@@ -1,0 +1,10 @@
+# test files
+*.rar
+*.zip
+*.gz
+*.tar
+*.tar.gz
+*.tar.bz2
+
+# composer lock
+composer.lock
