@@ -1,13 +1,22 @@
 {
 	"name": "wapmorgan/unified-archive",
-	"description": "UnifiedArchive - unified interface to archive (zip, rar, gz, tar, tar.gz, tar.bz) for listing, reading, extracting and creation + built-in console packer and unpacker.",
-	"keywords": ["archive", "rar", "zip", "gzip", "tar"],
+	"description": "UnifiedArchive - unified interface to archive (zip, rar, gz, tar, tar.gz, tar.bz, iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker.",
+	"keywords": ["archive", "rar", "zip", "gzip", "tar", "iso-9660"],
 	"homepage": "https://github.com/wapmorgan/UnifiedArchive",
+	"repositories": [
+		{
+			"type": "composer",
+			"url": "http://www.phpclasses.org/"
+		}
+	],
 	"require": {
 		"ext-zip": "*",
 		"ext-rar": "*",
 		"ext-zlib": "*",
 		"pear/archive_tar": "*"
+	},
+	"suggest": {
+		"phpclasses/php-iso-file": "Allows unpack iso-9660 images."
 	},
 	"autoload": {
 		"psr-4": {

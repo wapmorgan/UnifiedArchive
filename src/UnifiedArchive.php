@@ -6,6 +6,7 @@ class UnifiedArchive implements AbstractArchive {
 	const RAR = 'rar';
 	const TAR = 'tar';
 	const GZIP = 'gzip';
+	const ISO = 'iso';
 
 	protected $type;
 
@@ -20,6 +21,9 @@ class UnifiedArchive implements AbstractArchive {
 	protected $tarCompressionRatio;
 	protected $gzipStat;
 	protected $gzipFilename;
+	protected $iso;
+	protected $isoBlockSize;
+	protected $isoFilesData;
 
 	/**
 	 * Creates instance with right type
@@ -31,6 +35,7 @@ class UnifiedArchive implements AbstractArchive {
 		if ($ext == 'rar') return new self($filename, self::RAR);
 		if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2)$~', $filename)) return new self($filename, self::TAR);
 		if ($ext == 'gz') return new self($filename, self::GZIP);
+		if ($ext == 'iso' && class_exists('\CISOFile')) return new self($filename, self::ISO);
 		if (true) return null;
 	}
 
@@ -93,6 +98,50 @@ class UnifiedArchive implements AbstractArchive {
 				$this->gzipFilename = $filename;
 				$this->compressedFilesSize = $this->archiveSize;
 				$this->uncompressedFilesSize = $this->gzipStat['size'];
+			break;
+			case self::ISO:
+				// load php-iso-files
+				$this->iso = new \CISOFile;
+				$this->iso->open($filename);
+				$this->iso->ISOInit();
+				$size = 0;
+
+				$usedDesc = $this->iso->GetDescriptor(SUPPLEMENTARY_VOLUME_DESC);
+				if(!$usedDesc) $usedDesc = $this->iso->GetDescriptor(PRIMARY_VOLUME_DESC);
+				$this->isoBlockSize = $usedDesc->iBlockSize;
+				$directories = $usedDesc->LoadMPathTable($this->iso);
+				foreach($directories as $Directory) {
+					$directory = $Directory->GetFullPath($directories, false);
+					$directory = trim($directory, '/');
+					if ($directory != '') {
+						$directory .= '/';
+						$this->files[$Directory->Location] = $directory;
+					}
+					$this->isoCatalogsStructure[$Directory->Location] = $directory;
+
+					// // echo 'Nom: ' . $ptRec->strd_DirId . "\n";
+					// $this->files[$fPath] = $fPath;
+					// // echo "\t" . 'Chemin: ' . $fPath . "\n";
+					// // echo "\t" . 'Position: ' . $ptRec->Location . ' (LBA)' . "\n";
+					// // echo "\t" . '╔tendu: ' . $ptRec->ExtAttrLen . ' (LBA)' . "\n";
+					// var_dump("Path: ".$fPath);
+					$files = $Directory->LoadExtents($this->iso, $usedDesc->iBlockSize, true);
+					if ($files) {
+						foreach($files as $file) {
+							if (in_array($file->strd_FileId, array('.', '..'))) continue;
+
+							$this->files[$file->Location] = $directory.$file->strd_FileId;
+							$size += $file->DataLen;
+
+							$this->isoFilesData[$directory.$file->strd_FileId] = array(
+								'size' => $file->DataLen,
+								'mtime' => strtotime((string)$file->isoRecDate),
+							);
+						}
+					}
+				}
+				$this->uncompressedFilesSize = $this->compressedFilesSize = $size;
+
 			break;
 		}
 	}
@@ -238,6 +287,18 @@ class UnifiedArchive implements AbstractArchive {
 				$file->is_compressed = true;
 				return $file;
 			break;
+			case 'iso':
+				if (!in_array($filename, $this->files)) return false;
+				if (!isset($this->isoFilesData[$filename])) return false;
+				$data = $this->isoFilesData[$filename];
+				$file = new \stdClass;
+				$file->filename = $filename;
+				$file->compressed_size = $data['size'];
+				$file->uncompressed_size = $data['size'];
+				$file->mtime = $data['mtime'];
+				$file->is_compressed = false;
+				return $file;
+			break;
 		}
 	}
 
@@ -269,6 +330,15 @@ class UnifiedArchive implements AbstractArchive {
 			case 'gzip':
 				if (!in_array($filename, $this->files)) return false;
 				return gzdecode(file_get_contents($this->gzipFilename));
+			break;
+			case 'iso':
+				if (!in_array($filename, $this->files)) return false;
+				$Location = array_search($filename, $this->files);
+				if (!isset($this->isoFilesData[$filename])) return false;
+				$data = $this->isoFilesData[$filename];
+				$Location_Real = $Location * $this->isoBlockSize;
+				if ($this->iso->Seek($Location_Real, SEEK_SET) === false) return false;
+				return $this->iso->Read($data['size']);
 			break;
 		}
 	}

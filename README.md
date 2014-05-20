@@ -1,4 +1,4 @@
-UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz) for listing, reading, extracting and creation + built-in console packer and unpacker.
+UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz`/`iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker.
 
 **Contents**:
 ---
@@ -45,6 +45,8 @@ Composer package: `wapmorgan/unified-archive` [[1](https://packagist.org/package
 	$archive = UnifiedArchive::open('filename.tar.gz');
 	// or
 	$archive = UnifiedArchive::open('filename.tar.bz2');
+	// or
+	$archive = UnifiedArchive::open('filename.iso');
 	```
 
 2. Further, read the list of files of archive (notice, this function returns only names of files)
