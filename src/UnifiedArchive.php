@@ -49,23 +49,27 @@ class UnifiedArchive implements AbstractArchive {
 		switch ($type) {
 			case self::ZIP:
 				$this->zip = new \ZipArchive;
-				$this->zip->open($filename);
-				for ($i = 0; $i < $this->zip->numFiles; $i++) {
-					// $this->files[] = $this->zip->getNameIndex($i, ZIPARCHIVE::FL_UNCHANGED);
-					$file = $this->zip->statIndex($i);
-					$this->files[$i] = $file['name'];
-					$this->compressedFilesSize += $file['comp_size'];
-					$this->uncompressedFilesSize += $file['size'];
-				}
+				if ($this->zip->open($filename) === true) {
+					for ($i = 0; $i < $this->zip->numFiles; $i++) {
+						// $this->files[] = $this->zip->getNameIndex($i, ZIPARCHIVE::FL_UNCHANGED);
+						$file = $this->zip->statIndex($i);
+						$this->files[$i] = $file['name'];
+						$this->compressedFilesSize += $file['comp_size'];
+						$this->uncompressedFilesSize += $file['size'];
+					}
+				} else $this->zip->numFiles = $this->compressedFilesSize = $this->uncompressedFilesSize = 0;
 			break;
 			case self::RAR:
 				$this->rar = \RarArchive::open($filename);
-				$Entries = $this->rar->getEntries();
-				$this->rar->numberOfFiles = count($Entries); # rude hack
-				foreach ($Entries as $i => $entry) {
-					$this->files[$i] = $entry->getName();
-					$this->compressedFilesSize += $entry->getPackedSize();
-					$this->uncompressedFilesSize += $entry->getUnpackedSize();
+				$Entries = @$this->rar->getEntries();
+				if ($Entries === false) $this->rar->numberOfFiles = $this->compressedFilesSize = $this->uncompressedFilesSize = 0;
+				else {
+					$this->rar->numberOfFiles = count($Entries); # rude hack
+					foreach ($Entries as $i => $entry) {
+						$this->files[$i] = $entry->getName();
+						$this->compressedFilesSize += $entry->getPackedSize();
+						$this->uncompressedFilesSize += $entry->getUnpackedSize();
+					}
 				}
 			break;
 			case self::TAR:
@@ -152,13 +156,17 @@ class UnifiedArchive implements AbstractArchive {
 	public function __destruct() {
 		switch($this->type) {
 			case 'zip':
-				$this->zip->close();
+				// $this->zip->close();
+				unset($this->zip);
 			break;
 			case 'rar':
 				$this->rar->close();
 			break;
 			case 'tar':
 				$this->tar = null;
+			break;
+			case 'iso':
+				$this->iso->close();
 			break;
 		}
 	}
@@ -179,6 +187,9 @@ class UnifiedArchive implements AbstractArchive {
 			break;
 			case 'gzip':
 				return 1;
+			break;
+			case 'iso':
+				return count($this->files);
 			break;
 		}
 	}
@@ -213,6 +224,9 @@ class UnifiedArchive implements AbstractArchive {
 			break;
 			case 'gzip':
 				return self::GZIP;
+			break;
+			case 'iso':
+				return self::ISO;
 			break;
 		}
 	}

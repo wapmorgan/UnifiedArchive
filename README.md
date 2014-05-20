@@ -1,4 +1,4 @@
-UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz`/`iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker.
+UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz2`/`iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker.
 
 **Contents**:
 ---

@@ -23,7 +23,7 @@ foreach (glob(isset($argv[1]) ? rtrim($argv[1], '/*').'/*' : './*') as $file) {
 		}
 		echo sprintf("%-28s | %4s | %8d | %8d | %8d | %8d | %7dx | %8s | %8s | %8s", basename($file), $archive->getArchiveType(),
 			$archive->getArchiveSize(), $archive->countUncompressedFilesSize(), $archive->countCompressedFilesSize(), $archive->countFiles(),
-			ceil($archive->countUncompressedFilesSize() / $archive->countCompressedFilesSize()),
+			$archive->countCompressedFilesSize() > 0 ? ceil($archive->countUncompressedFilesSize() / $archive->countCompressedFilesSize()) : 0,
 			formatBytes($archive->getArchiveSize()), formatBytes($archive->countUncompressedFilesSize()), formatBytes($archive->countCompressedFilesSize())
 			).PHP_EOL;
 

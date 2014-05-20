@@ -30,9 +30,10 @@ But what if it is necessary to copy simply all files from the catalog in archive
 
 It is possible to make it the following configuration:
 ```php
-array('source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'), // to add cats from the current directory
-array('source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'), // to add cats from the home catalog
-array('source' => '/media/wapmorgan/W44XX33YY22ZZ111/Cats/*', 'destination' => 'Pictures/') // to add cats from an external hard disk
+//array('source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'), // to add cats from the current directory
+//array('source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'), // to add cats from the home catalog
+//array('source' => '/media/.../W44XX33YY22ZZ111/Cats/*', 'destination' => 'Pictures/') // to add cats from an external hard disk
+array('source' => '/var/log/*', 'destination' => 'logs/', 'recursive' => true)
 ```
 
 Remarkably! Now everything that we collected for years, it is possible command to keep one in archive.
@@ -41,10 +42,10 @@ $nodes = array(
 	array('source' => '/etc/php5/fpm/php.ini', 'destination' => 'php.ini'),
 	array('source' => '/home/.../Dropbox/software/1/', 'destination' => 'SoftwareVersions/', 'recursive' => true),
 	array('source' => '/home/.../Dropbox/software/2/', 'destination' => 'SoftwareVersions/', 'recursive' => true),
-	array('source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'),
-	array('source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'),
-	array('source' => '/media/.../W44XX33YY22ZZ111/Cats/*', 'destination' => 'Pictures/'),
-
+	//array('source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'),
+	//array('source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'),
+	//array('source' => '/media/.../W44XX33YY22ZZ111/Cats/*', 'destination' => 'Pictures/'),
+	array('source' => '/var/log/*', 'destination' => 'logs/', 'recursive' => true),
 );
 UnifiedArchive::archiveNodes($nodes, 'Archive.zip');
 // or
