@@ -240,5 +240,6 @@ If as the third argument (yes, real signature is `static public function archive
 
 ## Examples
 In the **examples** catalog there are some files for check of operability of the program. start them from a command line.
-Tt is necessary to transfer a catalog name in `cli.fs.php` for scanning.
-It is necessary to transfer a path to archive in `cli.unpack.php` for unpacking.
+
+* It is necessary to transfer a catalog name in `cli.fs.php` for scanning.
+* It is necessary to transfer a path to archive in `cli.hierachy.php` for unpacking.
