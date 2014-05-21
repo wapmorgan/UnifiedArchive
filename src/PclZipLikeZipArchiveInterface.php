@@ -26,6 +26,9 @@ class PclZipLikeZipArchiveInterface {
 		);
 	}
 
+	/**
+	 * Creates a new archive
+	 */
 	public function create($content) {
 		if (is_array($content)) $paths_list = $content;
 		else $paths_list = array_map(explode(',', $content));
@@ -106,7 +109,29 @@ class PclZipLikeZipArchiveInterface {
 		}
 	}
 
-	public function listContent() {}
+	/**
+	 * Lists archive content
+	 */
+	public function listContent() {
+		$filesList = array();
+		$numFiles = $this->archive->numFiles;
+		for ($i = 0; $i < $numFiles; $i++) {
+			$statIndex = $this->archive->statIndex($i);
+			$filesList[] = (object)array(
+				'filename' => $statIndex['name'],
+				'stored_filename' => $statIndex['name'],
+				'size' => $statIndex['size'],
+				'compressed_size' => $statIndex['comp_size'],
+				'mtime' => $statIndex,
+				'comment' => (($comment = $this->archive->getCommentIndex($statIndex['index']) !== false) ? $comment : null,
+				'folder' => in_array(substr($statIndex['name'], -1), array('/', '\\'))
+				'index' => $statIndex['index'],
+				'status' => 'ok',
+			);
+		}
+		return $filesList;
+	}
+
 	public function extract() {}
 	public function properties() {}
 	public function add() {}
