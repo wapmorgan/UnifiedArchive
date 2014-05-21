@@ -32,7 +32,7 @@ class PclZipLikeZipArchiveInterface {
 	/**
 	 * Creates a new archive
 	 * Two ways of usage:
-	 * <code>create($content, [$addDir[, $removeDir]])</code>
+	 * <code>create($content, [$addDir, [$removeDir]])</code>
 	 * <code>create($content, [... options ...]])</code>
 	 */
 	public function create($content) {
@@ -141,7 +141,7 @@ class PclZipLikeZipArchiveInterface {
 	/**
 	 * Extracts files
 	 * Two ways of usage:
-	 * <code>extract([$extractPath[, $removePath]])</code>
+	 * <code>extract([$extractPath, [$removePath]])</code>
 	 * <code>extract([... options ...]])</code>
 	 */
 	public function extract() {
@@ -354,9 +354,223 @@ class PclZipLikeZipArchiveInterface {
 		return $report;
 	}
 
-	public function properties() {}
-	public function add() {}
-	public function delete() {}
-	public function merge() {}
-	public function duplicate() {}
+	/**
+	 * Reads properties of archive
+	 */
+	public function properties() {
+		return array(
+			'nb' => $this->archive->numFiles,
+			'comment' => (($comment = $this->archive->getArchiveComment() !== false) ? $comment : null),
+			'status' => 'OK',
+		);
+	}
+
+	/**
+	 * Adds files in archive
+	 * <code>add($content, [$addDir, [$removeDir]])</code>
+	 * <code>add($content, [ ... options ... ])</code>
+	 */
+	public function add($content) {
+		if (is_array($content)) $paths_list = $content;
+		else $paths_list = array_map(explode(',', $content));
+		$report = array();
+
+		$options = func_get_args();
+		array_shift($options);
+
+		// parse options
+		if (isset($options[0]) && is_string($optios[0])) {
+			$options[PCLZIP_OPT_ADD_PATH] = $options[0];
+			if (isset($options[1]) && is_string($optios[1])) {
+				$options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
+			}
+		} else {
+			$options = array_combine(
+				array_filter($options, function ($v) {return (bool)$v&2}),
+				array_filter($options, function ($v) {return (bool)($v-1)&2})
+			);
+		}
+
+		// filters initiation
+		$filters = array();
+		if (isset($options[PCLZIP_OPT_REMOVE_PATH]) && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH])) $filters[] = function (&$key, &$value) use ($options) { $key = str_replace($key, null, $key); };
+		if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH])) $filters[] = function (&$key, &$value) { $key = basename($key); };
+		if (isset($options[PCLZIP_OPT_ADD_PATH])) $filters[] = function (&$key, &$value) use ($options) { $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.ltrim($key, '/'); };
+
+		if (isset($options[PCLZIP_CB_PRE_ADD]) && is_callable($options[PCLZIP_CB_PRE_ADD])) $preAddCallback = $options[PCLZIP_CB_PRE_ADD];
+		else $preAddCallback = function() { return 1; }
+
+		if (isset($options[PCLZIP_CB_POST_ADD]) && is_callable($options[PCLZIP_CB_POST_ADD])) $postAddCallback = $options[PCLZIP_CB_POST_ADD];
+		else $postAddCallback = function() { return 1; }
+
+		if (isset($options[PCLZIP_OPT_COMMENT])) $this->archive->setArchiveComment($options[PCLZIP_OPT_COMMENT]);
+		if (isset($options[PCLZIP_OPT_ADD_COMMENT])) {
+			$comment = (($comment = $this->archive->getArchiveComment() !== false) ? $comment : null;
+			$this->archive->setArchiveComment($comment . $options[PCLZIP_OPT_ADD_COMMENT]);
+		}
+		if (isset($options[PCLZIP_OPT_PREPEND_COMMENT])) {
+			$comment = (($comment = $this->archive->getArchiveComment() !== false) ? $comment : null;
+			$this->archive->setArchiveComment($options[PCLZIP_OPT_PREPEND_COMMENT] . $comment);
+		}
+
+
+		// scan filesystem for files list
+		$files_list = array();
+		foreach ($content as $file_to_add) {
+			$report[] = $this->addSnippet($file_to_add, $filters, $preAddCallback, $postAddCallback);
+
+			// additional dir contents
+			if (is_dir($file_to_add)) {
+				$directory_contents = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($file_to_add, \RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+				foreach ($directory_contents as $file_to_add) {
+					$report[] = $this->addSnippet($file_to_add, $filters, $preAddCallback, $postAddCallback);
+				}
+			}
+		}
+		// ...
+		return $report;
+	}
+
+	/**
+	 * Removes files from archive
+	 * Usage:
+	 * <code>delete([... options ...])</code>
+	 */
+	public function delete() {
+		$report = array();
+		$options = func_get_args();
+		$options = array_combine(
+			array_filter($options, function ($v) {return (bool)$v&2}),
+			array_filter($options, function ($v) {return (bool)($v-1)&2})
+		);
+
+		// exact matching
+		if (isset($options[PCLZIP_OPT_BY_NAME])) $selectFilter = function ($key, $value) use ($options) {
+			$allowedNames = is_array($options[PCLZIP_OPT_BY_NAME]) : $options[PCLZIP_OPT_BY_NAME] : explode(',', $options[PCLZIP_OPT_BY_NAME]);
+			foreach ($allowedNames as $allowedName) {
+				// select directory with nested files
+				if (in_array(substr($allowedName, -1), array('/', '\\'))) {
+					if (strncasecmp($allowedName, $key, strlen($allowedName)) === 0) {
+						return self::SELECT_FILTER_PASS; // that's a file inside a dir or that dir
+					}
+				} else {
+					// select exact name only
+					if (strcasecmp($allowedName, $key) === 0) {
+						return self::SELECT_FILTER_PASS; // that's a file with this name
+					}
+				}
+			}
+			return self::SELECT_FILTER_REFUSE; // that file is not in allowed list
+		};
+		// <ereg> rule
+		else if (isset($options[PCLZIP_OPT_BY_EREG])) $selectFilter = function ($key, $value) use ($options) {
+			return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false) ? self::SELECT_FILTER_PASS : self::SELECT_FILTER_REFUSE;
+		}
+		// <preg_match> rule
+		else if (isset($options[PCLZIP_OPT_BY_PREG])) $selectFilter = function ($key, $value) use ($options) {
+			return preg_match($options[PCLZIP_OPT_BY_PREG], $key) ? self::SELECT_FILTER_PASS : self::SELECT_FILTER_REFUSE;
+		}
+		// index rule
+		else if (isset($options[PCLZIP_OPT_BY_INDEX])) $selectFilter = function ($key, $value, $index) use ($options) {
+			$allowedIndexes = array();
+			foreach ($options[PCLZIP_OPT_BY_INDEX] as $rule) {
+				$parts = explode('-', $rule);
+				if (count($parts) == 1) $allowedIndexes[] = $rule;
+				else $allowedIndexes = array_merge(range($parts[0], $parts[1]), $allowedIndexes);
+			}
+			return in_array($index, $allowedIndexes) ? self::SELECT_FILTER_PASS : self::SELECT_FILTER_REFUSE;
+		}
+		// no rule
+		else
+			$selectFilter = function () { return self::SELECT_FILTER_PASS; };
+
+		foreach ($this->listContent() as $file_header) {
+			// select by select rule
+			if (call_user_func($selectFilter, $file_header->stored_filename, $file_header->filename, $file_header->index) === self::SELECT_FILTER_REFUSE) {
+				// delete file from archive
+				if ($this->archive->deleteName($file_header->stored_filename)) {
+					// ok
+					continue;
+				}
+				// deletion fails
+				else {
+					return 0;
+				}
+			}
+			// unselected file add in report
+			$report[] = $file_header;
+		}
+		return $report;
+	}
+
+	/**
+	 * Merges given archive into current archive
+	 * Two ways of usage:
+	 * <code>merge($filename)</code>
+	 * <code>merge(UnifiedArchive $unifiedArchiveInstance)</code>
+	 * This implementation is more intelligent than original' one.
+	 */
+	public function merge($a) {
+		// filename
+		if (is_string($a)) {
+			if ($a = UnifiedArchive::open($a) !== null) {
+				// ok
+			} else {
+				// // unsupported type of archive
+				return 0;
+			}
+		}
+		// UnifiedArchive instance
+		else if ($a instanceof UnifiedArchive) {
+			// go on
+		}
+		// invalid argument
+		else {
+			return 0;
+		}
+
+		$tempDir = tempnam(PCLZIP_TEMPORARY_DIR, 'merging');
+		if (file_exists($tempDir)) unlink($tempDir);
+		if (!mkdir($tempDir)) return 0;
+
+		// go through archive content list and copy all files
+		foreach ($a->getFileNames() as $filename) {
+			// dir merging process
+			if (in_array(substr($filename, -1), array('/', '\\')) {
+				$this->archive->addEmptyDir(rtrim($filename, '/\\'));
+			}
+			// file merging process
+			else {
+				// extract file in temporary dir
+				if ($a->extractNode($tempDir, '/'.$filename)) {
+					// go on
+				} else {
+					// extraction fails
+					return 0;
+				}
+				// add file in archive
+				if ($this->archive->addFile($tempDir.'/'.$filename, $filename)) {
+					// ok
+				} else {
+					return 0;
+				}
+			}
+		}
+
+		call_user_func(function ($directory) {
+			foreach (glob($directory.'/*') as $f) {
+				if (is_dir($f)) call_user_func(__FUNCTION__, $f);
+				else unlink($f);
+			}
+		}, $tempDir);
+
+		return 1;
+	}
+
+	/**
+	 * Duplicates archive
+	 */
+	public function duplicate($clone_filename) {
+		return copy($this->archive->filename, $clone_filename) ? 1 : 0;
+	}
 }
