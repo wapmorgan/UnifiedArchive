@@ -7,6 +7,9 @@ namespace wapmorgan\UnifiedArchive;
 defined('AVERAGE_ZIP_COMPRESSION_RATIO') or define('AVERAGE_ZIP_COMPRESSION_RATION', 2);
 
 class PclZipLikeZipArchiveInterface {
+	const SELECT_FILTER_PASS = 1;
+	const SELECT_FILTER_REFUSE = 0;
+
 	private $archive;
 
 	public function __construct(\ZipArchive $archive) {
@@ -28,6 +31,9 @@ class PclZipLikeZipArchiveInterface {
 
 	/**
 	 * Creates a new archive
+	 * Two ways of usage:
+	 * <code>create($content, [$addDir[, $removeDir]])</code>
+	 * <code>create($content, [... options ...]])</code>
 	 */
 	public function create($content) {
 		if (is_array($content)) $paths_list = $content;
@@ -52,9 +58,9 @@ class PclZipLikeZipArchiveInterface {
 
 		// filters initiation
 		$filters = array();
-		if (isset($options[PCLZIP_OPT_REMOVE_PATH]) && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH])) $filters[] = function (&$key, &$value) use ($options[PCLZIP_OPT_REMOVE_PATH]) { $key = str_replace($key, null, $key); };
+		if (isset($options[PCLZIP_OPT_REMOVE_PATH]) && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH])) $filters[] = function (&$key, &$value) use ($options) { $key = str_replace($key, null, $key); };
 		if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH])) $filters[] = function (&$key, &$value) { $key = basename($key); };
-		if (isset($options[PCLZIP_OPT_ADD_PATH])) $filters[] = function (&$key, &$value) use ($options[PCLZIP_OPT_ADD_PATH]) { $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.ltrim($key, '/'); };
+		if (isset($options[PCLZIP_OPT_ADD_PATH])) $filters[] = function (&$key, &$value) use ($options) { $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.ltrim($key, '/'); };
 
 		if (isset($options[PCLZIP_CB_PRE_ADD]) && is_callable($options[PCLZIP_CB_PRE_ADD])) $preAddCallback = $options[PCLZIP_CB_PRE_ADD];
 		else $preAddCallback = function() { return 1; }
@@ -132,7 +138,222 @@ class PclZipLikeZipArchiveInterface {
 		return $filesList;
 	}
 
-	public function extract() {}
+	/**
+	 * Extracts files
+	 * Two ways of usage:
+	 * <code>extract([$extractPath[, $removePath]])</code>
+	 * <code>extract([... options ...]])</code>
+	 */
+	public function extract() {
+		$options = func_get_args();
+		array_shift($options);
+
+		// parse options
+		if (isset($options[0]) && is_string($optios[0])) {
+			$options[PCLZIP_OPT_PATH] = $options[0];
+			if (isset($options[1]) && is_string($optios[1])) {
+				$options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
+			}
+		} else {
+			$options = array_combine(
+				array_filter($options, function ($v) {return (bool)$v&2}),
+				array_filter($options, function ($v) {return (bool)($v-1)&2})
+			);
+		}
+
+		// filters initiation
+		if (isset($options[PCLZIP_OPT_PATH])) $extractPath = rtrim($options[PCLZIP_OPT_PATH], '/');
+		else $extractPath = rtrim(getcwd(), '/');
+
+		$filters = array();
+		if (isset($options[PCLZIP_OPT_REMOVE_PATH]) && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH])) $filters[] = function (&$key, &$value) use ($options) { $key = str_replace($key, null, $key); };
+		if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH])) $filters[] = function (&$key, &$value) { $key = basename($key); };
+		if (isset($options[PCLZIP_OPT_ADD_PATH])) $filters[] = function (&$key, &$value) use ($options) { $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.ltrim($key, '/'); };
+
+		if (isset($options[PCLZIP_CB_PRE_EXTRACT]) && is_callable($options[PCLZIP_CB_PRE_EXTRACT])) $preExtractCallback = $options[PCLZIP_CB_PRE_EXTRACT];
+		else $preExtractCallback = function() { return 1; }
+
+		if (isset($options[PCLZIP_CB_POST_EXTRACT]) && is_callable($options[PCLZIP_CB_POST_EXTRACT])) $postExtractCallback = $options[PCLZIP_CB_POST_EXTRACT];
+		else $postExtractCallback = function() { return 1; }
+
+		// exact matching
+		if (isset($options[PCLZIP_OPT_BY_NAME])) $selectFilter = function ($key, $value) use ($options) {
+			$allowedNames = is_array($options[PCLZIP_OPT_BY_NAME]) : $options[PCLZIP_OPT_BY_NAME] : explode(',', $options[PCLZIP_OPT_BY_NAME]);
+			foreach ($allowedNames as $allowedName) {
+				// select directory with nested files
+				if (in_array(substr($allowedName, -1), array('/', '\\'))) {
+					if (strncasecmp($allowedName, $key, strlen($allowedName)) === 0) {
+						return self::SELECT_FILTER_PASS; // that's a file inside a dir or that dir
+					}
+				} else {
+					// select exact name only
+					if (strcasecmp($allowedName, $key) === 0) {
+						return self::SELECT_FILTER_PASS; // that's a file with this name
+					}
+				}
+			}
+			return self::SELECT_FILTER_REFUSE; // that file is not in allowed list
+		};
+		// <ereg> rule
+		else if (isset($options[PCLZIP_OPT_BY_EREG])) $selectFilter = function ($key, $value) use ($options) {
+			return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false) ? self::SELECT_FILTER_PASS : self::SELECT_FILTER_REFUSE;
+		}
+		// <preg_match> rule
+		else if (isset($options[PCLZIP_OPT_BY_PREG])) $selectFilter = function ($key, $value) use ($options) {
+			return preg_match($options[PCLZIP_OPT_BY_PREG], $key) ? self::SELECT_FILTER_PASS : self::SELECT_FILTER_REFUSE;
+		}
+		// index rule
+		else if (isset($options[PCLZIP_OPT_BY_INDEX])) $selectFilter = function ($key, $value, $index) use ($options) {
+			$allowedIndexes = array();
+			foreach ($options[PCLZIP_OPT_BY_INDEX] as $rule) {
+				$parts = explode('-', $rule);
+				if (count($parts) == 1) $allowedIndexes[] = $rule;
+				else $allowedIndexes = array_merge(range($parts[0], $parts[1]), $allowedIndexes);
+			}
+			return in_array($index, $allowedIndexes) ? self::SELECT_FILTER_PASS : self::SELECT_FILTER_REFUSE;
+		}
+		// no rule
+		else
+			$selectFilter = function () { return self::SELECT_FILTER_PASS; };
+
+
+		if (isset($options[PCLZIP_OPT_EXTRACT_AS_STRING])) $anotherOutputFormat = PCLZIP_OPT_EXTRACT_AS_STRING;
+		else if (isset($options[PCLZIP_OPT_EXTRACT_IN_OUTPUT])) $anotherOutputFormat = PCLZIP_OPT_EXTRACT_IN_OUTPUT;
+		else $anotherOutputFormat = false;
+
+		if (isset($options[PCLZIP_OPT_REPLACE_NEWER])) $doNotReplaceNewer = false;
+		else $doNotReplaceNewer = true;
+
+		if (isset($options[PCLZIP_OPT_EXTRACT_DIR_RESTRICTION])) $restrictExtractDir = $options[PCLZIP_OPT_EXTRACT_DIR_RESTRICTION];
+		else $restrictExtractDir = false;
+
+		$report = array();
+		foreach ($this->listContent() as $file_header) {
+			// add file information to report
+			$report[] = $file_header;
+			// refuse by select rule
+			if (call_user_func($selectFilter, $file_header->stored_filename, $file_header->filename, $file_header->index) === self::SELECT_FILTER_REFUSE) {
+				//
+				// I don't know need to remain this file in report or not,
+				// but for now I remove
+				array_pop($report);
+				// $file_header->status = 'filtered';
+				//
+				continue;
+			}
+
+			//
+			// add extract path in case of extraction
+			// for some reason need to do it before call pre extract callback (pclzip.lib.php v2.8.2, line 3670)
+			// so I decided to do it here too
+			//
+			if ($anotherOutputFormat === false) {
+				$file_header->filename = realpath($extractPath.'/'.$file_header->filename);
+				//
+				// check for path correlation with restricted path
+				//
+				if ($restrictExtractDir !== false) {
+					$filename = $file_header->filename;
+					$restrictedDir = realpath($restrictExtractDir);
+					if (strncasecmp($restrictedDir, $filename, strlen($restrictedDir)) !== 0) {
+						// refuse file extraction
+						$file_header->status = 'filtered';
+						continue;
+					}
+				}
+			}
+
+			// apply pre extract callback
+			$callback_result = call_user_func($preExtractCallback, $file_header);
+			if ($callback_result == 1) {
+				// go on ...
+			} else if ($callback_result == 0) {
+				// skip current file
+				$file_header->status = 'skipped';
+				continue;
+			} else if ($callback_result == 2) {
+				// skip & stop extraction
+				$file_header->status = 'aborted';
+				break;
+			}
+
+			// return content
+			if ($anotherOutputFormat == PCLZIP_OPT_EXTRACT_AS_STRING) {
+				$file_header->content = $this->archive->getFromName($file_header->stored_filename);
+			}
+			// echo content
+			else if ($anotherOutputFormat == PCLZIP_OPT_EXTRACT_IN_OUTPUT) {
+				echo $this->archive->getFromName($file_header->stored_filename);
+			}
+			// extract content
+			else if ($anotherOutputFormat === false) {
+				// apply path filters
+				foreach ($filters as $filter) call_user_func($filter, $file_header->stored_filename, $file_header->filename);
+				// dir extraction process
+				if ($file_header->folder) {
+					// if dir doesn't exist
+					if (!is_dir($file_header->filename)) {
+						// try to create folder
+						if (!mkdir($file_header)) {
+							$file_header->status = 'path_creation_fail';
+							continue;
+						}
+					}
+				}
+				// file extraction process
+				else {
+					// check if path is already taken by a folder
+					if (is_dir($file_header->filename)) {
+						$file_header->status = 'already_a_directory';
+						continue;
+					}
+					// check if file path is not writable
+					if (!is_writable($file_header->filename)) {
+						$file_header->status = 'write_protected';
+						continue;
+					}
+					// check if file exists and it's newer
+					if (is_file($file_header->filename)) {
+						if (filemtime($file_header->filename) > $file_header->mtime) {
+							// skip extraction if option EXTRACT_NEWER is not used
+							if ($doNotReplaceNewer) {
+								$file_header->status = 'newer_exist';
+								continue;
+							}
+						}
+					}
+					$directory = dirname($file_header->filename);
+					// check if running process can not create extraction folder
+					if (!is_dir($directory)) {
+						if (!mkdir($directory)) {
+							$file_header->status = 'path_creation_fail';
+							continue;
+						}
+					}
+					// extraction
+					if (copy("zip://".$this->archive->filename."#".$file_header->stored_filename, $file_header->filename)) {
+						// ok
+					}
+					// extraction fails
+					else {
+						$file_header->status = 'write_error';
+						continue;
+					}
+				}
+			}
+
+			// apply post extract callback
+			$callback_result = call_user_func($postExtractCallback, $file_header);
+			if ($callback_result == 1) {
+				// go on
+			} else if ($callback_result == 2) {
+				// skip & stop extraction
+				break;
+			}
+		}
+		return $report;
+	}
+
 	public function properties() {}
 	public function add() {}
 	public function delete() {}
