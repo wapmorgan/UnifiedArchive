@@ -4,7 +4,7 @@ namespace wapmorgan\UnifiedArchive;
 //
 // Average ratio of zip compression: 2x
 //
-defined('AVERAGE_ZIP_COMPRESSION_RATIO') or define('AVERAGE_ZIP_COMPRESSION_RATION', 2);
+defined('AVERAGE_ZIP_COMPRESSION_RATIO') or define('AVERAGE_ZIP_COMPRESSION_RATIO', 2);
 
 class PclZipLikeZipArchiveInterface {
 	const SELECT_FILTER_PASS = 1;
