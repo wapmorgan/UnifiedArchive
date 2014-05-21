@@ -1,6 +1,59 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+  // ----- Constants
+  if (!defined('PCLZIP_READ_BLOCK_SIZE')) {
+    define( 'PCLZIP_READ_BLOCK_SIZE', 2048 );
+  }
+
+  // ----- File list separator
+  // In version 1.x of PclZip, the separator for file list is a space
+  // (which is not a very smart choice, specifically for windows paths !).
+  // A better separator should be a comma (,). This constant gives you the
+  // abilty to change that.
+  // However notice that changing this value, may have impact on existing
+  // scripts, using space separated filenames.
+  // Recommanded values for compatibility with older versions :
+  //define( 'PCLZIP_SEPARATOR', ' ' );
+  // Recommanded values for smart separation of filenames.
+  if (!defined('PCLZIP_SEPARATOR')) {
+    define( 'PCLZIP_SEPARATOR', ',' );
+  }
+
+  // ----- Error configuration
+  // 0 : PclZip Class integrated error handling
+  // 1 : PclError external library error handling. By enabling this
+  //     you must ensure that you have included PclError library.
+  // [2,...] : reserved for futur use
+  if (!defined('PCLZIP_ERROR_EXTERNAL')) {
+    define( 'PCLZIP_ERROR_EXTERNAL', 0 );
+  }
+
+  // ----- Optional static temporary directory
+  //       By default temporary files are generated in the script current
+  //       path.
+  //       If defined :
+  //       - MUST BE terminated by a '/'.
+  //       - MUST be a valid, already created directory
+  //       Samples :
+  // define( 'PCLZIP_TEMPORARY_DIR', '/temp/' );
+  // define( 'PCLZIP_TEMPORARY_DIR', 'C:/Temp/' );
+  if (!defined('PCLZIP_TEMPORARY_DIR')) {
+    define( 'PCLZIP_TEMPORARY_DIR', sys_get_temp_dir());
+  }
+
+  // ----- Optional threshold ratio for use of temporary files
+  //       Pclzip sense the size of the file to add/extract and decide to
+  //       use or not temporary file. The algorythm is looking for
+  //       memory_limit of PHP and apply a ratio.
+  //       threshold = memory_limit * ratio.
+  //       Recommended values are under 0.5. Default 0.47.
+  //       Samples :
+  // define( 'PCLZIP_TEMPORARY_FILE_RATIO', 0.5 );
+  if (!defined('PCLZIP_TEMPORARY_FILE_RATIO')) {
+    define( 'PCLZIP_TEMPORARY_FILE_RATIO', 0.47 );
+  }
+
   define( 'PCLZIP_ERR_USER_ABORTED', 2 );
   define( 'PCLZIP_ERR_NO_ERROR', 0 );
   define( 'PCLZIP_ERR_WRITE_OPEN_FAIL', -1 );
