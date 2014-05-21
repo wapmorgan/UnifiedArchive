@@ -151,6 +151,22 @@ class UnifiedArchive implements AbstractArchive {
 	}
 
 	/**
+	 * Returns an instance of class implementing PclZipOriginalInterface interface.
+	 */
+	public function pclzipInterace() {
+		switch ($this->type) {
+			case 'zip':
+				return new PclZipLikeZipArchiveInterface($this->zip);
+			break;
+			case 'tar':
+				return new PclZipLikeTarArchiveInterface($this->tar);
+			break;
+		}
+
+		die(basename(__FILE__).', line '.__LINE.' : PclZip-like interface IS NOT available for archive format');
+	}
+
+	/**
 	 * Closes archive
 	 */
 	public function __destruct() {
