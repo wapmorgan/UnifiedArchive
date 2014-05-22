@@ -236,7 +236,7 @@ static public function open($filename);
 ```php
 static public function archiveNodes($nodes, $aname);
 ```
-- archives notes transferred in the first argument. Returns number of the archived files in case of success, in case of failure - false.
+- archives nodes transferred in the first argument. Returns number of the archived files in case of success, in case of failure - false.
 If as the third argument (yes, real signature is `static public function archiveNodes(array $nodes, $aname, $fake = false)`) "truth" is transferred, then the real archiving doesn't occur, and the result contains the list of the files chosen for an archiving, their number and total size.
 
 ## PclZip-like interface
