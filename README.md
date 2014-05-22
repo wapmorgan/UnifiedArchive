@@ -239,7 +239,7 @@ static public function archiveNodes($nodes, $aname);
 - archives notes transferred in the first argument. Returns number of the archived files in case of success, in case of failure - false.
 If as the third argument (yes, real signature is `static public function archiveNodes(array $nodes, $aname, $fake = false)`) "truth" is transferred, then the real archiving doesn't occur, and the result contains the list of the files chosen for an archiving, their number and total size.
 
-### PclZip-like interface
+## PclZip-like interface
 Yes, you didn't mishear - UnifedArchive provides full realization of the interface known on archiving popular library of PclZip (the last version 2.8.2).
 
 Let's look at it:
