@@ -1,4 +1,4 @@
-UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz2`/`iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implementated PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate)..
+UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz2`/`iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implemented PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate)..
 
 **Contents**:
 ---
