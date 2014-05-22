@@ -1,8 +1,15 @@
 {
 	"name": "wapmorgan/unified-archive",
-	"description": "UnifiedArchive - unified interface to archive (zip, rar, gz, tar, tar.gz, tar.bz, iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker.",
+	"description": "UnifiedArchive - unified interface to archive (zip, rar, gz, tar, tar.gz, tar.bz, iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implementated PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate).",
 	"keywords": ["archive", "rar", "zip", "gzip", "tar", "iso-9660"],
 	"homepage": "https://github.com/wapmorgan/UnifiedArchive",
+	"authors": [
+		{
+			"name": "wapmorgan",
+			"email": "wapmorgan@gmail.com",
+			"role": "developer"
+		}
+	],
 	"repositories": [
 		{
 			"type": "composer",
