@@ -245,6 +245,7 @@ Yes, you didn't mishear - UnifedArchive provides full realization of the interfa
 Let's look at it:
 ```php
 <?php
+use wapmorgan\UnifiedArchive\UnifiedArchive;
 require 'vendor/autoload.php';
 $archive = UnifiedArchive::open('ziparchive.zip');
 $pclzip = $archive->pclzipInteface();
