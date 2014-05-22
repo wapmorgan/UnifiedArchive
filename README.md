@@ -1,4 +1,4 @@
-UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz2`/`iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker.
+UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`tar.bz2`/`iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implementated PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate)..
 
 **Contents**:
 ---
@@ -11,7 +11,8 @@ UnifiedArchive - unified interface to archive (zip`/`rar`/`gz`/`tar`/`tar.gz`/`t
 5. **API**
 	1. **Object methods**
 	2. **Static methods**
-6. **Examples**
+6. **PclZip-like interface**
+7. **Examples**
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would like to add functionality of their automatic unpacking and viewing with no dependency on format of the archive, you can use this library.
@@ -237,6 +238,38 @@ static public function archiveNodes($nodes, $aname);
 ```
 - archives notes transferred in the first argument. Returns number of the archived files in case of success, in case of failure - false.
 If as the third argument (yes, real signature is `static public function archiveNodes(array $nodes, $aname, $fake = false)`) "truth" is transferred, then the real archiving doesn't occur, and the result contains the list of the files chosen for an archiving, their number and total size.
+
+### PclZip-like interface
+Yes, you didn't mishear - UnifedArchive provides full realization of the interface known on archiving popular library of PclZip (the last version 2.8.2).
+
+Let's look at it:
+```php
+<?php
+require 'vendor/autoload.php';
+$archive = UnifiedArchive::open('ziparchive.zip');
+$pclzip = $archive->pclzipInteface();
+```
+
+You are from this point free to use all available methods provided by the class PclZip:
+
+1. `create()` - creation of new archive, packing of files and catalogs.
+2. `listContent()` - receiving contents of archive.
+3. `extract()` - unpacking of files and catalogs.
+4. `properties()` - obtaining information on archive.
+5. `add()` - addition of files in archive.
+6. `delete()` - cleaning of archive of files.
+7. `merge()` - "pasting" of two archives.
+8. `duplicate()` - archive cloning.
+
+All available options and the parameters accepted by original PclZip are also available.
+
+It is also important to note increase in productivity when using my version of the PclZip-interface using a native class for work, over old and working with "crude" contents of archive means of the PHP-interpreter.
+
+*The PclZip-interface is at present in a stage of experimental realization. I ask to take it into account.*
+
+For those who isn't familiar with the PclZip interface or wishes to refresh knowledge, visit official documentation on PclZip on the official site: http://www.phpconcept.net/pclzip.
+
+Also I need to note that one of an option nevertheless is unrealizable: PCLZIP_OPT_NO_COMPRESSION. This option allows to disconnect compression for added files. At present the native library for work *doesn't allow* to change compression parameters from zip-archive - all added the file forcibly contract. I tried to find a roundabout way, but at present to make it it didn't turn out.
 
 ## Examples
 In the **examples** catalog there are some files for check of operability of the program. start them from a command line.
