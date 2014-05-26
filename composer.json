@@ -1,7 +1,7 @@
 {
 	"name": "wapmorgan/unified-archive",
-	"description": "UnifiedArchive - unified interface to archive (zip, rar, gz, tar, tar.gz, tar.bz, iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implemented PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate).",
-	"keywords": ["archive", "rar", "zip", "gzip", "tar", "iso-9660"],
+	"description": "UnifiedArchive - unified interface to archive (zip, rar, gz, tar, tar.gz, tar.bz2, tar.x, tar.Z, iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implemented PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate).",
+	"keywords": ["archive", "rar", "zip", "gzip", "tar", "iso-9660", "lzma2", "ncompress"],
 	"homepage": "https://github.com/wapmorgan/UnifiedArchive",
 	"authors": [
 		{
@@ -26,12 +26,17 @@
 		"ext-zlib": "Allows unpack GZ files and tar archives with gzip compression.",
 		"ext-bz2": "Allows unpack tar archives with bz2 compression.",
 		"ext-xz": "Allows unpack tar archives with lzma2 compression.",
+		"ncompress": "Allows unpack tar archives with LZW compression.",
 		"phpclasses/php-iso-file": "Allows unpack iso-9660 images."
 	},
 	"autoload": {
 		"psr-4": {
 			"wapmorgan\\UnifiedArchive\\": "src/"
 		},
-		"files": ["src/function.gzip_stat.php"]
-	}
+		"files": [
+			"src/function.gzip_stat.php",
+			"src/REGISTER_LZW_STREAM_WRAPPER.php"
+		]
+	},
+	"minimum-stability": "dev"
 }
