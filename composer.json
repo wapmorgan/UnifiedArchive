@@ -18,12 +18,14 @@
 	],
 	"require": {
 		"php": ">=5.3.0",
-		"ext-zip": "*",
-		"ext-rar": "*",
-		"ext-zlib": "*",
-		"pear/archive_tar": "*"
+		"pear/archive_tar": "dev-master#47ea5882ac5bef4199cf0d0d0095a056eecfdfd8"
 	},
 	"suggest": {
+		"ext-zip": "Allows unpack ZIP archives.",
+		"ext-rar": "Allows unpack RAR archives.",
+		"ext-zlib": "Allows unpack GZ files and tar archives with gzip compression.",
+		"ext-bz2": "Allows unpack tar archives with bz2 compression.",
+		"ext-xz": "Allows unpack tar archives with lzma2 compression.",
 		"phpclasses/php-iso-file": "Allows unpack iso-9660 images."
 	},
 	"autoload": {

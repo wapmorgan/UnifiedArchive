@@ -31,10 +31,10 @@ class UnifiedArchive implements AbstractArchive {
 	static public function open($filename) {
 		// determine archive type
 		$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-		if ($ext == 'zip') return new self($filename, self::ZIP);
-		if ($ext == 'rar') return new self($filename, self::RAR);
-		if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2)$~', $filename)) return new self($filename, self::TAR);
-		if ($ext == 'gz') return new self($filename, self::GZIP);
+		if ($ext == 'zip' && extension_loaded('zip')) return new self($filename, self::ZIP);
+		if ($ext == 'rar' && extension_loaded('rar')) return new self($filename, self::RAR);
+		if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz)$~', $filename)) return new self($filename, self::TAR);
+		if ($ext == 'gz' && extension_loaded('zlib')) return new self($filename, self::GZIP);
 		if ($ext == 'iso' && class_exists('\CISOFile')) return new self($filename, self::ISO);
 		if (true) return null;
 	}
@@ -77,6 +77,7 @@ class UnifiedArchive implements AbstractArchive {
 				switch ($ext) {
 					case 'gz': $this->tar = new \Archive_Tar($filename, 'gz'); break;
 					case 'bz2': $this->tar = new \Archive_Tar($filename, 'bz2'); break;
+					case 'xz': $this->tar = new \Archive_Tar($filename, 'lzma2'); break;
 					default: $this->tar = new \Archive_Tar($filename); break;
 				}
 				$this->tar->path = $filename;
@@ -93,7 +94,10 @@ class UnifiedArchive implements AbstractArchive {
 				}
 
 				$this->compressedFilesSize = $this->archiveSize;
-				$this->tarCompressionRatio = ceil($this->archiveSize / $this->uncompressedFilesSize);
+				if ($this->uncompressedFilesSize != 0)
+					$this->tarCompressionRatio = ceil($this->archiveSize / $this->uncompressedFilesSize);
+				else
+					$this->tarCompressionRatio = 1;
 
 			break;
 			case self::GZIP:
@@ -304,7 +308,7 @@ class UnifiedArchive implements AbstractArchive {
 				$file->compressed_size = $data['size'] / $this->tarCompressionRatio;
 				$file->uncompressed_size = $data['size'];
 				$file->mtime = $data['mtime'];
-				$file->is_compressed = in_array(strtolower(pathinfo($this->tar->path, PATHINFO_EXTENSION)), array('gz', 'bz2'));
+				$file->is_compressed = in_array(strtolower(pathinfo($this->tar->path, PATHINFO_EXTENSION)), array('gz', 'bz2', 'xz'));
 				return $file;
 			break;
 			case 'gzip':
@@ -522,7 +526,7 @@ class UnifiedArchive implements AbstractArchive {
 		$ext = strtolower(pathinfo($aname, PATHINFO_EXTENSION));
 		if ($ext == 'zip') $atype = self::ZIP;
 		else if ($ext == 'rar') $atype = self::RAR;
-		else if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2)$~', $aname)) $atype = self::TAR;
+		else if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz)$~', $aname)) $atype = self::TAR;
 		else if ($ext == 'gz') $atype = self::GZIP;
 		else return false;
 
@@ -552,6 +556,7 @@ class UnifiedArchive implements AbstractArchive {
 				switch (strtolower(pathinfo($aname, PATHINFO_EXTENSION))) {
 					case 'gz': $compression = 'gz'; break;
 					case 'bz2': $compression = 'bz2'; break;
+					case 'xz': $compression = 'lzma2'; break;
 				}
 				$tar = new \Archive_Tar($aname, $compression);
 				foreach ($files as $localname => $filename) {
