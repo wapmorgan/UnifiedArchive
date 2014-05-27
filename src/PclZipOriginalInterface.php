@@ -121,13 +121,14 @@ namespace wapmorgan\UnifiedArchive;
   define( 'PCLZIP_CB_PRE_ADD', 78003 );
   define( 'PCLZIP_CB_POST_ADD', 78004 );
 
-interface PclZipOriginalInterface {
-	public function create();
-	public function listContent();
-	public function extract();
-	public function properties();
-	public function add();
-	public function delete();
-	public function merge();
-	public function duplicate();
+interface PclZipOriginalInterface
+{
+    public function create();
+    public function listContent();
+    public function extract();
+    public function properties();
+    public function add();
+    public function delete();
+    public function merge();
+    public function duplicate();
 }
