@@ -17,6 +17,7 @@ duplicate).
 	2. **Static methods**
 6. **PclZip-like interface**
 7. **Examples**
+8. **Changelog**
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
@@ -341,3 +342,15 @@ program. start them from a command line.
 * It is necessary to transfer a catalog name in `cli.fs.php` for scanning.
 * It is necessary to transfer a path to archive in `cli.hierachy.php` for
 unpacking.
+
+## Changelog
+```
++---------+--------------+--------------------------------------------------+
+| version | date         | description                                      |
++---------+--------------+--------------------------------------------------+
+| 0.0.2   | May 27, 2014 | Changed:                                         |
+|         |              | * UnifiedArchive released under the MIT license. |
++---------+--------------+--------------------------------------------------+
+| 0.0.1   | May 26, 2014 | first release                                    |
++---------+--------------+--------------------------------------------------+
+```
