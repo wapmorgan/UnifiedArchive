@@ -17,10 +17,10 @@
 		}
 	],
 	"require": {
-		"php": ">=5.3.0",
-		"pear/archive_tar": "dev-master"
+		"php": ">=5.3.0"
 	},
 	"suggest": {
+		"pear/archive_tar": "dev-master",
 		"ext-zip": "Allows unpack ZIP archives.",
 		"ext-rar": "Allows unpack RAR archives.",
 		"ext-zlib": "Allows unpack GZ files and tar archives with gzip compression.",
