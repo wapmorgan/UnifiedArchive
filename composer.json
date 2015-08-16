@@ -20,7 +20,7 @@
 		"php": ">=5.3.0"
 	},
 	"suggest": {
-		"pear/archive_tar": "dev-master",
+		"pear/archive_tar": "Allows unpack of TAR archives. (strongly recommended)",
 		"ext-zip": "Allows unpack ZIP archives.",
 		"ext-rar": "Allows unpack RAR archives.",
 		"ext-zlib": "Allows unpack GZ files and tar archives with gzip compression.",
