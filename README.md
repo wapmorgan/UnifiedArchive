@@ -4,6 +4,8 @@ creation + built-in console packer and unpacker + fully implemented PclZip-like
 interface (create, listContent, extract, properties, add, delete, merge,
 duplicate).
 
+[![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive) [![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive) [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
+
 **Contents**:
 ---
 1. **Preamble**
