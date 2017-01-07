@@ -358,6 +358,10 @@ unpacking.
 +---------+--------------+--------------------------------------------------+
 | version | date         | description                                      |
 +---------+--------------+--------------------------------------------------+
+| 0.0.4   | Jan 7, 2016  | Added:                                           |
+|         |              | Support for single-file bz2 (bzip2) and xz       |
+|         |              | (lzma2) archives.                                |
++---------+--------------+--------------------------------------------------+
 | 0.0.3   | Aug 18, 2015 | Changed:                                         |
 |         |              | archive_tar is no longer a required package, now |
 |         |              | it is a suggestion.                              |
