@@ -10,6 +10,8 @@ class UnifiedArchive implements AbstractArchive
     const RAR = 'rar';
     const TAR = 'tar';
     const GZIP = 'gzip';
+    const BZIP = 'bzip2';
+    const LZMA = 'lzma2';
     const ISO = 'iso';
 
     protected $type;
@@ -25,6 +27,10 @@ class UnifiedArchive implements AbstractArchive
     protected $tarCompressionRatio;
     protected $gzipStat;
     protected $gzipFilename;
+    protected $bzipStat;
+    protected $bzipFilename;
+    protected $lzmaStat;
+    protected $lzmaFilename;
     protected $iso;
     protected $isoBlockSize;
     protected $isoFilesData;
@@ -45,10 +51,14 @@ class UnifiedArchive implements AbstractArchive
             return new self($filename, self::ZIP);
         if ($ext == 'rar' && extension_loaded('rar'))
             return new self($filename, self::RAR);
-        if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $filename))
+        if (($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $filename)) && class_exists('\Archive_Tar'))
             return new self($filename, self::TAR);
         if ($ext == 'gz' && extension_loaded('zlib'))
             return new self($filename, self::GZIP);
+        if ($ext == 'bz2' && extension_loaded('bz2'))
+            return new self($filename, self::BZIP);
+        if ($ext == 'xz' && extension_loaded('xz'))
+            return new self($filename, self::LZMA);
         if ($ext == 'iso' && class_exists('\CISOFile'))
             return new self($filename, self::ISO);
         if (true) return null;
@@ -145,6 +155,20 @@ class UnifiedArchive implements AbstractArchive
                 $this->gzipFilename = $filename;
                 $this->compressedFilesSize = $this->archiveSize;
                 $this->uncompressedFilesSize = $this->gzipStat['size'];
+            break;
+            case self::BZIP:
+                $this->files = array(basename($filename, '.bz2'));
+                $this->bzipFilename = $filename;
+                $this->bzipStat = array('mtime' => filemtime($filename));
+                $this->compressedFilesSize = $this->archiveSize;
+                $this->uncompressedFilesSize = $this->archiveSize;
+            break;
+            case self::LZMA:
+                $this->files = array(basename($filename, '.xz'));
+                $this->lzmaFilename = $filename;
+                $this->bzipStat = array('mtime' => filemtime($filename));
+                $this->compressedFilesSize = $this->archiveSize;
+                $this->uncompressedFilesSize = $this->archiveSize;
             break;
             case self::ISO:
                 // load php-iso-files
@@ -258,6 +282,12 @@ class UnifiedArchive implements AbstractArchive
             case 'gzip':
                 return 1;
             break;
+            case 'bzip2':
+                return 1;
+            break;
+            case 'lzma2':
+                return 1;
+            break;
             case 'iso':
                 return count($this->files);
             break;
@@ -297,6 +327,12 @@ class UnifiedArchive implements AbstractArchive
             break;
             case 'gzip':
                 return self::GZIP;
+            break;
+            case 'bzip2':
+                return self::BZIP;
+            break;
+            case 'lzma2':
+                return self::LZMA;
             break;
             case 'iso':
                 return self::ISO;
@@ -387,6 +423,28 @@ class UnifiedArchive implements AbstractArchive
 
                 return $file;
             break;
+            case 'bzip2':
+                if (!in_array($filename, $this->files)) return false;
+                $file = new \stdClass;
+                $file->filename = $filename;
+                $file->compressed_size = $this->archiveSize;
+                $file->uncompressed_size = $this->archiveSize;
+                $file->mtime = $this->bzipStat['mtime'];
+                $file->is_compressed = true;
+
+                return $file;
+            break;
+            case 'lzma2':
+                if (!in_array($filename, $this->files)) return false;
+                $file = new \stdClass;
+                $file->filename = $filename;
+                $file->compressed_size = $this->archiveSize;
+                $file->uncompressed_size = $this->archiveSize;
+                $file->mtime = $this->lzmaStat['mtime'];
+                $file->is_compressed = true;
+
+                return $file;
+            break;
             case 'iso':
                 if (!in_array($filename, $this->files)) return false;
                 if (!isset($this->isoFilesData[$filename])) return false;
@@ -434,6 +492,19 @@ class UnifiedArchive implements AbstractArchive
             case 'gzip':
                 if (!in_array($filename, $this->files)) return false;
                 return gzdecode(file_get_contents($this->gzipFilename));
+            break;
+            case 'bzip2':
+                if (!in_array($filename, $this->files)) return false;
+                return bzdecompress(file_get_contents($this->bzipFilename));
+            break;
+            case 'lzma2':
+                if (!in_array($filename, $this->files)) return false;
+                $fp = xzopen($this->lzmaFilename, 'r');
+                ob_start();
+                xzpassthru($fp);
+                $content = ob_get_flush();
+                xzclose($fp);
+                return $content;
             break;
             case 'iso':
                 if (!in_array($filename, $this->files)) return false;
@@ -536,6 +607,41 @@ class UnifiedArchive implements AbstractArchive
                     return 0;
                 }
             break;
+            case 'bzip2':
+                if ($node === '') {
+                    $dir = rtrim($outputFolder, '/').'/';
+                    if (!is_dir($dir)) mkdir($dir);
+                    if (file_put_contents($dir.
+                        basename($this->bzipFilename, '.bz2'),
+                        bzdecompress(file_get_contents($this->bzipFilename)))
+                        !== false)
+                        return 1;
+                    else
+                        return false;
+                } else {
+                    return 0;
+                }
+            break;
+            case 'lzma2':
+                if ($node === '') {
+                    $dir = rtrim($outputFolder, '/').'/';
+                    if (!is_dir($dir)) mkdir($dir);
+                    $fp = xzopen($this->lzmaFilename, 'r');
+                    ob_start();
+                    xzpassthru($fp);
+                    $content = ob_get_flush();
+                    xzclose($fp);
+                    if (file_put_contents($dir.
+                        basename($this->lzmaFilename, '.xz'),
+                        $content)
+                        !== false)
+                        return 1;
+                    else
+                        return false;
+                } else {
+                    return 0;
+                }
+            break;
         }
     }
 
@@ -622,6 +728,8 @@ class UnifiedArchive implements AbstractArchive
         else if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $aname))
             $atype = self::TAR;
         else if ($ext == 'gz') $atype = self::GZIP;
+        else if ($ext == 'bz2') $atype = self::BZIP;
+        else if ($ext == 'xz') $atype = self::LZMA;
         else return false;
 
         switch ($atype) {
@@ -688,6 +796,32 @@ class UnifiedArchive implements AbstractArchive
                 if (is_null($filename)) return false; // invalid list
                 if (file_put_contents($aname,
                     gzencode(file_get_contents($filename))) !== false)
+                    return 1;
+                else
+                    return false;
+            break;
+            case self::BZIP:
+                if (count($files) > 1) return false;
+                /*if ($localname != basename($aname, '.bz2')) return false;
+                */
+                $filename = array_shift($files);
+                if (is_null($filename)) return false; // invalid list
+                if (file_put_contents($aname,
+                    bzcompress(file_get_contents($filename))) !== false)
+                    return 1;
+                else
+                    return false;
+            break;
+            case self::LZMA:
+                if (count($files) > 1) return false;
+                /*if ($localname != basename($aname, '.xz')) return false;
+                */
+                $filename = array_shift($files);
+                if (is_null($filename)) return false; // invalid list
+                $fp = xzopen($aname, 'w');
+                $r = xzwrite($fp, file_get_contents($filename));
+                xzclose($fp);
+                if ($r !== false)
                     return 1;
                 else
                     return false;
