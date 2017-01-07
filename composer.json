@@ -1,7 +1,7 @@
 {
 	"name": "wapmorgan/unified-archive",
-	"description": "UnifiedArchive - unified interface to archive (zip, rar, gz, bz2, xz, tar, tar.gz, tar.bz2, tar.x, tar.Z, iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implemented PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate).",
-	"keywords": ["archive", "rar", "zip", "gzip", "tar", "iso-9660", "lzma2", "ncompress"],
+	"description": "UnifiedArchive - unified interface to archive (zip, 7z, rar, gz, bz2, xz, tar, tar.gz, tar.bz2, tar.x, tar.Z, iso-9660) for listing, reading, extracting and creation + built-in console packer and unpacker + fully implemented PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate).",
+	"keywords": ["archive", "rar", "7z", "zip", "gzip", "bzip2", "tar", "lzma2", "ncompress", "iso-9660"],
 	"license": "MIT",
 	"authors": [
 		{
@@ -20,13 +20,14 @@
 		"php": ">=5.3.0"
 	},
 	"suggest": {
-		"pear/archive_tar": "Allows unpack of TAR archives. (strongly recommended)",
+		"pear/archive_tar": "Allows unpack TAR archives (strongly recommended).",
+		"gemorroj/archive7z": "Allows unpack 7-ZIP archives.",
 		"ext-zip": "Allows unpack ZIP archives.",
 		"ext-rar": "Allows unpack RAR archives.",
-		"ext-zlib": "Allows unpack GZ files and tar archives with gzip compression.",
-		"ext-bz2": "Allows unpack tar archives with bz2 compression.",
-		"ext-xz": "Allows unpack tar archives with lzma2 compression.",
-		"ncompress": "Allows unpack tar archives with LZW compression.",
+		"ext-zlib": "Allows unpack GZ files and TAR archives with gzip compression.",
+		"ext-bz2": "Allows unpack BZ2 files and TAR archives with bzip2 compression.",
+		"ext-xz": "Allows unpack XZ files and TAR archives with lzma2 compression.",
+		"ncompress": "Allows unpack TAR archives with LZW compression.",
 		"phpclasses/php-iso-file": "Allows unpack iso-9660 images."
 	},
 	"autoload": {

@@ -1,8 +1,8 @@
-UnifiedArchive - unified interface to archive (zip # rar # gz # bz2 # xz # tar #
-tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing, reading, extracting
-and creation + built-in console packer and unpacker + fully implemented
-PclZip-like interface (create, listContent, extract, properties, add, delete, merge,
-duplicate).
+UnifiedArchive - unified interface to archive (zip # 7z # rar # gz # bz2 # xz #
+tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing, reading,
+extracting and creation + built-in console packer and unpacker + fully
+implemented PclZip-like interface (create, listContent, extract, properties,
+add, delete, merge, duplicate).
 
 [![Composer package](http://xn--e1adiijbgl.xn--p1acf/badge/wapmorgan/unified-archive)](https://packagist.org/packages/wapmorgan/unified-archive) [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive) [![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive) [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
 
@@ -50,6 +50,8 @@ returned. in case of failure - null
 	$archive = UnifiedArchive::open('filename.rar');
 	// or
 	$archive = UnifiedArchive::open('filename.zip');
+	// or
+	$archive = UnifiedArchive::open('filename.7z');
 	// or
 	$archive = UnifiedArchive::open('filename.gz');
 	// or

@@ -7,6 +7,7 @@ namespace wapmorgan\UnifiedArchive;
 class UnifiedArchive implements AbstractArchive
 {
     const ZIP = 'zip';
+    const SEVEN_ZIP = '7zip';
     const RAR = 'rar';
     const TAR = 'tar';
     const GZIP = 'gzip';
@@ -22,6 +23,7 @@ class UnifiedArchive implements AbstractArchive
     protected $archiveSize;
 
     protected $zip;
+    protected $seven_zip;
     protected $rar;
     protected $tar;
     protected $tarCompressionRatio;
@@ -49,6 +51,8 @@ class UnifiedArchive implements AbstractArchive
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if ($ext == 'zip' && extension_loaded('zip'))
             return new self($filename, self::ZIP);
+        if ($ext == '7z' && class_exists('\Archive7z\Archive7z'))
+            return new self($filename, self::SEVEN_ZIP);
         if ($ext == 'rar' && extension_loaded('rar'))
             return new self($filename, self::RAR);
         if (($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $filename)) && class_exists('\Archive_Tar'))
@@ -90,6 +94,15 @@ class UnifiedArchive implements AbstractArchive
                     $this->compressedFilesSize =
                     $this->uncompressedFilesSize = 0;
                 }
+            break;
+            case self::SEVEN_ZIP:
+                $this->seven_zip = new \Archive7z\Archive7z($filename);
+                foreach ($this->seven_zip->getEntries() as $entry) {
+                    $this->files[] = $entry->getPath();
+                    $this->compressedFilesSize += $entry->getPackedSize();
+                    $this->uncompressedFilesSize += $entry->getSize();
+                }
+                $this->seven_zip->numFiles = count($this->files);
             break;
             case self::RAR:
                 $this->rar = \RarArchive::open($filename);
@@ -252,6 +265,9 @@ class UnifiedArchive implements AbstractArchive
                 // $this->zip->close();
                 unset($this->zip);
             break;
+            case '7zip':
+                unset($this->seven_zip);
+            break;
             case 'rar':
                 $this->rar->close();
             break;
@@ -272,6 +288,9 @@ class UnifiedArchive implements AbstractArchive
         switch ($this->type) {
             case 'zip':
                 return $this->zip->numFiles;
+            break;
+            case 'seven_zip':
+                return $this->seven_zip->numFiles;
             break;
             case 'rar':
                 return $this->rar->numberOfFiles;
@@ -318,6 +337,9 @@ class UnifiedArchive implements AbstractArchive
         switch ($this->type) {
             case 'zip':
                 return self::ZIP;
+            break;
+            case '7zip':
+                return self::SEVEN_ZIP;
             break;
             case 'rar':
                 return self::RAR;
@@ -377,6 +399,20 @@ class UnifiedArchive implements AbstractArchive
 
                 return $file;
             break;
+            case '7zip':
+                if (!in_array($filename, $this->files)) return false;
+                $stat = $this->seven_zip->getEntry($filename);
+
+                $file = new \stdClass;
+                $file->filename = $filename;
+                $file->compressed_size = $entry->getPackedSize();
+                $file->uncompressed_size = $entry->getSize();
+                $file->mtime = strtotime($entry->getModified());
+                // 0 - no compression; 9 - max compression; etc ...
+                $file->is_compressed = !($this->seven_zip->getCompressionLevel() == 0);
+
+                return $file;
+            break;
             case 'rar':
                 if (!in_array($filename, $this->files)) return false;
                 $entry = $this->rar->getEntry($filename);
@@ -408,7 +444,7 @@ class UnifiedArchive implements AbstractArchive
 
                 $ext = strtolower(pathinfo($this->tar->path,
                     PATHINFO_EXTENSION));
-                $file->is_compressed = in_array($ext, array('gz', 'bz2', 'xz'));
+                $file->is_compressed = in_array($ext, array('gz', 'bz2', 'xz', 'Z'));
 
                 return $file;
             break;
@@ -472,6 +508,11 @@ class UnifiedArchive implements AbstractArchive
                 $index = array_search($filename, $this->files);
 
                 return $this->zip->getFromIndex($index);
+            break;
+            case '7zip':
+                if (!in_array($filename, $this->files)) return false;
+                $entry = $this->seven_zip->getEntry($filename);
+                return $entry->getContent();
             break;
             case 'rar':
                 if (!in_array($filename, $this->files)) return false;
@@ -560,6 +601,21 @@ class UnifiedArchive implements AbstractArchive
                 } else {
                     return false;
                 }
+            break;
+            case '7zip':
+                $this->seven_zip->setOutputDirectory($outputFolder);
+                $count = 0;
+                if ($node === '') {
+                    return $this->seven_zip->extract();
+                } else {
+                    foreach ($this->files as $fname) {
+                        if (strpos($fname, $node) === 0) {
+                            if ($this->seven_zip->extractEntry($fname))
+                                $count++;
+                        }
+                    }
+                }
+                return $count;
             break;
             case 'rar':
                 $count = 0;
