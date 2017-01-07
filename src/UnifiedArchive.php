@@ -401,15 +401,14 @@ class UnifiedArchive implements AbstractArchive
             break;
             case '7zip':
                 if (!in_array($filename, $this->files)) return false;
-                $stat = $this->seven_zip->getEntry($filename);
+                $entry = $this->seven_zip->getEntry($filename);
 
                 $file = new \stdClass;
                 $file->filename = $filename;
                 $file->compressed_size = $entry->getPackedSize();
                 $file->uncompressed_size = $entry->getSize();
                 $file->mtime = strtotime($entry->getModified());
-                // 0 - no compression; 9 - max compression; etc ...
-                $file->is_compressed = !($this->seven_zip->getCompressionLevel() == 0);
+                $file->is_compressed = $file->uncompressed_size != $file->compressed_size;
 
                 return $file;
             break;
