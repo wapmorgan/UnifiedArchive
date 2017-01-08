@@ -405,8 +405,8 @@ class UnifiedArchive implements AbstractArchive
 
                 $file = new \stdClass;
                 $file->filename = $filename;
-                $file->compressed_size = $entry->getPackedSize();
                 $file->uncompressed_size = $entry->getSize();
+                $file->compressed_size = ceil($file->uncompressed_size * ($this->compressedFilesSize / $this->uncompressedFilesSize));
                 $file->mtime = strtotime($entry->getModified());
                 $file->is_compressed = $file->uncompressed_size != $file->compressed_size;
 
