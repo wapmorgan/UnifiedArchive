@@ -962,6 +962,16 @@ class UnifiedArchive implements AbstractArchive
 
                 return count($files);
             break;
+            case self::SEVEN_ZIP:
+                $seven_zip = new \Archive7z\Archive7z($aname);
+                foreach ($files as $localname => $filename) {
+                    if (!is_null($filename)) {
+                        $seven_zip->addEntry($filename, false, $localname);
+                    }
+                }
+                unset($seven_zip);
+                return count($files);
+            break;
             case self::RAR:
                 return false;
             break;
