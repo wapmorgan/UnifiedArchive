@@ -392,14 +392,18 @@ I tried to find a roundabout way, but at present to make it it didn't turn out.
 In the **examples** catalog there are some files for check of operability of the
 program. start them from a command line.
 
-* It is necessary to transfer a catalog name in `cli.fs.php` for scanning.
-* It is necessary to transfer a path to archive in `cli.hierachy.php` for
-unpacking.
+* Transfer a catalog name in `cli.fs.php` to scan directory for all archives.
+* Transfer a path to archive in `cli.hierachy.php` for unpacking / listing.
+* Transfer a path to archive and list of files in `cli.pack.php` for archiving.
 
 ## Changelog
 ```
 +---------+--------------+--------------------------------------------------+
 | version | date         | description                                      |
++---------+--------------+--------------------------------------------------+
+| 0.0.6   | -----, 2017  | Added:                                           |
+|         |              | * Adding files in archive.                       |
+|         |              | * Deleting files from archive.                   |
 +---------+--------------+--------------------------------------------------+
 | 0.0.5   | Jan 8, 2017  | Added:                                           |
 |         |              | * Support for 7z (7zip) archives.                |
