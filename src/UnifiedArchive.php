@@ -581,7 +581,6 @@ class UnifiedArchive implements AbstractArchive
     {
         if ($node != '/') $node = substr($node, 1);
         else $node = '';
-
         switch ($this->type) {
             case 'zip':
                 $entries = array();
@@ -626,7 +625,6 @@ class UnifiedArchive implements AbstractArchive
                         }
                     }
                 }
-
                 return $count;
             break;
             case 'tar':
@@ -696,6 +694,161 @@ class UnifiedArchive implements AbstractArchive
                 } else {
                     return 0;
                 }
+            break;
+        }
+    }
+
+    /**
+     * Updates existing archive by removing files from it.
+     */
+    public function deleteFiles($fileOrFiles)
+    {
+        $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
+        foreach ($files as $i => $file) {
+            if (!in_array($filename, $this->files)) unset($files[$i]);
+        }
+        switch ($this->type) {
+            case 'zip':
+                $count++;
+                foreach ($files as $file) {
+                    $index = array_search($file, $this->files);
+                    $stat = $this->zip->statIndex($index);
+                    if ($this->zip->deleteIndex($index)) {
+                        unset($this->files[$index]);
+                        $this->compressedFilesSize -= $stat['comp_size'];
+                        $this->uncompressedFilesSize -= $stat['size'];
+                        $count++;
+                    }
+                }
+            break;
+            case '7zip':
+                foreach ($files as $file) {
+                    $this->seven_zip->delEntry($file);
+                    unset($this->files[array_search($file, $this->files)]);
+                }
+
+                $this->compressedFilesSize =
+                $this->uncompressedFilesSize = 0;
+                foreach ($this->seven_zip->getEntries() as $entry) {
+                    $this->compressedFilesSize += $entry->getPackedSize();
+                    $this->uncompressedFilesSize += $entry->getSize();
+                }
+
+                $count = $this->seven_zip->numFiles - count($this->files);
+                $this->seven_zip->numFiles = count($this->files);
+            break;
+        }
+        return isset($count) ? $count : false;
+    }
+
+    /**
+     * Updates existing archive by adding new files.
+     */
+    public function addFiles($nodes)
+    {
+        // -1: empty folder
+        $files = array();
+        if (is_array($nodes)) {
+            // check integrity
+            $strings = 0;// 1 - strings; 2 - arrays
+            foreach ($nodes as $node) $strings = (is_string($node) ?
+                $strings + 1 : $strings - 1);
+            if ($strings > 0 && $strings != count($nodes)) return false;
+
+            if ($strings == count($nodes)) {
+                foreach ($nodes as $node) {
+                    // if is directory
+                    if (is_dir($node))
+                        self::importFilesFromDir(rtrim($node, '/*').'/*',
+                            basename($node).'/', true, $files);
+                    else if (is_file($node))
+                        $files[basename($node)] = $node;
+                }
+            } else {
+                // make files list
+                foreach ($nodes as $node) {
+                    if (is_array($node)) $node = (object) $node;
+                    // put directory inside another directory in archive
+                    if (substr($node->source, -1) == '/') {
+                        if (substr($node->destination, -1) != '/')
+                            return false;
+                        if (!isset($node->recursive) || !$node->recursive) {
+                            self::importFilesFromDir($node->source.'*',
+                                $node->destination.basename($node->source).'/',
+                                false, $files);
+                        } else {
+                            self::importFilesFromDir($node->source.'*',
+                                $node->destination.basename($node->source).'/',
+                                true, $files);
+                        }
+                    } elseif (substr($node->source, -1) == '*') {
+                        if (substr($node->destination, -1) != '/')
+                            return false;
+                        if (!isset($node->recursive) || !$node->recursive) {
+                            self::importFilesFromDir($node->source,
+                                $node->destination, false, $files);
+                        } else {
+                            self::importFilesFromDir($node->source,
+                                $node->destination, true, $files);
+                        }
+                    } else { // put regular file inside directory in archive
+                        if (!is_file($node->source))
+                            return false;
+                        $files[$node->destination] = $node->source;
+                    }
+                }
+            }
+        } elseif (is_string($nodes)) {
+            // if is directory
+            if (is_dir($nodes))
+                self::importFilesFromDir(rtrim($nodes, '/*').'/*', '/', true,
+                    $files);
+            else if (is_file($nodes))
+                $files[basename($nodes)] = $nodes;
+        }
+
+        switch ($this->type) {
+            case self::ZIP:
+                foreach ($files as $localname => $filename) {
+                    if (is_null($filename)) {
+                        if ($this->zip->addEmptyDir($localname) === false)
+                            return false;
+                    } else {
+                        if ($this->zip->addFile($filename, $localname) === false)
+                            return false;
+                    }
+                }
+                $zip->close();
+
+                return count($files);
+            break;
+            case self::SEVEN_ZIP:
+                foreach ($files as $localname => $filename) {
+                    if (!is_null($filename)) {
+                        $seven_zip->addEntry($filename, false, $localname);
+                    }
+                }
+                unset($seven_zip);
+                return count($files);
+            break;
+            case self::TAR:
+                foreach ($files as $localname => $filename) {
+                    $remove_dir = dirname($filename);
+                    $add_dir = dirname($localname);
+                    /*echo "added ".$filename.PHP_EOL;
+                    echo number_format(filesize($filename)).PHP_EOL;
+                    */
+                    if (is_null($filename)) {
+                        if ($this->tar->addString($localname, "") === false)
+                            return false;
+                    } else {
+                        if ($this->tar->addModify($filename, $add_dir, $remove_dir)
+                         === false) return false;
+                    }
+                }
+                $tar = null;
+
+                return count($files);
             break;
         }
     }

@@ -10,8 +10,9 @@ add, delete, merge, duplicate).
 ---
 1. **Preamble**
 2. **Installation**
-3. **Process of reading archive**
-	1. **Process of creation of archive**
+3. **Process of archive reading**
+	1. **Process of archive modification**
+	2. **Process of archive creation**
 		1. Restrictions
 4. **Built-in archiver**
 5. **API**
@@ -36,7 +37,7 @@ Composer package: `wapmorgan/unified-archive`
 		}
 	}
 
-## Process of reading archive
+## Process of archive reading
 0. Import a class
 	```php
 	require 'vendor/autoload.php';
@@ -106,7 +107,34 @@ important! Don't forget them.
 	$archive->extractNode(tmpnam('/tmp', 'sources'), '/bookmarks/');
 	```
 
-## Process of creation of archive
+## Process of archive modification
+To delete a single file from an archive:
+```php
+$archive->deleteFiles('README.md');
+```
+To delete multiple files from an archive
+```php
+$archive->deleteFiles(array('README.md', 'MANIFEST.MF'));
+```
+In case of success the number of successfully deleted files will be returned.
+
+## Process of archive addition
+To add completely the catalog with all attached files and subdirectories:
+```php
+$archive->addFiles('/var/log');
+```
+To add one file:
+```php
+$archive->addFiles('/var/log/syslog');
+```
+To add some files or catalogs:
+```php
+$archive->addFiles(array(directory, file, file2, ...));
+```
+Full syntax of multiple files addition is described in next section **Process
+of archive creation**.
+
+## Process of archive creation
 To pack completely the catalog with all attached files and subdirectories:
 ```php
 UnifiedArchive::archiveNodes('/var/log', 'Archive.zip');
@@ -284,6 +312,16 @@ public function extractNode($outputFolder, $node = '/');
 - unpacks any of internal catalogs archive with full preservation of structure
 of catalogs in the catalog on a hard disk.
 
+**Archive modification**
+```php
+public function deleteFiles($fileOrFiles);
+```
+- updates existing archive by removing files from it.
+
+```php
+public function addFiles($nodes);
+```
+- updates existing archive by adding new files.
 ### Static methods
 
 ```php
