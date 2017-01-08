@@ -885,6 +885,7 @@ class UnifiedArchive implements AbstractArchive
                     $this->tarCompressionRatio = 1;
             break;
         }
+        return count($this->files);
     }
 
     /**
