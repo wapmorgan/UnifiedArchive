@@ -818,18 +818,33 @@ class UnifiedArchive implements AbstractArchive
                             return false;
                     }
                 }
-                $zip->close();
 
-                return count($files);
+                $this->files = array();
+                $this->compressedFilesSize =
+                $this->uncompressedFilesSize = 0;
+                for ($i = 0; $i < $this->zip->numFiles; $i++) {
+                    $file = $this->zip->statIndex($i);
+                    $this->files[$i] = $file['name'];
+                    $this->compressedFilesSize += $file['comp_size'];
+                    $this->uncompressedFilesSize += $file['size'];
+                }
             break;
             case self::SEVEN_ZIP:
                 foreach ($files as $localname => $filename) {
                     if (!is_null($filename)) {
-                        $seven_zip->addEntry($filename, false, $localname);
+                        $this->seven_zip->addEntry($filename, false, $localname);
                     }
                 }
-                unset($seven_zip);
-                return count($files);
+
+                $this->files = array();
+                $this->compressedFilesSize =
+                $this->uncompressedFilesSize = 0;
+                foreach ($this->seven_zip->getEntries() as $entry) {
+                    $this->files[] = $entry->getPath();
+                    $this->compressedFilesSize += $entry->getPackedSize();
+                    $this->uncompressedFilesSize += $entry->getSize();
+                }
+                $this->seven_zip->numFiles = count($this->files);
             break;
             case self::TAR:
                 foreach ($files as $localname => $filename) {
@@ -846,9 +861,28 @@ class UnifiedArchive implements AbstractArchive
                          === false) return false;
                     }
                 }
-                $tar = null;
 
-                return count($files);
+                $this->files = array();
+                $this->compressedFilesSize =
+                $this->uncompressedFilesSize = 0;
+                $Content = $this->tar->listContent();
+                $this->tar->numberOfFiles = count($Content);
+                foreach ($Content as $i => $file) {
+                    // BUG workaround: http://pear.php.net/bugs/bug.php?id=20275
+                    if ($file['filename'] == 'pax_global_header') {
+                        $this->tar->numberOfFiles--;
+                        continue;
+                    }
+                    $this->files[$i] = $file['filename'];
+                    $this->uncompressedFilesSize += $file['size'];
+                }
+
+                $this->compressedFilesSize = $this->archiveSize;
+                if ($this->uncompressedFilesSize != 0)
+                    $this->tarCompressionRatio = ceil($this->archiveSize
+                        / $this->uncompressedFilesSize);
+                else
+                    $this->tarCompressionRatio = 1;
             break;
         }
     }
