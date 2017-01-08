@@ -967,6 +967,7 @@ class UnifiedArchive implements AbstractArchive
 
         $ext = strtolower(pathinfo($aname, PATHINFO_EXTENSION));
         if ($ext == 'zip') $atype = self::ZIP;
+        else if ($ext == '7z') $atype = self::SEVEN_ZIP;
         else if ($ext == 'rar') $atype = self::RAR;
         else if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $aname))
             $atype = self::TAR;
