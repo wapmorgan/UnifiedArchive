@@ -322,6 +322,7 @@ public function deleteFiles($fileOrFiles);
 public function addFiles($nodes);
 ```
 - updates existing archive by adding new files.
+
 ### Static methods
 
 ```php
