@@ -705,11 +705,11 @@ class UnifiedArchive implements AbstractArchive
     {
         $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
         foreach ($files as $i => $file) {
-            if (!in_array($filename, $this->files)) unset($files[$i]);
+            if (!in_array($file, $this->files)) unset($files[$i]);
         }
         switch ($this->type) {
             case 'zip':
-                $count++;
+                $count = 0;
                 foreach ($files as $file) {
                     $index = array_search($file, $this->files);
                     $stat = $this->zip->statIndex($index);
