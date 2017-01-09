@@ -401,9 +401,12 @@ program. start them from a command line.
 +---------+--------------+--------------------------------------------------+
 | version | date         | description                                      |
 +---------+--------------+--------------------------------------------------+
-| 0.0.6   | -----, 2017  | Added:                                           |
+| 0.0.6   | Jan 9, 2017  | Added:                                           |
 |         |              | * Adding files in archive.                       |
 |         |              | * Deleting files from archive.                   |
+|         |              | Fixed:                                           |
+|         |              | * Fixed discovering 7z archive number of files   |
+|         |              | and creating new archive.                        |
 +---------+--------------+--------------------------------------------------+
 | 0.0.5   | Jan 8, 2017  | Added:                                           |
 |         |              | * Support for 7z (7zip) archives.                |
