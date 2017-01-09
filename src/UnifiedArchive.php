@@ -289,7 +289,7 @@ class UnifiedArchive implements AbstractArchive
             case 'zip':
                 return $this->zip->numFiles;
             break;
-            case 'seven_zip':
+            case '7zip':
                 return $this->seven_zip->numFiles;
             break;
             case 'rar':
