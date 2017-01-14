@@ -249,7 +249,7 @@ class PclZipLikeZipArchiveInterface
             return self::SELECT_FILTER_REFUSE;
         };
         // <ereg> rule
-        else if (isset($options[PCLZIP_OPT_BY_EREG]))
+        else if (isset($options[PCLZIP_OPT_BY_EREG]) && function_exists('ereg'))
             $selectFilter = function ($key, $value) use ($options) {
                 return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false)
                     ? self::SELECT_FILTER_PASS
@@ -580,7 +580,7 @@ class PclZipLikeZipArchiveInterface
                 return self::SELECT_FILTER_REFUSE;
             };
         // <ereg> rule
-        else if (isset($options[PCLZIP_OPT_BY_EREG]))
+        else if (isset($options[PCLZIP_OPT_BY_EREG]) && function_exists('ereg'))
             $selectFilter = function ($key, $value) use ($options) {
                 return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false)
                 ? self::SELECT_FILTER_PASS

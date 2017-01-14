@@ -99,8 +99,8 @@ class UnifiedArchive implements AbstractArchive
                 $this->seven_zip = new \Archive7z\Archive7z($filename);
                 foreach ($this->seven_zip->getEntries() as $entry) {
                     $this->files[] = $entry->getPath();
-                    $this->compressedFilesSize += $entry->getPackedSize();
-                    $this->uncompressedFilesSize += $entry->getSize();
+                    $this->compressedFilesSize += (int)$entry->getPackedSize();
+                    $this->uncompressedFilesSize += (int)$entry->getSize();
                 }
                 $this->seven_zip->numFiles = count($this->files);
             break;
