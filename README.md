@@ -1,5 +1,5 @@
 UnifiedArchive - unified interface to archive (zip # 7z # rar # gz # bz2 # xz #
-tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing, reading,
+cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing, reading,
 extracting and creation + built-in console packer and unpacker + fully
 implemented PclZip-like interface (create, listContent, extract, properties,
 add, delete, merge, duplicate).
@@ -59,6 +59,8 @@ returned. in case of failure - null
 	$archive = UnifiedArchive::open('filename.bz2');
 	// or
 	$archive = UnifiedArchive::open('filename.xz');
+	// or
+	$archive = UnifiedArchive::open('filename.cab');
 	// or
 	$archive = UnifiedArchive::open('filename.tar');
 	// or
