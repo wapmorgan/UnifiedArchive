@@ -401,6 +401,9 @@ program. start them from a command line.
 +---------+--------------+--------------------------------------------------+
 | version | date         | description                                      |
 +---------+--------------+--------------------------------------------------+
+| 0.0.7   | Jan 14, 2017 | Fixed:                                           |
+|         |              | * Using ereg function on PHP >7.                 |
++---------+--------------+--------------------------------------------------+
 | 0.0.6   | Jan 9, 2017  | Added:                                           |
 |         |              | * Adding files in archive.                       |
 |         |              | * Deleting files from archive.                   |
