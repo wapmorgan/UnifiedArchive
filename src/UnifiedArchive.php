@@ -14,6 +14,7 @@ class UnifiedArchive implements AbstractArchive
     const BZIP = 'bzip2';
     const LZMA = 'lzma2';
     const ISO = 'iso';
+    const CAB = 'cab';
 
     protected $type;
 
@@ -36,6 +37,7 @@ class UnifiedArchive implements AbstractArchive
     protected $iso;
     protected $isoBlockSize;
     protected $isoFilesData;
+    protected $cab;
 
     /**
      * Creates instance with right type.
@@ -65,6 +67,8 @@ class UnifiedArchive implements AbstractArchive
             return new self($filename, self::LZMA);
         if ($ext == 'iso' && class_exists('\CISOFile'))
             return new self($filename, self::ISO);
+        if ($ext == 'cab' && class_exists('\CabArchive'))
+            return new self($filename, self::CAB);
         if (true) return null;
     }
 
@@ -225,11 +229,21 @@ class UnifiedArchive implements AbstractArchive
                             );
                         }
                     }
+                    break;
                 }
                 $this->uncompressedFilesSize = $this->compressedFilesSize
                  = $size;
 
             break;
+            case self::CAB:
+                $this->cab = new \CabArchive($filename);
+                foreach ($this->cab->getFileNames() as $file) {
+                    $this->files[] = $file;
+                    $file_info = $this->cab->getFileData($file);
+                    $this->uncompressedFilesSize += $file_info->size;
+                    $this->compressedFilesSize += $file_info->packedSize;
+                }
+                break;
         }
     }
 
@@ -246,13 +260,10 @@ class UnifiedArchive implements AbstractArchive
             case 'zip':
                 return new PclZipLikeZipArchiveInterface($this->zip);
             break;
-            case 'tar':
-                return new PclZipLikeTarArchiveInterface($this->tar);
-            break;
         }
 
-        die(basename(__FILE__).', line '.__LINE.' : PclZip-like interface IS'.
-         'NOT available for archive format');
+        throw new \Exception(basename(__FILE__).', line '.__LINE.' : PclZip-like interface IS'.
+         'NOT available for '.$this->type.' archive format');
     }
 
     /**
@@ -277,6 +288,9 @@ class UnifiedArchive implements AbstractArchive
             case 'iso':
                 $this->iso->close();
             break;
+            case 'cab':
+                unset($this->cab);
+            break;
         }
     }
 
@@ -288,28 +302,30 @@ class UnifiedArchive implements AbstractArchive
         switch ($this->type) {
             case 'zip':
                 return $this->zip->numFiles;
-            break;
+
             case '7zip':
                 return $this->seven_zip->numFiles;
-            break;
+
             case 'rar':
                 return $this->rar->numberOfFiles;
-            break;
+
             case 'tar':
                 return $this->tar->numberOfFiles;
-            break;
+
             case 'gzip':
                 return 1;
-            break;
+
             case 'bzip2':
                 return 1;
-            break;
+
             case 'lzma2':
                 return 1;
-            break;
+
             case 'iso':
                 return count($this->files);
-            break;
+
+            case 'cab':
+                return $this->cab->filesCount;
         }
     }
 
@@ -337,28 +353,30 @@ class UnifiedArchive implements AbstractArchive
         switch ($this->type) {
             case 'zip':
                 return self::ZIP;
-            break;
+
             case '7zip':
                 return self::SEVEN_ZIP;
-            break;
+
             case 'rar':
                 return self::RAR;
-            break;
+
             case 'tar':
                 return self::TAR;
-            break;
+
             case 'gzip':
                 return self::GZIP;
-            break;
+
             case 'bzip2':
                 return self::BZIP;
-            break;
+
             case 'lzma2':
                 return self::LZMA;
-            break;
+
             case 'iso':
                 return self::ISO;
-            break;
+
+            case 'cab':
+                return self::CAB;
         }
     }
 
@@ -493,6 +511,10 @@ class UnifiedArchive implements AbstractArchive
 
                 return $file;
             break;
+            case 'cab':
+                if (!in_array($filename, $this->files)) return false;
+                return $this->cab->getFileData($filename);
+            break;
         }
     }
 
@@ -556,6 +578,8 @@ class UnifiedArchive implements AbstractArchive
                     return false;
                 return $this->iso->Read($data['size']);
             break;
+            case 'cab':
+                return false;
         }
     }
 
@@ -695,6 +719,8 @@ class UnifiedArchive implements AbstractArchive
                     return 0;
                 }
             break;
+            case 'cab':
+                return false;
         }
     }
 
