@@ -16,7 +16,7 @@ function formatBytes($bytes, $precision = 2)
     return round($bytes, $precision) . $units[$pow];
 }
 
-echo sprintf("%28s | %4s | %8s | %8s | %8s | %8s | %8s | %8s | %8s | %8s",
+echo sprintf("%28s | %5s | %8s | %8s | %8s | %8s | %8s | %8s | %8s | %8s",
     "Name", "Type", "Size", "Unpacked", "Packed", "Files", "Ratio", "Size",
         "Unpacked", "Packed").PHP_EOL;
 foreach (glob(isset($argv[1]) ? rtrim($argv[1], '/*').'/*' : './*') as $file) {
@@ -24,7 +24,7 @@ foreach (glob(isset($argv[1]) ? rtrim($argv[1], '/*').'/*' : './*') as $file) {
         if (($archive = UnifiedArchive::open($file)) === null) {
             continue;
         }
-        echo sprintf("%-28s | %4s | %8d | %8d | %8d | %8d | %7dx | %8s |".
+        echo sprintf("%-28s | %5s | %8d | %8d | %8d | %8d | %7dx | %8s |".
             " %8s | %8s",
             basename($file), $archive->getArchiveType(),
             $archive->getArchiveSize(),
