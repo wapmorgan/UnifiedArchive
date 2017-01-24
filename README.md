@@ -39,6 +39,7 @@ Composer package: `wapmorgan/unified-archive`
 
 ## Process of archive reading
 0. Import a class
+
 	```php
 	require 'vendor/autoload.php';
 	use \wapmorgan\UnifiedArchive\UnifiedArchive;
@@ -47,6 +48,7 @@ Composer package: `wapmorgan/unified-archive`
 1. At the beginning, try to open the file with automatic detection of a format
 by name. In case of successful recognition the object of UnifiedArchive will be
 returned. in case of failure - null
+
 	```php
 	$archive = UnifiedArchive::open('filename.rar');
 	// or
@@ -77,19 +79,22 @@ returned. in case of failure - null
 
 2. Further, read the list of files of archive (notice, this function returns
 only names of files)
+
 	```php
 	var_dump($archive->getFileNames());
 	```
 
 3. Further, you can receive additional information on the concrete file by means
 of the getFileData function
+
 	```php
 	var_dump($archive->getFileData('README.md'));
 	```
 
 4. Further, you can receive file contents by means of the getFileContent
 function
-	```php
+
+```php
 	var_dump($archive->getFileContent('README.md'));
 	```
 
@@ -98,6 +103,7 @@ all archive (the root catalog of archive). The extractNode method is engaged in
 it. In case of success, it returns number of the mentioned files, in case of
 failure - false. Initial and final symbol of division of catalogs are very
 important! Don't forget them.
+
 	```php
 	$archive->extractNode(outputFolder, archiveFolder = '/');
 	// to unpack all contents of archive
@@ -111,47 +117,64 @@ important! Don't forget them.
 
 ## Process of archive modification
 To delete a single file from an archive:
+
 ```php
 $archive->deleteFiles('README.md');
 ```
+
 To delete multiple files from an archive
+
 ```php
 $archive->deleteFiles(array('README.md', 'MANIFEST.MF'));
 ```
+
 In case of success the number of successfully deleted files will be returned.
 
 ## Process of archive addition
 To add completely the catalog with all attached files and subdirectories:
+
 ```php
 $archive->addFiles('/var/log');
 ```
+
 To add one file:
+
 ```php
 $archive->addFiles('/var/log/syslog');
 ```
+
 To add some files or catalogs:
+
 ```php
 $archive->addFiles(array(directory, file, file2, ...));
 ```
+
 Full syntax of multiple files addition is described in next section **Process
 of archive creation**.
 
 ## Process of archive creation
 To pack completely the catalog with all attached files and subdirectories:
+
 ```php
 UnifiedArchive::archiveNodes('/var/log', 'Archive.zip');
 ```
+
 To pack one file:
+
 ```php
 UnifiedArchive::archiveNodes('/var/log/syslog', 'Archive.zip');
 ```
+
 To pack some files or catalogs:
+
 ```php
 UnifiedArchive::archiveNodes(array(directory, file, file2, ...), 'Archive.zip');
 ```
 
+
 Extended syntax with possibility of rewriting of paths and additional
 opportunities:
+
 ```php
 $nodes = array(
 	array('source' => '/etc/php5/fpm/php.ini', 'destination' => 'php.ini'),
@@ -166,6 +189,7 @@ $nodes = array(
 );
 UnifiedArchive::archiveNodes($nodes, 'Archive.zip');
 ```
+
 
 [**Complete description of expanded syntax with examples and explanations: Full
 `archiveNodes` documentation**](doc.archiveNodes.md).
@@ -184,6 +208,7 @@ be a file.
 To see all opportunities of this remarkable UnifiedArchive, together with source
  codes some scripts are delivered. They can become quite good replacement to
  standard commands of file system (tar, unzip, rar, gzip).
+ 
 ```bash
 DIRECTORY=/tmp/output
 # /* All couples of commands are completely identical */
@@ -203,11 +228,13 @@ unrar x archive.rar $DIRECTORY
 gzip -d -k archive.gz && mv archive $DIRECTORY
 ./cli.hierarchy.php -e -n / -a archive.gz -o $DIRECTORY
 ```
+
 You noticed? The universal extractor itself defines type of archive and there is
 no need manually to choose type.
 
 We will continue and look at examples of replacement of the unbridled number of
 utilities on one command:
+
 ```bash
 # List of nodes in archive
 ./cli.hierarchy.php -l -a archivename
@@ -228,6 +255,7 @@ utilities on one command:
 # /* Archive information */
 ./cli.hierarchy.php -i -a archivename
 ```
+
 In the future probably I will add still some scripts or I will update existing
 having added some operations.
 
@@ -315,6 +343,7 @@ public function extractNode($outputFolder, $node = '/');
 of catalogs in the catalog on a hard disk.
 
 **Archive modification**
+
 ```php
 public function deleteFiles($fileOrFiles);
 ```
@@ -350,8 +379,8 @@ Yes, you didn't mishear - UnifedArchive provides full realization of the
 interface known on archiving popular library of PclZip (the last version 2.8.2).
 
 Let's look at it:
+
 ```php
-<?php
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 require 'vendor/autoload.php';
 $archive = UnifiedArchive::open('ziparchive.zip');
