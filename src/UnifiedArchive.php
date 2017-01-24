@@ -416,7 +416,6 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = !($stat['comp_method'] == 0);
 
                 return $file;
-            break;
             case '7zip':
                 if (!in_array($filename, $this->files)) return false;
                 $entry = $this->seven_zip->getEntry($filename);
@@ -429,7 +428,6 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = $file->uncompressed_size != $file->compressed_size;
 
                 return $file;
-            break;
             case 'rar':
                 if (!in_array($filename, $this->files)) return false;
                 $entry = $this->rar->getEntry($filename);
@@ -444,7 +442,6 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = !($entry->getMethod() == 48);
 
                 return $file;
-            break;
             case 'tar':
                 if (!in_array($filename, $this->files)) return false;
                 $index = array_search($filename, $this->files);
@@ -464,7 +461,6 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = in_array($ext, array('gz', 'bz2', 'xz', 'Z'));
 
                 return $file;
-            break;
             case 'gzip':
                 if (!in_array($filename, $this->files)) return false;
                 $file = new \stdClass;
@@ -475,7 +471,6 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = true;
 
                 return $file;
-            break;
             case 'bzip2':
                 if (!in_array($filename, $this->files)) return false;
                 $file = new \stdClass;
@@ -497,7 +492,6 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = true;
 
                 return $file;
-            break;
             case 'iso':
                 if (!in_array($filename, $this->files)) return false;
                 if (!isset($this->isoFilesData[$filename])) return false;
@@ -510,11 +504,16 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = false;
 
                 return $file;
-            break;
             case 'cab':
                 if (!in_array($filename, $this->files)) return false;
-                return $this->cab->getFileData($filename);
-            break;
+                $data = $this->cab->getFileData($filename);
+                $file = new \stdClass;
+                $file->filename = $filename;
+                $file->compressed_size = $data->packedSize;
+                $file->uncompressed_size = $data->size;
+                $file->mtime = $data->unixtime;
+                $file->is_compressed = $data->is_compressed;
+                return $file;
         }
     }
 
