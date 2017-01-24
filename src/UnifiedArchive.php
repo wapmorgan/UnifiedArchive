@@ -57,7 +57,7 @@ class UnifiedArchive implements AbstractArchive
             return new self($filename, self::SEVEN_ZIP);
         if ($ext == 'rar' && extension_loaded('rar'))
             return new self($filename, self::RAR);
-        if (($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $filename)) && class_exists('\Archive_Tar'))
+        if ((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $filename)) && class_exists('\Archive_Tar'))
             return new self($filename, self::TAR);
         if ($ext == 'gz' && extension_loaded('zlib'))
             return new self($filename, self::GZIP);
