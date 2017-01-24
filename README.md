@@ -94,7 +94,7 @@ of the getFileData function
 4. Further, you can receive file contents by means of the getFileContent
 function
 
-```php
+        ```php
 	var_dump($archive->getFileContent('README.md'));
 	```
 
