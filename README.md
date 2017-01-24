@@ -403,6 +403,14 @@ program. start them from a command line.
 +---------+--------------+--------------------------------------------------+
 | version | date         | description                                      |
 +---------+--------------+--------------------------------------------------+
+| 0.0.8   | Jan 24, 2017 | Added:                                           |
+|         |              | * Initial support for CAB archives without       |
+|         |              | extracting.                                      |
+|         |              | Changed:                                         |
+|         |              | * Handling of short names of tar archives.       |
+|         |              | * Removed external repository declaration.       |
+|         |              | * Removed die() in source code.                  |
++---------+--------------+--------------------------------------------------+
 | 0.0.7   | Jan 14, 2017 | Fixed:                                           |
 |         |              | * Using ereg function on PHP >7.                 |
 +---------+--------------+--------------------------------------------------+
