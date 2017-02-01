@@ -232,9 +232,6 @@ utilities on one command:
 | Prints file content without extraction | `./cli.hierarchy.php -u -a archivename -n file_in_archive`               | Replaces `unzip -p archivename file_in_archive`               |
 | Extract a folder                       | `./cli.hierarchy.php -e -a archivename -n /directory_in_archive/ -o .`   | Replaces `unzip archivename "directory_in_archive/*"`         |
 | Archive information                    | `./cli.hierarchy.php -i -a archivename`                                  |                                                               |
-|                                        |                                                                          |                                                               |
-|                                        |                                                                          |                                                               |
-|                                        |                                                                          |                                                               |
 
 In the future probably I will add still some scripts or I will update existing
 with new functions.
@@ -396,6 +393,23 @@ _PCLZIP_OPT_NO_COMPRESSION_. This option allows to disconnect compression for
 added files. At present the native library for work *doesn't allow* to change
 compression parameters from zip-archive - all added the file forcibly contract.
 I tried to find a roundabout way, but at present to make it it didn't turn out.
+
+### Performance comparation
+
+To confirm my words about boost that UnifiedArchive can make in your project,
+here's comparation table of UnifiedArchive and PclZip extracting the same
+archives.
+
+| Filename            | UA (time) | % of PZ     | PZ (time) |
+|---------------------|-----------|-------------|-----------|
+| googletools.zip     | 0.014     | **67%**     | 0.020     |
+| PHPWord-develop.zip | 0.573     | **63%**     | 0.907     |
+| turbosale_1.0.0.zip | 0.250     | **80%**     | 0.309     |
+| meteor-devel.zip    | 6.553     | **62%**     | 10.429    |
+| subrion-develop.zip | 10.682    | **82%**     | 12.996    |
+| OptiKey-master.zip  | 3.445     | **82%**     | 4.180     |
+
+**Average growth is 27%!**
 
 ## Examples
 In the **examples** catalog there are some files for check of operability of the
