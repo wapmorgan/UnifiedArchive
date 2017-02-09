@@ -90,6 +90,13 @@ class UnifiedArchive implements AbstractArchive
                     for ($i = 0; $i < $this->zip->numFiles; $i++) {
                         $file = $this->zip->statIndex($i);
                         $this->files[$i] = $file['name'];
+                        if (extension_loaded('mbstring')) {
+                            $encoding = mb_detect_encoding($this->files[$i], 'UTF-8, GBK');
+                            if ($encoding != 'UTF-8') {
+                                $this->files[$i] = mb_convert_encoding($this->files[$i], 'UTF-8', $encoding);
+                                $this->zip->renameIndex($i, $this->files[$i]);
+                            }
+                        }
                         $this->compressedFilesSize += $file['comp_size'];
                         $this->uncompressedFilesSize += $file['size'];
                     }
