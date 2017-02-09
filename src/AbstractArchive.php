@@ -10,6 +10,8 @@ interface AbstractArchive
     public function getFileContent($filename);
     public function getHierarchy();
     public function extractNode($outputFolder, $node = '/');
+    public function deleteFiles($fileOrFiles);
+    public function addFiles($nodes);
 
     public function countFiles();
     public function getArchiveSize();
