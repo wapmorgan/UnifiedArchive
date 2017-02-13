@@ -420,42 +420,14 @@ program. start them from a command line.
 * Transfer a path to archive and list of files in `cli.pack.php` for archiving.
 
 ## Changelog
-```
-+---------+--------------+--------------------------------------------------+
-| version | date         | description                                      |
-+---------+--------------+--------------------------------------------------+
-| 0.0.8   | Jan 24, 2017 | Added:                                           |
-|         |              | * Initial support for CAB archives without       |
-|         |              | extracting.                                      |
-|         |              | Changed:                                         |
-|         |              | * Handling of short names of tar archives.       |
-|         |              | * Removed external repository declaration.       |
-|         |              | * Removed die() in source code.                  |
-+---------+--------------+--------------------------------------------------+
-| 0.0.7   | Jan 14, 2017 | Fixed:                                           |
-|         |              | * Using ereg function on PHP >7.                 |
-+---------+--------------+--------------------------------------------------+
-| 0.0.6   | Jan 9, 2017  | Added:                                           |
-|         |              | * Adding files in archive.                       |
-|         |              | * Deleting files from archive.                   |
-|         |              | Fixed:                                           |
-|         |              | * Fixed discovering 7z archive number of files   |
-|         |              | and creating new archive.                        |
-+---------+--------------+--------------------------------------------------+
-| 0.0.5   | Jan 8, 2017  | Added:                                           |
-|         |              | * Support for 7z (7zip) archives.                |
-+---------+--------------+--------------------------------------------------+
-| 0.0.4   | Jan 7, 2017  | Added:                                           |
-|         |              | * Support for single-file bz2 (bzip2) and xz     |
-|         |              | (lzma2) archives.                                |
-+---------+--------------+--------------------------------------------------+
-| 0.0.3   | Aug 18, 2015 | Changed:                                         |
-|         |              | * archive_tar is no longer a required package,   |
-|         |              | now it is a suggestion.                          |
-+---------+--------------+--------------------------------------------------+
-| 0.0.2   | May 27, 2014 | Changed:                                         |
-|         |              | * UnifiedArchive released under the MIT license. |
-+---------+--------------+--------------------------------------------------+
-| 0.0.1   | May 26, 2014 | first release                                    |
-+---------+--------------+--------------------------------------------------+
-```
+
+| Version | Date         | Changelog                                                                                                                                                                               |
+|---------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration.* Removed die() in source code. |
+| 0.0.7   | Jan 14, 2017 | * Fixed using ereg function on PHP >7.                                                                                                                                                  |
+| 0.0.6   | Jan 9, 2017  | * Added functionality for adding files in archive.* Added functionality for deleting files from archive. * Fixed discovering 7z archive number of files and creating new archive.       |
+| 0.0.5   | Jan 8, 2017  | * Added support for 7z (7zip) archives.                                                                                                                                                 |
+| 0.0.4   | Jan 7, 2017  | * Added support for single-file bz2 (bzip2) and xz (lzma2) archives.                                                                                                                    |
+| 0.0.3   | Aug 18, 2015 | * Removed archive_tar from required packages.                                                                                                                                           |
+| 0.0.2   | May 27, 2014 | * Released under the MIT license                                                                                                                                                        |
+| 0.0.1   | May 26, 2014 | ---                                                                                                                                                                                     |
