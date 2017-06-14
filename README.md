@@ -212,9 +212,9 @@ To see all opportunities of this remarkable UnifiedArchive, together with source
 |  Format | Program usage                                       | Replacement                                                    |
 |---------| ----------------------------------------------------|----------------------------------------------------------------|
 | tar     | `tar xv -C $DIRECTORY archive.tar.gz`               | `./cli.hierarchy.php -e -n / -a archive.tar.gz -o $DIRECTORY`  |
-| zip     | `unzip archive.zip -d $DIRECTORY`                   | `./cli.hierarchy.php -e -n / -a archive.tar.gz -o $DIRECTORY`  |
-| rar     | `unrar x archive.rar $DIRECTORY`                    | `./cli.hierarchy.php -e -n / -a archive.tar.gz -o $DIRECTORY`  |
-| gzip    | `gzip -d -k archive.gz && mv archive $DIRECTORY`    | `./cli.hierarchy.php -e -n / -a archive.tar.gz -o $DIRECTORY`  |
+| zip     | `unzip archive.zip -d $DIRECTORY`                   | `./cli.hierarchy.php -e -n / -a archive.zip -o $DIRECTORY`     |
+| rar     | `unrar x archive.rar $DIRECTORY`                    | `./cli.hierarchy.php -e -n / -a archive.rar -o $DIRECTORY`     |
+| gzip    | `gzip -d -k archive.gz && mv archive $DIRECTORY`    | `./cli.hierarchy.php -e -n / -a archive.gz -o $DIRECTORY`      |
 
 You noticed? The universal extractor itself defines type of archive and there is
 no need manually to choose type.
