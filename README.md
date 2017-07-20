@@ -1,5 +1,5 @@
-UnifiedArchive - unified interface to any archive (zip # 7z # rar # gz # bz2
-# xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing,
+UnifiedArchive - unified interface to any archive (zip # 7z # rar # gz # bz2 #
+xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing,
 reading, extracting and creation + built-in console archive manager + fully
 implemented PclZip-like interface (create, listContent, extract, properties,
 add, delete, merge, duplicate).
