@@ -197,8 +197,7 @@ $nodes = array(
 UnifiedArchive::archiveNodes($nodes, 'Archive.zip');
 ```
 
-
-[**Complete description of extended syntax with examples and explanations](extendedSyntax.md).
+[**Complete description of extended syntax with examples and explanations**.](extendedSyntax.md).
 
 ### Restrictions
 It is impossible to create the ideal archiver, here therefore some restrictions
