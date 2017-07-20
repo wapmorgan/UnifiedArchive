@@ -15,12 +15,14 @@ add, delete, merge, duplicate).
 	2. **Process of archive creation**
 		1. Restrictions
 4. **Built-in archiver**
-5. **API**
+5. **Built-in console archive manager**
+6. **API**
 	1. **Object methods**
 	2. **Static methods**
-6. **PclZip-like interface**
-7. **Examples**
-8. **Changelog**
+7. **PclZip-like interface**
+8. **Examples**
+9. **Progress of supporting various formats and operations**
+10. **Changelog**
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
@@ -86,7 +88,7 @@ only names of files)
 	var_dump($archive->getFileNames());
 	```
 
-4. Further, you can get additional information about concrete files by  
+4. Further, you can get additional information about concrete files by
 `getFileData()` method
 
 	```php
@@ -100,9 +102,9 @@ method
 	var_dump($archive->getFileContent('README.md'));
 	```
 
-6. Further, you can unpack any internal catalog or the whole archive with files 
-on a disk. The `extractNode()` method is engaged in it. In case of success, it 
-returns number of the extracted files, in case of failure - **false**. Initial 
+6. Further, you can unpack any internal catalog or the whole archive with files
+on a disk. The `extractNode()` method is engaged in it. In case of success, it
+returns number of the extracted files, in case of failure - **false**. Initial
 and final symbol of division of catalogs are very important! Don't forget them.
 
 	```php
@@ -150,7 +152,7 @@ To add some files or catalogs:
 $archive->addFiles(array(directory, file, file2, ...));
 ```
 
-Full syntax of multiple files addition is described in 
+Full syntax of multiple files addition is described in
 [another document](extendedSyntax.md).
 
 ## Process of archive creation & modification
@@ -246,6 +248,48 @@ viewing of contents of archive from the terminal!
 
 Conveniently, isn't that so?
 
+## Built-in console archive manager
+UnifiedArchive is distributed with a unified console program to manipulate popular
+archive formats. This script is stored in `bin/cam`.
+
+It supports all formats that UnifiedArchive does and can be used to manipulate
+archives without other software. To check your configuration and check formats
+support launch it with `-f` flag in console:
+
+```
+$ php bin/cam -f
+```
+
+
+### Full usage help
+```
+USAGE: cam (-l|--list)  ARCHIVE
+       cam (-t|--table) ARCHIVE
+       cam (-i|--info)  ARCHIVE
+       cam (-e|--extract) [--output=DIR] [--replace=(all|ask|none|time|size)] [--flat=(file|path)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
+       cam (-p|--print)   ARCHIVE FILES_IN_ARCHIVE...
+       cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
+       cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
+       cam (-a|--add)     ARCHIVE FILES_ON_DISK...
+       cam (-c|--create)  ARCHIVE FILES_ON_DISK...
+       cam (-f|--formats)
+
+ACTIONS:
+      -l(--list)    List files
+      -t(--table)   List files in table
+      -i(--info)    Summary about archive
+
+      -e(--extract) Extract from archive
+
+      -p(--print)   Print files' content
+      -d(--details) Details about files
+      -x(--delete)  Delete files
+
+      -a(--add)     Add to archive
+      -c(--create)  Create new archive
+
+```
+
 ## API
 Create object of class `\wapmorgan\UnifiedArchive\UnifiedArchive` implementing
 the `\wapmorgan\UnifiedArchive\AbstractArchive` interface which has the
@@ -269,7 +313,7 @@ public function getFileData($filename): stdClass
 
 Obtaining detailed information on the file in archive. The name of the file
 has to COINCIDE in ACCURACY with one stored in archive. It is restricted to
-change a symbol of division of catalogs. This method returns object of 
+change a symbol of division of catalogs. This method returns object of
 **stdClass** with following fields:
 * `string $filename` - file name in archive.
 * `integer $compressed_size` - the size of the PACKED contents of the file.
@@ -416,6 +460,22 @@ program. start them from a command line.
 * Transfer a catalog name in `cli.fs.php` to scan directory for all archives.
 * Transfer a path to archive in `cli.hierachy.php` for unpacking / listing.
 * Transfer a path to archive and list of files in `cli.pack.php` for archiving.
+
+## Progress of supporting various formats and operations
+
+- One-file archives:
+  - gzip - **creation** supported
+  - bzip2 - **creation** supported
+  - lzma2 - **creation** supported
+- Proprietary archive formats:
+  - rar - **only reading** from archive
+- Other restrictions:
+  - tar, tar.gz, tar.bz2, tar.xz, tar.Z - **creation and addition** supported, but not deletion (due to library restrictions).
+  - iso - **only reading** from archive
+  - cab - **only reading** from archive. **Extracting** supported only on speicific interpreter versions (>=7.0.22, >=7.1.8, >=7.2.0) due to bug in previous versions.
+- General archive formats:
+  - zip - **full support** (creation, addition, update)
+  - 7zip - **full support** (creation, addition, update)
 
 ## Changelog
 

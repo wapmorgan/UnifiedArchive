@@ -1,0 +1,107 @@
+#!/usr/bin/env php
+<?php
+use wapmorgan\UnifiedArchive\CamApplication;
+
+$paths = [
+	// as a root package or phar
+	__DIR__.'/../vendor/autoload.php',
+	// as a dependency from bin
+	__DIR__.'/../autoload.php',
+	// as a dependency from package folder
+	__DIR__.'/../../../autoload.php',
+	];
+function init_composer(array $paths) {
+	foreach ($paths as $path) {
+		if (file_exists($path)) {
+			require_once $path;
+			return true;
+		}
+	}
+	return false;
+}
+if (!init_composer($paths)) die('Run `composer install` firstly.'.PHP_EOL);
+
+$doc = <<<DOC
+Universal console archive manager for Windows/Linux (part of UnifiedArchive).
+
+USAGE: cam (-l|--list)  ARCHIVE
+       cam (-t|--table) ARCHIVE
+       cam (-i|--info)  ARCHIVE
+       cam (-e|--extract) [--output=DIR] [--replace=(all|ask|none|time|size)] [--flat=(file|path)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
+       cam (-p|--print)   ARCHIVE FILES_IN_ARCHIVE...
+       cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
+       cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
+       cam (-a|--add)     ARCHIVE FILES_ON_DISK...
+       cam (-c|--create)  ARCHIVE FILES_ON_DISK...
+       cam (-f|--formats)
+
+ACTIONS:
+      -l(--list)    List files
+      -t(--table)   List files in table
+      -i(--info)    Summary about archive
+
+      -e(--extract) Extract from archive
+
+      -p(--print)   Print files' content
+      -d(--details) Details about files
+      -x(--delete)  Delete files
+
+      -a(--add)     Add to archive
+      -c(--create)  Create new archive
+
+OPTIONS:
+  for --extract (-e):
+    --replace=all|ask|none|time|size
+      Set how should be resolved cases in that extracting files already exist.
+        all - replaces all files
+        ask - ask for manual resolution on every case
+        none - preserve all existing on disk files
+        time - selects file with later timestamp
+        size - selects file with bigger size
+
+    --flat=[file,path]
+       Removes all hierarchy and stores all files in one directory. With path option file name will be prepended with in-archive path (all "/" replaced by "-").
+
+    --exclude FILES... or
+    --exclude /PATTERN/
+       Excludes one or few files, directories by exact in-archive path or by regular expression pattern.
+
+    --output=DIRECTORY
+       Set output directory in that all files will be extracted.
+DOC;
+
+$args = Docopt::handle($doc);
+
+if ((isset($args['-f']) && $args['-f']) || (isset($args['--formats']) && $args['--formats'])) {
+  echo 'Your system can work with following archive types:
+ - rar: '.(extension_loaded('rar') ? '+ (ok)' : '- (no, extension "rar" is not installed)').'
+ - zip: '.(extension_loaded('zip') ? '+ (ok)' : '- (no, extension "zip" is not installed)').'
+ - gzip: '.(extension_loaded('zlib') ? '+ (ok)' : '- (no, extension "zlib" is not installed)').'
+ - bzip2: '.(extension_loaded('bz2') ? '+ (ok)' : '- (no, extension "bz2" is not installed)').'
+ - lzma2: '.(extension_loaded('xz') ? '+ (ok)' : '- (no, extension "xz" is not installed)').'
+
+ - 7zip: '.(class_exists('\Archive7z\Archive7z') ? '+ (ok)' : '- (no, package "gemorroj/archive7z" is not installed)').'
+ - tar: '.(class_exists('\Archive_Tar') ? '+ (ok)' : '- (no, package "pear/archive_tar" is not installed)').'
+ - iso: '.(class_exists('\CISOFile') ? '+ (ok)' : '- (no, package "phpclasses/php-iso-file" is not installed)'.PHP_EOL);
+ exit(0);
+}
+
+$actions = array(
+    'l:list' => 'listArray',
+    't:table' => 'table',
+    'i:info' => 'info',
+    'e:extract' => 'extract',
+    'p:print' => 'printFile',
+    'd:details' => 'details',
+    'x:delete' => 'delete',
+    'a:add' => 'add',
+    'c:create' => 'create',
+);
+
+foreach ($actions as $arg => $v) {
+  $arg = explode(':', $arg);
+    if ($args['-'.$arg[0]] === true || $args['--'.$arg[1]] === true) {
+        $application = new CamApplication();
+        call_user_func(array($application, $v), $args);
+    }
+}

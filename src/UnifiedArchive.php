@@ -69,7 +69,7 @@ class UnifiedArchive implements AbstractArchive
             return new self($filename, self::ISO);
         if ($ext == 'cab' && class_exists('\CabArchive'))
             return new self($filename, self::CAB);
-        if (true) return null;
+        return null;
     }
 
     /**
