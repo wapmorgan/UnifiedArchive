@@ -344,9 +344,9 @@ public function getArchiveSize(): integer
 Counts the archive size (the file size).
 
 ```php
-public function getArchiveType(): integer
+public function getArchiveType(): string
 ```
-Receives archive type.
+Receives archive type (like `rar` or `zip`).
 
 ```php
 public function countCompressedFilesSize(): integer
