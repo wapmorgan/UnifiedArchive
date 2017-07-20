@@ -31,11 +31,13 @@ dependency on format of the archive, you can use this library.
 Composer package: `wapmorgan/unified-archive`
 [[1](https://packagist.org/packages/wapmorgan/unified-archive)]
 
-	{
-		"require": {
-				"wapmorgan/unified-archive": "dev-master"
-		}
+```json
+{
+	"require": {
+			"wapmorgan/unified-archive": "0.0.8"
 	}
+}
+```
 
 ## Process of archive reading
 1. Import a class
@@ -46,8 +48,8 @@ Composer package: `wapmorgan/unified-archive`
 	```
 
 2. At the beginning, try to open the file with automatic detection of a format
-by name. In case of successful recognition the object of UnifiedArchive will be
-returned. in case of failure - null
+by name. In case of successful recognition a `UnifiedArchive` object will be
+returned. In case of failure - **null**
 
 	```php
 	$archive = UnifiedArchive::open('filename.rar');
@@ -84,25 +86,24 @@ only names of files)
 	var_dump($archive->getFileNames());
 	```
 
-4. Further, you can receive additional information on the concrete file by means
-of the getFileData function
+4. Further, you can get additional information about concrete files by  
+`getFileData()` method
 
 	```php
 	var_dump($archive->getFileData('README.md'));
 	```
 
-5. Further, you can receive file contents by means of the getFileContent
-function
+5. Further, you can get raw file contents by `getFileContent()`
+method
 
 	```php
 	var_dump($archive->getFileContent('README.md'));
 	```
 
-6. Further you can unpack any internal catalog with files on a disk. Including
-all archive (the root catalog of archive). The extractNode method is engaged in
-it. In case of success, it returns number of the mentioned files, in case of
-failure - false. Initial and final symbol of division of catalogs are very
-important! Don't forget them.
+6. Further, you can unpack any internal catalog or the whole archive with files 
+on a disk. The `extractNode()` method is engaged in it. In case of success, it 
+returns number of the extracted files, in case of failure - **false**. Initial 
+and final symbol of division of catalogs are very important! Don't forget them.
 
 	```php
 	$archive->extractNode(outputFolder, archiveFolder = '/');
@@ -149,11 +150,12 @@ To add some files or catalogs:
 $archive->addFiles(array(directory, file, file2, ...));
 ```
 
-Full syntax of multiple files addition is described in next section **Process
-of archive creation**.
+Full syntax of multiple files addition is described in 
+[another document](extendedSyntax.md).
 
-## Process of archive creation
-To pack completely the catalog with all attached files and subdirectories:
+## Process of archive creation & modification
+To pack completely the catalog with all attached files and subdirectories
+in new archive:
 
 ```php
 UnifiedArchive::archiveNodes('/var/log', 'Archive.zip');
@@ -191,16 +193,14 @@ UnifiedArchive::archiveNodes($nodes, 'Archive.zip');
 ```
 
 
-[**Complete description of expanded syntax with examples and explanations: Full
-`archiveNodes` and `addFiles` documentation**](doc.archiveNodes.md).
+[**Complete description of extended syntax with examples and explanations](extendedSyntax.md).
 
 ### Restrictions
 It is impossible to create the ideal archiver, here therefore some restrictions
 and technical features are listed further:
 
-1. Creation of _rar_, _iso_ archives is impossible.
-2. If the `source` doesn't end with `/` or `*`, it means there has to
-be a file.
+1. Creation of _rar_, _iso_ archives is impossible due to format limits.
+2. If the `source` doesn't end with `/` or `*`, it means to be a file.
 3. If the `source` is a directory, destination too means has to be a directory
 (to terminate on "/").
 
@@ -254,79 +254,79 @@ following methods:
 ### Object methods
 
 ```php
-public function __construct($filename, $type);
+public function __construct($filename, $type)
 ```
 Creation of object of a class.
 
 ```php
-public function getFileNames();
+public function getFileNames(): array
 ```
 Obtaining the list of files in archive. The symbol of division of catalogs can be both a slash, and a backslash (depends on format).
 
 ```php
-public function getFileData($filename);
+public function getFileData($filename): stdClass
 ```
 
 Obtaining detailed information on the file in archive. The name of the file
-has to COINCIDE in ACCURACY with what is registered in archive. It is restricted
-to add gaps or other symbols, to change a symbol of division of catalogs. This
-method returns object of **stdClass** which has following fields:
-* `filename` - file name in archive.
-* `compressed_size` - the size of the PACKED contents of the file.
-* `uncompressed_size` - the size of the UNPACKED contents of the file.
-* `mtime` - time of change of the file (the integer value containing number
-of seconds, passed since the beginning of an era of Unix).
-* `is_compressed` - the Boolean value, containing "truth" if the file was
+has to COINCIDE in ACCURACY with one stored in archive. It is restricted to
+change a symbol of division of catalogs. This method returns object of 
+**stdClass** with following fields:
+* `string $filename` - file name in archive.
+* `integer $compressed_size` - the size of the PACKED contents of the file.
+* `integer $uncompressed_size` - the size of the UNPACKED contents of the file.
+* `integer $mtime` - time of change of the file (the integer value containing number
+of seconds passed since the beginning of an era of Unix).
+* `boolean $is_compressed` - the boolean value, containing **true** if the file was
 packed with compression.
 
 ```php
-public function getFileContent($filename);
+public function getFileContent($filename): string
 ```
-Receiving "crude" contents of the file. For text files it also is the text,
+Receiving "crude" contents of the file. For text files it is the text,
 for images/video/music are crude binary data. The file name besides has to be in
 accuracy as in archive.
 
 ```php
-public function countFiles();
+public function countFiles(): integer
 ```
 Counts total of all files in archive.
 
 ```php
-public function getArchiveSize();
+public function getArchiveSize(): integer
 ```
 Counts the archive size (the file size).
 
 ```php
-public function getArchiveType();
+public function getArchiveType(): integer
 ```
 Receives archive type.
 
 ```php
-public function countCompressedFilesSize();
+public function countCompressedFilesSize(): integer
 ```
 Counts the size of all PACKED useful data (that is contents of all files
 listed in archive).
 
 ```php
-public function countUncompressedFilesSize();
+public function countUncompressedFilesSize(): integer
 ```
 Counts the size of all UNPACKED useful data (that is contents of all files
 listed in archive).
 
 ```php
-public function extractNode($outputFolder, $node = '/');
+public function extractNode($outputFolder, $node = '/')
 ```
 Unpacks any of internal catalogs archive with full preservation of structure
 of catalogs in the catalog on a hard disk.
 
 ```php
-public function deleteFiles($fileOrFiles);
+public function deleteFiles($fileOrFiles): integer
 ```
 Updates existing archive by removing files from it. Returns number of deleted
 files.
 
 ```php
-public function addFiles($nodes);
+public function addFiles($nodes): integer
 ```
 Updates existing archive by adding new files. Returns total number of files
 after addition.
@@ -334,20 +334,18 @@ after addition.
 ### Static methods
 
 ```php
-static public function open($filename);
+static public function open($filename): UnifiedArchive | null
 ```
-Tries to distinguish type of archive and creates an instance UnifiedArchive in
-case of success, returns null in case of failure.
+Tries to distinguish type of archive and returns a `UnifiedArchive` instance in
+case of success, **null** in case of failure.
 
 ```php
-static public function archiveNodes($nodes, $aname);
+static public function archiveNodes($nodes, $aname, $simulation = false): integer | boolean | array
 ```
 Archives nodes transferred in the first argument. Returns number of the
-archived files in case of success, in case of failure - false.
-If as the third argument (yes, real signature is `static public function
-archiveNodes(array $nodes, $aname, $fake = false)`) **true** is transferred, then
-the real archiving doesn't occur, and the result contains the list of the files
-chosen for an archiving, their number and total size.
+archived files in case of success, in case of failure - **false**.
+If as the third argument is **true**, then the real archiving doesn't happen,
+and the result contains the list of the files chosen for an archiving, their number and total size.
 
 ## PclZip-like interface
 UnifedArchive provides full realization of the interface known on archiving popular
