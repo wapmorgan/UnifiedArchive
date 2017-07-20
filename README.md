@@ -1,10 +1,13 @@
-UnifiedArchive - unified interface to archive (zip # 7z # rar # gz # bz2 # xz #
-cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing, reading,
-extracting and creation + built-in console archive manager + fully
+UnifiedArchive - unified interface to any archive (zip # 7z # rar # gz # bz2
+# xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing,
+reading, extracting and creation + built-in console archive manager + fully
 implemented PclZip-like interface (create, listContent, extract, properties,
 add, delete, merge, duplicate).
 
-[![Composer package](http://xn--e1adiijbgl.xn--p1acf/badge/wapmorgan/unified-archive)](https://packagist.org/packages/wapmorgan/unified-archive) [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive) [![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive) [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
+[![Composer package](http://xn--e1adiijbgl.xn--p1acf/badge/wapmorgan/unified-archive)](https://packagist.org/packages/wapmorgan/unified-archive)
+[![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive)
+[![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive)
+[![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
 
 **Contents**:
 ---
