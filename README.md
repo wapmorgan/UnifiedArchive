@@ -8,21 +8,21 @@ add, delete, merge, duplicate).
 
 **Contents**:
 ---
-1. **Preamble**
-2. **Installation**
-3. **Process of archive reading**
-	1. **Process of archive modification**
-	2. **Process of archive creation**
-		1. Restrictions
-4. **Built-in archiver**
-5. **Built-in console archive manager**
-6. **API**
-	1. **Object methods**
-	2. **Static methods**
-7. **PclZip-like interface**
-8. **Examples**
-9. **Progress of supporting various formats and operations**
-10. **Changelog**
+1. [**Preamble**](#preamble)
+2. [**Installation**](#installation)
+3. [**Process of archive reading**](#process-of-archive-reading)
+    1. **Process of archive modification**
+    2. **Process of archive creation**
+        1. Restrictions
+4. [**Built-in archiver**](#built-in-archiver)
+5. [**Built-in console archive manager**](#built-in-console-archive-manager)
+6. [**API**](#api)
+    1. **Object methods**
+    2. **Static methods**
+7. [**PclZip-like interface**](#pclzip-like-interface)
+8. [**Examples**](#examples)
+9. [**Progress of supporting various formats and operations**](#progress-of-supporting-various-formats-and-operations)
+10. [**Changelog**](#changelog)
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
@@ -35,88 +35,88 @@ Composer package: `wapmorgan/unified-archive`
 
 ```json
 {
-	"require": {
-			"wapmorgan/unified-archive": "0.0.8"
-	}
+    "require": {
+        "wapmorgan/unified-archive": "0.0.8"
+    }
 }
 ```
 
 ## Process of archive reading
 1. Import a class
 
-	```php
-	require 'vendor/autoload.php';
-	use \wapmorgan\UnifiedArchive\UnifiedArchive;
-	```
+    ```php
+    require 'vendor/autoload.php';
+    use \wapmorgan\UnifiedArchive\UnifiedArchive;
+    ```
 
 2. At the beginning, try to open the file with automatic detection of a format
 by name. In case of successful recognition a `UnifiedArchive` object will be
 returned. In case of failure - **null**
 
-	```php
-	$archive = UnifiedArchive::open('filename.rar');
-	// or
-	$archive = UnifiedArchive::open('filename.zip');
-	// or
-	$archive = UnifiedArchive::open('filename.7z');
-	// or
-	$archive = UnifiedArchive::open('filename.gz');
-	// or
-	$archive = UnifiedArchive::open('filename.bz2');
-	// or
-	$archive = UnifiedArchive::open('filename.xz');
-	// or
-	$archive = UnifiedArchive::open('filename.cab');
-	// or
-	$archive = UnifiedArchive::open('filename.tar');
-	// or
-	$archive = UnifiedArchive::open('filename.tar.gz');
-	// or
-	$archive = UnifiedArchive::open('filename.tar.bz2');
-	// or
-	$archive = UnifiedArchive::open('filename.tar.xz');
-	// or
-	$archive = UnifiedArchive::open('filename.tar.Z');
-	// or
-	$archive = UnifiedArchive::open('filename.iso');
-	```
+    ```php
+    $archive = UnifiedArchive::open('filename.rar');
+    // or
+    $archive = UnifiedArchive::open('filename.zip');
+    // or
+    $archive = UnifiedArchive::open('filename.7z');
+    // or
+    $archive = UnifiedArchive::open('filename.gz');
+    // or
+    $archive = UnifiedArchive::open('filename.bz2');
+    // or
+    $archive = UnifiedArchive::open('filename.xz');
+    // or
+    $archive = UnifiedArchive::open('filename.cab');
+    // or
+    $archive = UnifiedArchive::open('filename.tar');
+    // or
+    $archive = UnifiedArchive::open('filename.tar.gz');
+    // or
+    $archive = UnifiedArchive::open('filename.tar.bz2');
+    // or
+    $archive = UnifiedArchive::open('filename.tar.xz');
+    // or
+    $archive = UnifiedArchive::open('filename.tar.Z');
+    // or
+    $archive = UnifiedArchive::open('filename.iso');
+    ```
 
 3. Further, read the list of files of archive (notice, this function returns
 only names of files)
 
-	```php
-	var_dump($archive->getFileNames());
-	```
+    ```php
+    var_dump($archive->getFileNames());
+    ```
 
 4. Further, you can get additional information about concrete files by
 `getFileData()` method
 
-	```php
-	var_dump($archive->getFileData('README.md'));
-	```
+    ```php
+    var_dump($archive->getFileData('README.md'));
+    ```
 
 5. Further, you can get raw file contents by `getFileContent()`
 method
 
-	```php
-	var_dump($archive->getFileContent('README.md'));
-	```
+    ```php
+    var_dump($archive->getFileContent('README.md'));
+    ```
 
 6. Further, you can unpack any internal catalog or the whole archive with files
 on a disk. The `extractNode()` method is engaged in it. In case of success, it
 returns number of the extracted files, in case of failure - **false**. Initial
 and final symbol of division of catalogs are very important! Don't forget them.
 
-	```php
-	$archive->extractNode(outputFolder, archiveFolder = '/');
-	// to unpack all contents of archive
-	$archive->extractNode(tmpnam('/tmp', 'arc'));
-	// to unpack the src catalog in archive in the sources catalog on a disk
-	$archive->extractNode(tmpnam('/tmp', 'sources'), '/src/');
-	// to unpack the bookmarks catalog in archive in the sources catalog on a
-	// disk
-	$archive->extractNode(tmpnam('/tmp', 'sources'), '/bookmarks/');
-	```
+    ```php
+    $archive->extractNode(outputFolder, archiveFolder = '/');
+    // to unpack all contents of archive
+    $archive->extractNode(tmpnam('/tmp', 'arc'));
+    // to unpack the src catalog in archive in the sources catalog on a disk
+    $archive->extractNode(tmpnam('/tmp', 'sources'), '/src/');
+    // to unpack the bookmarks catalog in archive in the sources catalog on a
+    // disk
+    $archive->extractNode(tmpnam('/tmp', 'sources'), '/bookmarks/');
+    ```
 
 ## Process of archive modification
 To delete a single file from an archive:
@@ -181,15 +181,15 @@ opportunities:
 
 ```php
 $nodes = array(
-	array('source' => '/etc/php5/fpm/php.ini', 'destination' => 'php.ini'),
-	array('source' => '/home/.../Dropbox/software/1/',
-		'destination' => 'SoftwareVersions/', 'recursive' => true),
-	array('source' => '/home/.../Dropbox/software/2/',
-		'destination' => 'SoftwareVersions/', 'recursive' => true),
-	array('source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'),
-	array('source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'),
-	array('source' => '/media/wapmorgan/.../Cats/*',
-		'destination' => 'Pictures/'),
+    array('source' => '/etc/php5/fpm/php.ini', 'destination' => 'php.ini'),
+    array('source' => '/home/.../Dropbox/software/1/',
+        'destination' => 'SoftwareVersions/', 'recursive' => true),
+    array('source' => '/home/.../Dropbox/software/2/',
+        'destination' => 'SoftwareVersions/', 'recursive' => true),
+    array('source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'),
+    array('source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'),
+    array('source' => '/media/wapmorgan/.../Cats/*',
+        'destination' => 'Pictures/'),
 );
 UnifiedArchive::archiveNodes($nodes, 'Archive.zip');
 ```
@@ -358,10 +358,10 @@ Counts the size of all UNPACKED useful data (that is contents of all files
 listed in archive).
 
 ```php
-public function extractNode($outputFolder, $node = '/')
+public function extractNode($outputFolder, $node = '/'): integer
 ```
 Unpacks any of internal catalogs archive with full preservation of structure
-of catalogs in the catalog on a hard disk.
+of catalogs in the catalog on a hard disk. Returns number of extracted files.
 
 ```php
 public function deleteFiles($fileOrFiles): integer
@@ -481,11 +481,12 @@ program. start them from a command line.
 
 | Version | Date         | Changelog                                                                                                                                                                               |
 |---------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0.0.9   | Jul 20, 2017 | * Added cam script                                                                                                                                                                      |
 | 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration.* Removed die() in source code. |
 | 0.0.7   | Jan 14, 2017 | * Fixed using ereg function on PHP >7.                                                                                                                                                  |
 | 0.0.6   | Jan 9, 2017  | * Added functionality for adding files in archive.* Added functionality for deleting files from archive. * Fixed discovering 7z archive number of files and creating new archive.       |
-| 0.0.5   | Jan 8, 2017  | * Added support for 7z (7zip) archives.                                                                                                                                                 |
-| 0.0.4   | Jan 7, 2017  | * Added support for single-file bz2 (bzip2) and xz (lzma2) archives.                                                                                                                    |
+| 0.0.5   | Jan 8, 2017  | * Added support for `7z` (7zip) archives.                                                                                                                                               |
+| 0.0.4   | Jan 7, 2017  | * Added support for single-file `bz2` (bzip2) and `xz` (lzma2) archives.                                                                                                                |
 | 0.0.3   | Aug 18, 2015 | * Removed archive_tar from required packages.                                                                                                                                           |
 | 0.0.2   | May 27, 2014 | * Released under the MIT license                                                                                                                                                        |
 | 0.0.1   | May 26, 2014 | ---                                                                                                                                                                                     |
