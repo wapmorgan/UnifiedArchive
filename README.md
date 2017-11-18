@@ -39,7 +39,7 @@ Composer package: `wapmorgan/unified-archive`
 ```json
 {
     "require": {
-        "wapmorgan/unified-archive": "~0.0.9"
+        "wapmorgan/unified-archive": "~0.0.10"
     }
 }
 ```
@@ -84,14 +84,14 @@ returned. In case of failure - **null**
     $archive = UnifiedArchive::open('filename.iso');
     ```
 
-3. Further, read the list of files of archive (notice, this function returns
+3. Further, read the list of files of archive (note: this function returns
 only names of files)
 
     ```php
     var_dump($archive->getFileNames());
     ```
 
-4. Further, you can get additional information about concrete files by
+4. Further, you can get additional information about concrete file by
 `getFileData()` method
 
     ```php
@@ -178,7 +178,6 @@ To pack some files or catalogs:
 UnifiedArchive::archiveNodes(array(directory, file, file2, ...), 'Archive.zip');
 ```
 
-
 Extended syntax with possibility of rewriting of paths and additional
 opportunities:
 
@@ -261,7 +260,6 @@ support launch it with `-f` flag in console:
 ```
 $ php bin/cam -f
 ```
-
 
 ### Full usage help
 ```
@@ -394,8 +392,8 @@ If as the third argument is **true**, then the real archiving doesn't happen,
 and the result contains the list of the files chosen for an archiving, their number and total size.
 
 ## PclZip-like interface
-UnifedArchive provides full realization of the interface known on archiving popular
-library of PclZip (only for **zip** format, the last version 2.8.2).
+UnifedArchive provides full realization of the interface known by popular archiving
+library "PclZip" (only for **zip** format, the last version 2.8.2).
 
 Let's look at it:
 
@@ -438,7 +436,7 @@ added files. At present the native library for work *doesn't allow* to change
 compression parameters from zip-archive - all added the file forcibly contract.
 I tried to find a roundabout way, but at present to make it it didn't turn out.
 
-### Performance comparation
+**Performance comparation**
 
 To confirm my words about boost that UnifiedArchive can make in your project,
 here's comparation table of UnifiedArchive and PclZip extracting the same
@@ -459,9 +457,9 @@ archives.
 In the **examples** catalog there are some files for check of operability of the
 program. start them from a command line.
 
-* Transfer a catalog name in `cli.fs.php` to scan directory for all archives.
-* Transfer a path to archive in `cli.hierachy.php` for unpacking / listing.
-* Transfer a path to archive and list of files in `cli.pack.php` for archiving.
+* Pass a catalog name to `cli.fs.php` script to scan directory for all archives.
+* Pass a path to archive to `cli.hierachy.php` script for unpacking / listing.
+* Pass a path to archive and file names to `cli.pack.php` script for archiving.
 
 ## Progress of supporting various formats and operations
 
@@ -483,10 +481,11 @@ program. start them from a command line.
 
 | Version | Date         | Changelog                                                                                                                                                                               |
 |---------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 0.0.9   | Jul 20, 2017 | * Added cam script                                                                                                                                                                      |
-| 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration.* Removed die() in source code. |
+| 0.0.10  | Nov 18, 2017 | * Remove `docopt` from requirements.                                                                                                                                                    |
+| 0.0.9   | Jul 20, 2017 | * Added cam script.                                                                                                                                                                     |
+| 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration. * Removed die() in source code.|
 | 0.0.7   | Jan 14, 2017 | * Fixed using ereg function on PHP >7.                                                                                                                                                  |
-| 0.0.6   | Jan 9, 2017  | * Added functionality for adding files in archive.* Added functionality for deleting files from archive. * Fixed discovering 7z archive number of files and creating new archive.       |
+| 0.0.6   | Jan 9, 2017  | * Added functionality for adding files in archive. * Added functionality for deleting files from archive. * Fixed discovering 7z archive number of files and creating new archive.       |
 | 0.0.5   | Jan 8, 2017  | * Added support for `7z` (7zip) archives.                                                                                                                                               |
 | 0.0.4   | Jan 7, 2017  | * Added support for single-file `bz2` (bzip2) and `xz` (lzma2) archives.                                                                                                                |
 | 0.0.3   | Aug 18, 2015 | * Removed archive_tar from required packages.                                                                                                                                           |
