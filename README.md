@@ -481,7 +481,7 @@ program. start them from a command line.
 
 | Version | Date         | Changelog                                                                                                                                                                               |
 |---------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 0.0.10  | Nov 18, 2017 | * Remove `docopt` from requirements.                                                                                                                                                    |
+| 0.0.10  | Aug 7, 2017  | * Remove `docopt` from requirements.                                                                                                                                                    |
 | 0.0.9   | Jul 20, 2017 | * Added cam script.                                                                                                                                                                     |
 | 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration. * Removed die() in source code.|
 | 0.0.7   | Jan 14, 2017 | * Fixed using ereg function on PHP >7.                                                                                                                                                  |
