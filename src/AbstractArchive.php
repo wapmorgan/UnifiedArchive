@@ -91,13 +91,12 @@ abstract class AbstractArchive
 	}
 
 	/**
-	 * @param $source
-	 * @param $destination
-	 * @param $recursive
-	 * @param $map
+	 * @param string $source
+	 * @param string $destination
+	 * @param bool $recursive
+	 * @param array $map
 	 */
-	protected static function importFilesFromDir($source, $destination,
-												 $recursive, &$map)
+	protected static function importFilesFromDir($source, $destination, $recursive, &$map)
 	{
 		// $map[$destination] = rtrim($source, '/*');
 		// do not map root archive folder
