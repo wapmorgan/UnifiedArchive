@@ -14,18 +14,16 @@ add, delete, merge, duplicate).
 1. [**Preamble**](#preamble)
 2. [**Installation**](#installation)
 3. [**Process of archive reading**](#process-of-archive-reading)
-    1. **Process of archive modification**
-    2. **Process of archive creation**
-        1. Restrictions
+    1. **Archive modification**
+    2. **Archive creation**
 4. [**Built-in archiver**](#built-in-archiver)
 5. [**Built-in console archive manager**](#built-in-console-archive-manager)
 6. [**API**](#api)
     1. **Object methods**
     2. **Static methods**
 7. [**PclZip-like interface**](#pclzip-like-interface)
-8. [**Examples**](#examples)
-9. [**Progress of supporting various formats and operations**](#progress-of-supporting-various-formats-and-operations)
-10. [**Changelog**](#changelog)
+8. [**Formats support**](#formats-support)
+9. [**Changelog**](#changelog)
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
@@ -121,7 +119,7 @@ and final symbol of division of catalogs are very important! Don't forget them.
     $archive->extractNode(tmpnam('/tmp', 'sources'), '/bookmarks/');
     ```
 
-## Process of archive modification
+### Archive modification
 To delete a single file from an archive:
 
 ```php
@@ -136,7 +134,6 @@ $archive->deleteFiles(array('README.md', 'MANIFEST.MF'));
 
 In case of success the number of successfully deleted files will be returned.
 
-## Process of archive addition
 To add completely the catalog with all attached files and subdirectories:
 
 ```php
@@ -158,7 +155,7 @@ $archive->addFiles(array(directory, file, file2, ...));
 Full syntax of multiple files addition is described in
 [another document](extendedSyntax.md).
 
-## Process of archive creation & modification
+### Archive creation
 To pack completely the catalog with all attached files and subdirectories
 in new archive:
 
@@ -199,13 +196,10 @@ UnifiedArchive::archiveNodes($nodes, 'Archive.zip');
 [**Complete description of extended syntax with examples and explanations**.](extendedSyntax.md).
 
 ### Restrictions
-It is impossible to create the ideal archiver, here therefore some restrictions
-and technical features are listed further:
+There are some restrictions:
 
-1. Creation of _rar_, _iso_ archives is impossible due to format limits.
-2. If the `source` doesn't end with `/` or `*`, it means to be a file.
-3. If the `source` is a directory, destination too means has to be a directory
-(to terminate on "/").
+1. If the `source` doesn't end with `/` or `*`, it means to be a file.
+2. If the `source` is a directory, destination should be a directory (to end with "/").
 
 ## Built-in archiver
 To see all opportunities of this remarkable UnifiedArchive, together with source
@@ -219,7 +213,7 @@ To see all opportunities of this remarkable UnifiedArchive, together with source
 | rar     | `unrar x archive.rar $DIRECTORY`                    | `./cli.hierarchy.php -e -n / -a archive.rar -o $DIRECTORY`     |
 | gzip    | `gzip -d -k archive.gz && mv archive $DIRECTORY`    | `./cli.hierarchy.php -e -n / -a archive.gz -o $DIRECTORY`      |
 
-You noticed? The universal extractor itself defines type of archive and there is
+You see? The universal extractor itself defines type of archive and there is
 no need manually to choose type.
 
 We will continue and look at examples of replacement of the unbridled number of
@@ -453,29 +447,20 @@ archives.
 
 **Average growth is 27%!**
 
-## Examples
-In the **examples** catalog there are some files for check of operability of the
-program. start them from a command line.
+## Formats support
 
-* Pass a catalog name to `cli.fs.php` script to scan directory for all archives.
-* Pass a path to archive to `cli.hierachy.php` script for unpacking / listing.
-* Pass a path to archive and file names to `cli.pack.php` script for archiving.
-
-## Progress of supporting various formats and operations
-
-- One-file archives:
-  - gzip - **creation** supported
-  - bzip2 - **creation** supported
-  - lzma2 - **creation** supported
-- Proprietary archive formats:
-  - rar - **only reading** from archive
-- Other restrictions:
-  - tar, tar.gz, tar.bz2, tar.xz, tar.Z - **creation and addition** supported, but not deletion (due to library restrictions).
-  - iso - **only reading** from archive
-  - cab - **only reading** from archive. **Extracting** supported only on speicific interpreter versions (>=7.0.22, >=7.1.8, >=7.2.0) due to bug in previous versions.
-- General archive formats:
-  - zip - **full support** (creation, addition, update)
-  - 7zip - **full support** (creation, addition, update)
+| Formats                                                     | Requirement                                                                                | Reading | Modification | Creation                             | Notes                                                                                                                              |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------|---------|--------------|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| .zip                                                        | ext-zip                                                                                    | ✔       | ✔            | ✔                                    |                                                                                                                                    |
+| .7zip, .7z                                                  | package [gemorroj/archive7z](packagist.org/packages/gemorroj/archive7z) and installed 7zip | ✔       | ✔            | ✔                                    |                                                                                                                                    |
+| .tar, .tar.gz, .tar.bz2, .tar.xz, .tar.Z, .tgz, .tbz2, .txz | package [pear/archive_tar](https://packagist.org/packages/pear/archive_tar)                | ✔       | ✔            | ❌                                    | Compressed versions of tar are supported by appropriate libraries or extenions (zlib, bzip2, xz) or installed software (ncompress) |
+| .tar, .tar.gz, .tar.bz2, .tgz, .tbz2                        | ext-phar                                                                                   | ✔       | ✔            | ✔                                    | Compressed versions of tar are supported by appropriate libraries or extenions (zlib, bzip2)                                       |
+| .rar                                                        | ext-rar                                                                                    | ✔       | ❌            | ❌                                    |                                                                                                                                    |
+| .iso                                                        | package [phpclasses/php-iso-file](https://packagist.org/packages/phpclasses/php-iso-file)  | ✔       | ❌            | ❌                                    |                                                                                                                                    |
+| .cab                                                        | package [wapmorgan/cab-archive](https://packagist.org/packages/wapmorgan/cab-archive)      | ✔       | ❌            | ❌/ ✔ (on PHP 7.0.22+, 7.1.8+, 7.2.0) |                                                                                                                                    |
+| .gz                                                         | ext-zlib                                                                                   | ✔       |              |                                      |                                                                                                                                    |
+| .bz2                                                        | ext-bzip2                                                                                  | ✔       |              |                                      |                                                                                                                                    |
+| .xz                                                         | ext-lzma2                                                                                  | ✔       |              |                                      |                                                                                                                                    |
 
 ## Changelog
 
