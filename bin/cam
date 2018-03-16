@@ -82,7 +82,7 @@ if ((isset($args['-f']) && $args['-f']) || (isset($args['--formats']) && $args['
  - lzma2: '.(extension_loaded('xz') ? '+ (ok)' : '- (no, extension "xz" is not installed)').'
 
  - 7zip: '.(class_exists('\Archive7z\Archive7z') ? '+ (ok)' : '- (no, package "gemorroj/archive7z" is not installed)').'
- - tar: '.(class_exists('\Archive_Tar') ? '+ (ok)' : '- (no, package "pear/archive_tar" is not installed)').'
+ - tar: '.(class_exists('\Archive_Tar') || class_exists('\PharData') ? '+ (ok)' : '- (no, extension "phar" nor package "pear/archive_tar" are not installed)').'
  - iso: '.(class_exists('\CISOFile') ? '+ (ok)' : '- (no, package "phpclasses/php-iso-file" is not installed)'.PHP_EOL);
  exit(0);
 }

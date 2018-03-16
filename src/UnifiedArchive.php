@@ -1,42 +1,71 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
+use Archive7z\Archive7z;
+use ZipArchive;
 
 /**
  * Class which represents archive in one of supported formats.
  */
-class UnifiedArchive implements AbstractArchive
+class UnifiedArchive extends AbstractArchive
 {
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
     const RAR = 'rar';
-    const TAR = 'tar';
     const GZIP = 'gzip';
     const BZIP = 'bzip2';
     const LZMA = 'lzma2';
     const ISO = 'iso';
     const CAB = 'cab';
 
+    /** @var string */
     protected $type;
 
+    /** @var array */
     protected $files;
+
+	/** @var int */
     protected $uncompressedFilesSize;
+
+	/** @var int */
     protected $compressedFilesSize;
+
+	/** @var int */
     protected $archiveSize;
 
+    /** @var ZipArchive */
     protected $zip;
+
+    /** @var Archive7z */
     protected $seven_zip;
+
+    /** @var \RarArchive */
     protected $rar;
-    protected $tar;
-    protected $tarCompressionRatio;
+
+    /** @var array|null */
     protected $gzipStat;
+
+    /** @var string */
     protected $gzipFilename;
+
+    /** @var array */
     protected $bzipStat;
+
+    /** @var string */
     protected $bzipFilename;
-    protected $lzmaStat;
+
+    /** @var string */
     protected $lzmaFilename;
+
+    /** @var \CISOFile */
     protected $iso;
+
+    /** @var int */
     protected $isoBlockSize;
+
+    /** @var mixed */
     protected $isoFilesData;
+
+    /** @var \CabArchive */
     protected $cab;
 
     /**
@@ -44,7 +73,7 @@ class UnifiedArchive implements AbstractArchive
      *
      * @param  string $filename Filename
      *
-     * @return UnifiedArchive|null Returns UnifiedArchive in case of successful
+     * @return AbstractArchive|null Returns AbstractArchive in case of successful
      * parsing of the file
      */
     public static function open($filename)
@@ -57,8 +86,9 @@ class UnifiedArchive implements AbstractArchive
             return new self($filename, self::SEVEN_ZIP);
         if ($ext == 'rar' && extension_loaded('rar'))
             return new self($filename, self::RAR);
-        if ((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $filename)) && class_exists('\Archive_Tar'))
-            return new self($filename, self::TAR);
+        if ((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $filename))
+			&& ($archive = TarArchive::open($filename)) !== null)
+			return $archive;
         if ($ext == 'gz' && extension_loaded('zlib'))
             return new self($filename, self::GZIP);
         if ($ext == 'bz2' && extension_loaded('bz2'))
@@ -85,7 +115,7 @@ class UnifiedArchive implements AbstractArchive
 
         switch ($type) {
             case self::ZIP:
-                $this->zip = new \ZipArchive;
+                $this->zip = new ZipArchive;
                 if ($this->zip->open($filename) === true) {
                     for ($i = 0; $i < $this->zip->numFiles; $i++) {
                         $file = $this->zip->statIndex($i);
@@ -100,7 +130,7 @@ class UnifiedArchive implements AbstractArchive
                 }
             break;
             case self::SEVEN_ZIP:
-                $this->seven_zip = new \Archive7z\Archive7z($filename);
+                $this->seven_zip = new Archive7z($filename);
                 foreach ($this->seven_zip->getEntries() as $entry) {
                     $this->files[] = $entry->getPath();
                     $this->compressedFilesSize += (int)$entry->getPackedSize();
@@ -124,47 +154,6 @@ class UnifiedArchive implements AbstractArchive
                             $entry->getUnpackedSize();
                     }
                 }
-            break;
-            case self::TAR:
-                $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-                switch ($ext) {
-                    case 'gz':
-                    $this->tar = new \Archive_Tar($filename, 'gz');
-                    break;
-                    case 'bz2':
-                    $this->tar = new \Archive_Tar($filename, 'bz2');
-                    break;
-                    case 'xz':
-                    $this->tar = new \Archive_Tar($filename, 'lzma2');
-                    break;
-                    case 'z':
-                    $this->tar = new \Archive_Tar('compress.lzw://'.$filename);
-                    break;
-                    default:
-                    $this->tar = new \Archive_Tar($filename);
-                    break;
-                }
-                $this->tar->path = $filename;
-
-                $Content = $this->tar->listContent();
-                $this->tar->numberOfFiles = count($Content);
-                foreach ($Content as $i => $file) {
-                    // BUG workaround: http://pear.php.net/bugs/bug.php?id=20275
-                    if ($file['filename'] == 'pax_global_header') {
-                        $this->tar->numberOfFiles--;
-                        continue;
-                    }
-                    $this->files[$i] = $file['filename'];
-                    $this->uncompressedFilesSize += $file['size'];
-                }
-
-                $this->compressedFilesSize = $this->archiveSize;
-                if ($this->uncompressedFilesSize != 0)
-                    $this->tarCompressionRatio = ceil($this->archiveSize
-                        / $this->uncompressedFilesSize);
-                else
-                    $this->tarCompressionRatio = 1;
-
             break;
             case self::GZIP:
                 $this->files = array(basename($filename, '.gz'));
@@ -247,7 +236,7 @@ class UnifiedArchive implements AbstractArchive
         }
     }
 
-    /**
+	/**
      * Returns an instance of class implementing PclZipOriginalInterface
      * interface.
      *
@@ -282,9 +271,6 @@ class UnifiedArchive implements AbstractArchive
             case 'rar':
                 $this->rar->close();
             break;
-            case 'tar':
-                $this->tar = null;
-            break;
             case 'iso':
                 $this->iso->close();
             break;
@@ -308,9 +294,6 @@ class UnifiedArchive implements AbstractArchive
 
             case 'rar':
                 return $this->rar->numberOfFiles;
-
-            case 'tar':
-                return $this->tar->numberOfFiles;
 
             case 'gzip':
                 return 1;
@@ -359,9 +342,6 @@ class UnifiedArchive implements AbstractArchive
 
             case 'rar':
                 return self::RAR;
-
-            case 'tar':
-                return self::TAR;
 
             case 'gzip':
                 return self::GZIP;
@@ -442,25 +422,6 @@ class UnifiedArchive implements AbstractArchive
                 $file->is_compressed = !($entry->getMethod() == 48);
 
                 return $file;
-            case 'tar':
-                if (!in_array($filename, $this->files)) return false;
-                $index = array_search($filename, $this->files);
-                $Content = $this->tar->listContent();
-                $data = $Content[$index];
-                unset($Content);
-
-                $file = new \stdClass;
-                $file->filename = $filename;
-                $file->compressed_size = $data['size']
-                 / $this->tarCompressionRatio;
-                $file->uncompressed_size = $data['size'];
-                $file->mtime = $data['mtime'];
-
-                $ext = strtolower(pathinfo($this->tar->path,
-                    PATHINFO_EXTENSION));
-                $file->is_compressed = in_array($ext, array('gz', 'bz2', 'xz', 'Z'));
-
-                return $file;
             case 'gzip':
                 if (!in_array($filename, $this->files)) return false;
                 $file = new \stdClass;
@@ -488,7 +449,7 @@ class UnifiedArchive implements AbstractArchive
                 $file->filename = $filename;
                 $file->compressed_size = $this->archiveSize;
                 $file->uncompressed_size = $this->archiveSize;
-                $file->mtime = $this->lzmaStat['mtime'];
+                $file->mtime = 0;
                 $file->is_compressed = true;
 
                 return $file;
@@ -545,10 +506,6 @@ class UnifiedArchive implements AbstractArchive
                 unlink($tmpname);
 
                 return $data;
-            break;
-            case 'tar':
-                if (!in_array($filename, $this->files)) return false;
-                return $this->tar->extractInString($filename);
             break;
             case 'gzip':
                 if (!in_array($filename, $this->files)) return false;
@@ -650,24 +607,6 @@ class UnifiedArchive implements AbstractArchive
                 }
                 return $count;
             break;
-            case 'tar':
-                $list = array();
-                if ($node === '') {
-                    $list = array_values($this->files);
-                } else {
-                    foreach ($this->files as $fname) {
-                        if (strpos($fname, $node) === 0) {
-                            $list[] = $fname;
-                        }
-                    }
-                }
-                if (($result = $this->tar->extractList($list, $outputFolder))
-                 === true) {
-                    return count($list);
-                } else {
-                    return false;
-                }
-            break;
             case 'gzip':
                 if ($node === '') {
                     $dir = rtrim($outputFolder, '/').'/';
@@ -766,71 +705,14 @@ class UnifiedArchive implements AbstractArchive
         return isset($count) ? $count : false;
     }
 
-    /**
-     * Updates existing archive by adding new files.
-     */
-    public function addFiles($nodes)
+	/**
+	 * Updates existing archive by adding new files.
+	 * @param array $nodes
+	 * @return int
+	 */
+	public function addFiles($nodes)
     {
-        // -1: empty folder
-        $files = array();
-        if (is_array($nodes)) {
-            // check integrity
-            $strings = 0;// 1 - strings; 2 - arrays
-            foreach ($nodes as $node) $strings = (is_string($node) ?
-                $strings + 1 : $strings - 1);
-            if ($strings > 0 && $strings != count($nodes)) return false;
-
-            if ($strings == count($nodes)) {
-                foreach ($nodes as $node) {
-                    // if is directory
-                    if (is_dir($node))
-                        self::importFilesFromDir(rtrim($node, '/*').'/*',
-                            basename($node).'/', true, $files);
-                    else if (is_file($node))
-                        $files[basename($node)] = $node;
-                }
-            } else {
-                // make files list
-                foreach ($nodes as $node) {
-                    if (is_array($node)) $node = (object) $node;
-                    // put directory inside another directory in archive
-                    if (substr($node->source, -1) == '/') {
-                        if (substr($node->destination, -1) != '/')
-                            return false;
-                        if (!isset($node->recursive) || !$node->recursive) {
-                            self::importFilesFromDir($node->source.'*',
-                                $node->destination.basename($node->source).'/',
-                                false, $files);
-                        } else {
-                            self::importFilesFromDir($node->source.'*',
-                                $node->destination.basename($node->source).'/',
-                                true, $files);
-                        }
-                    } elseif (substr($node->source, -1) == '*') {
-                        if (substr($node->destination, -1) != '/')
-                            return false;
-                        if (!isset($node->recursive) || !$node->recursive) {
-                            self::importFilesFromDir($node->source,
-                                $node->destination, false, $files);
-                        } else {
-                            self::importFilesFromDir($node->source,
-                                $node->destination, true, $files);
-                        }
-                    } else { // put regular file inside directory in archive
-                        if (!is_file($node->source))
-                            return false;
-                        $files[$node->destination] = $node->source;
-                    }
-                }
-            }
-        } elseif (is_string($nodes)) {
-            // if is directory
-            if (is_dir($nodes))
-                self::importFilesFromDir(rtrim($nodes, '/*').'/*', '/', true,
-                    $files);
-            else if (is_file($nodes))
-                $files[basename($nodes)] = $nodes;
-        }
+        $files = self::createFilesList($nodes);
 
         switch ($this->type) {
             case self::ZIP:
@@ -871,140 +753,49 @@ class UnifiedArchive implements AbstractArchive
                 }
                 $this->seven_zip->numFiles = count($this->files);
             break;
-            case self::TAR:
-                foreach ($files as $localname => $filename) {
-                    $remove_dir = dirname($filename);
-                    $add_dir = dirname($localname);
-                    /*echo "added ".$filename.PHP_EOL;
-                    echo number_format(filesize($filename)).PHP_EOL;
-                    */
-                    if (is_null($filename)) {
-                        if ($this->tar->addString($localname, "") === false)
-                            return false;
-                    } else {
-                        if ($this->tar->addModify($filename, $add_dir, $remove_dir)
-                         === false) return false;
-                    }
-                }
-
-                $this->files = array();
-                $this->compressedFilesSize =
-                $this->uncompressedFilesSize = 0;
-                $Content = $this->tar->listContent();
-                $this->tar->numberOfFiles = count($Content);
-                foreach ($Content as $i => $file) {
-                    // BUG workaround: http://pear.php.net/bugs/bug.php?id=20275
-                    if ($file['filename'] == 'pax_global_header') {
-                        $this->tar->numberOfFiles--;
-                        continue;
-                    }
-                    $this->files[$i] = $file['filename'];
-                    $this->uncompressedFilesSize += $file['size'];
-                }
-
-                $this->compressedFilesSize = $this->archiveSize;
-                if ($this->uncompressedFilesSize != 0)
-                    $this->tarCompressionRatio = ceil($this->archiveSize
-                        / $this->uncompressedFilesSize);
-                else
-                    $this->tarCompressionRatio = 1;
-            break;
         }
         return count($this->files);
     }
 
-    /**
-     * Creates an archive.
-     */
-    public static function archiveNodes($nodes, $aname, $fake = false)
+	/**
+	 * Creates an archive.
+	 * @param array $nodes
+	 * @param $archiveName
+	 * @param bool $fake
+	 * @return array|bool|int
+	 * @throws \Exception
+	 */
+	public static function archiveNodes($nodes, $archiveName, $fake = false)
     {
-        // -1: empty folder
-        $files = array();
-        if (is_array($nodes)) {
-            // check integrity
-            $strings = 0;// 1 - strings; 2 - arrays
-            foreach ($nodes as $node) $strings = (is_string($node) ?
-                $strings + 1 : $strings - 1);
-            if ($strings > 0 && $strings != count($nodes)) return false;
+		$ext = strtolower(pathinfo($archiveName, PATHINFO_EXTENSION));
+		if ($ext == 'zip') $atype = self::ZIP;
+		else if ($ext == '7z') $atype = self::SEVEN_ZIP;
+		else if ($ext == 'rar') $atype = self::RAR;
+		else if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz'], true) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $archiveName))
+			return TarArchive::archiveNodes($nodes, $archiveName, $fake);
+		else if ($ext == 'gz') $atype = self::GZIP;
+		else if ($ext == 'bz2') $atype = self::BZIP;
+		else if ($ext == 'xz') $atype = self::LZMA;
+		else return false;
 
-            if ($strings == count($nodes)) {
-                foreach ($nodes as $node) {
-                    // if is directory
-                    if (is_dir($node))
-                        self::importFilesFromDir(rtrim($node, '/*').'/*',
-                            basename($node).'/', true, $files);
-                    else if (is_file($node))
-                        $files[basename($node)] = $node;
-                }
-            } else {
-                // make files list
-                foreach ($nodes as $node) {
-                    if (is_array($node)) $node = (object) $node;
-                    // put directory inside another directory in archive
-                    if (substr($node->source, -1) == '/') {
-                        if (substr($node->destination, -1) != '/')
-                            return false;
-                        if (!isset($node->recursive) || !$node->recursive) {
-                            self::importFilesFromDir($node->source.'*',
-                                $node->destination.basename($node->source).'/',
-                                false, $files);
-                        } else {
-                            self::importFilesFromDir($node->source.'*',
-                                $node->destination.basename($node->source).'/',
-                                true, $files);
-                        }
-                    } elseif (substr($node->source, -1) == '*') {
-                        if (substr($node->destination, -1) != '/')
-                            return false;
-                        if (!isset($node->recursive) || !$node->recursive) {
-                            self::importFilesFromDir($node->source,
-                                $node->destination, false, $files);
-                        } else {
-                            self::importFilesFromDir($node->source,
-                                $node->destination, true, $files);
-                        }
-                    } else { // put regular file inside directory in archive
-                        if (!is_file($node->source))
-                            return false;
-                        $files[$node->destination] = $node->source;
-                    }
-                }
-            }
-        } elseif (is_string($nodes)) {
-            // if is directory
-            if (is_dir($nodes))
-                self::importFilesFromDir(rtrim($nodes, '/*').'/*', '/', true,
-                    $files);
-            else if (is_file($nodes))
-                $files[basename($nodes)] = $nodes;
-        }
-        // fake creation: return archive data
-        if ($fake) {
-            $totalSize = 0;
-            foreach ($files as $fn) $totalSize += filesize($fn);
+        $files = self::createFilesList($nodes);
 
-            return array(
-                'totalSize' => $totalSize,
-                'numberOfFiles' => count($files),
-                'files' => $files,
-            );
-        }
+		// fake creation: return archive data
+		if ($fake) {
+			$totalSize = 0;
+			foreach ($files as $fn) $totalSize += filesize($fn);
 
-        $ext = strtolower(pathinfo($aname, PATHINFO_EXTENSION));
-        if ($ext == 'zip') $atype = self::ZIP;
-        else if ($ext == '7z') $atype = self::SEVEN_ZIP;
-        else if ($ext == 'rar') $atype = self::RAR;
-        else if ($ext == 'tar' || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $aname))
-            $atype = self::TAR;
-        else if ($ext == 'gz') $atype = self::GZIP;
-        else if ($ext == 'bz2') $atype = self::BZIP;
-        else if ($ext == 'xz') $atype = self::LZMA;
-        else return false;
+			return array(
+				'totalSize' => $totalSize,
+				'numberOfFiles' => count($files),
+				'files' => $files,
+			);
+		}
 
         switch ($atype) {
             case self::ZIP:
-                $zip = new \ZipArchive;
-                $result = $zip->open($aname, \ZIPARCHIVE::CREATE);
+                $zip = new ZipArchive;
+                $result = $zip->open($archiveName, ZipArchive::CREATE);
                 if ($result !== true)
                     throw new \Exception('ZipArchive error: '.$result);
                 foreach ($files as $localname => $filename) {
@@ -1024,7 +815,7 @@ class UnifiedArchive implements AbstractArchive
                 return count($files);
             break;
             case self::SEVEN_ZIP:
-                $seven_zip = new \Archive7z\Archive7z($aname);
+                $seven_zip = new Archive7z($archiveName);
                 foreach ($files as $localname => $filename) {
                     if (!is_null($filename)) {
                         $seven_zip->addEntry($filename, false, $localname);
@@ -1036,44 +827,13 @@ class UnifiedArchive implements AbstractArchive
             case self::RAR:
                 return false;
             break;
-            case self::TAR:
-                $compression = null;
-                switch (strtolower(pathinfo($aname, PATHINFO_EXTENSION))) {
-                    case 'gz': $compression = 'gz'; break;
-                    case 'bz2': $compression = 'bz2'; break;
-                    case 'xz': $compression = 'lzma2'; break;
-                    case 'Z': $tar_aname = 'compress.lzw://'.$aname; break;
-                }
-                if (isset($tar_aname))
-                    $tar = new \Archive_Tar($tar_aname, $compression);
-                else
-                    $tar = new \Archive_Tar($aname, $compression);
-
-                foreach ($files as $localname => $filename) {
-                    $remove_dir = dirname($filename);
-                    $add_dir = dirname($localname);
-                    /*echo "added ".$filename.PHP_EOL;
-                    echo number_format(filesize($filename)).PHP_EOL;
-                    */
-                    if (is_null($filename)) {
-                        if ($tar->addString($localname, "") === false)
-                            return false;
-                    } else {
-                        if ($tar->addModify($filename, $add_dir, $remove_dir)
-                         === false) return false;
-                    }
-                }
-                $tar = null;
-
-                return count($files);
-            break;
             case self::GZIP:
                 if (count($files) > 1) return false;
                 /*if ($localname != basename($aname, '.gz')) return false;
                 */
                 $filename = array_shift($files);
                 if (is_null($filename)) return false; // invalid list
-                if (file_put_contents($aname,
+                if (file_put_contents($archiveName,
                     gzencode(file_get_contents($filename))) !== false)
                     return 1;
                 else
@@ -1085,7 +845,7 @@ class UnifiedArchive implements AbstractArchive
                 */
                 $filename = array_shift($files);
                 if (is_null($filename)) return false; // invalid list
-                if (file_put_contents($aname,
+                if (file_put_contents($archiveName,
                     bzcompress(file_get_contents($filename))) !== false)
                     return 1;
                 else
@@ -1097,7 +857,7 @@ class UnifiedArchive implements AbstractArchive
                 */
                 $filename = array_shift($files);
                 if (is_null($filename)) return false; // invalid list
-                $fp = xzopen($aname, 'w');
+                $fp = xzopen($archiveName, 'w');
                 $r = xzwrite($fp, file_get_contents($filename));
                 xzclose($fp);
                 if ($r !== false)
@@ -1105,24 +865,6 @@ class UnifiedArchive implements AbstractArchive
                 else
                     return false;
             break;
-        }
-    }
-
-    private static function importFilesFromDir($source, $destination,
-        $recursive, &$map)
-    {
-        // $map[$destination] = rtrim($source, '/*');
-        // do not map root archive folder
-        if ($destination != '')
-        $map[$destination] = null;
-
-        foreach (glob($source, GLOB_MARK) as $node) {
-            if (substr($node, -1) == '/' && $recursive) {
-                self::importFilesFromDir($node.'*',
-                    $destination.basename($node).'/', $recursive, $map);
-            } elseif (is_file($node) && is_readable($node)) {
-                $map[$destination.basename($node)] = $node;
-            }
         }
     }
 }

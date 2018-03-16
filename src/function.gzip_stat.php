@@ -1,4 +1,8 @@
 <?php
+/**
+ * @param $file GZipped file
+ * @return array|null Array with 'mtime' and 'size' items
+ */
 function gzip_stat($file)
 {
     $fp = fopen($file, 'rb');

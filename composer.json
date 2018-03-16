@@ -22,10 +22,11 @@
 	"suggest": {
 		"ext-zip": "ZIP support",
 		"ext-rar": "RAR support",
-		"pear/archive_tar": "TAR support (strongly recommended)",
+		"ext-phar": "TAR support",
 		"ext-zlib": "GZ and TAR.GZ support",
 		"ext-bz2": "BZ2 and TAR.BZ2 support",
 		"ext-xz": "XZ and TAR.XZ support",
+		"pear/archive_tar": "another TAR support",
 		"bin-ncompress": "TAR.Z support",
 		"gemorroj/archive7z": "7ZIP support",
 		"wapmorgan/cab-archive": "CAB support",
@@ -38,7 +39,7 @@
 		},
 		"files": [
 			"src/function.gzip_stat.php",
-			"src/REGISTER_LZW_STREAM_WRAPPER.php"
+			"src/stream.compress.lzw.php"
 		]
 	},
 	"bin": ["bin/cam"],

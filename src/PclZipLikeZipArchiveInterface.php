@@ -50,15 +50,15 @@ class PclZipLikeZipArchiveInterface
         array_shift($options);
 
         // parse options
-        if (isset($options[0]) && is_string($optios[0])) {
+        if (isset($options[0]) && is_string($options[0])) {
             $options[PCLZIP_OPT_ADD_PATH] = $options[0];
-            if (isset($options[1]) && is_string($optios[1])) {
+            if (isset($options[1]) && is_string($options[1])) {
                 $options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
             }
         } else {
             $options = array_combine(
-                array_filter($options, function ($v) {return (bool) $v&2}),
-                array_filter($options, function ($v) {return (bool) ($v-1)&2})
+                array_filter($options, function ($v) {return (bool) $v&2;}),
+                array_filter($options, function ($v) {return (bool) ($v-1)&2;})
             );
         }
 
@@ -79,12 +79,12 @@ class PclZipLikeZipArchiveInterface
         if (isset($options[PCLZIP_CB_PRE_ADD])
             && is_callable($options[PCLZIP_CB_PRE_ADD]))
             $preAddCallback = $options[PCLZIP_CB_PRE_ADD];
-        else $preAddCallback = function () { return 1; }
+        else $preAddCallback = function () { return 1; };
 
         if (isset($options[PCLZIP_CB_POST_ADD])
             && is_callable($options[PCLZIP_CB_POST_ADD]))
             $postAddCallback = $options[PCLZIP_CB_POST_ADD];
-        else $postAddCallback = function () { return 1; }
+        else $postAddCallback = function () { return 1; };
 
         if (isset($options[PCLZIP_OPT_COMMENT]))
             $this->archive->setArchiveComment($options[PCLZIP_OPT_COMMENT]);
@@ -158,10 +158,10 @@ class PclZipLikeZipArchiveInterface
                 'size' => $statIndex['size'],
                 'compressed_size' => $statIndex['comp_size'],
                 'mtime' => $statIndex,
-                'comment' => (($comment = $this->archive->getCommentIndex
+                'comment' => ($comment = $this->archive->getCommentIndex
                     ($statIndex['index']) !== false) ? $comment : null,
                 'folder' => in_array(substr($statIndex['name'], -1),
-                    array('/', '\\'))
+                    array('/', '\\')),
                 'index' => $statIndex['index'],
                 'status' => 'ok',
             );
@@ -182,15 +182,15 @@ class PclZipLikeZipArchiveInterface
         array_shift($options);
 
         // parse options
-        if (isset($options[0]) && is_string($optios[0])) {
+        if (isset($options[0]) && is_string($options[0])) {
             $options[PCLZIP_OPT_PATH] = $options[0];
-            if (isset($options[1]) && is_string($optios[1])) {
+            if (isset($options[1]) && is_string($options[1])) {
                 $options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
             }
         } else {
             $options = array_combine(
-                array_filter($options, function ($v) {return (bool) $v&2}),
-                array_filter($options, function ($v) {return (bool) ($v-1)&2})
+                array_filter($options, function ($v) {return (bool) $v&2;}),
+                array_filter($options, function ($v) {return (bool) ($v-1)&2;})
             );
         }
 
@@ -216,12 +216,12 @@ class PclZipLikeZipArchiveInterface
         if (isset($options[PCLZIP_CB_PRE_EXTRACT])
             && is_callable($options[PCLZIP_CB_PRE_EXTRACT]))
             $preExtractCallback = $options[PCLZIP_CB_PRE_EXTRACT];
-        else $preExtractCallback = function () { return 1; }
+        else $preExtractCallback = function () { return 1; };
 
         if (isset($options[PCLZIP_CB_POST_EXTRACT])
             && is_callable($options[PCLZIP_CB_POST_EXTRACT]))
             $postExtractCallback = $options[PCLZIP_CB_POST_EXTRACT];
-        else $postExtractCallback = function () { return 1; }
+        else $postExtractCallback = function () { return 1; };
 
         // exact matching
         if (isset($options[PCLZIP_OPT_BY_NAME]))
@@ -254,14 +254,14 @@ class PclZipLikeZipArchiveInterface
                 return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false)
                     ? self::SELECT_FILTER_PASS
                     : self::SELECT_FILTER_REFUSE;
-            }
+            };
         // <preg_match> rule
         else if (isset($options[PCLZIP_OPT_BY_PREG]))
             $selectFilter = function ($key, $value) use ($options) {
                 return preg_match($options[PCLZIP_OPT_BY_PREG], $key)
                     ? self::SELECT_FILTER_PASS
                     : self::SELECT_FILTER_REFUSE;
-            }
+            };
         // index rule
         else if (isset($options[PCLZIP_OPT_BY_INDEX]))
             $selectFilter = function ($key, $value, $index) use ($options) {
@@ -275,7 +275,7 @@ class PclZipLikeZipArchiveInterface
 
             return in_array($index, $allowedIndexes) ? self::SELECT_FILTER_PASS
                 : self::SELECT_FILTER_REFUSE;
-        }
+        };
         // no rule
         else
             $selectFilter = function () { return self::SELECT_FILTER_PASS; };
@@ -463,15 +463,15 @@ class PclZipLikeZipArchiveInterface
         array_shift($options);
 
         // parse options
-        if (isset($options[0]) && is_string($optios[0])) {
+        if (isset($options[0]) && is_string($options[0])) {
             $options[PCLZIP_OPT_ADD_PATH] = $options[0];
-            if (isset($options[1]) && is_string($optios[1])) {
+            if (isset($options[1]) && is_string($options[1])) {
                 $options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
             }
         } else {
             $options = array_combine(
-                array_filter($options, function ($v) {return (bool) $v&2}),
-                array_filter($options, function ($v) {return (bool) ($v-1)&2})
+                array_filter($options, function ($v) {return (bool) $v&2;}),
+                array_filter($options, function ($v) {return (bool) ($v-1)&2;})
             );
         }
 
@@ -493,25 +493,25 @@ class PclZipLikeZipArchiveInterface
         if (isset($options[PCLZIP_CB_PRE_ADD])
             && is_callable($options[PCLZIP_CB_PRE_ADD]))
             $preAddCallback = $options[PCLZIP_CB_PRE_ADD];
-        else $preAddCallback = function () { return 1; }
+        else $preAddCallback = function () { return 1; };
 
         if (isset($options[PCLZIP_CB_POST_ADD])
             && is_callable($options[PCLZIP_CB_POST_ADD]))
             $postAddCallback = $options[PCLZIP_CB_POST_ADD];
-        else $postAddCallback = function () { return 1; }
+        else $postAddCallback = function () { return 1; };
 
         if (isset($options[PCLZIP_OPT_COMMENT]))
             $this->archive->setArchiveComment($options[PCLZIP_OPT_COMMENT]);
         if (isset($options[PCLZIP_OPT_ADD_COMMENT])) {
             $comment =
-            (($comment = $this->archive->getArchiveComment() !== false)
+            ($comment = $this->archive->getArchiveComment() !== false)
                 ? $comment : null;
             $this->archive->setArchiveComment(
                 $comment . $options[PCLZIP_OPT_ADD_COMMENT]);
         }
         if (isset($options[PCLZIP_OPT_PREPEND_COMMENT])) {
             $comment =
-            (($comment = $this->archive->getArchiveComment() !== false)
+            ($comment = $this->archive->getArchiveComment() !== false)
                 ? $comment : null;
             $this->archive->setArchiveComment(
                 $options[PCLZIP_OPT_PREPEND_COMMENT] . $comment);
@@ -550,8 +550,8 @@ class PclZipLikeZipArchiveInterface
         $report = array();
         $options = func_get_args();
         $options = array_combine(
-            array_filter($options, function ($v) {return (bool) $v&2}),
-            array_filter($options, function ($v) {return (bool) ($v-1)&2})
+            array_filter($options, function ($v) {return (bool) $v&2;}),
+            array_filter($options, function ($v) {return (bool) ($v-1)&2;})
         );
 
         // exact matching
@@ -585,14 +585,14 @@ class PclZipLikeZipArchiveInterface
                 return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false)
                 ? self::SELECT_FILTER_PASS
                 : self::SELECT_FILTER_REFUSE;
-            }
+            };
         // <preg_match> rule
         else if (isset($options[PCLZIP_OPT_BY_PREG]))
             $selectFilter = function ($key, $value) use ($options) {
                 return preg_match($options[PCLZIP_OPT_BY_PREG], $key)
                 ? self::SELECT_FILTER_PASS
                 : self::SELECT_FILTER_REFUSE;
-            }
+            };
         // index rule
         else if (isset($options[PCLZIP_OPT_BY_INDEX]))
             $selectFilter = function ($key, $value, $index) use ($options) {
@@ -607,7 +607,7 @@ class PclZipLikeZipArchiveInterface
                 return in_array($index, $allowedIndexes)
                 ? self::SELECT_FILTER_PASS
                 : self::SELECT_FILTER_REFUSE;
-            }
+            };
         // no rule
         else
             $selectFilter = function () { return self::SELECT_FILTER_PASS; };
@@ -668,7 +668,7 @@ class PclZipLikeZipArchiveInterface
         // go through archive content list and copy all files
         foreach ($a->getFileNames() as $filename) {
             // dir merging process
-            if (in_array(substr($filename, -1), array('/', '\\')) {
+            if (in_array(substr($filename, -1), array('/', '\\'))) {
                 $this->archive->addEmptyDir(rtrim($filename, '/\\'));
             }
             // file merging process
