@@ -37,7 +37,7 @@ Composer package: `wapmorgan/unified-archive`
 ```json
 {
     "require": {
-        "wapmorgan/unified-archive": "~0.0.10"
+        "wapmorgan/unified-archive": "~0.0.11"
     }
 }
 ```
@@ -466,6 +466,7 @@ archives.
 
 | Version | Date         | Changelog                                                                                                                                                                               |
 |---------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0.0.11  | Mar 21, 2018 | * Cleaned up some old code. * Added `ext-phar` adapter for **.tar** archives (if `pear/archive_tar` is not installed).                                                                |
 | 0.0.10  | Aug 7, 2017  | * Remove `docopt` from requirements.                                                                                                                                                    |
 | 0.0.9   | Jul 20, 2017 | * Added cam script.                                                                                                                                                                     |
 | 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration. * Removed die() in source code.|
