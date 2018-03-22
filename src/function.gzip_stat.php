@@ -1,6 +1,6 @@
 <?php
 /**
- * @param $file GZipped file
+ * @param string $file GZipped file
  * @return array|null Array with 'mtime' and 'size' items
  */
 function gzip_stat($file)

@@ -40,64 +40,64 @@ class TarArchive extends AbstractArchive
 	protected $compressionRatio;
 
 	/**
-	 * @param $filename
+	 * @param $fileName
 	 * @return null|TarArchive
 	 */
-	public static function open($filename)
+	public static function open($fileName)
 	{
-		$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-		if (((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $filename)) && class_exists('\Archive_Tar'))
-			|| (in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $filename)) && class_exists('\PharData'))
-			return new self($filename);
+		$ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+		if (((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $fileName)) && class_exists('\Archive_Tar'))
+			|| (in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $fileName)) && class_exists('\PharData'))
+			return new self($fileName);
 		return null;
 	}
 
 	/**
 	 * TarArchive constructor.
-	 * @param $filename
+	 * @param $fileName
 	 * @param null $type
 	 * @throws Exception
 	 */
-	public function __construct($filename, $type = null)
+	public function __construct($fileName, $type = null)
 	{
 		$this->enabledPearTar = class_exists('\Archive_Tar');
 		$this->enabledPharData = class_exists('\PharData');
-		$this->path = realpath($filename);
+		$this->path = realpath($fileName);
 
 		if (!$this->enabledPharData && !$this->enabledPearTar)
 			throw new Exception('Archive_Tar nor PharData not available');
 
-		$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+		$ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 		switch ($ext) {
 			case 'gz':
 			case 'tgz':
 				if ($this->enabledPharData)
-					$this->tar = new PharData($filename);
+					$this->tar = new PharData($fileName);
 				else
-					$this->tar = new Archive_Tar($filename, 'gz');
+					$this->tar = new Archive_Tar($fileName, 'gz');
 				break;
 			case 'bz2':
 			case 'tbz2':
 				if ($this->enabledPharData)
-					$this->tar = new PharData($filename);
+					$this->tar = new PharData($fileName);
 				else
-					$this->tar = new Archive_Tar($filename, 'bz2');
+					$this->tar = new Archive_Tar($fileName, 'bz2');
 				break;
 			case 'xz':
 				if (!$this->enabledPharData)
 					throw new Exception('Archive_Tar not available');
-				$this->tar = new Archive_Tar($filename, 'lzma2');
+				$this->tar = new Archive_Tar($fileName, 'lzma2');
 				break;
 			case 'z':
 				if (!$this->enabledPharData)
 					throw new Exception('Archive_Tar not available');
-				$this->tar = new Archive_Tar('compress.lzw://'.$filename);
+				$this->tar = new Archive_Tar('compress.lzw://'.$fileName);
 				break;
 			default:
 				if ($this->enabledPharData)
-					$this->tar = new PharData($filename);
+					$this->tar = new PharData($fileName);
 				else
-					$this->tar = new Archive_Tar($filename);
+					$this->tar = new Archive_Tar($fileName);
 				break;
 		}
 
@@ -120,42 +120,34 @@ class TarArchive extends AbstractArchive
 		return $this->files;
 	}
 
-	/**
-	 * @param $filename
-	 * @return \stdClass
-	 */
-	public function getFileData($filename)
+    /**
+     * @param $fileName
+     * @return bool|ArchiveEntry
+     */
+	public function getFileData($fileName)
 	{
-		if (!in_array($filename, $this->files))
+		if (!in_array($fileName, $this->files))
 			return false;
 
 		if ($this->tar instanceof Archive_Tar) {
-			$index = array_search($filename, $this->files);
+			$index = array_search($fileName, $this->files);
 			$Content = $this->tar->listContent();
 			$data = $Content[$index];
 			unset($Content);
 
-			$file = new \stdClass;
-			$file->filename = $filename;
-			$file->compressed_size = $data['size']
-				/ $this->tarCompressionRatio;
-			$file->uncompressed_size = $data['size'];
-			$file->mtime = $data['mtime'];
-
-			$ext = strtolower(pathinfo($this->tar->path,
-				PATHINFO_EXTENSION));
-			$file->is_compressed = in_array($ext, array('gz', 'bz2', 'xz', 'Z'));
+			return new ArchiveEntry($fileName, $data['size'] / $this->tarCompressionRatio,
+                $data['size'], $data['mtime'], in_array(strtolower(pathinfo($this->tar->path,
+                    PATHINFO_EXTENSION)), array('gz', 'bz2', 'xz', 'Z')));
 		} else {
 			/** @var \PharFileInfo $entry_info */
-			$entry_info = $this->tar[$filename];
-			$file = new \stdClass;
-			$file->filename = $filename;
-			$file->compressed_size = $entry_info->getCompressedSize();
-			$file->uncompressed_size = filesize($entry_info->getPathname());
-			$file->mtime = 0;
-			$file->is_compressed = $entry_info->isCompressed();
+			$entry_info = $this->tar[$fileName];
+
+			var_dump($entry_info->getSize());
+
+			return new ArchiveEntry($fileName, $entry_info->getSize(), filesize($entry_info->getPathname()),
+                0, $entry_info->isCompressed());
 		}
-		return $file;
+		return false;
 	}
 
 	/**
@@ -188,17 +180,17 @@ class TarArchive extends AbstractArchive
 
 	/**
 	 * @param $outputFolder
-	 * @param string $node
+	 * @param string $files
 	 * @return bool|int
 	 */
-	public function extractNode($outputFolder, $node = '/')
+	public function extractFiles($outputFolder, $files = '/')
 	{
 		$list = array();
-		if ($node === '') {
+		if ($files === '') {
 			$list = array_values($this->files);
 		} else {
 			foreach ($this->files as $fname) {
-				if (strpos($fname, $node) === 0) {
+				if (strpos($fname, $files) === 0) {
 					$list[] = $fname;
 				}
 			}
@@ -240,15 +232,15 @@ class TarArchive extends AbstractArchive
 	}
 
 	/**
-	 * @param $nodes
-	 * @return bool
+	 * @param $fileOrFiles
+	 * @return int|bool
 	 */
-	public function addFiles($nodes)
+	public function addFiles($fileOrFiles)
 	{
-		$files = self::createFilesList($nodes);
+		$fileOrFiles = self::createFilesList($fileOrFiles);
 
 		if ($this->tar instanceof Archive_Tar) {
-			foreach ($files as $localname => $filename) {
+			foreach ($fileOrFiles as $localname => $filename) {
 				$remove_dir = dirname($filename);
 				$add_dir = dirname($localname);
 				if (is_null($filename)) {
@@ -260,7 +252,7 @@ class TarArchive extends AbstractArchive
 				}
 			}
 		} else {
-			foreach ($files as $localname => $filename) {
+			foreach ($fileOrFiles as $localname => $filename) {
 				if (is_null($filename)) {
 					if ($this->tar->addEmptyDir($localname) === false)
 						return false;
@@ -315,25 +307,25 @@ class TarArchive extends AbstractArchive
 	}
 
 	/**
-	 * @param $nodes
+	 * @param $filesOrFiles
 	 * @param $archiveName
 	 * @param bool $fake
 	 * @return array|bool
 	 * @throws Exception
 	 */
-	public static function archiveNodes($nodes, $archiveName, $fake = false)
+	public static function archiveFiles($filesOrFiles, $archiveName, $fake = false)
 	{
-		$files = self::createFilesList($nodes);
+		$filesOrFiles = self::createFilesList($filesOrFiles);
 
 		// fake creation: return archive data
 		if ($fake) {
 			$totalSize = 0;
-			foreach ($files as $fn) $totalSize += filesize($fn);
+			foreach ($filesOrFiles as $fn) $totalSize += filesize($fn);
 
 			return array(
 				'totalSize' => $totalSize,
-				'numberOfFiles' => count($files),
-				'files' => $files,
+				'numberOfFiles' => count($filesOrFiles),
+				'files' => $filesOrFiles,
 			);
 		}
 
@@ -360,7 +352,7 @@ class TarArchive extends AbstractArchive
 			else
 				$tar = new Archive_Tar($archiveName, $compression);
 
-			foreach ($files as $localname => $filename) {
+			foreach ($filesOrFiles as $localname => $filename) {
 				$remove_dir = dirname($filename);
 				$add_dir = dirname($localname);
 
@@ -383,7 +375,7 @@ class TarArchive extends AbstractArchive
 			}
 			$tar = new PharData($basename.'.tar', 0, null, Phar::TAR);
 
-			foreach ($files as $localname => $filename) {
+			foreach ($filesOrFiles as $localname => $filename) {
 				if (is_null($filename)) {
 					if ($tar->addEmptyDir($localname) === false)
 						return false;
@@ -407,7 +399,7 @@ class TarArchive extends AbstractArchive
 			throw new Exception('Archive_Tar nor PharData not available');
 		}
 
-		return count($files);
+		return count($filesOrFiles);
 	}
 
 	/**

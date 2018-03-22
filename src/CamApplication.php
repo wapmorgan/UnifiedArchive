@@ -4,12 +4,23 @@ namespace wapmorgan\UnifiedArchive;
 use Exception;
 
 class CamApplication {
+    /**
+     * @param $file
+     * @return AbstractArchive
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     protected function open($file) {
         $archive = UnifiedArchive::open($file);
         if ($archive === null) throw new Exception('Could not open archive '.$file);
         return $archive;
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function listArray($args) {
         $archive = $this->open($args['ARCHIVE']);
         foreach ($archive->getFileNames() as $file) {
@@ -17,6 +28,11 @@ class CamApplication {
         }
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function table($args) {
         $archive = $this->open($args['ARCHIVE']);
         $dirs = array();
@@ -24,13 +40,13 @@ class CamApplication {
         echo str_repeat('-', 80).PHP_EOL;
         foreach ($archive->getFileNames() as $file) {
             $info = $archive->getFileData($file);
-            $size = $this->formatSize($info->uncompressed_size);
+            $size = $this->formatSize($info->uncompressedSize);
             $file_name = strlen($file) > 51 ? substr($file, 0, 49).'..' : $file;
             echo sprintf('%-51s | %1.1f%s | %18s'.PHP_EOL,
                 $file_name,
                 $size[0],
                 $size[1],
-                $this->formatDate($info->mtime)
+                $this->formatDate($info->modificationTime)
                 );
         }
         $size = $this->formatSize($archive->countUncompressedFilesSize());
@@ -40,6 +56,11 @@ class CamApplication {
 
     }
 
+    /**
+     * @param $bytes
+     * @param int $precision
+     * @return array
+     */
     public function formatSize($bytes, $precision = 1) {
         $units = array('b', 'k', 'm', 'g', 't');
 
@@ -56,10 +77,14 @@ class CamApplication {
         return array($i, $units[$pow]);
     }
 
+    /**
+     * @param $unixtime
+     * @return string
+     */
     public function formatDate($unixtime) {
-        if ((mktime(0, 0, 0) - $unixtime) < 86000)
+        if (strtotime('today') < $unixtime)
             return 'Today, '.date('G:m', $unixtime);
-        else if ((strtotime('yesterday') - $unixtime) < 172000)
+        else if (strtotime('yesterday') < $unixtime)
             return 'Yesterday, '.date('G:m', $unixtime);
         else {
             $datetime = new \DateTime();
@@ -71,6 +96,11 @@ class CamApplication {
         }
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function info($args) {
         $archive = $this->open($args['ARCHIVE']);
         echo 'Archive           changed: '.$this->formatDate(filemtime($args['ARCHIVE'])).PHP_EOL;
@@ -80,20 +110,30 @@ class CamApplication {
         echo 'Archive compression ratio: '.round($archive->countUncompressedFilesSize() / $archive->countCompressedFilesSize(), 6).'/1'.PHP_EOL;
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function extract($args) {
         $archive = $this->open($args['ARCHIVE']);
         $output = getcwd();
         if (isset($args['--output']))
             $output = $args['--output'];
         if (empty($args['FILES_IN_ARCHIVE']) || $args['FILES_IN_ARCHIVE'] == array('/') || $args['FILES_IN_ARCHIVE'] == array('*'))
-            $archive->extractNode($output);
+            $archive->extractFiles($output);
         else {
             foreach ($args['FILES_IN_ARCHIVE'] as $file) {
-                $archive->extractNode($output, $file);
+                $archive->extractFiles($output, $file);
             }
         }
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function printFile($args) {
         $archive = $this->open($args['ARCHIVE']);
         foreach ($args['FILES_IN_ARCHIVE'] as $file) {
@@ -102,11 +142,16 @@ class CamApplication {
                 echo 'File '.$file.' IS NOT PRESENT'.PHP_EOL;
                 continue;
             }
-            echo 'File content: '.$file.' (size is '.implode('', $this->formatSize($info->compressed_size, 1)).')'.PHP_EOL;
+            echo 'File content: '.$file.' (size is '.implode('', $this->formatSize($info->uncompressedSize, 1)).')'.PHP_EOL;
             echo $archive->getFileContent($file).PHP_EOL;
         }
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function details($args) {
         $archive = $this->open($args['ARCHIVE']);
         foreach ($args['FILES_IN_ARCHIVE'] as $file) {
@@ -116,13 +161,18 @@ class CamApplication {
                 continue;
             }
             echo 'File name        : '.$file.PHP_EOL;
-            echo 'Compressed size  : '.implode('', $this->formatSize($info->compressed_size, 2)).PHP_EOL;
-            echo 'Uncompressed size: '.implode('', $this->formatSize($info->uncompressed_size, 2)).PHP_EOL;
-            echo 'Is compressed    : '.($info->is_compressed ? 'yes' : 'no').PHP_EOL;
-            echo 'Date modification: '.$this->formatDate($info->mtime).PHP_EOL;
+            echo 'Compressed size  : '.implode('', $this->formatSize($info->compressedSize, 2)).PHP_EOL;
+            echo 'Uncompressed size: '.implode('', $this->formatSize($info->uncompressedSize, 2)).PHP_EOL;
+            echo 'Is compressed    : '.($info->isCompressed ? 'yes' : 'no').PHP_EOL;
+            echo 'Date modification: '.$this->formatDate($info->modificationTime).PHP_EOL;
         }
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function delete($args) {
         $archive = $this->open($args['ARCHIVE']);
         $files = $archive->getFileNames();
@@ -135,15 +185,34 @@ class CamApplication {
         }
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
     public function add($args) {
         $archive = $this->open($args['ARCHIVE']);
+        $added = 0;
         foreach ($args['FILES_ON_DISK'] as $file) {
-            $archive->addFiles($file);
+            $added += $archive->addFiles($file);
         }
+        echo 'Added '.$added.' file(s)'.PHP_EOL;
     }
 
+    /**
+     * @param $args
+     * @throws Exception
+     */
     public function create($args) {
-        $archived_files = UnifiedArchive::archiveNodes($args['FILES_ON_DISK'], $args['ARCHIVE']);
-        echo 'Created archive '.$args['ARCHIVE'].' with '.$archived_files.' file(s) of total size '.implode('', $this->formatSize(filesize($args['ARCHIVE']))).PHP_EOL;
+        if (file_exists($args['ARCHIVE'])) {
+            if (is_dir($args['ARCHIVE']))
+                echo $args['ARCHIVE'].' is a directory!'.PHP_EOL;
+            else {
+                echo 'File '.$args['ARCHIVE'].' already exists!'.PHP_EOL;
+            }
+        } else {
+            $archived_files = UnifiedArchive::archiveFiles($args['FILES_ON_DISK'], $args['ARCHIVE']);
+            echo 'Created archive ' . $args['ARCHIVE'] . ' with ' . $archived_files . ' file(s) of total size ' . implode('', $this->formatSize(filesize($args['ARCHIVE']))) . PHP_EOL;
+        }
     }
 }

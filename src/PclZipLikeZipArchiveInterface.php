@@ -7,7 +7,7 @@ namespace wapmorgan\UnifiedArchive;
 defined('AVERAGE_ZIP_COMPRESSION_RATIO')
 or define('AVERAGE_ZIP_COMPRESSION_RATIO', 2);
 
-class PclZipLikeZipArchiveInterface
+class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
 {
     const SELECT_FILTER_PASS = 1;
     const SELECT_FILTER_REFUSE = 0;
@@ -674,7 +674,7 @@ class PclZipLikeZipArchiveInterface
             // file merging process
             else {
                 // extract file in temporary dir
-                if ($a->extractNode($tempDir, '/'.$filename)) {
+                if ($a->extractFiles($tempDir, '/'.$filename)) {
                     // go on
                 } else {
                     // extraction fails

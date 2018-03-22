@@ -201,48 +201,6 @@ There are some restrictions:
 1. If the `source` doesn't end with `/` or `*`, it means to be a file.
 2. If the `source` is a directory, destination should be a directory (to end with "/").
 
-## Built-in archiver
-To see all opportunities of this remarkable UnifiedArchive, together with source
- codes some scripts are delivered. They can become quite good replacement to
- standard commands of file system (tar, unzip, rar, gzip).
-
-|  Format | Program usage                                       | Replacement                                                    |
-|---------| ----------------------------------------------------|----------------------------------------------------------------|
-| tar     | `tar xv -C $DIRECTORY archive.tar.gz`               | `./cli.hierarchy.php -e -n / -a archive.tar.gz -o $DIRECTORY`  |
-| zip     | `unzip archive.zip -d $DIRECTORY`                   | `./cli.hierarchy.php -e -n / -a archive.zip -o $DIRECTORY`     |
-| rar     | `unrar x archive.rar $DIRECTORY`                    | `./cli.hierarchy.php -e -n / -a archive.rar -o $DIRECTORY`     |
-| gzip    | `gzip -d -k archive.gz && mv archive $DIRECTORY`    | `./cli.hierarchy.php -e -n / -a archive.gz -o $DIRECTORY`      |
-
-You see? The universal extractor itself defines type of archive and there is
-no need manually to choose type.
-
-We will continue and look at examples of replacement of the unbridled number of
-utilities on one command:
-
-| Operation                              | Command                                                                  | Notes                                                         |
-|----------------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------|
-| List nodes in archive                  | `./cli.hierarchy.php -l -a archivename`                                  |                                                               |
-| Table nodes in archive                 | `./cli.hierarchy.php -t -a archivename`                                  |                                                               |
-| Hierarchy of nodes in archive          | `./cli.hierarchy.php -h -a archivename`                                  |                                                               |
-| Details about a file                   | `./cli.hierarchy.php -d -a archivename -n file_in_archive`               | Replaces `unzip -v archivename file_in_archive replacement`   |
-| Extract a file                         | `./cli.hierarchy.php -e -a archivename -n /file_in_archive -o .`         | Replaces `unzip archivename file_in_archive`                  |
-| Prints file content without extraction | `./cli.hierarchy.php -u -a archivename -n file_in_archive`               | Replaces `unzip -p archivename file_in_archive`               |
-| Extract a folder                       | `./cli.hierarchy.php -e -a archivename -n /directory_in_archive/ -o .`   | Replaces `unzip archivename "directory_in_archive/*"`         |
-| Archive information                    | `./cli.hierarchy.php -i -a archivename`                                  |                                                               |
-
-In the future probably I will add still some scripts or I will update existing
-with new functions.
-
-It is very easy and equally universal for any of supported types of archives
-(which already about 13)!
-
-Try, it will be pleasant to you!
-
-It is possible even to use the console version of the archiver in daily work for
-viewing of contents of archive from the terminal!
-
-Conveniently, isn't that so?
-
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular
 archive formats. This script is stored in `bin/cam`.

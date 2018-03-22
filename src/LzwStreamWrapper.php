@@ -5,6 +5,7 @@ class LzwStreamWrapper
 {
     private static $registered = false;
     private static $installed = 0;
+
     public static function registerWrapper()
     {
         if (!self::$registered)

@@ -3,22 +3,91 @@ namespace wapmorgan\UnifiedArchive;
 
 abstract class AbstractArchive
 {
-    abstract public static function open($filename);
-	abstract public function __construct($filename, $type);
-	abstract public function getFileNames();
-	abstract public function getFileData($filename);
-	abstract public function getFileContent($filename);
-	abstract public function getHierarchy();
-	abstract public function extractNode($outputFolder, $node = '/');
-	abstract public function deleteFiles($fileOrFiles);
-	abstract public function addFiles($nodes);
+    /**
+     * @param $fileName
+     * @return AbstractArchive|null
+     */
+    abstract public static function open($fileName);
 
-	abstract public function countFiles();
-	abstract public function getArchiveSize();
-	abstract public function getArchiveType();
-	abstract public function countCompressedFilesSize();
-	abstract public function countUncompressedFilesSize();
-	abstract public static function archiveNodes($nodes, $archiveName);
+    /**
+     * AbstractArchive constructor.
+     * @param $fileName
+     * @param $type
+     */
+    abstract public function __construct($fileName, $type);
+
+    /**
+     * @return array
+     */
+    abstract public function getFileNames();
+
+    /**
+     * @param $fileName
+     * @return ArchiveEntry
+     */
+	abstract public function getFileData($fileName);
+
+    /**
+     * @param $filename
+     * @return string|bool
+     */
+    abstract public function getFileContent($filename);
+
+    /**
+     * @return array
+     */
+    abstract public function getHierarchy();
+
+    /**
+     * @param $outputFolder
+     * @param string $files
+     * @return bool|int
+     */
+    abstract public function extractFiles($outputFolder, $files = '/');
+
+    /**
+     * @param $fileOrFiles
+     * @return bool|int
+     */
+    abstract public function deleteFiles($fileOrFiles);
+
+    /**
+     * @param $fileOrFiles
+     * @return int|bool
+     */
+    abstract public function addFiles($fileOrFiles);
+
+    /**
+     * @return int
+     */
+    abstract public function countFiles();
+
+    /**
+     * @return int
+     */
+    abstract public function getArchiveSize();
+
+    /**
+     * @return string
+     */
+    abstract public function getArchiveType();
+
+    /**
+     * @return int
+     */
+    abstract public function countCompressedFilesSize();
+
+    /**
+     * @return int
+     */
+    abstract public function countUncompressedFilesSize();
+
+    /**
+     * @param $filesOrFiles
+     * @param $archiveName
+     * @return mixed
+     */
+    abstract public static function archiveFiles($filesOrFiles, $archiveName);
 
 	/**
 	 * @param $nodes
