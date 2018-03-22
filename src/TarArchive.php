@@ -39,15 +39,16 @@ class TarArchive extends AbstractArchive
 	/** @var float */
 	protected $compressionRatio;
 
-	/**
-	 * @param $fileName
-	 * @return null|TarArchive
-	 */
+    /**
+     * @param $fileName
+     * @return null|TarArchive
+     * @throws Exception
+     */
 	public static function open($fileName)
 	{
 		$ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 		if (((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $fileName)) && class_exists('\Archive_Tar'))
-			|| (in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $fileName)) && class_exists('\PharData'))
+			|| ((in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $fileName)) && class_exists('\PharData')))
 			return new self($fileName);
 		return null;
 	}
@@ -126,11 +127,11 @@ class TarArchive extends AbstractArchive
      */
 	public function getFileData($fileName)
 	{
-		if (!in_array($fileName, $this->files))
+		if (!in_array($fileName, $this->files, true))
 			return false;
 
 		if ($this->tar instanceof Archive_Tar) {
-			$index = array_search($fileName, $this->files);
+			$index = array_search($fileName, $this->files, true);
 			$Content = $this->tar->listContent();
 			$data = $Content[$index];
 			unset($Content);
@@ -151,17 +152,17 @@ class TarArchive extends AbstractArchive
 	}
 
 	/**
-	 * @param $filename
+	 * @param $fileName
 	 * @return string
 	 */
-	public function getFileContent($filename)
+	public function getFileContent($fileName)
 	{
-		if (!in_array($filename, $this->files))
+		if (!in_array($fileName, $this->files))
 			return false;
 		if ($this->tar instanceof Archive_Tar)
-			return $this->tar->extractInString($filename);
+			return $this->tar->extractInString($fileName);
 		else
-			return $this->tar[$filename]->getContent();
+			return $this->tar[$fileName]->getContent();
 	}
 
 	/**
@@ -183,10 +184,10 @@ class TarArchive extends AbstractArchive
 	 * @param string $files
 	 * @return bool|int
 	 */
-	public function extractFiles($outputFolder, $files = '/')
+	public function extractFiles($outputFolder, $files = null)
 	{
 		$list = array();
-		if ($files === '') {
+		if ($files === null) {
 			$list = array_values($this->files);
 		} else {
 			foreach ($this->files as $fname) {
@@ -307,25 +308,26 @@ class TarArchive extends AbstractArchive
 	}
 
 	/**
-	 * @param $filesOrFiles
+	 * @param string|string[]|array[] $fileOrFiles
 	 * @param $archiveName
-	 * @param bool $fake
+	 * @param bool $emulate
 	 * @return array|bool
 	 * @throws Exception
 	 */
-	public static function archiveFiles($filesOrFiles, $archiveName, $fake = false)
+	public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
 	{
-		$filesOrFiles = self::createFilesList($filesOrFiles);
+		$fileOrFiles = self::createFilesList($fileOrFiles);
 
 		// fake creation: return archive data
-		if ($fake) {
+		if ($emulate) {
 			$totalSize = 0;
-			foreach ($filesOrFiles as $fn) $totalSize += filesize($fn);
+			foreach ($fileOrFiles as $fn) $totalSize += filesize($fn);
 
 			return array(
 				'totalSize' => $totalSize,
-				'numberOfFiles' => count($filesOrFiles),
-				'files' => $filesOrFiles,
+				'numberOfFiles' => count($fileOrFiles),
+				'files' => $fileOrFiles,
+                'type' => 'tar',
 			);
 		}
 
@@ -343,16 +345,17 @@ class TarArchive extends AbstractArchive
 				case 'xz':
 					$compression = 'lzma2';
 					break;
-				case 'Z':
+				case 'z':
 					$tar_aname = 'compress.lzw://' . $archiveName;
 					break;
 			}
+
 			if (isset($tar_aname))
 				$tar = new Archive_Tar($tar_aname, $compression);
 			else
 				$tar = new Archive_Tar($archiveName, $compression);
 
-			foreach ($filesOrFiles as $localname => $filename) {
+			foreach ($fileOrFiles as $localname => $filename) {
 				$remove_dir = dirname($filename);
 				$add_dir = dirname($localname);
 
@@ -366,7 +369,7 @@ class TarArchive extends AbstractArchive
 			}
 			$tar = null;
 		} else if (class_exists('\PharData')) {
-			if (preg_match('~^(.+)\.(tar\.(gz|bz2|xz|Z))$~i', $archiveName, $match)) {
+			if (preg_match('~^(.+)\.(tar\.(gz|bz2))$~i', $archiveName, $match)) {
 				$ext = $match[2];
 				$basename = $match[1];
 			} else {
@@ -375,7 +378,7 @@ class TarArchive extends AbstractArchive
 			}
 			$tar = new PharData($basename.'.tar', 0, null, Phar::TAR);
 
-			foreach ($filesOrFiles as $localname => $filename) {
+			foreach ($fileOrFiles as $localname => $filename) {
 				if (is_null($filename)) {
 					if ($tar->addEmptyDir($localname) === false)
 						return false;
@@ -399,7 +402,7 @@ class TarArchive extends AbstractArchive
 			throw new Exception('Archive_Tar nor PharData not available');
 		}
 
-		return count($filesOrFiles);
+		return count($fileOrFiles);
 	}
 
 	/**
@@ -416,7 +419,7 @@ class TarArchive extends AbstractArchive
 			$this->numberOfFiles = count($Content);
 			foreach ($Content as $i => $file) {
 				// BUG workaround: http://pear.php.net/bugs/bug.php?id=20275
-				if ($file['filename'] == 'pax_global_header') {
+				if ($file['filename'] === 'pax_global_header') {
 					$this->numberOfFiles--;
 					continue;
 				}
@@ -425,11 +428,8 @@ class TarArchive extends AbstractArchive
 			}
 
 			$this->compressedFilesSize = $this->archiveSize;
-			if ($this->uncompressedFilesSize != 0)
-				$this->compressionRatio = ceil($this->archiveSize
-					/ $this->uncompressedFilesSize);
-			else
-				$this->compressionRatio = 1;
+            $this->compressionRatio = $this->uncompressedFilesSize != 0 ? ceil($this->archiveSize
+                / $this->uncompressedFilesSize) : 1;
 		} else {
 			$this->numberOfFiles = $this->tar->count();
 			$stream_path_length = strlen('phar://'.$this->path.'/');

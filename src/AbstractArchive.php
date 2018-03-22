@@ -28,10 +28,10 @@ abstract class AbstractArchive
 	abstract public function getFileData($fileName);
 
     /**
-     * @param $filename
+     * @param $fileName
      * @return string|bool
      */
-    abstract public function getFileContent($filename);
+    abstract public function getFileContent($fileName);
 
     /**
      * @return array
@@ -83,15 +83,15 @@ abstract class AbstractArchive
     abstract public function countUncompressedFilesSize();
 
     /**
-     * @param $filesOrFiles
+     * @param $fileOrFiles
      * @param $archiveName
      * @return mixed
      */
-    abstract public static function archiveFiles($filesOrFiles, $archiveName);
+    abstract public static function archiveFiles($fileOrFiles, $archiveName);
 
 	/**
-	 * @param $nodes
-	 * @return array|bool
+	 * @param string|string[]|array[]
+	 * @return array
 	 */
 	protected static function createFilesList($nodes)
 	{
@@ -172,7 +172,7 @@ abstract class AbstractArchive
 		if ($destination != '')
 			$map[$destination] = null;
 		foreach (glob($source, GLOB_MARK) as $node) {
-			if (substr($node, -1) == '/' && $recursive) {
+			if (substr($node, -1) === '/' && $recursive) {
 				self::importFilesFromDir($node.'*',
 					$destination.basename($node).'/', $recursive, $map);
 			} elseif (is_file($node) && is_readable($node)) {

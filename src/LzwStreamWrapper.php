@@ -9,7 +9,7 @@ class LzwStreamWrapper
     public static function registerWrapper()
     {
         if (!self::$registered)
-            stream_register_wrapper('compress.lzw', __CLASS__);
+            stream_wrapper_register('compress.lzw', __CLASS__);
         self::$registered = true;
     }
 
@@ -28,6 +28,14 @@ class LzwStreamWrapper
     private $dataSize;
     private $pointer;
     private $writtenBytes = 0;
+
+    /**
+     * @param $path
+     * @param $mode
+     * @param $options
+     * @return bool
+     * @throws \Exception
+     */
     public function stream_open($path, $mode, $options)
     {
         // check for compress & uncompress utility
@@ -83,8 +91,8 @@ class LzwStreamWrapper
                     throw new \Exception(__CLASS__.', line '.__LINE__.
                         ': Could not create temporary file in '.
                         sys_get_temp_dir());
-                $this->tmp = $tempfile;
-                $this->tmp2 = $tempfile2;
+                $this->tmp = $tmp;
+                $this->tmp2 = $tmp2;
                 $this->pointer = 0;
             } else {
                 $this->pointer = 0;
@@ -95,6 +103,10 @@ class LzwStreamWrapper
         return true;
     }
 
+    /**
+     * @return float|int|string
+     * @throws \Exception
+     */
     public function getAvailableMemory()
     {
         $limit = strtoupper(ini_get('memory_limit'));
@@ -110,6 +122,10 @@ class LzwStreamWrapper
         return $limit;
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getSystemMemory()
     {
         $this->exec('free --bytes | head -n3 | tail -n1 | awk \'{print $4}\'',
@@ -118,6 +134,12 @@ class LzwStreamWrapper
         return trim($output);
     }
 
+    /**
+     * @param $command
+     * @param $output
+     * @param null $resultCode
+     * @throws \Exception
+     */
     private function exec($command, &$output, &$resultCode = null)
     {
         if (function_exists('system')) {
@@ -152,6 +174,9 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     private function read()
     {
         if ($this->tmp !== null) {
@@ -183,6 +208,9 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @return array
+     */
     public function stream_stat()
     {
         return array(
@@ -190,6 +218,9 @@ class LzwStreamWrapper
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function stream_close()
     {
         // rewrite file
@@ -246,6 +277,10 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @param $count
+     * @return bool|string
+     */
     public function stream_read($count)
     {
         if ($this->tmp !== null) {
@@ -266,16 +301,26 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @return bool
+     */
     public function stream_eof()
     {
         return $this->pointer >= $this->dataSize;
     }
 
+    /**
+     * @return mixed
+     */
     public function stream_tell()
     {
         return $this->pointer;
     }
 
+    /**
+     * @param $data
+     * @return bool|int
+     */
     public function stream_write($data)
     {
         $this->writtenBytes += strlen($data);
@@ -299,6 +344,11 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @param $offset
+     * @param int $whence
+     * @return bool
+     */
     public function stream_seek($offset, $whence = SEEK_SET)
     {
         switch ($whence) {
@@ -320,6 +370,10 @@ class LzwStreamWrapper
         return true;
     }
 
+    /**
+     * @param $operation
+     * @return bool
+     */
     public function stream_lock($operation)
     {
         if ($this->tmp !== null) {
@@ -329,6 +383,9 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @param $new_size
+     */
     public function stream_truncate($new_size)
     {
         $actual_data_size = (is_null($this->tmp)) ? strlen($this->data)

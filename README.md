@@ -16,14 +16,13 @@ add, delete, merge, duplicate).
 3. [**Process of archive reading**](#process-of-archive-reading)
     1. **Archive modification**
     2. **Archive creation**
-4. [**Built-in archiver**](#built-in-archiver)
-5. [**Built-in console archive manager**](#built-in-console-archive-manager)
-6. [**API**](#api)
+4. [**Built-in console archive manager**](#built-in-console-archive-manager)
+5. [**API**](#api)
     1. **Object methods**
     2. **Static methods**
-7. [**PclZip-like interface**](#pclzip-like-interface)
-8. [**Formats support**](#formats-support)
-9. [**Changelog**](#changelog)
+6. [**PclZip-like interface**](#pclzip-like-interface)
+7. [**Formats support**](#formats-support)
+8. [**Changelog**](#changelog)
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
@@ -204,10 +203,38 @@ There are some restrictions:
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular
 archive formats. This script is stored in `bin/cam`.
+To see all opportunities of this remarkable UnifiedArchive, together with source
+codes a `cam` script is delivered. It can become quite good replacement of
+standard OS commands (tar, unzip, rar, gzip, ..).
 
 It supports all formats that UnifiedArchive does and can be used to manipulate
-archives without other software. To check your configuration and check formats
-support launch it with `-f` flag in console:
+archives without other software.
+
+|  Format | Program usage                                       | Replacement                             |
+|---------| ----------------------------------------------------|-----------------------------------------|
+| tar     | `tar xv -C $DIRECTORY archive.tar.gz`               | `bin/cam -e --output=$DIRECTORY archive.tar.gz`  |
+| zip     | `unzip archive.zip -d $DIRECTORY`                   | `bin/cam -e --output=$DIRECTORY archive.zip`     |
+| rar     | `unrar x archive.rar $DIRECTORY`                    | `bin/cam -e --output=$DIRECTORY archive.rar`     |
+| gzip    | `gzip -d -k archive.gz && mv archive $DIRECTORY`    | `bin/cam -e --output=$DIRECTORY archive.gz`      |
+
+You see? Console archive manager itself defines type of archive and there is
+no need manually to choose type.
+
+We will continue and look at examples of replacement to number of
+utilities on one command:
+
+| Operation                              | Command                                                          | Notes                                                       |
+|----------------------------------------|------------------------------------------------------------------|-------------------------------------------------------------|
+| List nodes in archive                  | `bin/cam -l archivename`                                         |                                                             |
+| Table nodes in archive                 | `bin/cam -t archivename`                                         |                                                             |
+| Hierarchy of nodes in archive          | `bin/cam -h archivename`                                         |                                                             |
+| Details about a file                   | `bin/cam -d archivename file_in_archive`                         | Replaces `unzip -v archivename file_in_archive replacement` |
+| Extract a file                         | `bin/cam -e --output=output/ archivename file_in_archive`        | Replaces `unzip archivename file_in_archive`                |
+| Prints file content without extraction | `bin/cam -p archivename file_in_archive`                         | Replaces `unzip -p archivename file_in_archive`             |
+| Extract a folder                       | `bin/cam -e --output=output/ archivename /directory_in_archive/` | Replaces `unzip archivename "directory_in_archive/*"`       |
+| Archive information                    | `bin/cam -i archivename`                                         |                                                             |
+
+To check your configuration and check formats support launch it with `-f` flag in console:
 
 ```
 $ php bin/cam -f
@@ -257,13 +284,13 @@ Creation of object of a class.
 ```php
 public function getFileNames(): array
 ```
-Obtaining the list of files in archive. The symbol of division of catalogs can be both a slash, and a backslash (depends on format).
+Retrieving the list of files in archive. The catalogs separator can be both a slash, and a backslash (depends on archive format).
 
 ```php
 public function getFileData($filename): ArchiveEntry
 ```
 
-Obtaining detailed information on the file in archive. The name of the file
+Retrieving detailed information on the file in archive. The name of the file
 has to COINCIDE in ACCURACY with one stored in archive. It is restricted to
 change a symbol of division of catalogs. This method returns object of
 _wapmorgan\UnifiedArchive\ArchiveEntry_ with following fields:
@@ -330,7 +357,7 @@ after addition.
 ### Static methods
 
 ```php
-static public function open($filename): UnifiedArchive | null
+static public function open($filename): AbstractArchive | null
 ```
 Tries to distinguish type of archive and returns a `UnifiedArchive` instance in
 case of success, **null** in case of failure.
