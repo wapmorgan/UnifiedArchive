@@ -104,19 +104,19 @@ method
     ```
 
 6. Further, you can unpack any internal catalog or the whole archive with files
-on a disk. The `extractNode()` method is engaged in it. In case of success, it
+on a disk. The `extractFiles()` method is engaged in it. In case of success, it
 returns number of the extracted files, in case of failure - **false**. Initial
 and final symbol of division of catalogs are very important! Don't forget them.
 
     ```php
-    $archive->extractNode(outputFolder, archiveFolder = '/');
+    $archive->extractFiles(outputFolder, archiveFolder = '/');
     // to unpack all contents of archive
-    $archive->extractNode(tmpnam('/tmp', 'arc'));
+    $archive->extractFiles(tmpnam('/tmp', 'arc'));
     // to unpack the src catalog in archive in the sources catalog on a disk
-    $archive->extractNode(tmpnam('/tmp', 'sources'), '/src/');
+    $archive->extractFiles(tmpnam('/tmp', 'sources'), '/src/');
     // to unpack the bookmarks catalog in archive in the sources catalog on a
     // disk
-    $archive->extractNode(tmpnam('/tmp', 'sources'), '/bookmarks/');
+    $archive->extractFiles(tmpnam('/tmp', 'sources'), '/bookmarks/');
     ```
 
 ### Archive modification
@@ -160,19 +160,19 @@ To pack completely the catalog with all attached files and subdirectories
 in new archive:
 
 ```php
-UnifiedArchive::archiveNodes('/var/log', 'Archive.zip');
+UnifiedArchive::archiveFiles('/var/log', 'Archive.zip');
 ```
 
 To pack one file:
 
 ```php
-UnifiedArchive::archiveNodes('/var/log/syslog', 'Archive.zip');
+UnifiedArchive::archiveFiles('/var/log/syslog', 'Archive.zip');
 ```
 
 To pack some files or catalogs:
 
 ```php
-UnifiedArchive::archiveNodes(array(directory, file, file2, ...), 'Archive.zip');
+UnifiedArchive::archiveFiles(array(directory, file, file2, ...), 'Archive.zip');
 ```
 
 Extended syntax with possibility of rewriting of paths and additional
@@ -190,7 +190,7 @@ $nodes = array(
     array('source' => '/media/wapmorgan/.../Cats/*',
         'destination' => 'Pictures/'),
 );
-UnifiedArchive::archiveNodes($nodes, 'Archive.zip');
+UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 ```
 
 [**Complete description of extended syntax with examples and explanations**.](extendedSyntax.md).
@@ -260,19 +260,19 @@ public function getFileNames(): array
 Obtaining the list of files in archive. The symbol of division of catalogs can be both a slash, and a backslash (depends on format).
 
 ```php
-public function getFileData($filename): stdClass
+public function getFileData($filename): ArchiveEntry
 ```
 
 Obtaining detailed information on the file in archive. The name of the file
 has to COINCIDE in ACCURACY with one stored in archive. It is restricted to
 change a symbol of division of catalogs. This method returns object of
-**stdClass** with following fields:
-* `string $filename` - file name in archive.
-* `integer $compressed_size` - the size of the PACKED contents of the file.
-* `integer $uncompressed_size` - the size of the UNPACKED contents of the file.
-* `integer $mtime` - time of change of the file (the integer value containing number
+_wapmorgan\UnifiedArchive\ArchiveEntry_ with following fields:
+* `string $path` - file name in archive.
+* `integer $compressedSize` - the size of the PACKED contents of the file.
+* `integer $uncompressedSize` - the size of the UNPACKED contents of the file.
+* `integer $modificationTime` - time of change of the file (the integer value containing number
 of seconds passed since the beginning of an era of Unix).
-* `boolean $is_compressed` - the boolean value, containing **true** if the file was
+* `boolean $isCompressed` - the boolean value, containing **true** if the file was
 packed with compression.
 
 ```php
@@ -310,7 +310,7 @@ Counts the size of all UNPACKED useful data (that is contents of all files
 listed in archive).
 
 ```php
-public function extractNode($outputFolder, $node = '/'): integer
+public function extractFiles($outputFolder, $node = '/'): integer
 ```
 Unpacks any of internal catalogs archive with full preservation of structure
 of catalogs in the catalog on a hard disk. Returns number of extracted files.
@@ -336,7 +336,7 @@ Tries to distinguish type of archive and returns a `UnifiedArchive` instance in
 case of success, **null** in case of failure.
 
 ```php
-static public function archiveNodes($nodes, $aname, $simulation = false): integer | boolean | array
+static public function archiveFiles($nodes, $aname, $simulation = false): integer | boolean | array
 ```
 Archives nodes transferred in the first argument. Returns number of the
 archived files in case of success, in case of failure - **false**.

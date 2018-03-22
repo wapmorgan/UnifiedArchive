@@ -661,7 +661,6 @@ class UnifiedArchive extends AbstractArchive
 	public function addFiles($fileOrFiles)
     {
         $files_list = self::createFilesList($fileOrFiles);
-        var_dump($files_list);
 
         switch ($this->type) {
             case self::ZIP:
