@@ -35,7 +35,7 @@ class CamApplication {
      */
     public function table($args) {
         $archive = $this->open($args['ARCHIVE']);
-        $dirs = array();
+
         echo sprintf('%51s | %4s | %-18s'.PHP_EOL, 'File name', 'Size', 'Date');
         echo str_repeat('-', 80).PHP_EOL;
         foreach ($archive->getFileNames() as $file) {
@@ -192,11 +192,8 @@ class CamApplication {
      */
     public function add($args) {
         $archive = $this->open($args['ARCHIVE']);
-        $added = 0;
-        foreach ($args['FILES_ON_DISK'] as $file) {
-            $added += $archive->addFiles($file);
-        }
-        echo 'Added '.$added.' file(s)'.PHP_EOL;
+        $added_files = $archive->addFiles($args['FILES_ON_DISK']);
+        echo 'Added '.$added_files.' file(s)'.PHP_EOL;
     }
 
     /**

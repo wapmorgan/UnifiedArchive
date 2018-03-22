@@ -109,9 +109,9 @@ abstract class AbstractArchive
 					// if is directory
 					if (is_dir($node))
 						self::importFilesFromDir(rtrim($node, '/*').'/*',
-							basename($node).'/', true, $files);
+							$node.'/', true, $files);
 					else if (is_file($node))
-						$files[basename($node)] = $node;
+						$files[$node] = $node;
 				}
 			} else {
 				// make files list
