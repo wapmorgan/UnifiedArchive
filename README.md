@@ -16,14 +16,13 @@ add, delete, merge, duplicate).
 3. [**Process of archive reading**](#process-of-archive-reading)
     1. **Archive modification**
     2. **Archive creation**
-4. [**Built-in archiver**](#built-in-archiver)
-5. [**Built-in console archive manager**](#built-in-console-archive-manager)
-6. [**API**](#api)
+4. [**Built-in console archive manager**](#built-in-console-archive-manager)
+5. [**API**](#api)
     1. **Object methods**
     2. **Static methods**
-7. [**PclZip-like interface**](#pclzip-like-interface)
-8. [**Formats support**](#formats-support)
-9. [**Changelog**](#changelog)
+6. [**PclZip-like interface**](#pclzip-like-interface)
+7. [**Formats support**](#formats-support)
+8. [**Changelog**](#changelog)
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
