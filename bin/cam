@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 use wapmorgan\UnifiedArchive\CamApplication;
+use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 $paths = [
 	// as a root package or phar
@@ -22,8 +23,9 @@ function init_composer(array $paths) {
 if (!init_composer($paths)) die('Run `composer install` firstly.'.PHP_EOL);
 if (!class_exists('\Docopt')) die('Install docopt firsly. Run `composer require docopt/docopt ~1.0`.'.PHP_EOL);
 
+$version = UnifiedArchive::VERSION;
 $doc = <<<DOC
-Universal console archive manager for Windows/Linux (part of UnifiedArchive).
+Universal console archive manager for Windows/Linux (part of UnifiedArchive $version).
 
 USAGE: cam (-l|--list)  ARCHIVE
        cam (-t|--table) ARCHIVE
@@ -37,17 +39,17 @@ USAGE: cam (-l|--list)  ARCHIVE
        cam (-f|--formats)
 
 ACTIONS:
-      -l(--list)    List files
-      -t(--table)   List files in table
+      -l(--list)    List files in archive
+      -t(--table)   List files as table in archive
       -i(--info)    Summary about archive
 
       -e(--extract) Extract from archive
 
-      -p(--print)   Print files' content
-      -d(--details) Details about files
-      -x(--delete)  Delete files
+      -p(--print)   Extract archive file content on terminal
+      -d(--details) Details about file in archive
+      -x(--delete)  Delete files from archive
 
-      -a(--add)     Add to archive
+      -a(--add)     Pack files to archive
       -c(--create)  Create new archive
 
 OPTIONS:
@@ -71,7 +73,7 @@ OPTIONS:
        Set output directory in that all files will be extracted.
 DOC;
 
-$args = Docopt::handle($doc);
+$args = Docopt::handle($doc, ['version' => UnifiedArchive::VERSION]);
 
 if ((isset($args['-f']) && $args['-f']) || (isset($args['--formats']) && $args['--formats'])) {
   echo 'Your system can work with following archive types:

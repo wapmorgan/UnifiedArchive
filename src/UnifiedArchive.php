@@ -9,6 +9,8 @@ use ZipArchive;
  */
 class UnifiedArchive extends AbstractArchive
 {
+    const VERSION = '0.1.x';
+
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
     const RAR = 'rar';
