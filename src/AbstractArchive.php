@@ -46,6 +46,18 @@ abstract class AbstractArchive
     abstract public function extractFiles($outputFolder, $files = '/');
 
     /**
+     * @param $outputFolder
+     * @param string $files
+     * @deprecated 0.1.0
+     * @see extractFiles()
+     * @return bool|int
+     */
+    public function extractNode($outputFolder, $files = '/')
+    {
+        return $this->extractFiles($outputFolder, $files);
+    }
+
+    /**
      * @param $fileOrFiles
      * @return bool|int
      */
@@ -93,6 +105,7 @@ abstract class AbstractArchive
      * @param $filesOrFiles
      * @param $archiveName
      * @deprecated 0.1.0
+     * @see archiveFiles()
      * @return mixed
      */
     public static function archiveNodes($filesOrFiles, $archiveName)
