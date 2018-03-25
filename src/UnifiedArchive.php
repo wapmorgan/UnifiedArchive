@@ -24,13 +24,13 @@ class UnifiedArchive extends AbstractArchive
     /** @var array */
     protected $files;
 
-	/** @var int */
+    /** @var int */
     protected $uncompressedFilesSize;
 
-	/** @var int */
+    /** @var int */
     protected $compressedFilesSize;
 
-	/** @var int */
+    /** @var int */
     protected $archiveSize;
 
     /** @var ZipArchive */
@@ -88,8 +88,8 @@ class UnifiedArchive extends AbstractArchive
         if ($ext == 'rar' && extension_loaded('rar'))
             return new self($fileName, self::RAR);
         if ((in_array($ext, ['tar', 'tgz', 'tbz2', 'txz']) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $fileName))
-			&& ($archive = TarArchive::open($fileName)) !== null)
-			return $archive;
+            && ($archive = TarArchive::open($fileName)) !== null)
+            return $archive;
         if ($ext == 'gz' && extension_loaded('zlib'))
             return new self($fileName, self::GZIP);
         if ($ext == 'bz2' && extension_loaded('bz2'))
@@ -108,7 +108,6 @@ class UnifiedArchive extends AbstractArchive
      *
      * @param string $fileName Filename
      * @param string $type Archive type.
-     * @throws \Archive7z\Exception
      * @throws Exception
      */
     public function __construct($fileName, $type)
@@ -119,15 +118,25 @@ class UnifiedArchive extends AbstractArchive
         switch ($this->type) {
             case self::ZIP:
                 $this->zip = new ZipArchive;
-                $this->zip->open($fileName);
+                $open_result = $this->zip->open($fileName);
+                if ($open_result !== true) {
+                    throw new Exception('Could not open Zip archive: '.$open_result);
+                }
                 break;
 
             case self::SEVEN_ZIP:
-                $this->seven_zip = new Archive7z($fileName);
+                try {
+                    $this->seven_zip = new Archive7z($fileName);
+                } catch (\Archive7z\Exception $e) {
+                    throw new Exception('Could not open 7Zip archive: '.$e->getMessage(), $e->getCode(), $e);
+                }
                 break;
 
             case self::RAR:
                 $this->rar = \RarArchive::open($fileName);
+                if ($this->rar === false) {
+                    throw new Exception('Could not open Rar archive');
+                }
                 $Entries = @$this->rar->getEntries();
                 if ($Entries === false) {
                     $this->rar->numberOfFiles =
@@ -148,6 +157,9 @@ class UnifiedArchive extends AbstractArchive
                 $this->files = [basename($fileName, '.gz')];
                 $this->gzipFilename = $fileName;
                 $this->gzipStat = gzip_stat($fileName);
+                if ($this->gzipStat === false) {
+                    throw new Exception('Could not open Gzip file');
+                }
                 $this->compressedFilesSize = $this->archiveSize;
                 $this->uncompressedFilesSize = $this->gzipStat['size'];
                 break;
@@ -217,7 +229,11 @@ class UnifiedArchive extends AbstractArchive
                 break;
 
             case self::CAB:
-                $this->cab = new \CabArchive($fileName);
+                try {
+                    $this->cab = new \CabArchive($fileName);
+                } catch (Exception $e) {
+                    throw new Exception('Could not open Cab archive: '.$e->getMessage(), $e->getCode(), $e);
+                }
                 foreach ($this->cab->getFileNames() as $file) {
                     $this->files[] = $file;
                     $file_info = $this->cab->getFileData($file);
@@ -658,7 +674,7 @@ class UnifiedArchive extends AbstractArchive
      * @return int|bool
      * @throws \Archive7z\Exception
      */
-	public function addFiles($fileOrFiles)
+    public function addFiles($fileOrFiles)
     {
         $files_list = self::createFilesList($fileOrFiles);
 
@@ -712,40 +728,40 @@ class UnifiedArchive extends AbstractArchive
         return count($this->files);
     }
 
-	/**
-	 * Creates an archive.
-	 * @param array $filesOrFiles
-	 * @param $archiveName
-	 * @param bool $fake
-	 * @return array|bool|int
-	 * @throws Exception
-	 */
-	public static function archiveFiles($filesOrFiles, $archiveName, $fake = false)
+    /**
+     * Creates an archive.
+     * @param array $filesOrFiles
+     * @param $archiveName
+     * @param bool $fake
+     * @return array|bool|int
+     * @throws Exception
+     */
+    public static function archiveFiles($filesOrFiles, $archiveName, $fake = false)
     {
-		$ext = strtolower(pathinfo($archiveName, PATHINFO_EXTENSION));
-		if ($ext == 'zip') $atype = self::ZIP;
-		else if ($ext == '7z') $atype = self::SEVEN_ZIP;
-		else if ($ext == 'rar') $atype = self::RAR;
-		else if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz'], true) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $archiveName))
-			return TarArchive::archiveFiles($filesOrFiles, $archiveName, $fake);
-		else if ($ext == 'gz') $atype = self::GZIP;
-		else if ($ext == 'bz2') $atype = self::BZIP;
-		else if ($ext == 'xz') $atype = self::LZMA;
-		else return false;
+        $ext = strtolower(pathinfo($archiveName, PATHINFO_EXTENSION));
+        if ($ext == 'zip') $atype = self::ZIP;
+        else if ($ext == '7z') $atype = self::SEVEN_ZIP;
+        else if ($ext == 'rar') $atype = self::RAR;
+        else if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz'], true) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $archiveName))
+            return TarArchive::archiveFiles($filesOrFiles, $archiveName, $fake);
+        else if ($ext == 'gz') $atype = self::GZIP;
+        else if ($ext == 'bz2') $atype = self::BZIP;
+        else if ($ext == 'xz') $atype = self::LZMA;
+        else return false;
 
         $files_list = self::createFilesList($filesOrFiles);
 
-		// fake creation: return archive data
-		if ($fake) {
-			$totalSize = 0;
-			foreach ($files_list as $fn) $totalSize += filesize($fn);
+        // fake creation: return archive data
+        if ($fake) {
+            $totalSize = 0;
+            foreach ($files_list as $fn) $totalSize += filesize($fn);
 
-			return array(
-				'totalSize' => $totalSize,
-				'numberOfFiles' => count($files_list),
-				'files' => $files_list,
-			);
-		}
+            return array(
+                'totalSize' => $totalSize,
+                'numberOfFiles' => count($files_list),
+                'files' => $files_list,
+            );
+        }
 
         switch ($atype) {
             case self::ZIP:

@@ -181,7 +181,8 @@ class CamApplication {
                 echo 'File '.$file.' is NOT in archive'.PHP_EOL;
                 continue;
             }
-            $archive->deleteFiles($file);
+            if ($archive->deleteFiles($file) === false)
+                echo 'Error file '.$file.PHP_EOL;
         }
     }
 
@@ -193,7 +194,10 @@ class CamApplication {
     public function add($args) {
         $archive = $this->open($args['ARCHIVE']);
         $added_files = $archive->addFiles($args['FILES_ON_DISK']);
-        echo 'Added '.$added_files.' file(s)'.PHP_EOL;
+        if ($added_files === false)
+            echo 'Error'.PHP_EOL;
+        else
+            echo 'Added '.$added_files.' file(s)'.PHP_EOL;
     }
 
     /**
@@ -209,7 +213,10 @@ class CamApplication {
             }
         } else {
             $archived_files = UnifiedArchive::archiveFiles($args['FILES_ON_DISK'], $args['ARCHIVE']);
-            echo 'Created archive ' . $args['ARCHIVE'] . ' with ' . $archived_files . ' file(s) of total size ' . implode('', $this->formatSize(filesize($args['ARCHIVE']))) . PHP_EOL;
+            if ($archived_files === false)
+                echo 'Error'.PHP_EOL;
+            else
+                echo 'Created archive ' . $args['ARCHIVE'] . ' with ' . $archived_files . ' file(s) of total size ' . implode('', $this->formatSize(filesize($args['ARCHIVE']))) . PHP_EOL;
         }
     }
 }

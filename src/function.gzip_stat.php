@@ -1,13 +1,13 @@
 <?php
 /**
  * @param string $file GZipped file
- * @return array|null Array with 'mtime' and 'size' items
+ * @return array|false Array with 'mtime' and 'size' items
  */
 function gzip_stat($file)
 {
     $fp = fopen($file, 'rb');
     if (filesize($file) < 18 || strcmp(fread($fp, 2), "\x1f\x8b")) {
-        return null;  // Not GZIP format (See RFC 1952)
+        return false;  // Not GZIP format (See RFC 1952)
     }
     $method = fread($fp, 1);
     $flags = fread($fp, 1);
