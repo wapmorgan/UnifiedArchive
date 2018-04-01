@@ -136,7 +136,7 @@ class CamApplication {
                 else $extracted += $result;
             }
             if ($errors > 0) echo 'Errored: '.$errors.PHP_EOL;
-            else echo 'Exctracted '.$extracted.' file(s) to '.$output.PHP_EOL;
+            if ($extracted > 0) echo 'Exctracted '.$extracted.' file(s) to '.$output.PHP_EOL;
         }
     }
 
