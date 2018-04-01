@@ -516,7 +516,7 @@ class UnifiedArchive extends AbstractArchive
      * Unpacks node with its content to disk. Pass any node from getHierarchy()
      * method.
      * @param $outputFolder
-     * @param string $files
+     * @param string|array|null $files
      * @return bool|int
      * @throws \Archive7z\Exception
      */
@@ -543,10 +543,17 @@ class UnifiedArchive extends AbstractArchive
             break;
 
             case self::SEVEN_ZIP:
+                if (!is_dir($outputFolder))
+                    mkdir($outputFolder);
                 $this->seven_zip->setOutputDirectory($outputFolder);
                 $count = 0;
                 if ($files === null) {
-                    return $this->seven_zip->extract();
+                    try {
+                        $this->seven_zip->extract();
+                        return $this->seven_zip->numFiles;
+                    } catch (Exception $e) {
+                        return false;
+                    }
                 } else {
                     foreach ($this->files as $fname) {
                         if (strpos($fname, $files) === 0) {

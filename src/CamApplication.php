@@ -118,14 +118,25 @@ class CamApplication {
     public function extract($args) {
         $archive = $this->open($args['ARCHIVE']);
         $output = getcwd();
-        if (isset($args['--output']))
-            $output = $args['--output'];
-        if (empty($args['FILES_IN_ARCHIVE']) || $args['FILES_IN_ARCHIVE'] == array('/') || $args['FILES_IN_ARCHIVE'] == array('*'))
-            $archive->extractFiles($output);
-        else {
+        if (isset($args['--output'])) {
+            if (!is_dir($args['--output']))
+                mkdir($args['--output']);
+            $output = realpath($args['--output']);
+        }
+
+        if (empty($args['FILES_IN_ARCHIVE']) || $args['FILES_IN_ARCHIVE'] == array('/') || $args['FILES_IN_ARCHIVE'] == array('*')) {
+            $result = $archive->extractFiles($output);
+            if ($result === false) echo 'Error occured'.PHP_EOL;
+            else echo 'Extracted '.$result.' file(s) to '.$output.PHP_EOL;
+        } else {
+            $extracted = $errors = 0;
             foreach ($args['FILES_IN_ARCHIVE'] as $file) {
-                $archive->extractFiles($output, $file);
+                $result = $archive->extractFiles($output, $file);
+                if ($result === false) $errors++;
+                else $extracted += $result;
             }
+            if ($errors > 0) echo 'Errored: '.$errors.PHP_EOL;
+            else echo 'Exctracted '.$extracted.' file(s) to '.$output.PHP_EOL;
         }
     }
 

@@ -40,19 +40,19 @@ abstract class AbstractArchive
 
     /**
      * @param $outputFolder
-     * @param string $files
+     * @param string|array|null $files
      * @return bool|int
      */
-    abstract public function extractFiles($outputFolder, $files = '/');
+    abstract public function extractFiles($outputFolder, $files = null);
 
     /**
      * @param $outputFolder
-     * @param string $files
+     * @param string|array|null $files
      * @deprecated 0.1.0
      * @see extractFiles()
      * @return bool|int
      */
-    public function extractNode($outputFolder, $files = '/')
+    public function extractNode($outputFolder, $files = null)
     {
         return $this->extractFiles($outputFolder, $files);
     }
