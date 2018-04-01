@@ -129,13 +129,14 @@ class CamApplication {
             if ($result === false) echo 'Error occured'.PHP_EOL;
             else echo 'Extracted '.$result.' file(s) to '.$output.PHP_EOL;
         } else {
-            $extracted = $errors = 0;
+            $extracted = 0;
+            $errored = [];
             foreach ($args['FILES_IN_ARCHIVE'] as $file) {
                 $result = $archive->extractFiles($output, $file);
-                if ($result === false) $errors++;
+                if ($result === false) $errored[] = $file;
                 else $extracted += $result;
             }
-            if ($errors > 0) echo 'Errored: '.$errors.PHP_EOL;
+            if (!empty($errored)) echo 'Errored: '.implode(', ', $errored).PHP_EOL;
             if ($extracted > 0) echo 'Exctracted '.$extracted.' file(s) to '.$output.PHP_EOL;
         }
     }
