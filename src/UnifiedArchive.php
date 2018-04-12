@@ -9,6 +9,8 @@ use ZipArchive;
  */
 class UnifiedArchive extends AbstractArchive
 {
+    const VERSION = '0.1.x';
+
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
     const RAR = 'rar';
@@ -108,7 +110,6 @@ class UnifiedArchive extends AbstractArchive
      *
      * @param string $fileName Filename
      * @param string $type Archive type.
-     * @throws \Archive7z\Exception
      * @throws Exception
      */
     public function __construct($fileName, $type)
@@ -119,15 +120,25 @@ class UnifiedArchive extends AbstractArchive
         switch ($this->type) {
             case self::ZIP:
                 $this->zip = new ZipArchive;
-                $this->zip->open($fileName);
+                $open_result = $this->zip->open($fileName);
+                if ($open_result !== true) {
+                    throw new Exception('Could not open Zip archive: '.$open_result);
+                }
                 break;
 
             case self::SEVEN_ZIP:
-                $this->seven_zip = new Archive7z($fileName);
+                try {
+                    $this->seven_zip = new Archive7z($fileName);
+                } catch (\Archive7z\Exception $e) {
+                    throw new Exception('Could not open 7Zip archive: '.$e->getMessage(), $e->getCode(), $e);
+                }
                 break;
 
             case self::RAR:
                 $this->rar = \RarArchive::open($fileName);
+                if ($this->rar === false) {
+                    throw new Exception('Could not open Rar archive');
+                }
                 $Entries = @$this->rar->getEntries();
                 if ($Entries === false) {
                     $this->rar->numberOfFiles =
@@ -148,6 +159,9 @@ class UnifiedArchive extends AbstractArchive
                 $this->files = [basename($fileName, '.gz')];
                 $this->gzipFilename = $fileName;
                 $this->gzipStat = gzip_stat($fileName);
+                if ($this->gzipStat === false) {
+                    throw new Exception('Could not open Gzip file');
+                }
                 $this->compressedFilesSize = $this->archiveSize;
                 $this->uncompressedFilesSize = $this->gzipStat['size'];
                 break;
@@ -217,7 +231,11 @@ class UnifiedArchive extends AbstractArchive
                 break;
 
             case self::CAB:
-                $this->cab = new \CabArchive($fileName);
+                try {
+                    $this->cab = new \CabArchive($fileName);
+                } catch (Exception $e) {
+                    throw new Exception('Could not open Cab archive: '.$e->getMessage(), $e->getCode(), $e);
+                }
                 foreach ($this->cab->getFileNames() as $file) {
                     $this->files[] = $file;
                     $file_info = $this->cab->getFileData($file);
@@ -492,7 +510,7 @@ class UnifiedArchive extends AbstractArchive
      * Unpacks node with its content to disk. Pass any node from getHierarchy()
      * method.
      * @param $outputFolder
-     * @param string $files
+     * @param string|array|null $files
      * @return bool|int
      * @throws \Archive7z\Exception
      */
@@ -517,10 +535,17 @@ class UnifiedArchive extends AbstractArchive
                 return false;
 
             case self::SEVEN_ZIP:
+                if (!is_dir($outputFolder))
+                    mkdir($outputFolder);
                 $this->seven_zip->setOutputDirectory($outputFolder);
                 $count = 0;
                 if ($files === null) {
-                    return $this->seven_zip->extract();
+                    try {
+                        $this->seven_zip->extract();
+                        return $this->seven_zip->numFiles;
+                    } catch (Exception $e) {
+                        return false;
+                    }
                 } else {
                     foreach ($this->files as $fname) {
                         if (strpos($fname, $files) === 0) {

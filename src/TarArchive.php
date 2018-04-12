@@ -132,6 +132,7 @@ class TarArchive extends AbstractArchive
 
         if ($this->tar instanceof Archive_Tar) {
             $index = array_search($fileName, $this->files, true);
+
             $Content = $this->tar->listContent();
             $data = $Content[$index];
             unset($Content);
@@ -142,9 +143,6 @@ class TarArchive extends AbstractArchive
         } else {
             /** @var \PharFileInfo $entry_info */
             $entry_info = $this->tar[$fileName];
-
-            var_dump($entry_info->getSize());
-
             return new ArchiveEntry($fileName, $entry_info->getSize(), filesize($entry_info->getPathname()),
                 0, $entry_info->isCompressed());
         }
@@ -157,7 +155,7 @@ class TarArchive extends AbstractArchive
      */
     public function getFileContent($fileName)
     {
-        if (!in_array($fileName, $this->files))
+        if (!in_array($fileName, $this->files, true))
             return false;
         if ($this->tar instanceof Archive_Tar)
             return $this->tar->extractInString($fileName);
@@ -181,7 +179,7 @@ class TarArchive extends AbstractArchive
 
     /**
      * @param $outputFolder
-     * @param string $files
+     * @param string|array|null $files
      * @return bool|int
      */
     public function extractFiles($outputFolder, $files = null)
@@ -197,10 +195,11 @@ class TarArchive extends AbstractArchive
             }
         }
 
-        if ($this->tar instanceof Archive_Tar)
+        if ($this->tar instanceof Archive_Tar) {
             $result = $this->tar->extractList($list, $outputFolder);
-        else
+        } else {
             $result = $this->tar->extractTo($outputFolder, $list, true);
+        }
 
         if ($result === true) {
             return count($list);

@@ -40,10 +40,22 @@ abstract class AbstractArchive
 
     /**
      * @param $outputFolder
-     * @param string $files
+     * @param string|array|null $files
      * @return bool|int
      */
-    abstract public function extractFiles($outputFolder, $files = '/');
+    abstract public function extractFiles($outputFolder, $files = null);
+
+    /**
+     * @param $outputFolder
+     * @param string|array|null $files
+     * @deprecated 0.1.0
+     * @see extractFiles()
+     * @return bool|int
+     */
+    public function extractNode($outputFolder, $files = null)
+    {
+        return $this->extractFiles($outputFolder, $files);
+    }
 
     /**
      * @param $fileOrFiles
@@ -83,15 +95,27 @@ abstract class AbstractArchive
     abstract public function countUncompressedFilesSize();
 
     /**
-     * @param $fileOrFiles
+     * @param string|string[]|array[]
      * @param $archiveName
      * @return mixed
      */
     abstract public static function archiveFiles($fileOrFiles, $archiveName);
 
     /**
-     * @param string|string[]|array[]
-     * @return array
+     * @param $filesOrFiles
+     * @param $archiveName
+     * @deprecated 0.1.0
+     * @see archiveFiles()
+     * @return mixed
+     */
+    public static function archiveNodes($filesOrFiles, $archiveName)
+    {
+        return static::archiveFiles($filesOrFiles, $archiveName);
+    }
+
+    /**
+     * @param $nodes
+     * @return array|bool
      */
     protected static function createFilesList($nodes)
     {

@@ -118,14 +118,26 @@ class CamApplication {
     public function extract($args) {
         $archive = $this->open($args['ARCHIVE']);
         $output = getcwd();
-        if (isset($args['--output']))
-            $output = $args['--output'];
-        if (empty($args['FILES_IN_ARCHIVE']) || $args['FILES_IN_ARCHIVE'] == array('/') || $args['FILES_IN_ARCHIVE'] == array('*'))
-            $archive->extractFiles($output);
-        else {
+        if (isset($args['--output'])) {
+            if (!is_dir($args['--output']))
+                mkdir($args['--output']);
+            $output = realpath($args['--output']);
+        }
+
+        if (empty($args['FILES_IN_ARCHIVE']) || $args['FILES_IN_ARCHIVE'] == array('/') || $args['FILES_IN_ARCHIVE'] == array('*')) {
+            $result = $archive->extractFiles($output);
+            if ($result === false) echo 'Error occured'.PHP_EOL;
+            else echo 'Extracted '.$result.' file(s) to '.$output.PHP_EOL;
+        } else {
+            $extracted = 0;
+            $errored = [];
             foreach ($args['FILES_IN_ARCHIVE'] as $file) {
-                $archive->extractFiles($output, $file);
+                $result = $archive->extractFiles($output, $file);
+                if ($result === false) $errored[] = $file;
+                else $extracted += $result;
             }
+            if (!empty($errored)) echo 'Errored: '.implode(', ', $errored).PHP_EOL;
+            if ($extracted > 0) echo 'Exctracted '.$extracted.' file(s) to '.$output.PHP_EOL;
         }
     }
 
@@ -181,7 +193,8 @@ class CamApplication {
                 echo 'File '.$file.' is NOT in archive'.PHP_EOL;
                 continue;
             }
-            $archive->deleteFiles($file);
+            if ($archive->deleteFiles($file) === false)
+                echo 'Error file '.$file.PHP_EOL;
         }
     }
 
@@ -193,7 +206,10 @@ class CamApplication {
     public function add($args) {
         $archive = $this->open($args['ARCHIVE']);
         $added_files = $archive->addFiles($args['FILES_ON_DISK']);
-        echo 'Added '.$added_files.' file(s)'.PHP_EOL;
+        if ($added_files === false)
+            echo 'Error'.PHP_EOL;
+        else
+            echo 'Added '.$added_files.' file(s)'.PHP_EOL;
     }
 
     /**
@@ -209,7 +225,10 @@ class CamApplication {
             }
         } else {
             $archived_files = UnifiedArchive::archiveFiles($args['FILES_ON_DISK'], $args['ARCHIVE']);
-            echo 'Created archive ' . $args['ARCHIVE'] . ' with ' . $archived_files . ' file(s) of total size ' . implode('', $this->formatSize(filesize($args['ARCHIVE']))) . PHP_EOL;
+            if ($archived_files === false)
+                echo 'Error'.PHP_EOL;
+            else
+                echo 'Created archive ' . $args['ARCHIVE'] . ' with ' . $archived_files . ' file(s) of total size ' . implode('', $this->formatSize(filesize($args['ARCHIVE']))) . PHP_EOL;
         }
     }
 }
