@@ -24,13 +24,13 @@ class UnifiedArchive extends AbstractArchive
     /** @var array */
     protected $files;
 
-	/** @var int */
+    /** @var int */
     protected $uncompressedFilesSize;
 
-	/** @var int */
+    /** @var int */
     protected $compressedFilesSize;
 
-	/** @var int */
+    /** @var int */
     protected $archiveSize;
 
     /** @var ZipArchive */
@@ -88,8 +88,8 @@ class UnifiedArchive extends AbstractArchive
         if ($ext === 'rar' && extension_loaded('rar'))
             return new self($fileName, self::RAR);
         if ((in_array($ext, ['tar', 'tgz', 'tbz2', 'txz']) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $fileName))
-			&& ($archive = TarArchive::open($fileName)) !== null)
-			return $archive;
+            && ($archive = TarArchive::open($fileName)) !== null)
+            return $archive;
         if ($ext === 'gz' && extension_loaded('zlib'))
             return new self($fileName, self::GZIP);
         if ($ext === 'bz2' && extension_loaded('bz2'))
@@ -646,7 +646,7 @@ class UnifiedArchive extends AbstractArchive
      * @return int|bool
      * @throws \Archive7z\Exception
      */
-	public function addFiles($fileOrFiles)
+    public function addFiles($fileOrFiles)
     {
         $files_list = self::createFilesList($fileOrFiles);
 
@@ -700,41 +700,41 @@ class UnifiedArchive extends AbstractArchive
         return count($this->files);
     }
 
-	/**
-	 * Creates an archive.
-	 * @param string|string[]|array $fileOrFiles
-	 * @param $archiveName
-	 * @param bool $emulate
-	 * @return array|bool|int
-	 * @throws Exception
-	 */
-	public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
+    /**
+     * Creates an archive.
+     * @param string|string[]|array $fileOrFiles
+     * @param $archiveName
+     * @param bool $emulate
+     * @return array|bool|int
+     * @throws Exception
+     */
+    public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
     {
-		$ext = strtolower(pathinfo($archiveName, PATHINFO_EXTENSION));
-		if ($ext === 'zip') $atype = self::ZIP;
-		else if ($ext === '7z') $atype = self::SEVEN_ZIP;
-		else if ($ext === 'rar') $atype = self::RAR;
-		else if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz'], true) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $archiveName))
-			return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
-		else if ($ext === 'gz') $atype = self::GZIP;
-		else if ($ext === 'bz2') $atype = self::BZIP;
-		else if ($ext === 'xz') $atype = self::LZMA;
-		else return false;
+        $ext = strtolower(pathinfo($archiveName, PATHINFO_EXTENSION));
+        if ($ext === 'zip') $atype = self::ZIP;
+        else if ($ext === '7z') $atype = self::SEVEN_ZIP;
+        else if ($ext === 'rar') $atype = self::RAR;
+        else if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz'], true) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $archiveName))
+            return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
+        else if ($ext === 'gz') $atype = self::GZIP;
+        else if ($ext === 'bz2') $atype = self::BZIP;
+        else if ($ext === 'xz') $atype = self::LZMA;
+        else return false;
 
         $files_list = self::createFilesList($fileOrFiles);
 
-		// fake creation: return archive data
-		if ($emulate) {
-			$totalSize = 0;
-			foreach ($files_list as $fn) $totalSize += filesize($fn);
+        // fake creation: return archive data
+        if ($emulate) {
+            $totalSize = 0;
+            foreach ($files_list as $fn) $totalSize += filesize($fn);
 
-			return array(
-				'totalSize' => $totalSize,
-				'numberOfFiles' => count($files_list),
-				'files' => $files_list,
+            return array(
+                'totalSize' => $totalSize,
+                'numberOfFiles' => count($files_list),
+                'files' => $files_list,
                 'type' => $atype,
-			);
-		}
+            );
+        }
 
         switch ($atype) {
             case self::ZIP:
