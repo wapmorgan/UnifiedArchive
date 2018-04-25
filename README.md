@@ -7,6 +7,7 @@ add, delete, merge, duplicate).
 [![Composer package](http://composer.network/badge/wapmorgan/unified-archive)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive)
+[![Daily Downloads](https://poser.pugx.org/wapmorgan/unified-archive/d/daily)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
 
 **Contents**:
@@ -203,38 +204,10 @@ There are some restrictions:
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular
 archive formats. This script is stored in `bin/cam`.
-To see all opportunities of this remarkable UnifiedArchive, together with source
-codes a `cam` script is delivered. It can become quite good replacement of
-standard OS commands (tar, unzip, rar, gzip, ..).
 
 It supports all formats that UnifiedArchive does and can be used to manipulate
-archives without other software.
-
-|  Format | Program usage                                       | Replacement                             |
-|---------| ----------------------------------------------------|-----------------------------------------|
-| tar     | `tar xv -C $DIRECTORY archive.tar.gz`               | `bin/cam -e --output=$DIRECTORY archive.tar.gz`  |
-| zip     | `unzip archive.zip -d $DIRECTORY`                   | `bin/cam -e --output=$DIRECTORY archive.zip`     |
-| rar     | `unrar x archive.rar $DIRECTORY`                    | `bin/cam -e --output=$DIRECTORY archive.rar`     |
-| gzip    | `gzip -d -k archive.gz && mv archive $DIRECTORY`    | `bin/cam -e --output=$DIRECTORY archive.gz`      |
-
-You see? Console archive manager itself defines type of archive and there is
-no need manually to choose type.
-
-We will continue and look at examples of replacement to number of
-utilities on one command:
-
-| Operation                              | Command                                                          | Notes                                                       |
-|----------------------------------------|------------------------------------------------------------------|-------------------------------------------------------------|
-| List nodes in archive                  | `bin/cam -l archivename`                                         |                                                             |
-| Table nodes in archive                 | `bin/cam -t archivename`                                         |                                                             |
-| Hierarchy of nodes in archive          | `bin/cam -h archivename`                                         |                                                             |
-| Details about a file                   | `bin/cam -d archivename file_in_archive`                         | Replaces `unzip -v archivename file_in_archive replacement` |
-| Extract a file                         | `bin/cam -e --output=output/ archivename file_in_archive`        | Replaces `unzip archivename file_in_archive`                |
-| Prints file content without extraction | `bin/cam -p archivename file_in_archive`                         | Replaces `unzip -p archivename file_in_archive`             |
-| Extract a folder                       | `bin/cam -e --output=output/ archivename /directory_in_archive/` | Replaces `unzip archivename "directory_in_archive/*"`       |
-| Archive information                    | `bin/cam -i archivename`                                         |                                                             |
-
-To check your configuration and check formats support launch it with `-f` flag in console:
+archives without other software. To check your configuration and check formats
+support launch it with `-f` flag in console:
 
 ```
 $ php bin/cam -f
@@ -284,13 +257,13 @@ Creation of object of a class.
 ```php
 public function getFileNames(): array
 ```
-Retrieving the list of files in archive. The catalogs separator can be both a slash, and a backslash (depends on archive format).
+Obtaining the list of files in archive. The symbol of division of catalogs can be both a slash, and a backslash (depends on format).
 
 ```php
 public function getFileData($filename): ArchiveEntry
 ```
 
-Retrieving detailed information on the file in archive. The name of the file
+Obtaining detailed information on the file in archive. The name of the file
 has to COINCIDE in ACCURACY with one stored in archive. It is restricted to
 change a symbol of division of catalogs. This method returns object of
 _wapmorgan\UnifiedArchive\ArchiveEntry_ with following fields:
@@ -357,7 +330,7 @@ after addition.
 ### Static methods
 
 ```php
-static public function open($filename): AbstractArchive | null
+static public function open($filename): UnifiedArchive | null
 ```
 Tries to distinguish type of archive and returns a `UnifiedArchive` instance in
 case of success, **null** in case of failure.
@@ -449,16 +422,17 @@ archives.
 
 ## Changelog
 
-| Version | Date         | Changelog                                                                                                                                                                               |
-|---------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 0.0.11  | Mar 21, 2018 | * Cleaned up some old code. * Added `ext-phar` adapter for **.tar** archives (if `pear/archive_tar` is not installed).                                                                |
-| 0.0.10  | Aug 7, 2017  | * Remove `docopt` from requirements.                                                                                                                                                    |
-| 0.0.9   | Jul 20, 2017 | * Added cam script.                                                                                                                                                                     |
-| 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration. * Removed die() in source code.|
-| 0.0.7   | Jan 14, 2017 | * Fixed using ereg function on PHP >7.                                                                                                                                                  |
+| Version | Date         | Changelog                                                                                                                                                                                |
+|---------|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0.1.0   | Apr 11, 2018 | * Renamed methods `extractNode()` -> `extractFiles()`, `archiveNodes()` -> `archiveFiles()`. * Added checks for archive format. * Changed `getFileData()` output.                                  |
+| 0.0.11  | Mar 21, 2018 | * Cleaned up some old code. * Added `ext-phar` adapter for `tar` archives (if `pear/archive_tar` is not installed).                                                                           |
+| 0.0.10  | Aug 7, 2017  | * Remove `docopt` from requirements.                                                                                                                                                       |
+| 0.0.9   | Jul 20, 2017 | * Added `cam` script.                                                                                                                                                                      |
+| 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration. * Removed die() in source code. |
+| 0.0.7   | Jan 14, 2017 | * Fixed using ereg function on PHP >7.                                                                                                                                                   |
 | 0.0.6   | Jan 9, 2017  | * Added functionality for adding files in archive. * Added functionality for deleting files from archive. * Fixed discovering 7z archive number of files and creating new archive.       |
-| 0.0.5   | Jan 8, 2017  | * Added support for `7z` (7zip) archives.                                                                                                                                               |
-| 0.0.4   | Jan 7, 2017  | * Added support for single-file `bz2` (bzip2) and `xz` (lzma2) archives.                                                                                                                |
-| 0.0.3   | Aug 18, 2015 | * Removed archive_tar from required packages.                                                                                                                                           |
-| 0.0.2   | May 27, 2014 | * Released under the MIT license                                                                                                                                                        |
-| 0.0.1   | May 26, 2014 | ---                                                                                                                                                                                     |
+| 0.0.5   | Jan 8, 2017  | * Added support for `7z` (7zip) archives.                                                                                                                                                  |
+| 0.0.4   | Jan 7, 2017  | * Added support for single-file `bz2` (bzip2) and `xz` (lzma2) archives.                                                                                                                     |
+| 0.0.3   | Aug 18, 2015 | * Removed archive_tar from required packages.                                                                                                                                            |
+| 0.0.2   | May 27, 2014 | * Released under the MIT license                                                                                                                                                         |
+| 0.0.1   | May 26, 2014 | ---                                                                                                                                                                                      |
