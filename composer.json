@@ -43,5 +43,21 @@
 		]
 	},
 	"bin": ["bin/cam"],
-	"minimum-stability": "dev"
+	"minimum-stability": "dev",
+	"extra": {
+        "phar-builder": {
+            "compression": "BZip2",
+            "name": "cam.phar",
+            "output-dir": "./",
+            "entry-point": "bin/cam",
+            "include": ["bin", "data"],
+            "events": {
+                "command.package.start" : "git describe --tags > bin/version.txt",
+                "command.package.end": "chmod +x cam.phar && rm bin/version.txt"
+            }
+        }
+    },
+    "scripts": {
+        "build": "phar-builder package composer.json"
+    }
 }
