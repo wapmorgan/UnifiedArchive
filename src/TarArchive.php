@@ -7,7 +7,7 @@ use Phar;
 use PharData;
 use RecursiveIteratorIterator;
 
-class TarArchive extends AbstractArchive
+class TarArchive extends BasicArchive
 {
     /** @var string */
     protected $path;

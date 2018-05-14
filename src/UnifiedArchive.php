@@ -7,7 +7,7 @@ use ZipArchive;
 /**
  * Class which represents archive in one of supported formats.
  */
-class UnifiedArchive extends AbstractArchive
+class UnifiedArchive extends BasicArchive
 {
     const VERSION = '0.1.x';
 
