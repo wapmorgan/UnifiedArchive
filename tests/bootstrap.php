@@ -16,6 +16,16 @@ class PhpUnitTestCase extends TestCase
         ['36140341386a8a46fc345d2068f1969f', 'fixtures.zip', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.zip'],
     ];
 
+    static public $fixtureContents = [
+        'folder' => [
+            'subfolder' => [
+                'subfile' => 'Content'."\n",
+            ],
+            'subdoc' => 'Subdoc',
+        ],
+        'doc' => 'Doc',
+    ];
+
     static public function getFixturePath($fixture)
     {
         return FIXTURES_DIR.'/'.$fixture;
