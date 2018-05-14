@@ -53,6 +53,19 @@ class TarArchive extends AbstractArchive
         return null;
     }
 
+    public static function canOpen($fileName)
+    {
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if (in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $fileName) && class_exists('\Archive_Tar'))
+            return true;
+
+        if ((in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $fileName)) && class_exists('\PharData'))
+            return true;
+
+        return false;
+    }
+
     /**
      * TarArchive constructor.
      * @param $fileName

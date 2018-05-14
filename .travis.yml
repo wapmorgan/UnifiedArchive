@@ -1,0 +1,21 @@
+language: php
+matrix:
+  include:
+    - php: 7.2
+    - php: 7.1
+    - php: 7.0
+    - php: 5.6
+    - php: 5.5
+    - php: 5.4
+
+install:
+  - phpenv config-rm xdebug.ini || echo "xdebug is not installed"
+
+  # install composer dependencies
+  - travis_retry composer self-update
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - travis_retry composer install
+
+script:
+  # PHP tests
+  - vendor/bin/phpunit --verbose

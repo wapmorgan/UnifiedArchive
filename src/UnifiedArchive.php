@@ -105,6 +105,33 @@ class UnifiedArchive extends AbstractArchive
         return null;
     }
 
+    public static function canOpen($fileName)
+    {
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz']) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $fileName))
+            return TarArchive::canOpen($fileName);
+
+        switch ($ext) {
+            case 'zip':
+                return extension_loaded('zip');
+            case '7z':
+                return class_exists('\Archive7z\Archive7z');
+            case 'rar':
+                return extension_loaded('rar');
+            case 'gz':
+                return extension_loaded('zlib');
+            case 'bz2':
+                return extension_loaded('bz2');
+            case 'xz':
+                return extension_loaded('xz');
+            case 'iso':
+                return class_exists('\CISOFile');
+            case 'cab':
+                return class_exists('\CabArchive');
+        }
+    }
+
     /**
      * Opens the file as one of supported formats.
      *
