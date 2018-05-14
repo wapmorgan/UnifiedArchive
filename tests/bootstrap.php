@@ -1,10 +1,9 @@
 <?php
-use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 define('FIXTURES_DIR', __DIR__ . '/fixtures');
 
-class PhpUnitTestCase extends TestCase
+class PhpUnitTestCase extends PHPUnit_Framework_TestCase
 {
     static public $fixtures = [
         ['c2bdd9989281738a637b3331dd415b8b', 'fixtures.7z', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.7z'],

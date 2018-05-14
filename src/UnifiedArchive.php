@@ -238,7 +238,6 @@ class UnifiedArchive extends AbstractArchive
                         foreach ($files as $file) {
                             if (in_array($file->strd_FileId, ['.', '..']))
                                 continue;
-
                             $this->files[$file->Location]
                                 = $directory . $file->strd_FileId;
                             $size += $file->DataLen;
@@ -251,7 +250,7 @@ class UnifiedArchive extends AbstractArchive
                                 ];
                         }
                     }
-                    break;
+                    // break;
                 }
                 $this->uncompressedFilesSize = $this->compressedFilesSize = $size;
 
