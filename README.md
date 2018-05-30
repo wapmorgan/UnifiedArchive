@@ -14,13 +14,13 @@ add, delete, merge, duplicate).
 ---
 1. [**Preamble**](#preamble)
 2. [**Installation**](#installation)
-3. [**Process of archive reading**](#process-of-archive-reading)
-    1. **Archive modification**
-    2. **Archive creation**
+3. [**Reading of archive**](#reading-of-archive)
+    1. [**Archive modification**](#archive-modification)
+    2. [**Archive creation**](#archive-creation)
 4. [**Built-in console archive manager**](#built-in-console-archive-manager)
 5. [**API**](#api)
-    1. **Object methods**
-    2. **Static methods**
+    1. [**UnifiedArchive**](#unifiedarchive)
+    2. [**ArchiveEntry**](#archiveentry)
 6. [**PclZip-like interface**](#pclzip-like-interface)
 7. [**Formats support**](#formats-support)
 8. [**Changelog**](#changelog)
@@ -42,7 +42,7 @@ Composer package: `wapmorgan/unified-archive`
 }
 ```
 
-## Process of archive reading
+## Reading of archive
 1. Import a class
 
     ```php
@@ -109,48 +109,44 @@ returns number of the extracted files, in case of failure - **false**. Initial
 and final symbol of division of catalogs are very important! Don't forget them.
 
     ```php
-    $archive->extractFiles(outputFolder, archiveFolder = '/');
+    $archive->extractFiles($outputFolder, $archiveFiles);
+
     // to unpack all contents of archive
-    $archive->extractFiles(tmpnam('/tmp', 'arc'));
+    $archive->extractFiles('output');
+
     // to unpack the src catalog in archive in the sources catalog on a disk
-    $archive->extractFiles(tmpnam('/tmp', 'sources'), '/src/');
+    $archive->extractFiles('output', '/src/');
+
     // to unpack the bookmarks catalog in archive in the sources catalog on a
     // disk
-    $archive->extractFiles(tmpnam('/tmp', 'sources'), '/bookmarks/');
+    $archive->extractFiles('output', '/bookmarks/');
     ```
 
 ### Archive modification
-To delete a single file from an archive:
+1. Deletion files from archive
 
-```php
-$archive->deleteFiles('README.md');
-```
+    ```php
+    // To delete a single file from an archive
+    $archive->deleteFiles('README.md');
 
-To delete multiple files from an archive
+    // To delete multiple files from an archive
+    $archive->deleteFiles(['README.md', 'MANIFEST.MF']);
+    ```
 
-```php
-$archive->deleteFiles(array('README.md', 'MANIFEST.MF'));
-```
+    In case of success the number of successfully deleted files will be returned.
 
-In case of success the number of successfully deleted files will be returned.
+2. Addition files to archive
 
-To add completely the catalog with all attached files and subdirectories:
+    ```php
+    // To add completely the catalog with all attached files and subdirectories
+    $archive->addFiles('/var/log');
 
-```php
-$archive->addFiles('/var/log');
-```
+    // To add one file
+    $archive->addFiles('/var/log/syslog');
 
-To add one file:
-
-```php
-$archive->addFiles('/var/log/syslog');
-```
-
-To add some files or catalogs:
-
-```php
-$archive->addFiles(array(directory, file, file2, ...));
-```
+    // To add some files or catalogs
+    $archive->addFiles([$directory, $file, $file2, ...]);
+    ```
 
 Full syntax of multiple files addition is described in
 [another document](extendedSyntax.md).
@@ -161,34 +157,28 @@ in new archive:
 
 ```php
 UnifiedArchive::archiveFiles('/var/log', 'Archive.zip');
-```
 
-To pack one file:
-
-```php
+// To pack one file
 UnifiedArchive::archiveFiles('/var/log/syslog', 'Archive.zip');
-```
 
-To pack some files or catalogs:
-
-```php
-UnifiedArchive::archiveFiles(array(directory, file, file2, ...), 'Archive.zip');
+// To pack some files or catalogs
+UnifiedArchive::archiveFiles([$directory, $file, $file2, ...], 'Archive.zip');
 ```
 
 Extended syntax with possibility of rewriting of paths and additional
 opportunities:
 
 ```php
-$nodes = array(
-    array('source' => '/etc/php5/fpm/php.ini', 'destination' => 'php.ini'),
-    array('source' => '/home/.../Dropbox/software/1/',
-        'destination' => 'SoftwareVersions/', 'recursive' => true),
-    array('source' => '/home/.../Dropbox/software/2/',
-        'destination' => 'SoftwareVersions/', 'recursive' => true),
-    array('source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'),
-    array('source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'),
-    array('source' => '/media/wapmorgan/.../Cats/*',
-        'destination' => 'Pictures/'),
+$nodes = [
+    ['source' => '/etc/php5/fpm/php.ini', 'destination' => 'php.ini'],
+    ['source' => '/home/.../Dropbox/software/1/',
+        'destination' => 'SoftwareVersions/', 'recursive' => true],
+    ['source' => '/home/.../Dropbox/software/2/',
+        'destination' => 'SoftwareVersions/', 'recursive' => true],
+    ['source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'],
+    ['source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'],
+    ['source' => '/media/wapmorgan/.../Cats/*',
+        'destination' => 'Pictures/'],
 );
 UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 ```
@@ -243,37 +233,33 @@ ACTIONS:
 ```
 
 ## API
-Create object of class `\wapmorgan\UnifiedArchive\UnifiedArchive` implementing
-the `\wapmorgan\UnifiedArchive\AbstractArchive` interface which has the
-following methods:
+### `UnifiedArchive`
+The main class representing an archive.
 
-### Object methods
+```php
+static public function open($filename): UnifiedArchive | null
+```
+Tries to detect type of archive and open it. Returns a  `UnifiedArchive`
+instance in case of success, `null` in case of failure.
 
 ```php
 public function __construct($filename, $type)
 ```
-Creation of object of a class.
+Creation of object of a class with specific type.
 
 ```php
 public function getFileNames(): array
 ```
-Obtaining the list of files in archive. The symbol of division of catalogs can be both a slash, and a backslash (depends on format).
+Obtaining the list of files in archive. The symbol of division of catalogs
+can be both a slash, and a backslash (depends on format).
 
 ```php
 public function getFileData($filename): ArchiveEntry
 ```
-
 Obtaining detailed information on the file in archive. The name of the file
-has to COINCIDE in ACCURACY with one stored in archive. It is restricted to
+has to be the same as one stored in archive. It is restricted to
 change a symbol of division of catalogs. This method returns object of
-_wapmorgan\UnifiedArchive\ArchiveEntry_ with following fields:
-* `string $path` - file name in archive.
-* `integer $compressedSize` - the size of the PACKED contents of the file.
-* `integer $uncompressedSize` - the size of the UNPACKED contents of the file.
-* `integer $modificationTime` - time of change of the file (the integer value containing number
-of seconds passed since the beginning of an era of Unix).
-* `boolean $isCompressed` - the boolean value, containing **true** if the file was
-packed with compression.
+_wapmorgan\UnifiedArchive\ArchiveEntry_.
 
 ```php
 public function getFileContent($filename): string
@@ -290,7 +276,7 @@ Counts total of all files in archive.
 ```php
 public function getArchiveSize(): integer
 ```
-Counts the archive size (the file size).
+Returns the archive size (the file size) in bytes.
 
 ```php
 public function getArchiveType(): string
@@ -300,14 +286,14 @@ Receives archive type (like `rar` or `zip`).
 ```php
 public function countCompressedFilesSize(): integer
 ```
-Counts the size of all PACKED useful data (that is contents of all files
-listed in archive).
+Counts the size of all PACKED useful data in bytes (that is contents of all
+files listed in archive).
 
 ```php
 public function countUncompressedFilesSize(): integer
 ```
-Counts the size of all UNPACKED useful data (that is contents of all files
-listed in archive).
+Counts the size of all UNPACKED useful data in bytes (that is contents of all
+files listed in archive).
 
 ```php
 public function extractFiles($outputFolder, $node = '/'): integer
@@ -322,26 +308,33 @@ Updates existing archive by removing files from it. Returns number of deleted
 files.
 
 ```php
-public function addFiles($nodes): integer
+public function addFiles($fileOrFiles): integer
 ```
 Updates existing archive by adding new files. Returns total number of files
 after addition.
 
-### Static methods
-
 ```php
-static public function open($filename): UnifiedArchive | null
+static public function archiveFiles($fileOrFiles, $aname, $simulation = false): integer | boolean | array
 ```
-Tries to distinguish type of archive and returns a `UnifiedArchive` instance in
-case of success, **null** in case of failure.
-
-```php
-static public function archiveFiles($nodes, $aname, $simulation = false): integer | boolean | array
-```
-Archives nodes transferred in the first argument. Returns number of the
+Archives files transferred in the first argument. Returns number of the
 archived files in case of success, in case of failure - **false**.
-If as the third argument is **true**, then the real archiving doesn't happen,
-and the result contains the list of the files chosen for an archiving, their number and total size.
+If as the third argument is **true**, then the real archiving doesn't
+happen, and the result contains the list of the files chosen for an
+archiving, their number and total size.
+
+### `ArchiveEntry`
+The class representing a file from archive as result of a call to `getFileData()`.
+It containts fields with file information:
+* `string $path` - file name in archive.
+* `boolean $isCompressed` - the boolean value, containing `true` if the file
+was packed with compression.
+* `integer $compressedSize` - the size of the PACKED contents of the file in
+bytes. If no compression used, will have the same value with next field.
+* `integer $uncompressedSize` - the size of the UNPACKED contents of the file
+in bytes.
+* `integer $modificationTime` - time of change of the file (the integer value
+containing number
+of seconds passed since the beginning of an era of Unix).
 
 ## PclZip-like interface
 UnifedArchive provides full realization of the interface known by popular archiving
