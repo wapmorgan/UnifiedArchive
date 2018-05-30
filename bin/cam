@@ -75,20 +75,6 @@ DOC;
 
 $args = Docopt::handle($doc, ['version' => UnifiedArchive::VERSION]);
 
-if ((isset($args['-f']) && $args['-f']) || (isset($args['--formats']) && $args['--formats'])) {
-  echo 'Your system can work with following archive types:
- - zip: '.(extension_loaded('zip') ? '+ (ok)' : '- (no, extension "zip" is not installed)').'
- - rar: '.(extension_loaded('rar') ? '+ (ok)' : '- (no, extension "rar" is not installed)').'
- - gzip: '.(extension_loaded('zlib') ? '+ (ok)' : '- (no, extension "zlib" is not installed)').'
- - bzip2: '.(extension_loaded('bz2') ? '+ (ok)' : '- (no, extension "bz2" is not installed)').'
- - lzma2: '.(extension_loaded('xz') ? '+ (ok)' : '- (no, extension "xz" is not installed)').'
-
- - 7zip: '.(class_exists('\Archive7z\Archive7z') ? '+ (ok)' : '- (no, package "gemorroj/archive7z" is not installed)').'
- - tar: '.(class_exists('\Archive_Tar') || class_exists('\PharData') ? '+ (ok)' : '- (no, extension "phar" nor package "pear/archive_tar" are not installed)').'
- - iso: '.(class_exists('\CISOFile') ? '+ (ok)' : '- (no, package "phpclasses/php-iso-file" is not installed)').PHP_EOL;
- exit(0);
-}
-
 $actions = array(
     'l:list' => 'listArray',
     't:table' => 'table',
@@ -99,6 +85,7 @@ $actions = array(
     'x:delete' => 'delete',
     'a:add' => 'add',
     'c:create' => 'create',
+    'f:formats' => 'checkFormats',
 );
 
 foreach ($actions as $arg => $v) {
