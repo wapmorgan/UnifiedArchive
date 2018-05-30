@@ -1,3 +1,6 @@
+# libraries
+vendor
+
 # test files
 *.rar
 *.zip
@@ -8,6 +11,14 @@
 *.tar.x
 *.tar.Z
 *.iso
+*.7z
+*.phar
 
 # composer lock
 composer.lock
+
+# phpunit configuration
+phpunit.xml
+
+# phpstorm
+.idea
