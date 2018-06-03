@@ -50,6 +50,15 @@ class TarArchive extends BasicArchive
         if (((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $fileName)) && class_exists('\Archive_Tar'))
             || ((in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $fileName)) && class_exists('\PharData')))
             return new self($fileName);
+
+        if (class_exists('\Archive_Tar') || class_exists('\PharData')) {
+            $mime_type = mime_content_type($fileName);
+            if ($mime_type === 'application/x-tar')
+                return new self($fileName, 'tar');
+            else if ($mime_type === 'application/x-gtar')
+                return new self($fileName, '.tgz');
+        }
+
         return null;
     }
 
@@ -109,7 +118,7 @@ class TarArchive extends BasicArchive
                 break;
             default:
                 if ($this->enabledPharData)
-                    $this->tar = new PharData($fileName);
+                    $this->tar = new PharData($fileName, 0, null, Phar::TAR);
                 else
                     $this->tar = new Archive_Tar($fileName);
                 break;

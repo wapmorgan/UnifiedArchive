@@ -102,6 +102,28 @@ class UnifiedArchive extends BasicArchive
             return new self($fileName, self::ISO);
         if ($ext === 'cab' && class_exists('\CabArchive'))
             return new self($fileName, self::CAB);
+
+        // checking by file mime
+        $mime_type = mime_content_type($fileName);
+        if ($mime_type === 'application/zip' && extension_loaded('zip'))
+            return new self($fileName, self::ZIP);
+        if ($mime_type === 'application/x-7z-compressed' && class_exists('\Archive7z\Archive7z'))
+            return new self($fileName, self::SEVEN_ZIP);
+        if ($mime_type === 'application/x-rar' && extension_loaded('rar'))
+            return new self($fileName, self::RAR);
+        if (in_array($mime_type, ['application/x-tar', 'application/x-gtar'], true) && ($archive = TarArchive::open($fileName)) !== null)
+            return $archive;
+        if ($mime_type === 'application/zlib' && extension_loaded('zlib'))
+            return new self($fileName, self::GZIP);
+        if ($mime_type === 'application/x-bzip2' && extension_loaded('bz2'))
+            return new self($fileName, self::BZIP);
+        if ($mime_type === 'application/x-lzma' && extension_loaded('xz'))
+            return new self($fileName, self::LZMA);
+        if ($mime_type === 'application/x-iso9660-image' && class_exists('\CISOFile'))
+            return new self($fileName, self::ISO);
+        if ($mime_type === 'application/vnd.ms-cab-compressed' && class_exists('\CabArchive'))
+            return new self($fileName, self::CAB);
+
         return null;
     }
 
