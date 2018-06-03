@@ -12,8 +12,13 @@ class CamApplication {
      */
     protected function open($file)
     {
+        if (!UnifiedArchive::canOpenArchive($file))
+            throw new Exception('Could not open archive '.$file.'. Try installing suggested packages or run `cam -f` to see formats support.');
+
         $archive = UnifiedArchive::open($file);
-        if ($archive === null) throw new Exception('Could not open archive '.$file);
+        if ($archive === null)
+            throw new Exception('Could not open archive '.$file);
+
         return $archive;
     }
 

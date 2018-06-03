@@ -183,6 +183,9 @@ class UnifiedArchive extends BasicArchive
                 case 'application/vnd.ms-cab-compressed':
                     return self::CAB;
             }
+
+            if ($type = TarArchive::detectArchiveType($fileName))
+                return $type;
         }
 
         return false;
