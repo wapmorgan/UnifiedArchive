@@ -71,6 +71,9 @@ class UnifiedArchive extends BasicArchive
     /** @var \CabArchive */
     protected $cab;
 
+    /** @var array */
+    static protected $enabledTypes = [];
+
     /**
      * Creates instance with right type.
      * @param  string $fileName Filename
@@ -81,77 +84,108 @@ class UnifiedArchive extends BasicArchive
      */
     public static function open($fileName)
     {
-        // determine archive type
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        if ($ext === 'zip' && extension_loaded('zip'))
-            return new self($fileName, self::ZIP);
-        if ($ext === '7z' && class_exists('\Archive7z\Archive7z'))
-            return new self($fileName, self::SEVEN_ZIP);
-        if ($ext === 'rar' && extension_loaded('rar'))
-            return new self($fileName, self::RAR);
-        if ((in_array($ext, ['tar', 'tgz', 'tbz2', 'txz']) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $fileName))
-            && ($archive = TarArchive::open($fileName)) !== null)
-            return $archive;
-        if ($ext === 'gz' && extension_loaded('zlib'))
-            return new self($fileName, self::GZIP);
-        if ($ext === 'bz2' && extension_loaded('bz2'))
-            return new self($fileName, self::BZIP);
-        if ($ext === 'xz' && extension_loaded('xz'))
-            return new self($fileName, self::LZMA);
-        if ($ext === 'iso' && class_exists('\CISOFile'))
-            return new self($fileName, self::ISO);
-        if ($ext === 'cab' && class_exists('\CabArchive'))
-            return new self($fileName, self::CAB);
+        self::checkRequirements();
 
-        // checking by file mime
-        $mime_type = mime_content_type($fileName);
-        if ($mime_type === 'application/zip' && extension_loaded('zip'))
-            return new self($fileName, self::ZIP);
-        if ($mime_type === 'application/x-7z-compressed' && class_exists('\Archive7z\Archive7z'))
-            return new self($fileName, self::SEVEN_ZIP);
-        if ($mime_type === 'application/x-rar' && extension_loaded('rar'))
-            return new self($fileName, self::RAR);
-        if (in_array($mime_type, ['application/x-tar', 'application/x-gtar'], true) && ($archive = TarArchive::open($fileName)) !== null)
-            return $archive;
-        if ($mime_type === 'application/zlib' && extension_loaded('zlib'))
-            return new self($fileName, self::GZIP);
-        if ($mime_type === 'application/x-bzip2' && extension_loaded('bz2'))
-            return new self($fileName, self::BZIP);
-        if ($mime_type === 'application/x-lzma' && extension_loaded('xz'))
-            return new self($fileName, self::LZMA);
-        if ($mime_type === 'application/x-iso9660-image' && class_exists('\CISOFile'))
-            return new self($fileName, self::ISO);
-        if ($mime_type === 'application/vnd.ms-cab-compressed' && class_exists('\CabArchive'))
-            return new self($fileName, self::CAB);
+        if (!file_exists($fileName) || !is_readable($fileName))
+            throw new Exception('Count not open file: '.$fileName);
 
-        return null;
+        $type = self::detectArchiveType($fileName);
+        if (!self::canOpenType($type)) {
+            if (TarArchive::canOpenType($type)) {
+                return TarArchive::open($fileName);
+            }
+            return null;
+        }
+
+        return new self($fileName, $type);
     }
 
-    public static function canOpen($fileName)
+    /**
+     * Checks whether archive can be opened with current system configuration
+     * @return boolean
+     */
+    public static function canOpenArchive($fileName)
     {
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        self::checkRequirements();
 
-        if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz']) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~', $fileName))
-            return TarArchive::canOpen($fileName);
+        $type = self::detectArchiveType($fileName);
+        if ($type !== false) {
+            if (self::canOpenType($type)) {
+                return true;
+            } else if (TarArchive::canOpenType($type)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether specific archive type can be opened with current system configuration
+     * @return boolean
+     */
+    public static function canOpenType($type)
+    {
+        self::checkRequirements();
+
+        return isset(self::$enabledTypes[$type]) ? self::$enabledTypes[$type] : false;
+    }
+
+    /**
+     * Detect archive type by its filename or content.
+     * @return string|boolean One of UnifiedArchive type constants OR false if type is not detected
+     */
+    public static function detectArchiveType($fileName, $contentCheck = true)
+    {
+        // by file name
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz']) || preg_match('~\.tar\.(gz|bz2|xz|z)$~', strtolower($fileName))) {
+            return TarArchive::detectArchiveType($fileName);
+        }
 
         switch ($ext) {
             case 'zip':
-                return extension_loaded('zip');
+                return self::ZIP;
             case '7z':
-                return class_exists('\Archive7z\Archive7z');
+                return self::SEVEN_ZIP;
             case 'rar':
-                return extension_loaded('rar');
+                return self::RAR;
             case 'gz':
-                return extension_loaded('zlib');
+                return self::GZIP;
             case 'bz2':
-                return extension_loaded('bz2');
+                return self::BZIP;
             case 'xz':
-                return extension_loaded('xz');
+                return self::LZMA;
             case 'iso':
-                return class_exists('\CISOFile');
+                return self::ISO;
             case 'cab':
-                return class_exists('\CabArchive');
+                return self::CAB;
         }
+
+        // by content
+        if ($contentCheck) {
+            $mime_type = mime_content_type($fileName);
+            switch ($mime_type) {
+                case 'application/zip':
+                    return self::ZIP;
+                case 'application/x-7z-compressed':
+                    return self::SEVEN_ZIP;
+                case 'application/x-rar':
+                    return self::RAR;
+                case 'application/zlib':
+                    return self::GZIP;
+                case 'application/x-bzip2':
+                    return self::BZIP;
+                case 'application/x-lzma':
+                    return self::LZMA;
+                case 'application/x-iso9660-image':
+                    return self::ISO;
+                case 'application/vnd.ms-cab-compressed':
+                    return self::CAB;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -163,6 +197,8 @@ class UnifiedArchive extends BasicArchive
      */
     public function __construct($fileName, $type)
     {
+        self::checkRequirements();
+
         $this->type = $type;
         $this->archiveSize = filesize($fileName);
 
@@ -783,16 +819,11 @@ class UnifiedArchive extends BasicArchive
      */
     public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
     {
-        $ext = strtolower(pathinfo($archiveName, PATHINFO_EXTENSION));
-        if ($ext === 'zip') $atype = self::ZIP;
-        else if ($ext === '7z') $atype = self::SEVEN_ZIP;
-        else if ($ext === 'rar') $atype = self::RAR;
-        else if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz'], true) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $archiveName))
+        $atype = self::detectArchiveType($archiveName, false);
+        if (in_array($atype, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
             return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
-        else if ($ext === 'gz') $atype = self::GZIP;
-        else if ($ext === 'bz2') $atype = self::BZIP;
-        else if ($ext === 'xz') $atype = self::LZMA;
-        else return false;
+        if ($atype === false)
+            return false;
 
         $files_list = self::createFilesList($fileOrFiles);
 
@@ -905,6 +936,23 @@ class UnifiedArchive extends BasicArchive
                 }
                 $this->seven_zip->numFiles = count($this->files);
                 break;
+        }
+    }
+
+    /**
+     *
+     */
+    protected static function checkRequirements()
+    {
+        if (empty(self::$enabledTypes)) {
+            self::$enabledTypes[self::ZIP] = extension_loaded('zip');
+            self::$enabledTypes[self::SEVEN_ZIP] = class_exists('\Archive7z\Archive7z');
+            self::$enabledTypes[self::RAR] = extension_loaded('rar');
+            self::$enabledTypes[self::GZIP] = extension_loaded('zlib');
+            self::$enabledTypes[self::BZIP] = extension_loaded('bz2');
+            self::$enabledTypes[self::LZMA] = extension_loaded('xz');
+            self::$enabledTypes[self::ISO] = class_exists('\CISOFile');
+            self::$enabledTypes[self::CAB] = class_exists('\CabArchive');
         }
     }
 }

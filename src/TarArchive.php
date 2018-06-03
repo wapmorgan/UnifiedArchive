@@ -9,6 +9,12 @@ use RecursiveIteratorIterator;
 
 class TarArchive extends BasicArchive
 {
+    const TAR = 'tar';
+    const TAR_GZIP = 'tgz';
+    const TAR_BZIP = 'tbz2';
+    const TAR_LZMA = 'txz';
+    const TAR_LZW = 'tar.z';
+
     /** @var string */
     protected $path;
 
@@ -16,10 +22,10 @@ class TarArchive extends BasicArchive
     protected $tar;
 
     /** @var bool */
-    protected $enabledPearTar;
+    static protected $enabledPearTar;
 
     /** @var bool */
-    protected $enabledPharData;
+    static protected $enabledPharData;
 
     /** @var int */
     protected $numberOfFiles;
@@ -46,31 +52,92 @@ class TarArchive extends BasicArchive
      */
     public static function open($fileName)
     {
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        if (((in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $fileName)) && class_exists('\Archive_Tar'))
-            || ((in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $fileName)) && class_exists('\PharData')))
-            return new self($fileName);
+        self::checkRequirements();
 
-        if (class_exists('\Archive_Tar') || class_exists('\PharData')) {
-            $mime_type = mime_content_type($fileName);
-            if ($mime_type === 'application/x-tar')
-                return new self($fileName, 'tar');
-            else if ($mime_type === 'application/x-gtar')
-                return new self($fileName, '.tgz');
+        if (!file_exists($fileName) || !is_readable($fileName))
+            throw new Exception('Count not open file: '.$fileName);
+
+        $type = self::detectArchiveType($fileName);
+
+        if (!self::canOpenType($type)) {
+            return null;
         }
 
-        return null;
+        return new self($fileName, $type);
     }
 
-    public static function canOpen($fileName)
+    /**
+     * Checks whether archive can be opened with current system configuration
+     * @return boolean
+     */
+    public static function canOpenArchive($fileName)
     {
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        self::checkRequirements();
 
-        if (in_array($ext, array('tar', 'tgz', 'tbz2', 'txz')) || preg_match('~\.tar\.(gz|bz2|xz|Z)$~i', $fileName) && class_exists('\Archive_Tar'))
-            return true;
+        $type = self::detectArchiveType($fileName);
+        if ($type !== false) {
+            return self::canOpenType($type);
+        }
 
-        if ((in_array($ext, array('tar', 'tgz', 'tbz2')) || preg_match('~\.tar\.(gz|bz2)$~i', $fileName)) && class_exists('\PharData'))
-            return true;
+        return false;
+    }
+
+    /**
+     * Detect archive type by its filename or content.
+     * @return string|boolean One of TarArchive type constants OR false if type is not detected
+     */
+    public static function detectArchiveType($fileName, $contentCheck = true)
+    {
+        // by file name
+        if (preg_match('~\.(?<ext>tar|tgz|tbz2|txz|tar\.(gz|bz2|xz|z))$~', strtolower($fileName), $match)) {
+            switch ($match['ext']) {
+                case 'tar':
+                    return self::TAR;
+                case 'tgz':
+                case 'tar.gz':
+                    return self::TAR_GZIP;
+                case 'tbz2':
+                case 'tar.bz2':
+                    return self::TAR_BZIP;
+                case 'txz':
+                case 'tar.xz':
+                    return self::TAR_LZMA;
+                case 'tar.z':
+                    return self::TAR_LZW;
+            }
+        }
+
+        // by content
+        if ($contentCheck) {
+            $mime_type = mime_content_type($fileName);
+            switch ($mime_type) {
+                case 'application/x-tar':
+                    return self::TAR;
+                case 'application/x-gtar':
+                    return self::TAR_GZIP;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether specific archive type can be opened with current system configuration
+     * @return boolean
+     */
+    public static function canOpenType($type)
+    {
+        self::checkRequirements();
+        switch ($type) {
+            case self::TAR:
+            case self::TAR_GZIP:
+            case self::TAR_BZIP:
+                return self::$enabledPearTar || self::$enabledPharData;
+
+            case self::TAR_LZMA:
+            case self::TAR_LZW:
+                return self::$enabledPearTar;
+        }
 
         return false;
     }
@@ -83,41 +150,43 @@ class TarArchive extends BasicArchive
      */
     public function __construct($fileName, $type = null)
     {
-        $this->enabledPearTar = class_exists('\Archive_Tar');
-        $this->enabledPharData = class_exists('\PharData');
+        self::checkRequirements();
+
         $this->path = realpath($fileName);
 
-        if (!$this->enabledPharData && !$this->enabledPearTar)
+        if (!self::$enabledPharData && !self::$enabledPearTar)
             throw new Exception('Archive_Tar nor PharData not available');
 
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        switch ($ext) {
+        if ($type === null)
+            $type = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        switch ($type) {
             case 'gz':
             case 'tgz':
-                if ($this->enabledPharData)
+                if (self::$enabledPharData)
                     $this->tar = new PharData($fileName);
                 else
                     $this->tar = new Archive_Tar($fileName, 'gz');
                 break;
             case 'bz2':
             case 'tbz2':
-                if ($this->enabledPharData)
+                if (self::$enabledPharData)
                     $this->tar = new PharData($fileName);
                 else
                     $this->tar = new Archive_Tar($fileName, 'bz2');
                 break;
             case 'xz':
-                if (!$this->enabledPharData)
+                if (!self::$enabledPharData)
                     throw new Exception('Archive_Tar not available');
                 $this->tar = new Archive_Tar($fileName, 'lzma2');
                 break;
             case 'z':
-                if (!$this->enabledPharData)
+                if (!self::$enabledPharData)
                     throw new Exception('Archive_Tar not available');
                 $this->tar = new Archive_Tar('compress.lzw://'.$fileName);
                 break;
             default:
-                if ($this->enabledPharData)
+                if (self::$enabledPharData)
                     $this->tar = new PharData($fileName, 0, null, Phar::TAR);
                 else
                     $this->tar = new Archive_Tar($fileName);
@@ -352,7 +421,7 @@ class TarArchive extends BasicArchive
             );
         }
 
-        if (class_exists('\Archive_Tar')) {
+        if (self::$enabledPearTar) {
             $compression = null;
             switch (strtolower(pathinfo($archiveName, PATHINFO_EXTENSION))) {
                 case 'gz':
@@ -389,7 +458,7 @@ class TarArchive extends BasicArchive
                 }
             }
             $tar = null;
-        } else if (class_exists('\PharData')) {
+        } else if (self::$enabledPharData) {
             if (preg_match('~^(.+)\.(tar\.(gz|bz2))$~i', $archiveName, $match)) {
                 $ext = $match[2];
                 $basename = $match[1];
@@ -459,6 +528,14 @@ class TarArchive extends BasicArchive
                 $this->compressedFilesSize += $file->getCompressedSize();
                 $this->uncompressedFilesSize += filesize($file->getPathname());
             }
+        }
+    }
+
+    protected static function checkRequirements()
+    {
+        if (self::$enabledPharData === null || self::$enabledPearTar === null) {
+            self::$enabledPearTar = class_exists('\Archive_Tar');
+            self::$enabledPharData = class_exists('\PharData');
         }
     }
 }
