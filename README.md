@@ -193,14 +193,14 @@ There are some restrictions:
 
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular
-archive formats. This script is stored in `bin/cam`.
+archive formats. This script is stored in `vendor/bin/cam`.
 
 It supports all formats that UnifiedArchive does and can be used to manipulate
 archives without other software. To check your configuration and check formats
 support launch it with `-f` flag in console:
 
 ```
-$ php bin/cam -f
+$ php vendor/bin/cam -f
 ```
 
 ### Full usage help
