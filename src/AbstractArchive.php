@@ -11,6 +11,19 @@ interface AbstractArchive
 
     /**
      * @param string|string[]|array[]
+     * @example If passed just one string:
+     *  1. `archiveFiles('path/to/filename.txt', 'archive.zip')` => file will be stored as 'filename.txt' in the root of archive
+     *  2. `archiveFiles('path/to/dir', 'archive.zip')` => directory contents will be stored in the root of archive
+     * @example If passed array [key => value]:
+     *  ```
+     *  archiveFiles([
+     *          'path/to/filename.txt',
+     *          'path/to/dir',
+     *          'path/to/another_filename.txt' => 'filename.txt',
+     *          'path/to/another_dir' => 'directory',
+     *          'path/to/third_dir' => '',
+     *      ], 'archive.zip')
+     *  ``` => for 2 first entries catalogs structure will be saved, 3 and 4 will be saved as `filename.txt` and `directory` respectively, all files from 5 directory will be stored in archive root
      * @param $archiveName
      * @return mixed
      */

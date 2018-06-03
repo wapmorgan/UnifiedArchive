@@ -1,8 +1,7 @@
-UnifiedArchive - unified interface to any archive (zip # 7z # rar # gz # bz2 #
-xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660) for listing,
-reading, extracting and creation + built-in console archive manager + fully
-implemented PclZip-like interface (create, listContent, extract, properties,
-add, delete, merge, duplicate).
+UnifiedArchive - unified interface to all popular archive formats (zip # 7z #
+rar # gz # bz2 # xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660)
+for listing, reading, extracting and creation + built-in console archive
+manager + PclZip-like interface for zip archives.
 
 [![Composer package](http://composer.network/badge/wapmorgan/unified-archive)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive)
@@ -86,21 +85,21 @@ returned. In case of failure - **null**
 only names of files)
 
     ```php
-    var_dump($archive->getFileNames());
+    var_dump($archive->getFileNames()); // array with files list
     ```
 
 4. Further, you can get additional information about concrete file by
 `getFileData()` method
 
     ```php
-    var_dump($archive->getFileData('README.md'));
+    var_dump($archive->getFileData('README.md')); // ArchiveEntry with file information
     ```
 
 5. Further, you can get raw file contents by `getFileContent()`
 method
 
     ```php
-    var_dump($archive->getFileContent('README.md'));
+    var_dump($archive->getFileContent('README.md')); // string
     ```
 
 6. Further, you can unpack any internal catalog or the whole archive with files
@@ -138,18 +137,15 @@ and final symbol of division of catalogs are very important! Don't forget them.
 2. Addition files to archive
 
     ```php
-    // To add completely the catalog with all attached files and subdirectories
+    // To add completely the catalog with all attached files and subdirectories (all directory contents will be stored in archive root)
     $archive->addFiles('/var/log');
 
-    // To add one file
+    // To add one file (will be stored as one file "syslog")
     $archive->addFiles('/var/log/syslog');
 
-    // To add some files or catalogs
+    // To add some files or catalogs (all catalogs structure in paths will be kept)
     $archive->addFiles([$directory, $file, $file2, ...]);
     ```
-
-Full syntax of multiple files addition is described in
-[another document](extendedSyntax.md).
 
 ### Archive creation
 To pack completely the catalog with all attached files and subdirectories
@@ -165,31 +161,19 @@ UnifiedArchive::archiveFiles('/var/log/syslog', 'Archive.zip');
 UnifiedArchive::archiveFiles([$directory, $file, $file2, ...], 'Archive.zip');
 ```
 
-Extended syntax with possibility of rewriting of paths and additional
-opportunities:
+Extended syntax with possibility of paths rewriting:
 
 ```php
 $nodes = [
-    ['source' => '/etc/php5/fpm/php.ini', 'destination' => 'php.ini'],
-    ['source' => '/home/.../Dropbox/software/1/',
-        'destination' => 'SoftwareVersions/', 'recursive' => true],
-    ['source' => '/home/.../Dropbox/software/2/',
-        'destination' => 'SoftwareVersions/', 'recursive' => true],
-    ['source' => 'pictures/other/cats/*', 'destination' => 'Pictures/'],
-    ['source' => '~/Desktop/catties/*', 'destination' => 'Pictures/'],
-    ['source' => '/media/wapmorgan/.../Cats/*',
-        'destination' => 'Pictures/'],
-);
+    '/etc/php5/fpm/php.ini' => 'php.ini',
+    '/media/pictures/other/cats' => 'Pictures', // all files from `cats` dir will be stored in Pictures
+    '/media/pictures/Cats' => 'Pictures', // the same
+    '/home/user/Desktop/catties' => 'Pictures',  // the same
+    '/home/user/Dropbox/software/1' => 'SoftwareVersions', // all files will be stored in SoftwareVersions
+    '/home/user/Dropbox/software/2' => 'SoftwareVersions', // the same
+];
 UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 ```
-
-[**Complete description of extended syntax with examples and explanations**.](extendedSyntax.md).
-
-### Restrictions
-There are some restrictions:
-
-1. If the `source` doesn't end with `/` or `*`, it means to be a file.
-2. If the `source` is a directory, destination should be a directory (to end with "/").
 
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular

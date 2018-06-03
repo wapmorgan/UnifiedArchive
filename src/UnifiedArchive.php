@@ -822,6 +822,9 @@ class UnifiedArchive extends BasicArchive
      */
     public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
     {
+        if (file_exists($archiveName))
+            throw new Exception('Archive '.$archiveName.' already exists!');
+
         $atype = self::detectArchiveType($archiveName, false);
         if (in_array($atype, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
             return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);

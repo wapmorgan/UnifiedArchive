@@ -36,55 +36,68 @@ abstract class BasicArchive implements AbstractArchive
         // -1: empty folder
         $files = array();
         if (is_array($nodes)) {
-            // check integrity
-            $strings = 0;// 1 - strings; 2 - arrays
-            foreach ($nodes as $node) $strings = (is_string($node) ?
-                $strings + 1 : $strings - 1);
-            if ($strings > 0 && $strings != count($nodes)) return false;
 
-            if ($strings == count($nodes)) {
-                foreach ($nodes as $node) {
-                    // if is directory
-                    if (is_dir($node))
-                        self::importFilesFromDir(rtrim($node, '/*').'/*',
-                            $node.'/', true, $files);
-                    else if (is_file($node))
-                        $files[$node] = $node;
-                }
-            } else {
-                // make files list
-                foreach ($nodes as $node) {
-                    if (is_array($node)) $node = (object) $node;
-                    // put directory inside another directory in archive
-                    if (substr($node->source, -1) == '/') {
-                        if (substr($node->destination, -1) != '/')
-                            return false;
-                        if (!isset($node->recursive) || !$node->recursive) {
-                            self::importFilesFromDir($node->source.'*',
-                                $node->destination.basename($node->source).'/',
-                                false, $files);
-                        } else {
-                            self::importFilesFromDir($node->source.'*',
-                                $node->destination.basename($node->source).'/',
-                                true, $files);
-                        }
-                    } elseif (substr($node->source, -1) == '*') {
-                        if (substr($node->destination, -1) != '/')
-                            return false;
-                        if (!isset($node->recursive) || !$node->recursive) {
-                            self::importFilesFromDir($node->source,
-                                $node->destination, false, $files);
-                        } else {
-                            self::importFilesFromDir($node->source,
-                                $node->destination, true, $files);
-                        }
-                    } else { // put regular file inside directory in archive
-                        if (!is_file($node->source))
-                            return false;
-                        $files[$node->destination] = $node->source;
-                    }
-                }
+            // // check integrity
+            // $strings = 0;// 1 - strings; 2 - arrays
+            // foreach ($nodes as $node) $strings = (is_string($node) ?
+            //     $strings + 1 : $strings - 1);
+            // if ($strings > 0 && $strings != count($nodes)) return false;
+
+            foreach ($nodes as $source => $destination) {
+                if (is_numeric($source))
+                    $source = $destination;
+
+                // if is directory
+                if (is_dir($source))
+                    self::importFilesFromDir(rtrim($source, '/*').'/*',
+                        $destination.'/', true, $files);
+                else if (is_file($source))
+                    $files[$destination] = $source;
             }
+
+            // if ($strings == count($nodes)) {
+            //     foreach ($nodes as $node) {
+            //         // if is directory
+            //         if (is_dir($node))
+            //             self::importFilesFromDir(rtrim($node, '/*').'/*',
+            //                 $node.'/', true, $files);
+            //         else if (is_file($node))
+            //             $files[$node] = $node;
+            //     }
+            // } else {
+            //     // make files list
+            //     foreach ($nodes as $node) {
+            //         if (is_array($node)) $node = (object) $node;
+            //         // put directory inside another directory in archive
+            //         if (substr($node->source, -1) == '/') {
+            //             if (substr($node->destination, -1) != '/')
+            //                 return false;
+            //             if (!isset($node->recursive) || !$node->recursive) {
+            //                 self::importFilesFromDir($node->source.'*',
+            //                     $node->destination.basename($node->source).'/',
+            //                     false, $files);
+            //             } else {
+            //                 self::importFilesFromDir($node->source.'*',
+            //                     $node->destination.basename($node->source).'/',
+            //                     true, $files);
+            //             }
+            //         } elseif (substr($node->source, -1) == '*') {
+            //             if (substr($node->destination, -1) != '/')
+            //                 return false;
+            //             if (!isset($node->recursive) || !$node->recursive) {
+            //                 self::importFilesFromDir($node->source,
+            //                     $node->destination, false, $files);
+            //             } else {
+            //                 self::importFilesFromDir($node->source,
+            //                     $node->destination, true, $files);
+            //             }
+            //         } else { // put regular file inside directory in archive
+            //             if (!is_file($node->source))
+            //                 return false;
+            //             $files[$node->destination] = $node->source;
+            //         }
+            //     }
+            // }
         } elseif (is_string($nodes)) {
             // if is directory
             if (is_dir($nodes))
@@ -110,7 +123,7 @@ abstract class BasicArchive implements AbstractArchive
         if ($destination != '')
             $map[$destination] = null;
         foreach (glob($source, GLOB_MARK) as $node) {
-            if (substr($node, -1) === '/' && $recursive) {
+            if (in_array(substr($node, -1), ['/', '\\'], true) && $recursive) {
                 self::importFilesFromDir($node.'*',
                     $destination.basename($node).'/', $recursive, $map);
             } elseif (is_file($node) && is_readable($node)) {
