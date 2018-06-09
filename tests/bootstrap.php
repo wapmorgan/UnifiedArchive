@@ -5,7 +5,14 @@ define('FIXTURES_DIR', __DIR__ . '/fixtures');
 
 class PhpUnitTestCase extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @var array Array of arrays[md5_hash, filename, remote file]
+     */
     static public $fixtures;
+
+    /**
+     * @var array List of directories/files and content stored in archive
+     */
     static public $fixtureContents;
 
     static public function getFixturePath($fixture)

@@ -2,7 +2,13 @@
 use wapmorgan\UnifiedArchive\TarArchive;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
-class UnifiedArchiveTest extends PhpUnitTestCase {
+class UnifiedArchiveTest extends PhpUnitTestCase
+{
+
+    public function getFixtures()
+    {
+        return self::$fixtures;
+    }
 
     public function archiveTypes()
     {
@@ -29,34 +35,72 @@ class UnifiedArchiveTest extends PhpUnitTestCase {
         $this->assertEquals($type, UnifiedArchive::detectArchiveType($filename));
     }
 
-    public function testOpen()
+    /**
+     * @dataProvider getFixtures
+     * @return bool
+     */
+    public function testOpen($md5hash, $filename, $remoteUrl)
     {
-        foreach (self::$fixtures as $fixture) {
-            $class = (strpos($fixture[1], '.tar') !== false) ? 'wapmorgan\UnifiedArchive\TarArchive' : 'wapmorgan\UnifiedArchive\UnifiedArchive';
+        $class = (strpos($filename, '.tar') !== false)
+            ? 'wapmorgan\UnifiedArchive\TarArchive'
+            : 'wapmorgan\UnifiedArchive\UnifiedArchive';
 
-            if (!UnifiedArchive::canOpenArchive($fixture[1]))
-                continue;
+        $full_filename = self::getFixturePath($filename);
 
-            $this->assertInstanceOf($class, UnifiedArchive::open(self::getFixturePath($fixture[1])),
-                '::open() on '.self::getFixturePath($fixture[1]).' should return an object');
-        }
+        if (!UnifiedArchive::canOpenArchive($full_filename))
+            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
 
-        return true;
+        $this->assertInstanceOf($class, UnifiedArchive::open($full_filename),
+            'UnifiedArchive::open() on '.$full_filename.' should return an object');
     }
 
     /**
      * @depends testOpen
+     * @dataProvider getFixtures
      */
-    public function testCountFiles()
+    public function testCountFiles($md5hash, $filename, $remoteUrl)
     {
         $files_number = count(self::$fixtureContents, COUNT_RECURSIVE);
+        $full_filename = self::getFixturePath($filename);
 
-        foreach (self::$fixtures as $fixture) {
-            if (!UnifiedArchive::canOpenArchive($fixture[1]))
-                continue;
+        if (!UnifiedArchive::canOpenArchive($full_filename))
+            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
 
-            $archive = UnifiedArchive::open(self::getFixturePath($fixture[1]));
-            $this->assertEquals($files_number, $archive->countFiles(), 'Invalid files count for '.$fixture[1]);
+        $archive = UnifiedArchive::open($full_filename);
+        $this->assertEquals($files_number, $archive->countFiles(), 'Invalid files count for '.$filename);
+    }
+
+//    /**
+//     * @depends testCountFiles
+//     * @dataProvider getFixtures
+//     */
+//    public function testFilesData($md5hash, $filename, $remoteUrl)
+//    {
+//        $full_filename = self::getFixturePath($filename);
+//
+//        if (!UnifiedArchive::canOpenArchive($full_filename))
+//            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
+//
+//        $archive = UnifiedArchive::open($full_filename);
+//        $flatten_list = [];
+//        $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
+//
+//        foreach ($flatten_list as $filename => $content) {
+//            var_dump($archive, $filename);
+//            $file_data = $archive->getFileData($filename);
+//            $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data);
+//
+//            $this->assertAttributeEquals(strlen($content), 'uncompressedSize', $file_data);
+//        }
+//    }
+
+    protected function flattenFilesList($prefix, array $list, array &$output)
+    {
+        foreach ($list as $name => $value) {
+            if (is_array($value))
+                $this->flattenFilesList($prefix.$name.'/', $value, $output);
+            else
+                $output[$prefix.$name] = $value;
         }
     }
 }
