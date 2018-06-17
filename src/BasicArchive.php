@@ -65,9 +65,11 @@ abstract class BasicArchive implements AbstractArchive
                 if (is_numeric($source))
                     $source = $destination;
 
+                $destination = rtrim($destination, '/\\*');
+
                 // if is directory
                 if (is_dir($source))
-                    self::importFilesFromDir(rtrim($source, '/*').'/*',
+                    self::importFilesFromDir(rtrim($source, '/\\*').'/*',
                         $destination.'/', true, $files);
                 else if (is_file($source))
                     $files[$destination] = $source;
@@ -119,7 +121,7 @@ abstract class BasicArchive implements AbstractArchive
         } elseif (is_string($nodes)) {
             // if is directory
             if (is_dir($nodes))
-                self::importFilesFromDir(rtrim($nodes, '/*').'/*', '/', true,
+                self::importFilesFromDir(rtrim($nodes, '/\\*').'/*', '/', true,
                     $files);
             else if (is_file($nodes))
                 $files[basename($nodes)] = $nodes;
