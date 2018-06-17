@@ -212,6 +212,8 @@ class TarArchive extends BasicArchive
         return $this->files;
     }
 
+
+
     /**
      * @param $fileName
      * @return bool|ArchiveEntry
@@ -540,5 +542,35 @@ class TarArchive extends BasicArchive
             self::$enabledPearTar = class_exists('\Archive_Tar');
             self::$enabledPharData = class_exists('\PharData');
         }
+    }
+
+    /**
+     * Checks that file exists in archive
+     * @param string $fileName Name of file
+     * @return boolean
+     */
+    public function isFileExists($fileName)
+    {
+        return in_array($fileName, $this->files, true);
+    }
+
+    /**
+     * Returns a resource for reading file from archive
+     * @param string $fileName
+     * @return resource|false
+     */
+    public function getFileResource($fileName)
+    {
+        if (!in_array($fileName, $this->files, true))
+            return false;
+
+        $resource = fopen('php://temp', 'r+');
+        if ($this->tar instanceof Archive_Tar)
+            fwrite($resource, $this->tar->extractInString($fileName));
+        else
+            fwrite($resource, $this->tar[$fileName]->getContent());
+
+        rewind($resource);
+        return $resource;
     }
 }

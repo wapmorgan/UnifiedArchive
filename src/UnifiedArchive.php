@@ -79,8 +79,7 @@ class UnifiedArchive extends BasicArchive
      * @param  string $fileName Filename
      * @return AbstractArchive|null Returns AbstractArchive in case of successful
      * parsing of the file
-     * @throws \Archive7z\Exception
-     * @throws Exception
+     * @throws \Exception
      */
     public static function open($fileName)
     {
@@ -102,6 +101,7 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Checks whether archive can be opened with current system configuration
+     * @param string $fileName
      * @return boolean
      */
     public static function canOpenArchive($fileName)
@@ -416,7 +416,7 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
-     * Counts size of all uncompressed data
+     * Counts size of all uncompressed data (bytes)
      * @return int
      */
     public function countUncompressedFilesSize()
@@ -443,7 +443,7 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
-     * Counts size of all compressed data
+     * Counts size of all compressed data (in bytes)
      * @return int
      */
     public function countCompressedFilesSize()
@@ -461,8 +461,18 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
-     * Retrieves file data
-     * @param $fileName
+     * Checks that file exists in archive
+     * @param string $fileName
+     * @return bool
+     */
+    public function isFileExists($fileName)
+    {
+        return in_array($fileName, $this->files, true);
+    }
+
+    /**
+     * Returns file metadata
+     * @param string $fileName
      * @return ArchiveEntry|bool
      */
     public function getFileData($fileName)
@@ -517,10 +527,13 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
-     * Extracts file content
+     * Returns file content
+     *
      * @param $fileName
+     *
      * @return bool|string
      * @throws \Archive7z\Exception
+     * @throws \Exception
      */
     public function getFileContent($fileName)
     {
@@ -541,13 +554,7 @@ class UnifiedArchive extends BasicArchive
             case self::RAR:
                 $entry = $this->rar->getEntry($fileName);
                 if ($entry->isDirectory()) return false;
-                // create temp file
-                $tmpname = tempnam(sys_get_temp_dir(), 'RarFile');
-                $entry->extract(dirname(__FILE__), $tmpname);
-                $data = file_get_contents($tmpname);
-                unlink($tmpname);
-
-                return $data;
+                return stream_get_contents($entry->getStream());
 
             case self::GZIP:
                 return gzdecode(file_get_contents($this->gzipFilename));
@@ -556,13 +563,7 @@ class UnifiedArchive extends BasicArchive
                 return bzdecompress(file_get_contents($this->bzipFilename));
 
             case self::LZMA:
-                $fp = xzopen($this->lzmaFilename, 'r');
-                ob_start();
-                xzpassthru($fp);
-                $content = ob_get_flush();
-                xzclose($fp);
-
-                return $content;
+                return xzopen($this->lzmaFilename, 'r');
 
             case self::ISO:
                 $Location = array_search($fileName, $this->files, true);
@@ -574,6 +575,70 @@ class UnifiedArchive extends BasicArchive
 
                 return $this->iso->Read($data['size']);
 
+            case self::CAB:
+                return $this->cab->getFileContent($fileName);
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Returns a resource for reading file from archive
+     * @param string $fileName
+     * @return bool|resource|string
+     * @throws \Archive7z\Exception
+     */
+    public function getFileResource($fileName)
+    {
+        if (!in_array($fileName, $this->files, true))
+            return false;
+
+        switch ($this->type) {
+            case self::ZIP:
+                return $this->zip->getStream($fileName);
+
+            case self::SEVEN_ZIP:
+                $resource = fopen('php://temp', 'r+');
+                $entry = $this->seven_zip->getEntry($fileName);
+
+                fwrite($resource, $entry->getContent());
+                rewind($resource);
+                return $resource;
+
+            case self::RAR:
+                $entry = $this->rar->getEntry($fileName);
+                if ($entry->isDirectory()) return false;
+                return $entry->getStream();
+
+            case self::GZIP:
+                return gzopen($this->gzipFilename, 'rb');
+
+            case self::BZIP:
+                return bzopen($this->bzipFilename, 'r');
+
+            case self::LZMA:
+                return xzopen($this->lzmaFilename, 'r');
+
+            case self::ISO:
+                $Location = array_search($fileName, $this->files, true);
+                if (!isset($this->isoFilesData[$fileName])) return false;
+                $data = $this->isoFilesData[$fileName];
+                $Location_Real = $Location * $this->isoBlockSize;
+                if ($this->iso->Seek($Location_Real, SEEK_SET) === false)
+                    return false;
+
+                $resource = fopen('php://temp', 'r+');
+                fwrite($resource, $this->iso->Read($data['size']));
+                rewind($resource);
+                return $resource;
+
+            case self::CAB:
+                $resource = fopen('php://temp', 'r+');
+                fwrite($resource, $this->cab->getFileContent($fileName));
+                rewind($resource);
+                return $resource;
+
             default:
                 return false;
         }
@@ -581,6 +646,7 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Returns hierarchy
+     * @return array
      */
     public function getHierarchy()
     {
@@ -642,7 +708,6 @@ class UnifiedArchive extends BasicArchive
                     }
                 }
                 return $count;
-            break;
 
             case self::RAR:
                 $count = 0;
@@ -813,6 +878,37 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
+     * Rescans array after modification
+     */
+    protected function scanArchive()
+    {
+
+        switch ($this->type) {
+            case self::ZIP:
+                $this->compressedFilesSize = $this->uncompressedFilesSize = $this->zip->numFiles = 0;
+                $this->files = [];
+                for ($i = 0; $i < $this->zip->numFiles; $i++) {
+                    $file = $this->zip->statIndex($i);
+                    $this->files[$i] = $file['name'];
+                    $this->compressedFilesSize += $file['comp_size'];
+                    $this->uncompressedFilesSize += $file['size'];
+                }
+                break;
+
+            case self::SEVEN_ZIP:
+                $this->compressedFilesSize = $this->uncompressedFilesSize = 0;
+                $this->files = [];
+                foreach ($this->seven_zip->getEntries() as $entry) {
+                    $this->files[] = $entry->getPath();
+                    $this->compressedFilesSize += (int)$entry->getPackedSize();
+                    $this->uncompressedFilesSize += (int)$entry->getSize();
+                }
+                $this->seven_zip->numFiles = count($this->files);
+                break;
+        }
+    }
+
+    /**
      * Creates an archive.
      * @param string|string[]|array $fileOrFiles
      * @param $archiveName
@@ -881,7 +977,7 @@ class UnifiedArchive extends BasicArchive
                 $filename = array_shift($files_list);
                 if (is_null($filename)) return false; // invalid list
                 if (file_put_contents($archiveName,
-                    gzencode(file_get_contents($filename))) !== false)
+                        gzencode(file_get_contents($filename))) !== false)
                     return 1;
 
                 return false;
@@ -891,11 +987,11 @@ class UnifiedArchive extends BasicArchive
                 $filename = array_shift($files_list);
                 if (is_null($filename)) return false; // invalid list
                 if (file_put_contents($archiveName,
-                    bzcompress(file_get_contents($filename))) !== false)
+                        bzcompress(file_get_contents($filename))) !== false)
                     return 1;
 
                 return false;
-            break;
+                break;
 
             case self::LZMA:
                 if (count($files_list) > 1) return false;
@@ -911,37 +1007,6 @@ class UnifiedArchive extends BasicArchive
 
             default:
                 return false;
-        }
-    }
-
-    /**
-     * Rescans array after modification
-     */
-    protected function scanArchive()
-    {
-
-        switch ($this->type) {
-            case self::ZIP:
-                $this->compressedFilesSize = $this->uncompressedFilesSize = $this->zip->numFiles = 0;
-                $this->files = [];
-                for ($i = 0; $i < $this->zip->numFiles; $i++) {
-                    $file = $this->zip->statIndex($i);
-                    $this->files[$i] = $file['name'];
-                    $this->compressedFilesSize += $file['comp_size'];
-                    $this->uncompressedFilesSize += $file['size'];
-                }
-                break;
-
-            case self::SEVEN_ZIP:
-                $this->compressedFilesSize = $this->uncompressedFilesSize = 0;
-                $this->files = [];
-                foreach ($this->seven_zip->getEntries() as $entry) {
-                    $this->files[] = $entry->getPath();
-                    $this->compressedFilesSize += (int)$entry->getPackedSize();
-                    $this->uncompressedFilesSize += (int)$entry->getSize();
-                }
-                $this->seven_zip->numFiles = count($this->files);
-                break;
         }
     }
 

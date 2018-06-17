@@ -4,8 +4,10 @@ namespace wapmorgan\UnifiedArchive;
 interface AbstractArchive
 {
     /**
-     * @param $fileName
-     * @return AbstractArchive|null
+     * Creates instance with right type.
+     * @param  string $fileName Filename
+     * @return AbstractArchive|null Returns AbstractArchive in case of successful
+     * parsing of the file
      */
     static public function open($fileName);
 
@@ -37,23 +39,41 @@ interface AbstractArchive
     public function __construct($fileName, $type);
 
     /**
-     * @return array
+     * Returns list of files
+     * @return array List of files
      */
     public function getFileNames();
 
     /**
-     * @param $fileName
-     * @return ArchiveEntry
+     * Checks that file exists in archive
+     * @param string $fileName Name of file
+     * @return boolean
+     */
+    public function isFileExists($fileName);
+
+    /**
+     * Returns file metadata
+     * @param string $fileName
+     * @return ArchiveEntry|bool
      */
     public function getFileData($fileName);
 
     /**
-     * @param $fileName
-     * @return string|bool
+     * Returns file content
+     * @param string $fileName
+     * @return string|false
      */
     public function getFileContent($fileName);
 
     /**
+     * Returns a resource for reading file from archive
+     * @param string $fileName
+     * @return resource|false
+     */
+    public function getFileResource($fileName);
+
+    /**
+     * Returns hierarchy
      * @return array
      */
     public function getHierarchy();
@@ -66,38 +86,45 @@ interface AbstractArchive
     public function extractFiles($outputFolder, $files = null);
 
     /**
-     * @param $fileOrFiles
+     * Updates existing archive by removing files from it.
+     * @param string|string[] $fileOrFiles
      * @return bool|int
      */
     public function deleteFiles($fileOrFiles);
 
     /**
-     * @param $fileOrFiles
+     * Updates existing archive by adding new files.
+     * @param string[] $fileOrFiles
      * @return int|bool
      */
     public function addFiles($fileOrFiles);
 
     /**
+     * Counts number of files
      * @return int
      */
     public function countFiles();
 
     /**
+     * Returns size of archive
      * @return int
      */
     public function getArchiveSize();
 
     /**
+     * Returns type of archive
      * @return string
      */
     public function getArchiveType();
 
     /**
+     * Counts size of all compressed data (in bytes)
      * @return int
      */
     public function countCompressedFilesSize();
 
     /**
+     * Counts size of all uncompressed data (bytes)
      * @return int
      */
     public function countUncompressedFilesSize();
