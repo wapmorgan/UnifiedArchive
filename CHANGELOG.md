@@ -8,24 +8,25 @@
 * Added simple tests.
 * Added `phar` distribution.
 * Changed algorithm of files list generation in `archiveFiles()` and `addFiles()`:
-      - If `$files` is a string containing one file name, then this file will be stored with it's basename in archive root.
-      - If `$files` is a string containing one directory name, then all files from this directory will be stored in archive root with relative paths.\
-      - If `$files` is an array containing file and directory names, then two options:
-        - `$source => $destination` format, where `$source` is a file/directory on your drive, and `$destination` is a target path in archive.
-            ```php
-            $files = [
-                '/home/test/files' => 'data',
-                '/home/test/pictures' => 'data'
-            ]; // all files will be saved in "data/" folder in archive.
-            ```
-        - `$source` format. In this case all files/directories will be saved with full paths in archive.
-            ```php
-            $files = [
-                '/home/test/files', // will be saved with path "/home/test/files" in archive
-                '/home/test/pictures',
-            ];
-            ```
-* Changed paths expanding in `extractFiles()` and `deleteFiles()`. Now no paths expanding is performing by default. If you need to expand `src/` path to all files within this directory in archive, `$expandFilesList` argument.
+  - If `$files` is a string containing one file name, then this file will be stored with it's basename in archive root.
+  - If `$files` is a string containing one directory name, then all files from this directory will be stored in archive root with relative paths.\
+  - If `$files` is an array containing file and directory names, then two options:
+      
+    - `$source => $destination` format, where `$source` is a file/directory on your drive, and `$destination` is a target path in archive.
+        ```php
+        $files = [
+            '/home/test/files' => 'data',
+            '/home/test/pictures' => 'data'
+        ]; // all files will be saved in "data/" folder in archive.
+        ```
+    - `$source` format. In this case all files/directories will be saved with full paths in archive.
+        ```php
+        $files = [
+            '/home/test/files', // will be saved with path "/home/test/files" in archive
+            '/home/test/pictures',
+        ];
+        ```
+* Changed paths expanding in `extractFiles()` and `deleteFiles()`. Now no paths expanding is performing by default. If you need to expand `src/` path to all files within this directory in archive, set `$expandFilesList` argument to `true`.
     ```php
     $archive->extratFiles(__DIR__, 'src/', true);
     $archive->deleteFiles('tests/', true);
