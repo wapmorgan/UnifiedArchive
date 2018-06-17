@@ -566,7 +566,7 @@ class UnifiedArchive extends BasicArchive
                 return bzdecompress(file_get_contents($this->bzipFilename));
 
             case self::LZMA:
-                return xzopen($this->lzmaFilename, 'r');
+                return stream_get_contents(xzopen($this->lzmaFilename, 'r'));
 
             case self::ISO:
                 $Location = array_search($fileName, $this->files, true);
@@ -926,7 +926,7 @@ class UnifiedArchive extends BasicArchive
      * @param string|string[]|array $fileOrFiles
      * @param $archiveName
      * @param bool $emulate
-     * @return arr  ay|bool|int
+     * @return array|bool|int
      * @throws Exception
      */
     public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
@@ -1004,7 +1004,6 @@ class UnifiedArchive extends BasicArchive
                     return 1;
 
                 return false;
-                break;
 
             case self::LZMA:
                 if (count($files_list) > 1) return false;
