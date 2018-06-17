@@ -47,9 +47,19 @@ Miscellaneous:
 * Added `phar` distribution.
 
 ### 0.1.0 - Apr 11, 2018
-* Renamed methods `extractNode()` -> `extractFiles()`, `archiveNodes()` -> `archiveFiles()`. 
-* Added checks for archive format. 
-* Changed `getFileData()` output from `stdclass` object to `ArchiveEntry`.
+API changes:
+* Renamed methods `extractNode()` → `extractFiles()`, `archiveNodes()` → `archiveFiles()`. Original method are still available with `@deprecated` status.
+* `getFileData()` now returns `ArchiveEntry` instance instead of `stdClass`. Original object fields are still available with `@deprecated` status.
+* `addFiles()` and `deleteFiles()` now return false when archive is not editable.
+
+Improvements:
+* Added checks of archive opening status in constructor: now an `Exception` will be throwed if archive file is not readable.
+* Some changes in `archiveNodes()` about handling directory names.
+* Fixed archive rescan in `addFiles()` and `deleteFiles()`.
+
+Miscellaneous:
+* Removed example scripts (`examples/`).
+* Code changes: added comments.
 
 ### 0.0.11 - Mar 21, 2018
 * Cleaned up some old code. 
