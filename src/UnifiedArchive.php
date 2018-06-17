@@ -669,7 +669,7 @@ class UnifiedArchive extends BasicArchive
      */
     public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
-        if ($expandFilesList)
+        if ($expandFilesList && $files !== null)
             $files = self::expandFileList($this->files, $files);
 
         switch ($this->type) {
@@ -790,7 +790,7 @@ class UnifiedArchive extends BasicArchive
      */
     public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
-        if ($expandFilesList)
+        if ($expandFilesList && $fileOrFiles !== null)
             $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
 
         $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
@@ -837,9 +837,6 @@ class UnifiedArchive extends BasicArchive
      */
     public function addFiles($fileOrFiles, $expandFilesList = false)
     {
-        if ($expandFilesList)
-            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
-
         $files_list = self::createFilesList($fileOrFiles);
 
         switch ($this->type) {

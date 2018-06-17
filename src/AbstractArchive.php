@@ -79,18 +79,13 @@ interface AbstractArchive
     public function getHierarchy();
 
     /**
-     * @param $outputFolder
+     * @param                   $outputFolder
      * @param string|array|null $files
+     * @param bool              $expandFilesList
+     *
      * @return bool|int
      */
-    public function extractFiles($outputFolder, $files = null);
-
-    /**
-     * Updates existing archive by removing files from it.
-     * @param string|string[] $fileOrFiles
-     * @return bool|int
-     */
-    public function deleteFiles($fileOrFiles);
+    public function extractFiles($outputFolder, $files = null, $expandFilesList = false);
 
     /**
      * Updates existing archive by adding new files.
@@ -98,6 +93,16 @@ interface AbstractArchive
      * @return int|bool
      */
     public function addFiles($fileOrFiles);
+
+    /**
+     * Updates existing archive by removing files from it.
+     *
+     * @param string|string[] $fileOrFiles
+     * @param bool            $expandFilesList
+     *
+     * @return bool|int
+     */
+    public function deleteFiles($fileOrFiles, $expandFilesList = false);
 
     /**
      * Counts number of files

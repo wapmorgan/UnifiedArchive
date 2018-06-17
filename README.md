@@ -118,13 +118,16 @@ and final symbol of division of catalogs are very important! Don't forget them.
 
     // to unpack all contents of archive
     $archive->extractFiles('output');
+ 
+    // to unpack specific files from archive
+    $archive->extractFiles('output', ['README.md', 'composer.json']);
 
     // to unpack the src catalog in archive in the sources catalog on a disk
-    $archive->extractFiles('output', '/src/');
+    $archive->extractFiles('output', '/src/', true);
 
     // to unpack the bookmarks catalog in archive in the sources catalog on a
     // disk
-    $archive->extractFiles('output', '/bookmarks/');
+    $archive->extractFiles('output', '/bookmarks/', true);
     ```
 
 ### Archive modification
@@ -136,6 +139,9 @@ and final symbol of division of catalogs are very important! Don't forget them.
 
     // To delete multiple files from an archive
     $archive->deleteFiles(['README.md', 'MANIFEST.MF']);
+     
+    // To delete directories from archive
+    $archive->deleteFiles('/src/', true);
     ```
 
     In case of success the number of successfully deleted files will be returned.
@@ -243,9 +249,9 @@ ACTIONS:
 | `UnifiedArchive::canOpenType($type): boolean`                                            | Checks whether archive format can be opened.                                                                           |                                                                     |
 | `getFileNames(): array`                                                                  | Returns list of files in archive.                                                                                      |                                                                     |
 | `isFileExists($fileName): boolean`                                                       | Checks whether file is stored in archive.                                                                              |                                                                     |
-| `getFileData($fileName): ArchiveEntry`                                                   | Returns metadata of file in archive.                                                                                   | Returns `false` when file is not is archive.                        |
-| `getFileContent($fileName): string`                                                      | Returns raw file content from archive.                                                                                 | Returns `false` when file is not is archive.                        |
-| `getFileResource($fileName): resource`                                                   | Returns a resource that can be used to read all file contents from archive.                                            | Returns `false` when file is not is archive.                        |
+| `getFileData($fileName): ArchiveEntry`                                                   | Returns metadata of file in archive.                                                                                   | Returns `false` when file is not in archive.                        |
+| `getFileContent($fileName): string`                                                      | Returns raw file content from archive.                                                                                 | Returns `false` when file is not in archive.                        |
+| `getFileResource($fileName): resource`                                                   | Returns a resource that can be used to read all file contents from archive.                                            | Returns `false` when file is not in archive.                        |
 | `countFiles(): integer`                                                                  | Returns number of files in archive.                                                                                    |                                                                     |
 | `getArchiveSize(): integer`                                                              | Returns size of archive in bytes.                                                                                      |                                                                     |
 | `getArchiveType(): string`                                                               | Returns type of archive (like zip/rar/etc).                                                                            |                                                                     |

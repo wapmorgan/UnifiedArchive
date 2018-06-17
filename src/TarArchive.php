@@ -271,12 +271,17 @@ class TarArchive extends BasicArchive
     }
 
     /**
-     * @param $outputFolder
+     * @param                   $outputFolder
      * @param string|array|null $files
+     * @param bool              $expandFilesList
+     *
      * @return bool|int
      */
-    public function extractFiles($outputFolder, $files = null)
+    public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
+        if ($expandFilesList && $files !== null)
+            $files = self::expandFileList($this->files, $files);
+
         $list = array();
         if ($files === null) {
             $list = array_values($this->files);
@@ -303,12 +308,17 @@ class TarArchive extends BasicArchive
 
     /**
      * @param string|array $fileOrFiles
+     * @param bool         $expandFilesList
+     *
      * @return bool|int
      */
-    public function deleteFiles($fileOrFiles)
+    public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
         if ($this->tar instanceof Archive_Tar)
             return false;
+
+        if ($expandFilesList && $fileOrFiles !== null)
+            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
 
         $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
         $deleted = 0;
