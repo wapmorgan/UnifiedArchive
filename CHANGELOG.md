@@ -7,7 +7,7 @@
 * Added `detectArchiveType($fileName)` static method to detect (by filename or content) archive type. 
 * Added simple tests.
 * Added `phar` distribution.
-* Changed algorithm of files list generation in `archiveFiles()` and `addFiles()`:
+* Changed algorithm of files list generation in `archiveFiles($files, $archiveFileName, $emulation = false)` and `addFiles($files)`:
   - If `$files` is a string containing one file name, then this file will be stored with it's basename in archive root.
   - If `$files` is a string containing one directory name, then all files from this directory will be stored in archive root with relative paths.\
   - If `$files` is an array containing file and directory names, then two options:

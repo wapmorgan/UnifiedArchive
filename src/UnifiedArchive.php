@@ -833,12 +833,11 @@ class UnifiedArchive extends BasicArchive
      * Updates existing archive by adding new files.
      *
      * @param string[] $fileOrFiles
-     * @param bool     $expandFilesList
      *
      * @return int|bool
      * @throws \Archive7z\Exception
      */
-    public function addFiles($fileOrFiles, $expandFilesList = false)
+    public function addFiles($fileOrFiles)
     {
         $files_list = self::createFilesList($fileOrFiles);
 
