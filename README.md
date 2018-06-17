@@ -230,12 +230,17 @@ ACTIONS:
 | Method                                                                                   | Description                                                                                                            | When it fails                                                       |
 |------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | `UnifiedArchive::open($fileName): UnifiedArchive`                                        | Tries to detect type of archive and open it.                                                                           | Returns `null` when archive is not recognized or not supported.     |
+| `UnifiedArchive::canOpenArchive($fileName): boolean)`                                    | Checks whether archive can be opened.                                                                                  |                                                                     |
+| `UnifiedArchive::canOpenType($type): boolean`                                            | Checks whether archive format can be opened.                                                                           |                                                                     |
 | `UnifiedArchive::archiveFiles($fileOrFiles, $aname, $simulation = false): integer/array` | Creates a new archive with passed files list.                                                                          | Returns `false` when format does not support archive creation.      |
 
 ### Object methods
 
 | Method                                                                                   | Description                                                                                                            | When it fails                                                       |
 |------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| `UnifiedArchive::open($fileName): UnifiedArchive`                                        | Tries to detect type of archive and open it.                                                                           | Returns `null` when archive is not recognized or not supported.     |
+| `UnifiedArchive::canOpenArchive($fileName): boolean)`                                    | Checks whether archive can be opened.                                                                                  |                                                                     |
+| `UnifiedArchive::canOpenType($type): boolean`                                            | Checks whether archive format can be opened.                                                                           |                                                                     |
 | `getFileNames(): array`                                                                  | Returns list of files in archive.                                                                                      |                                                                     |
 | `isFileExists($fileName): boolean`                                                       | Checks whether file is stored in archive.                                                                              |                                                                     |
 | `getFileData($fileName): ArchiveEntry`                                                   | Returns metadata of file in archive.                                                                                   | Returns `false` when file is not is archive.                        |
@@ -249,6 +254,7 @@ ACTIONS:
 | `extractFiles($outputFolder, $node = '/', $expandFilesList = false): integer`            | Extracts all files or few files from archive to specific directory.                                                    |                                                                     |
 | `deleteFiles($fileOrFiles, $expandFilesList = false): integer`                           | Returns number of deleted files.                                                                                       | Returns `false` when archive does not support archive modification. |
 | `addFiles($fileOrFiles, $expandFilesList = false): integer`                              | Returns number of added files.                                                                                         | Returns `false` when archive does not support archive modification. |
+
 
 The main class representing an archive.
 
