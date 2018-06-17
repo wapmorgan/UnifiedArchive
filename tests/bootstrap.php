@@ -1,27 +1,32 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-define('FIXTURES_DIR', __DIR__ . '/fixtures');
+define('ARCHIVES_DIR', __DIR__ . '/archives');
 
 class PhpUnitTestCase extends PHPUnit_Framework_TestCase
 {
     /**
      * @var array Array of arrays[md5_hash, filename, remote file]
      */
-    static public $fixtures;
+    static public $archives;
 
     /**
      * @var array List of directories/files and content stored in archive
      */
     static public $fixtureContents;
 
-    static public function getFixturePath($fixture)
+    /**
+     * @param $fixture
+     *
+     * @return string
+     */
+    static public function getArchivePath($fixture)
     {
-        return FIXTURES_DIR.'/'.$fixture;
+        return ARCHIVES_DIR.'/'.$fixture;
     }
 }
 
-PhpUnitTestCase::$fixtures = [
+PhpUnitTestCase::$archives = [
     ['c2bdd9989281738a637b3331dd415b8b', 'fixtures.7z', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.7z'],
     ['c6918bb89b32d5a71ec1f7836269056e', 'fixtures.iso', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.iso'],
     ['4df15469482f218110ab275eb17eef44', 'fixtures.tar', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar'],
@@ -34,7 +39,7 @@ PhpUnitTestCase::$fixtures = [
 PhpUnitTestCase::$fixtureContents = [
     'folder' => [
         'subfolder' => [
-            'subfile' => 'Content'."\n",
+            'subfile' => 'Content',
         ],
         'subdoc' => 'Subdoc',
     ],
@@ -63,8 +68,8 @@ function downloadFixture($url, $target, $md5, $retry = 3)
 /**
  * Checking fixtures
  */
-foreach (PhpUnitTestCase::$fixtures as $fixture) {
-    $fixture_file = PhpUnitTestCase::getFixturePath($fixture[1]);
+foreach (PhpUnitTestCase::$archives as $fixture) {
+    $fixture_file = PhpUnitTestCase::getArchivePath($fixture[1]);
     if (!file_exists($fixture_file)) {
         downloadFixture($fixture[2], $fixture_file, $fixture[0]);
     } else if (md5_file($fixture_file) !== $fixture[0]) {

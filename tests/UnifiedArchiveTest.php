@@ -7,9 +7,12 @@ class UnifiedArchiveTest extends PhpUnitTestCase
 
     public function getFixtures()
     {
-        return self::$fixtures;
+        return self::$archives;
     }
 
+    /**
+     * @return array
+     */
     public function archiveTypes()
     {
         return [
@@ -36,8 +39,31 @@ class UnifiedArchiveTest extends PhpUnitTestCase
     }
 
     /**
+     * @dataProvider creatableArchiveTypes
+     *
+     * @param string $archiveFileName
+     * @param string $archiveType
+     *
+     * @throws \Exception
+     */
+    public function testCreateAndModify($archiveFileName, $archiveType)
+    {
+        if (!UnifiedArchive::canOpenType($archiveType))
+            $this->markTestSkipped($archiveType.' is not supported with current system configuration');
+
+        $test_archive_filename = __DIR__.'/'.$archiveFileName;
+        if (file_exists($test_archive_filename))
+            $this->assertTrue(unlink($test_archive_filename));
+
+        $result = UnifiedArchive::archiveFiles(__DIR__.'/fixtures', $test_archive_filename);
+        $this->assertInternalType('integer', $result);
+        $this->assertEquals(6, $result);
+    }
+
+    /**
      * @dataProvider getFixtures
      * @return bool
+     * @throws \Exception
      */
     public function testOpen($md5hash, $filename, $remoteUrl)
     {
@@ -45,7 +71,7 @@ class UnifiedArchiveTest extends PhpUnitTestCase
             ? 'wapmorgan\UnifiedArchive\TarArchive'
             : 'wapmorgan\UnifiedArchive\UnifiedArchive';
 
-        $full_filename = self::getFixturePath($filename);
+        $full_filename = self::getArchivePath($filename);
 
         if (!UnifiedArchive::canOpenArchive($full_filename))
             $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
@@ -61,7 +87,7 @@ class UnifiedArchiveTest extends PhpUnitTestCase
     public function testCountFiles($md5hash, $filename, $remoteUrl)
     {
         $files_number = count(self::$fixtureContents, COUNT_RECURSIVE);
-        $full_filename = self::getFixturePath($filename);
+        $full_filename = self::getArchivePath($filename);
 
         if (!UnifiedArchive::canOpenArchive($full_filename))
             $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
@@ -70,7 +96,19 @@ class UnifiedArchiveTest extends PhpUnitTestCase
         $this->assertEquals($files_number, $archive->countFiles(), 'Invalid files count for '.$filename);
     }
 
-//    /**
+    /**
+     * @return array
+     */
+    public function creatableArchiveTypes()
+    {
+        return [
+            ['archive.zip', UnifiedArchive::ZIP],
+            ['archive.7z', UnifiedArchive::SEVEN_ZIP],
+            ['archive.tar', TarArchive::TAR],
+        ];
+    }
+
+    //    /**
 //     * @depends testCountFiles
 //     * @dataProvider getFixtures
 //     */

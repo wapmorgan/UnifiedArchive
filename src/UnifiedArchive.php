@@ -122,13 +122,16 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Checks whether specific archive type can be opened with current system configuration
+     *
+     * @param $type
+     *
      * @return boolean
      */
     public static function canOpenType($type)
     {
         self::checkRequirements();
 
-        return isset(self::$enabledTypes[$type]) ? self::$enabledTypes[$type] : false;
+        return (isset(self::$enabledTypes[$type])) ? self::$enabledTypes[$type] : false;
     }
 
     /**
@@ -670,7 +673,7 @@ class UnifiedArchive extends BasicArchive
     public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
         if ($expandFilesList && $files !== null)
-            $files = self::expandFileList($this->files, $files);
+            $files = self::expandFileList($this->files, is_string($files) ? [$files] : $files);
 
         switch ($this->type) {
             case self::ZIP:
@@ -791,7 +794,7 @@ class UnifiedArchive extends BasicArchive
     public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
         if ($expandFilesList && $fileOrFiles !== null)
-            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
+            $fileOrFiles = self::expandFileList($this->files, is_string($fileOrFiles) ? [$fileOrFiles] : $fileOrFiles);
 
         $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
         foreach ($files as $i => $file) {
@@ -924,7 +927,7 @@ class UnifiedArchive extends BasicArchive
      * @param string|string[]|array $fileOrFiles
      * @param $archiveName
      * @param bool $emulate
-     * @return array|bool|int
+     * @return arr  ay|bool|int
      * @throws Exception
      */
     public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
