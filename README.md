@@ -87,22 +87,28 @@ only names of files)
     ```php
     var_dump($archive->getFileNames()); // array with files list
     ```
+    
+4. Further, check that specific file is in archive.
+    
+    ```php
+    var_dump($archive->isFileExists('README.md')); // boolean
+    ```
 
-4. Further, you can get additional information about concrete file by
+5. Further, you can get additional information about concrete file by
 `getFileData()` method
 
     ```php
     var_dump($archive->getFileData('README.md')); // ArchiveEntry with file information
     ```
 
-5. Further, you can get raw file contents by `getFileContent()`
+6. Further, you can get raw file contents by `getFileContent()`
 method
 
     ```php
     var_dump($archive->getFileContent('README.md')); // string
     ```
 
-6. Further, you can unpack any internal catalog or the whole archive with files
+7. Further, you can unpack any internal catalog or the whole archive with files
 on a disk. The `extractFiles()` method is engaged in it. In case of success, it
 returns number of the extracted files, in case of failure - **false**. Initial
 and final symbol of division of catalogs are very important! Don't forget them.
@@ -219,9 +225,17 @@ ACTIONS:
 ## API
 ### `UnifiedArchive`
 
+### Static Methods
+
 | Method                                                                                   | Description                                                                                                            | When it fails                                                       |
 |------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | `UnifiedArchive::open($fileName): UnifiedArchive`                                        | Tries to detect type of archive and open it.                                                                           | Returns `null` when archive is not recognized or not supported.     |
+| `UnifiedArchive::archiveFiles($fileOrFiles, $aname, $simulation = false): integer/array` | Creates a new archive with passed files list.                                                                          | Returns `false` when format does not support archive creation.      |
+
+### Object methods
+
+| Method                                                                                   | Description                                                                                                            | When it fails                                                       |
+|------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | `getFileNames(): array`                                                                  | Returns list of files in archive.                                                                                      |                                                                     |
 | `isFileExists($fileName): boolean`                                                       | Checks whether file is stored in archive.                                                                              |                                                                     |
 | `getFileData($fileName): ArchiveEntry`                                                   | Returns metadata of file in archive.                                                                                   | Returns `false` when file is not is archive.                        |
@@ -232,10 +246,9 @@ ACTIONS:
 | `getArchiveType(): string`                                                               | Returns type of archive (like zip/rar/etc).                                                                            |                                                                     |
 | `countCompressedFilesSize(): integer`                                                    | Returns size of all compressed files from archive in bytes.Returns size of all compressed files from archive in bytes. |                                                                     |
 | `countUncompressedFilesSize(): integer`                                                  | Returns size of all uncompressed files from archive in bytes.                                                          |                                                                     |
-| `extractFiles($outputFolder, $node = '/'): integer`                                      | Extracts all files or few files from archive to specific directory.                                                    |                                                                     |
-| `deleteFiles($fileOrFiles): integer`                                                     | Returns number of deleted files.                                                                                       | Returns `false` when archive does not support archive modification. |
-| `addFiles($fileOrFiles): integer`                                                        | Returns number of added files.                                                                                         | Returns `false` when archive does not support archive modification. |
-| `UnifiedArchive::archiveFiles($fileOrFiles, $aname, $simulation = false): integer/array` | Creates a new archive with passed files list.                                                                          | Returns `false` when format does not support archive creation.      |
+| `extractFiles($outputFolder, $node = '/', $expandFilesList = false): integer`            | Extracts all files or few files from archive to specific directory.                                                    |                                                                     |
+| `deleteFiles($fileOrFiles, $expandFilesList = false): integer`                           | Returns number of deleted files.                                                                                       | Returns `false` when archive does not support archive modification. |
+| `addFiles($fileOrFiles, $expandFilesList = false): integer`                              | Returns number of added files.                                                                                         | Returns `false` when archive does not support archive modification. |
 
 The main class representing an archive.
 

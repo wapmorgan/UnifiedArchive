@@ -667,8 +667,11 @@ class UnifiedArchive extends BasicArchive
      * @return bool|int
      * @throws \Archive7z\Exception
      */
-    public function extractFiles($outputFolder, $files = null)
+    public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
+        if ($expandFilesList)
+            $files = self::expandFileList($this->files, $files);
+
         switch ($this->type) {
             case self::ZIP:
                 $entries = array();
@@ -779,11 +782,17 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Updates existing archive by removing files from it.
+     *
      * @param string|string[] $fileOrFiles
+     * @param bool            $expandFilesList
+     *
      * @return bool|int
      */
-    public function deleteFiles($fileOrFiles)
+    public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
+        if ($expandFilesList)
+            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
+
         $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
         foreach ($files as $i => $file) {
             if (!in_array($file, $this->files, true)) unset($files[$i]);
@@ -819,12 +828,18 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Updates existing archive by adding new files.
+     *
      * @param string[] $fileOrFiles
+     * @param bool     $expandFilesList
+     *
      * @return int|bool
      * @throws \Archive7z\Exception
      */
-    public function addFiles($fileOrFiles)
+    public function addFiles($fileOrFiles, $expandFilesList = false)
     {
+        if ($expandFilesList)
+            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
+
         $files_list = self::createFilesList($fileOrFiles);
 
         switch ($this->type) {
@@ -882,7 +897,6 @@ class UnifiedArchive extends BasicArchive
      */
     protected function scanArchive()
     {
-
         switch ($this->type) {
             case self::ZIP:
                 $this->compressedFilesSize = $this->uncompressedFilesSize = $this->zip->numFiles = 0;

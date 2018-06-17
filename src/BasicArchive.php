@@ -28,6 +28,24 @@ abstract class BasicArchive implements AbstractArchive
     }
 
     /**
+     * Expands files list
+     * @param $archiveFiles
+     * @param $files
+     * @return array
+     */
+    protected static function expandFileList($archiveFiles, $files)
+    {
+        $newFiles = [];
+        foreach ($files as $file) {
+            foreach ($archiveFiles as $archiveFile) {
+                if (fnmatch($file.'*', $archiveFile))
+                    $newFiles[] = $archiveFile;
+            }
+        }
+        return $newFiles;
+    }
+
+    /**
      * @param $nodes
      * @return array|bool
      */
