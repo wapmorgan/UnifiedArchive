@@ -1,13 +1,14 @@
 # Change Log
 
 ### 0.2.0 - ***
-* Added `isFileExists($file)` method for checking if archive has a file with specific name.
-* Added `getFileResource($file)` method for getting a file descriptor for reading all file content without full extraction in memory.
-* Added `canOpenArchive($archiveFileName)` and `canOpenType($archiveFormat)` static methods to check if specific archive or format can be opened.
-* Added `detectArchiveType($fileName)` static method to detect (by filename or content) archive type. 
-* Added simple tests.
-* Added `phar` distribution.
-* Changed algorithm of files list generation in `archiveFiles($files, $archiveFileName, $emulation = false)` and `addFiles($files)`:
+Fixes:
+* Fixed **LZW-stream** (.tar.Z) wrapper (before it didn't work).
+* Fixed **ISO** archives reading (before archive size could be calculated wrong).
+* Fixed **CAB** archives extraction in `getFileContent($file)` (before it didn't work).
+* Improved extraction in `getFileContent($file)` for **RAR** archives by using streams (before it did extract file in temporarily folder, read it and then delete it).
+
+API changes:
+* **Changed algorithm of files list generation in `archiveFiles($files, $archiveFileName, $emulation = false)` and `addFiles($files)`**:
   - If `$files` is a string containing one file name, then this file will be stored with it's basename in archive root.
   - If `$files` is a string containing one directory name, then all files from this directory will be stored in archive root with relative paths.\
   - If `$files` is an array containing file and directory names, then two options:
@@ -26,13 +27,24 @@
             '/home/test/pictures',
         ];
         ```
-* Changed paths expanding in `extractFiles()` and `deleteFiles()`. Now no paths expanding is performing by default. If you need to expand `src/` path to all files within this directory in archive, set `$expandFilesList` argument to `true`.
+* **Disabled paths expanding in `extractFiles()` and `deleteFiles()` by default**.
+
+    If you need to expand `src/` path to all files within this directory in archive, set `$expandFilesList` argument to `true`.
     ```php
     $archive->extratFiles(__DIR__, 'src/', true);
     $archive->deleteFiles('tests/', true);
     ```
-* Changed result format of `archiveFiles()` in emulation mode. Now it also returns type of archive in `type` archive element. 
-* Fixed LZW-stream wrapper.        
+* Changed result format of `archiveFiles()` in emulation mode. Now it returns an archive with 4 elements (added `type` element with archive type).
+
+Improvements:
+* Added `isFileExists($file): bool` method for checking if archive has a file with specific name.
+* Added `getFileResource($file): resource` method for getting a file descriptor for reading all file content without full extraction in memory.
+* Added `canOpenArchive($archiveFileName): bool` and `canOpenType($archiveFormat): bool` static methods to check if specific archive or format can be opened.
+* Added `detectArchiveType($fileName): string|false` static method to detect (by filename or content) archive type.
+
+Miscellaneous:
+* Added simple tests.
+* Added `phar` distribution.
 
 ### 0.1.0 - Apr 11, 2018
 * Renamed methods `extractNode()` -> `extractFiles()`, `archiveNodes()` -> `archiveFiles()`. 
