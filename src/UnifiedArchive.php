@@ -9,7 +9,7 @@ use ZipArchive;
  */
 class UnifiedArchive extends BasicArchive
 {
-    const VERSION = '0.1.x';
+    const VERSION = '0.2.x';
 
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
