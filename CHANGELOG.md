@@ -31,7 +31,7 @@ API changes:
 
     If you need to expand `src/` path to all files within this directory in archive, set `$expandFilesList` argument to `true`.
     ```php
-    $archive->extratFiles(__DIR__, 'src/', true);
+    $archive->extractFiles(__DIR__, 'src/', true);
     $archive->deleteFiles('tests/', true);
     ```
 * Changed result format of `archiveFiles()` in emulation mode. Now it returns an archive with 4 elements (added `type` element with archive type).
