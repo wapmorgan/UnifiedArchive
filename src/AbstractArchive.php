@@ -7,7 +7,7 @@ abstract class AbstractArchive
      * @param $fileName
      * @return AbstractArchive|null
      */
-    abstract public static function open($fileName);
+    public static function open($fileName) {}
 
     /**
      * AbstractArchive constructor.
@@ -99,7 +99,7 @@ abstract class AbstractArchive
      * @param $archiveName
      * @return mixed
      */
-    abstract public static function archiveFiles($filesOrFiles, $archiveName);
+    public static function archiveFiles($filesOrFiles, $archiveName) {}
 
     /**
      * @param $filesOrFiles
