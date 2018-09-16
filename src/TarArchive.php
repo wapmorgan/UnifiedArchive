@@ -485,8 +485,11 @@ class TarArchive extends BasicArchive
 
             foreach ($fileOrFiles as $localname => $filename) {
                 if (is_null($filename)) {
-                    if ($tar->addEmptyDir($localname) === false)
-                        return false;
+                    if ($localname !== '/') {
+                        if ($tar->addEmptyDir($localname) === false) {
+                            return false;
+                        }
+                    }
                 } else {
                     if ($tar->addFile($filename, $localname) === false)
                         return false;

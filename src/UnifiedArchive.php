@@ -9,7 +9,7 @@ use ZipArchive;
  */
 class UnifiedArchive extends BasicArchive
 {
-    const VERSION = '0.1.x';
+    const VERSION = '0.2.x';
 
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
@@ -122,13 +122,16 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Checks whether specific archive type can be opened with current system configuration
+     *
+     * @param $type
+     *
      * @return boolean
      */
     public static function canOpenType($type)
     {
         self::checkRequirements();
 
-        return isset(self::$enabledTypes[$type]) ? self::$enabledTypes[$type] : false;
+        return (isset(self::$enabledTypes[$type])) ? self::$enabledTypes[$type] : false;
     }
 
     /**
@@ -563,7 +566,7 @@ class UnifiedArchive extends BasicArchive
                 return bzdecompress(file_get_contents($this->bzipFilename));
 
             case self::LZMA:
-                return xzopen($this->lzmaFilename, 'r');
+                return stream_get_contents(xzopen($this->lzmaFilename, 'r'));
 
             case self::ISO:
                 $Location = array_search($fileName, $this->files, true);
@@ -670,7 +673,7 @@ class UnifiedArchive extends BasicArchive
     public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
         if ($expandFilesList && $files !== null)
-            $files = self::expandFileList($this->files, $files);
+            $files = self::expandFileList($this->files, is_string($files) ? [$files] : $files);
 
         switch ($this->type) {
             case self::ZIP:
@@ -791,7 +794,7 @@ class UnifiedArchive extends BasicArchive
     public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
         if ($expandFilesList && $fileOrFiles !== null)
-            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
+            $fileOrFiles = self::expandFileList($this->files, is_string($fileOrFiles) ? [$fileOrFiles] : $fileOrFiles);
 
         $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
         foreach ($files as $i => $file) {
@@ -830,12 +833,11 @@ class UnifiedArchive extends BasicArchive
      * Updates existing archive by adding new files.
      *
      * @param string[] $fileOrFiles
-     * @param bool     $expandFilesList
      *
      * @return int|bool
      * @throws \Archive7z\Exception
      */
-    public function addFiles($fileOrFiles, $expandFilesList = false)
+    public function addFiles($fileOrFiles)
     {
         $files_list = self::createFilesList($fileOrFiles);
 
@@ -1002,7 +1004,6 @@ class UnifiedArchive extends BasicArchive
                     return 1;
 
                 return false;
-                break;
 
             case self::LZMA:
                 if (count($files_list) > 1) return false;

@@ -16,13 +16,13 @@ manager + PclZip-like interface for zip archives.
 3. [**Reading of archive**](#reading-of-archive)
     1. [**Archive modification**](#archive-modification)
     2. [**Archive creation**](#archive-creation)
-4. [**Built-in console archive manager**](#built-in-console-archive-manager)
+4. [**Formats support**](#formats-support)
 5. [**API**](#api)
     1. [**UnifiedArchive**](#unifiedarchive)
     2. [**ArchiveEntry**](#archiveentry)
-6. [**PclZip-like interface**](#pclzip-like-interface)
-7. [**Formats support**](#formats-support)
-8. [**Changelog**](#changelog)
+    3. [**PclZip-like interface**](#pclzip-like-interface)
+6. [**Built-in console archive manager**](#built-in-console-archive-manager)
+7. [**Changelog**](#changelog)
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
@@ -187,46 +187,20 @@ $nodes = [
 UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 ```
 
-## Built-in console archive manager
-UnifiedArchive is distributed with a unified console program to manipulate popular
-archive formats. This script is stored in `vendor/bin/cam`.
+## Formats support
 
-It supports all formats that UnifiedArchive does and can be used to manipulate
-archives without other software. To check your configuration and check formats
-support launch it with `-f` flag in console:
-
-```
-$ php vendor/bin/cam -f
-```
-
-### Full usage help
-```
-USAGE: cam (-l|--list)  ARCHIVE
-       cam (-t|--table) ARCHIVE
-       cam (-i|--info)  ARCHIVE
-       cam (-e|--extract) [--output=DIR] [--replace=(all|ask|none|time|size)] [--flat=(file|path)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
-       cam (-p|--print)   ARCHIVE FILES_IN_ARCHIVE...
-       cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
-       cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
-       cam (-a|--add)     ARCHIVE FILES_ON_DISK...
-       cam (-c|--create)  ARCHIVE FILES_ON_DISK...
-       cam (-f|--formats)
-
-ACTIONS:
-      -l(--list)    List files
-      -t(--table)   List files in table
-      -i(--info)    Summary about archive
-
-      -e(--extract) Extract from archive
-
-      -p(--print)   Print files' content
-      -d(--details) Details about files
-      -x(--delete)  Delete files
-
-      -a(--add)     Add to archive
-      -c(--create)  Create new archive
-
-```
+| Formats                                                     | Requirement                                                                                      | getFileContent()                              | getFileResource() | addFiles() / removeFiles() | archiveFiles() | Notes                                                                                                                              |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------|-------------------|----------------------------|----------------|------------------------------------------------------------------------------------------------------------------------------------|
+| .zip                                                        | `zip` extension                                                                                  | ✔                                             | ✔                 | ✔                          | ✔              |                                                                                                                                    |
+| .7zip, .7z                                                  | [`gemorroj/archive7z`](https://packagist.org/packages/gemorroj/archive7z) package and `7zip-cli` | ✔                                             | ✔ (simulation)    | ✔                          | ✔              |                                                                                                                                    |
+| .tar, .tar.gz, .tar.bz2, .tar.xz, .tar.Z, .tgz, .tbz2, .txz | [`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar) package                    | ✔                                             | ✔ (simulation)    | ❌                          | ✔              | Compressed versions of tar are supported by appropriate libraries or extenions (zlib, bzip2, xz) or installed software (ncompress) |
+| .tar, .tar.gz, .tar.bz2, .tgz, .tbz2                        | `phar` extension                                                                                 | ✔                                             | ✔ (simulation)    | ✔                          | ✔              | Compressed versions of tar are supported by appropriate libraries or extenions (zlib, bzip2)                                       |
+| .rar                                                        | `rar` extension                                                                                  | ✔                                             | ✔                 | ❌                          | ❌              |                                                                                                                                    |
+| .iso                                                        | [`phpclasses/php-iso-file`](https://packagist.org/packages/phpclasses/php-iso-file) package      | ✔                                             | ✔ (simulation)    | ❌                          | ❌              |                                                                                                                                    |
+| .cab                                                        | [`wapmorgan/cab-archive`](https://packagist.org/packages/wapmorgan/cab-archive) package          | ✔ (extraction ability depends on PHP version) | ✔ (simulation)    | ❌                          | ❌              | Extraction is supported only on PHP 7.0.22+, 7.1.8+, 7.2.0.                                                                        |
+| .gz                                                         | `zlib` extension                                                                                 | ✔                                             | ✔                 |                            |                |                                                                                                                                    |
+| .bz2                                                        | `bzip2` extension                                                                                | ✔                                             | ✔                 |                            |                |                                                                                                                                    |
+| .xz                                                         | [`lzma2` extension](https://github.com/payden/php-xz)                                                                                | ✔                                             | ✔                 |                            |                |                                                                                                                                    |
 
 ## API
 ### `UnifiedArchive`
@@ -242,97 +216,28 @@ ACTIONS:
 
 ### Object methods
 
+- Archive information methods:
+
+| Method                                                                                   | Description                                                                                                            |
+|------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `countFiles(): integer`                                                                  | Returns number of files in archive.                                                                                    |
+| `getArchiveType(): string`                                                               | Returns type of archive (like zip/rar/etc).                                                                            |
+| `getArchiveSize(): integer`                                                              | Returns size of archive in bytes.                                                                                      |
+| `countCompressedFilesSize(): integer`                                                    | Returns size of all compressed files from archive in bytes.                                                            |
+| `countUncompressedFilesSize(): integer`                                                  | Returns size of all uncompressed files from archive in bytes.                                                          |
+
+- Archive manipulation methods:
+
 | Method                                                                                   | Description                                                                                                            | When it fails                                                       |
 |------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| `UnifiedArchive::open($fileName): UnifiedArchive`                                        | Tries to detect type of archive and open it.                                                                           | Returns `null` when archive is not recognized or not supported.     |
-| `UnifiedArchive::canOpenArchive($fileName): boolean)`                                    | Checks whether archive can be opened.                                                                                  |                                                                     |
-| `UnifiedArchive::canOpenType($type): boolean`                                            | Checks whether archive format can be opened.                                                                           |                                                                     |
 | `getFileNames(): array`                                                                  | Returns list of files in archive.                                                                                      |                                                                     |
-| `isFileExists($fileName): boolean`                                                       | Checks whether file is stored in archive.                                                                              |                                                                     |
-| `getFileData($fileName): ArchiveEntry`                                                   | Returns metadata of file in archive.                                                                                   | Returns `false` when file is not in archive.                        |
+| `isFileExists($fileName): boolean`                                                       | Checks whether file with specific name is in archive.                                                                  |                                                                     |
+| `getFileData($fileName): ArchiveEntry`                                                   | Returns an `ArchiveEntry` instance with metadata of file in archive (size, compressed size and modification date).     | Returns `false` when file is not in archive.                        |
 | `getFileContent($fileName): string`                                                      | Returns raw file content from archive.                                                                                 | Returns `false` when file is not in archive.                        |
-| `getFileResource($fileName): resource`                                                   | Returns a resource that can be used to read all file contents from archive.                                            | Returns `false` when file is not in archive.                        |
-| `countFiles(): integer`                                                                  | Returns number of files in archive.                                                                                    |                                                                     |
-| `getArchiveSize(): integer`                                                              | Returns size of archive in bytes.                                                                                      |                                                                     |
-| `getArchiveType(): string`                                                               | Returns type of archive (like zip/rar/etc).                                                                            |                                                                     |
-| `countCompressedFilesSize(): integer`                                                    | Returns size of all compressed files from archive in bytes.Returns size of all compressed files from archive in bytes. |                                                                     |
-| `countUncompressedFilesSize(): integer`                                                  | Returns size of all uncompressed files from archive in bytes.                                                          |                                                                     |
-| `extractFiles($outputFolder, $node = '/', $expandFilesList = false): integer`            | Extracts all files or few files from archive to specific directory.                                                    |                                                                     |
-| `deleteFiles($fileOrFiles, $expandFilesList = false): integer`                           | Returns number of deleted files.                                                                                       | Returns `false` when archive does not support archive modification. |
-| `addFiles($fileOrFiles, $expandFilesList = false): integer`                              | Returns number of added files.                                                                                         | Returns `false` when archive does not support archive modification. |
-
-
-The main class representing an archive.
-
-```php
-static public function open($filename): UnifiedArchive | null
-```
-Tries to detect type of archive and open it. Returns a  `UnifiedArchive`
-instance in case of success, `null` in case of failure.
-
-```php
-public function __construct($filename, $type)
-```
-Creation of object of a class with specific type.
-
-```php
-public function getFileNames(): array
-```
-Obtaining the list of files in archive. The symbol of division of catalogs
-can be both a slash, and a backslash (depends on format).
-
-```php
-isFileExists($fileName): boolean
-```
-Checks that passed file is present in archive.
-
-```php
-public function getFileData($filename): ArchiveEntry
-```
-Returns detailed information on the file in archive. The name of the file
-has to be the same as one stored in archive. It is restricted to
-change a symbol of division of catalogs. This method returns object of
-_wapmorgan\UnifiedArchive\ArchiveEntry_.
-
-```php
-public function getFileContent($filename): string
-```
-Receiving "crude" contents of the file. For text files it is the text,
-for images/video/music are crude binary data. The file name besides has to be in
-accuracy as in archive.
-
-```php
-public function getFileResource($filename): resource|false
-```
-Returns a resource that can be used to read all file contents
-without full extraction. If file does not exist, false will be returned.
-
-```php
-public function countFiles(): integer
-```
-Counts total of all files in archive.
-
-```php
-public function getArchiveSize(): integer
-```
-Returns the archive size (the file size) in bytes.
-
-```php
-public function getArchiveType(): string
-```
-Receives archive type (like `rar` or `zip`).
-
-```php
-public function countCompressedFilesSize(): integer
-```
-Counts the size of all PACKED useful data in bytes (that is contents of all
-files listed in archive).
-
-```php
-public function countUncompressedFilesSize(): integer
-```
-Counts the size of all UNPACKED useful data in bytes (that is contents of all
-files listed in archive).
+| `getFileResource($fileName): resource`                                                   | Returns a `resource` that can be used to read all file contents from archive.                                          | Returns `false` when file is not in archive.                        |
+| `extractFiles($outputFolder, $node = '/', $expandFilesList = false): integer`            | Extracts all files or few files from archive to specific directory and returns number of extracted files.              | Returns `false` when some error occurred.                           |
+| `deleteFiles($fileOrFiles, $expandFilesList = false): integer`                           | Deletes files from archive and returns number of deleted files.                                                        | Returns `false` when archive does not support archive modification. |
+| `addFiles($fileOrFiles): integer`                                                        | Adds files to archive and returns number of added files.                                                               | Returns `false` when archive does not support archive modification. |
 
 ```php
 public function extractFiles($outputFolder, $node = '/'): integer
@@ -363,7 +268,7 @@ archiving, their number and total size.
 
 ### `ArchiveEntry`
 The class representing a file from archive as result of a call to `getFileData()`.
-It containts fields with file information:
+It contains fields with file information:
 * `string $path` - file name in archive.
 * `boolean $isCompressed` - the boolean value, containing `true` if the file
 was packed with compression.
@@ -375,9 +280,9 @@ in bytes.
 containing number
 of seconds passed since the beginning of an era of Unix).
 
-## PclZip-like interface
-UnifedArchive provides full realization of the interface known by popular archiving
-library "PclZip" (only for **zip** format, the last version 2.8.2).
+### PclZip-like interface
+UnifiedArchive provides for zip archives full realization of the interface 
+known by popular archiving library "PclZip" (the last version 2.8.2).
 
 Let's look at it:
 
@@ -420,7 +325,7 @@ added files. At present the native library for work *doesn't allow* to change
 compression parameters from zip-archive - all added the file forcibly contract.
 I tried to find a roundabout way, but at present to make it it didn't turn out.
 
-**Performance comparation**
+**Performance comparision**
 
 To confirm my words about boost that UnifiedArchive can make in your project,
 here's comparation table of UnifiedArchive and PclZip extracting the same
@@ -437,34 +342,47 @@ archives.
 
 **Average growth is 27%!**
 
-## Formats support
+## Built-in console archive manager
+UnifiedArchive is distributed with a unified console program to manipulate popular
+archive formats. This script is stored in `vendor/bin/cam`.
 
-| Formats                                                     | Requirement                                                                                      | getFileContent()                              | getFileResource() | addFiles() / removeFiles() | archiveFiles() | Notes                                                                                                                              |
-|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------------------------|-------------------|----------------------------|----------------|------------------------------------------------------------------------------------------------------------------------------------|
-| .zip                                                        | `zip` extension                                                                                  | ✔                                             | ✔                 | ✔                          | ✔              |                                                                                                                                    |
-| .7zip, .7z                                                  | [`gemorroj/archive7z`](https://packagist.org/packages/gemorroj/archive7z) package and `7zip-cli` | ✔                                             | ✔ (simulation)    | ✔                          | ✔              |                                                                                                                                    |
-| .tar, .tar.gz, .tar.bz2, .tar.xz, .tar.Z, .tgz, .tbz2, .txz | [`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar) package                    | ✔                                             | ✔ (simulation)    | ❌                          | ✔              | Compressed versions of tar are supported by appropriate libraries or extenions (zlib, bzip2, xz) or installed software (ncompress) |
-| .tar, .tar.gz, .tar.bz2, .tgz, .tbz2                        | `phar` extension                                                                                 | ✔                                             | ✔ (simulation)    | ✔                          | ✔              | Compressed versions of tar are supported by appropriate libraries or extenions (zlib, bzip2)                                       |
-| .rar                                                        | `rar` extension                                                                                  | ✔                                             | ✔                 | ❌                          | ❌              |                                                                                                                                    |
-| .iso                                                        | [`phpclasses/php-iso-file`](https://packagist.org/packages/phpclasses/php-iso-file) package      | ✔                                             | ✔ (simulation)    | ❌                          | ❌              |                                                                                                                                    |
-| .cab                                                        | [`wapmorgan/cab-archive`](https://packagist.org/packages/wapmorgan/cab-archive) package          | ✔ (extraction ability depends on PHP version) | ✔ (simulation)    | ❌                          | ❌              | Extraction is supported only on PHP 7.0.22+, 7.1.8+, 7.2.0.                                                                        |
-| .gz                                                         | `zlib` extension                                                                                 | ✔                                             | ✔                 |                            |                |                                                                                                                                    |
-| .bz2                                                        | `bzip2` extension                                                                                | ✔                                             | ✔                 |                            |                |                                                                                                                                    |
-| .xz                                                         | `lzma2` extension                                                                                | ✔                                             | ✔                 |                            |                |                                                                                                                                    |
+It supports all formats that UnifiedArchive does and can be used to manipulate
+archives without other software. To check your configuration and check formats
+support launch it with `-f` flag in console:
+
+```
+$ php vendor/bin/cam -f
+```
+
+### Full usage help
+```
+USAGE: cam (-l|--list)  ARCHIVE
+       cam (-t|--table) ARCHIVE
+       cam (-i|--info)  ARCHIVE
+       cam (-e|--extract) [--output=DIR] [--replace=(all|ask|none|time|size)] [--flat=(file|path)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
+       cam (-p|--print)   ARCHIVE FILES_IN_ARCHIVE...
+       cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
+       cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
+       cam (-a|--add)     ARCHIVE FILES_ON_DISK...
+       cam (-c|--create)  ARCHIVE FILES_ON_DISK...
+       cam (-f|--formats)
+
+ACTIONS:
+      -l(--list)    List files
+      -t(--table)   List files in table
+      -i(--info)    Summary about archive
+
+      -e(--extract) Extract from archive
+
+      -p(--print)   Print files' content
+      -d(--details) Details about files
+      -x(--delete)  Delete files
+
+      -a(--add)     Add to archive
+      -c(--create)  Create new archive
+
+```
 
 ## Changelog
 
-| Version | Date         | Changelog                                                                                                                                                                                |
-|---------|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 0.1.0   | Apr 11, 2018 | * Renamed methods `extractNode()` -> `extractFiles()`, `archiveNodes()` -> `archiveFiles()`. * Added checks for archive format. * Changed `getFileData()` output.                                  |
-| 0.0.11  | Mar 21, 2018 | * Cleaned up some old code. * Added `ext-phar` adapter for `tar` archives (if `pear/archive_tar` is not installed).                                                                           |
-| 0.0.10  | Aug 7, 2017  | * Remove `docopt` from requirements.                                                                                                                                                       |
-| 0.0.9   | Jul 20, 2017 | * Added `cam` script.                                                                                                                                                                      |
-| 0.0.8   | Jan 24, 2017 | * Added initial support for CAB archives without extracting. * Added handling of short names of tar archives. * Removed external repository declaration. * Removed die() in source code. |
-| 0.0.7   | Jan 14, 2017 | * Fixed using ereg function on PHP >7.                                                                                                                                                   |
-| 0.0.6   | Jan 9, 2017  | * Added functionality for adding files in archive. * Added functionality for deleting files from archive. * Fixed discovering 7z archive number of files and creating new archive.       |
-| 0.0.5   | Jan 8, 2017  | * Added support for `7z` (7zip) archives.                                                                                                                                                  |
-| 0.0.4   | Jan 7, 2017  | * Added support for single-file `bz2` (bzip2) and `xz` (lzma2) archives.                                                                                                                     |
-| 0.0.3   | Aug 18, 2015 | * Removed archive_tar from required packages.                                                                                                                                            |
-| 0.0.2   | May 27, 2014 | * Released under the MIT license                                                                                                                                                         |
-| 0.0.1   | May 26, 2014 | ---                                                                                                                                                                                      |
+To see all changes in library go to [CHANGELOG file](CHANGELOG.md).
