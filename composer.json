@@ -14,7 +14,8 @@
 		"php": ">=5.4.0"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "~4.8"
+		"phpunit/phpunit": "~4.8",
+		"docopt/docopt": "~1.0"
 	},
 	"replace": {
 		"wapmorgan/cam": "1.0.2"
