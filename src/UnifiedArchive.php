@@ -71,7 +71,7 @@ class UnifiedArchive extends BasicArchive
     /** @var \CabArchive */
     protected $cab;
 
-    /** @var array */
+    /** @var array List of archive formats with support state */
     static protected $enabledTypes = [];
 
     /**
@@ -210,7 +210,7 @@ class UnifiedArchive extends BasicArchive
 
         switch ($this->type) {
             case self::ZIP:
-                $this->zip = new ZipArchive;
+                $this->zip = new ZipArchive();
                 $open_result = $this->zip->open($fileName);
                 if ($open_result !== true) {
                     throw new Exception('Could not open Zip archive: '.$open_result);
@@ -356,7 +356,7 @@ class UnifiedArchive extends BasicArchive
                 return new PclZipLikeZipArchiveInterface($this->zip);
         }
 
-        throw new Exception(basename(__FILE__).', line '.__LINE.' : PclZip-like interface IS'.
+        throw new Exception(basename(__FILE__).', line '.__LINE__.' : PclZip-like interface IS'.
          'NOT available for '.$this->type.' archive format');
     }
 
@@ -367,7 +367,6 @@ class UnifiedArchive extends BasicArchive
     {
         switch ($this->type) {
             case self::ZIP:
-                // $this->zip->close();
                 unset($this->zip);
             break;
 
@@ -834,7 +833,7 @@ class UnifiedArchive extends BasicArchive
      *
      * @param string[] $fileOrFiles
      *
-     * @return int|bool
+     * @return int|bool False if failed, number of added files if success
      * @throws \Archive7z\Exception
      */
     public function addFiles($fileOrFiles)

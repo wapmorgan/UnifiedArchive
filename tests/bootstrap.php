@@ -1,9 +1,12 @@
 <?php
+
+use PHPUnit\Framework\TestCase;
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 define('ARCHIVES_DIR', __DIR__ . '/archives');
 
-class PhpUnitTestCase extends PHPUnit_Framework_TestCase
+class PhpUnitTestCase extends TestCase
 {
     /**
      * @var array Array of arrays[md5_hash, filename, remote file]

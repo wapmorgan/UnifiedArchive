@@ -151,4 +151,60 @@ abstract class BasicArchive implements AbstractArchive
             }
         }
     }
+
+    /**
+     * @param string $file
+     * @param string $archiveName
+     * @return bool
+     */
+    static public function archiveFile($file, $archiveName)
+    {
+        if (!is_file($file))
+            throw new \InvalidArgumentException($file.' is not a valid file to archive');
+
+        return static::archiveFiles($file, $archiveName) === 1;
+    }
+
+    /**
+     * @param string $directory
+     * @param string $archiveName
+     * @return bool
+     */
+    static public function archiveDirectory($directory, $archiveName)
+    {
+        if (!is_dir($directory) || !is_readable($directory))
+            throw new \InvalidArgumentException($directory.' is not a valid directory to archive');
+
+        return static::archiveFiles($directory, $archiveName) > 0;
+    }
+
+    /**
+     * @param string $file
+     * @param string|null $inArchiveName
+     * @return bool
+     */
+    public function addFile($file, $inArchiveName = null)
+    {
+        if (!is_file($file))
+            throw new \InvalidArgumentException($file.' is not a valid file to add in archive');
+
+        return ($inArchiveName !== null
+            ? $this->addFiles([$file => $inArchiveName])
+            : $this->addFiles([$file])) === 1;
+    }
+
+    /**
+     * @param string $directory
+     * @param string|null $inArchivePath
+     * @return bool
+     */
+    public function addDirectory($directory, $inArchivePath = null)
+    {
+        if (!is_dir($directory) || !is_readable($directory))
+            throw new \InvalidArgumentException($directory.' is not a valid directory to add in archive');
+
+        return ($inArchivePath !== null
+                ? $this->addFiles([$directory => $inArchivePath])
+                : $this->addFiles([$inArchivePath])) > 0;
+    }
 }
