@@ -219,8 +219,8 @@ UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 
 | Method                                                                                             | Description                                                                                                            | When it fails                                                       |
 |----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| `UnifiedArchive::archiveFile($file, $archiveName, $simulation = false): integer/array`             | Creates a new archive with one file.                                                                                   | Returns `false` when format does not support archive creation.      |
-| `UnifiedArchive::archiveDirectory($fileOrFiles, $archiveName, $simulation = false): integer/array` | Creates a new archive and stores content of passed directory into it.                                                  | Returns `false` when format does not support archive creation.      |
+| `UnifiedArchive::archiveFile($file, $archiveName): boolean`                                        | Creates a new archive with one file.                                                                                   | Returns `false` when format does not support archive creation.      |
+| `UnifiedArchive::archiveDirectory($directory, $archiveName): boolean`                              | Creates a new archive and stores content of passed directory into it.                                                  | Returns `false` when format does not support archive creation.      |
 | `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $simulation = false): integer/array`     | Creates a new archive and stores passed files list into it.                                                            | Returns `false` when format does not support archive creation.      |
 
 ### Object methods
@@ -235,7 +235,7 @@ UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 | `countCompressedFilesSize(): integer`                                                    | Returns size of all compressed files from archive in bytes.                                                            |
 | `countUncompressedFilesSize(): integer`                                                  | Returns size of all uncompressed files from archive in bytes.                                                          |
 
-- Archive content information methds:
+- Archive content information methods:
 
 | Method                                                                                   | Description                                                                                                            | When it fails                                                       |
 |------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
@@ -244,16 +244,16 @@ UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 | `getFileData($fileName): ArchiveEntry`                                                   | Returns an `ArchiveEntry` instance with metadata of file in archive (size, compressed size and modification date).     | Returns `false` when file is not in archive.                        |
 | `getFileContent($fileName): string`                                                      | Returns raw file content from archive.                                                                                 | Returns `false` when file is not in archive.                        |
 | `getFileResource($fileName): resource`                                                   | Returns a `resource` that can be used to read all file contents from archive.                                          | Returns `false` when file is not in archive.                        |
+| `extractFiles($outputFolder, $node = '/', $expandFilesList = false): integer`            | Extracts all files or few files from archive to specific directory and returns number of extracted files.              | Returns `false` when some error occurred.                           |
 
 - Archive modification methods:
 
 | Method                                                                                   | Description                                                                                                            | When it fails                                                       |
 |------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| `extractFiles($outputFolder, $node = '/', $expandFilesList = false): integer`            | Extracts all files or few files from archive to specific directory and returns number of extracted files.              | Returns `false` when some error occurred.                           |
 | `deleteFiles($fileOrFiles, $expandFilesList = false): integer`                           | Deletes files from archive and returns number of deleted files.                                                        | Returns `false` when archive does not support archive modification. |
-| `addFiles($fileOrFiles): integer`                                                        | Adds files to archive and returns number of added files.                                                               | Returns `false` when archive does not support archive modification. |
 | `addFile($file, $inArchiveName = null): boolean`                                         | Adds one file to archive.                                                                                              | Returns `false` when archive does not support archive modification. |
 | `addDirectory($directory, $inArchivePath = null): boolean`                               | Adds files from directory to archive.                                                                                  | Returns `false` when archive does not support archive modification. |
+| `addFiles($fileOrFiles): integer`                                                        | Adds files to archive and returns number of added files.                                                               | Returns `false` when archive does not support archive modification. |
 
 **Notes**:
 

@@ -37,6 +37,7 @@ Improvements:
 * Added `getFileResource($file): resource` method for getting a file descriptor for reading all file content without full extraction in memory.
 * Added `canOpenArchive($archiveFileName): bool` and `canOpenType($archiveFormat): bool` static methods to check if specific archive or format can be opened.
 * Added `detectArchiveType($fileName): string|false` static method to detect (by filename or content) archive type.
+* Added `addFile($file, $inArchiveName = null)` / `addDirectory($directory, $inArchivePath = null)` to add one file or one directory, `archiveFile($file, $archiveName)` / `archiveDirectory($directory, $archiveName)` to archive one file or directory.
 
 Miscellaneous:
 * Added simple tests.
