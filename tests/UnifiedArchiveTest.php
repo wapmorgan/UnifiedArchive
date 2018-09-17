@@ -83,6 +83,7 @@ class UnifiedArchiveTest extends PhpUnitTestCase
     /**
      * @depends testOpen
      * @dataProvider getFixtures
+     * @throws Exception
      */
     public function testCountFiles($md5hash, $filename, $remoteUrl)
     {
