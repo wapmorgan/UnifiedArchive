@@ -207,14 +207,21 @@ UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 
 ### Static Methods
 
+- Archive opening:
+
 | Method                                                                                             | Description                                                                                                            | When it fails                                                       |
 |----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | `UnifiedArchive::open($fileName): UnifiedArchive`                                                  | Tries to detect type of archive and open it.                                                                           | Returns `null` when archive is not recognized or not supported.     |
 | `UnifiedArchive::canOpenArchive($fileName): boolean)`                                              | Checks whether archive can be opened.                                                                                  |                                                                     |
 | `UnifiedArchive::canOpenType($type): boolean`                                                      | Checks whether archive format can be opened.                                                                           |                                                                     |
-| `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $simulation = false): integer/array`     | Creates a new archive and stores passed files list into it.                                                            | Returns `false` when format does not support archive creation.      |
+
+- Archive creation. These methods create archive with one file, directory contents or with custom files list.
+
+| Method                                                                                             | Description                                                                                                            | When it fails                                                       |
+|----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | `UnifiedArchive::archiveFile($file, $archiveName, $simulation = false): integer/array`             | Creates a new archive with one file.                                                                                   | Returns `false` when format does not support archive creation.      |
 | `UnifiedArchive::archiveDirectory($fileOrFiles, $archiveName, $simulation = false): integer/array` | Creates a new archive and stores content of passed directory into it.                                                  | Returns `false` when format does not support archive creation.      |
+| `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $simulation = false): integer/array`     | Creates a new archive and stores passed files list into it.                                                            | Returns `false` when format does not support archive creation.      |
 
 ### Object methods
 
@@ -228,7 +235,7 @@ UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
 | `countCompressedFilesSize(): integer`                                                    | Returns size of all compressed files from archive in bytes.                                                            |
 | `countUncompressedFilesSize(): integer`                                                  | Returns size of all uncompressed files from archive in bytes.                                                          |
 
-- Archive manipulation methods:
+- Archive content information methds:
 
 | Method                                                                                   | Description                                                                                                            | When it fails                                                       |
 |------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
