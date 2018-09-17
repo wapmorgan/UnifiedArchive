@@ -24,7 +24,7 @@ API changes:
     $archive->deleteFiles('tests/', true);
     ```
 
-* Added fourth element in `archiveFiles()` result in emulation mode. Now it returns an archive with 4 elements (added `type` element with archive type).
+* Added new element in `archiveFiles()` result in emulation mode. Now it returns an archive with 4 elements: new `type` element with archive type.
 
 Fixes:
 * Fixed **LZW-stream** (.tar.Z) wrapper (before it didn't work).
