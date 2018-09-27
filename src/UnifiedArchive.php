@@ -136,6 +136,9 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Detect archive type by its filename or content.
+     *
+     * @param string $fileName
+     * @param bool $contentCheck
      * @return string|boolean One of UnifiedArchive type constants OR false if type is not detected
      */
     public static function detectArchiveType($fileName, $contentCheck = true)
