@@ -89,7 +89,7 @@ class UnifiedArchive extends BasicArchive
             throw new Exception('Count not open file: '.$fileName);
 
         $type = self::detectArchiveType($fileName);
-        if (!self::canOpenType($type)) {
+        if (!self::canOpenType($type, true)) {
             if (TarArchive::canOpenType($type)) {
                 return TarArchive::open($fileName);
             }
@@ -110,7 +110,7 @@ class UnifiedArchive extends BasicArchive
 
         $type = self::detectArchiveType($fileName);
         if ($type !== false) {
-            if (self::canOpenType($type)) {
+            if (self::canOpenType($type, true)) {
                 return true;
             } else if (TarArchive::canOpenType($type)) {
                 return true;
@@ -125,13 +125,16 @@ class UnifiedArchive extends BasicArchive
      *
      * @param $type
      *
+     * @param bool $onOwn
      * @return boolean
      */
-    public static function canOpenType($type)
+    public static function canOpenType($type, $onOwn = false)
     {
         self::checkRequirements();
 
-        return (isset(self::$enabledTypes[$type])) ? self::$enabledTypes[$type] : false;
+        return (isset(self::$enabledTypes[$type]))
+            ? self::$enabledTypes[$type]
+            : ($onOwn ? false : TarArchive::canOpenType($type));
     }
 
     /**
@@ -843,6 +846,8 @@ class UnifiedArchive extends BasicArchive
     {
         $files_list = self::createFilesList($fileOrFiles);
 
+        $added_files = 0;
+
         switch ($this->type) {
             case self::ZIP:
                 foreach ($files_list as $localname => $filename) {
@@ -852,6 +857,7 @@ class UnifiedArchive extends BasicArchive
                     } else {
                         if ($this->zip->addFile($filename, $localname) === false)
                             return false;
+                        $added_files++;
                     }
                 }
 
@@ -869,7 +875,12 @@ class UnifiedArchive extends BasicArchive
             case self::SEVEN_ZIP:
                 foreach ($files_list as $localname => $filename) {
                     if (!is_null($filename)) {
-                        $this->seven_zip->addEntry($filename, false, $localname);
+                        try {
+                            $this->seven_zip->addEntry($filename, false, $localname);
+                            $added_files++;
+                        } catch (Exception $e) {
+                            return false;
+                        }
                     }
                 }
 
@@ -890,7 +901,7 @@ class UnifiedArchive extends BasicArchive
 
         $this->scanArchive();
 
-        return count($this->files);
+        return $added_files;
     }
 
     /**

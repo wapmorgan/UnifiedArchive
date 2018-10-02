@@ -342,6 +342,8 @@ class TarArchive extends BasicArchive
     {
         $fileOrFiles = self::createFilesList($fileOrFiles);
 
+        $added_files = 0;
+
         if ($this->tar instanceof Archive_Tar) {
             foreach ($fileOrFiles as $localname => $filename) {
                 $remove_dir = dirname($filename);
@@ -352,6 +354,7 @@ class TarArchive extends BasicArchive
                 } else {
                     if ($this->tar->addModify($filename, $add_dir, $remove_dir) === false)
                         return false;
+                    $added_files++;
                 }
             }
         } else {
@@ -362,11 +365,14 @@ class TarArchive extends BasicArchive
                 } else {
                     if ($this->tar->addFile($filename, $localname) === false)
                         return false;
+                    $added_files++;
                 }
             }
         }
 
         $this->scanArray();
+
+        return $added_files;
     }
 
     /**

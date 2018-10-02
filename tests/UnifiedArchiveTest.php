@@ -39,25 +39,59 @@ class UnifiedArchiveTest extends PhpUnitTestCase
     }
 
     /**
-     * @dataProvider creatableArchiveTypes
+     * @dataProvider modifyableArchiveTypes
      *
      * @param string $archiveFileName
      * @param string $archiveType
      *
      * @throws \Exception
      */
-    public function testCreateAndModify($archiveFileName, $archiveType)
+    public function testCreate($archiveFileName, $archiveType)
     {
         if (!UnifiedArchive::canOpenType($archiveType))
             $this->markTestSkipped($archiveType.' is not supported with current system configuration');
 
-        $test_archive_filename = __DIR__.'/'.$archiveFileName;
-        if (file_exists($test_archive_filename))
-            $this->assertTrue(unlink($test_archive_filename));
+        $this->cleanWorkDir();
+
+        $test_archive_filename = WORK_DIR.$archiveFileName;
 
         $result = UnifiedArchive::archiveFiles(__DIR__.'/fixtures', $test_archive_filename);
         $this->assertInternalType('integer', $result);
         $this->assertEquals(6, $result);
+        unlink($test_archive_filename);
+    }
+
+    /**
+     * @dataProvider modifyableArchiveTypes
+     *
+     * @param string $archiveFileName
+     * @param string $archiveType
+     *
+     * @throws \Exception
+     */
+    public function testModify($archiveFileName, $archiveType)
+    {
+        if (!UnifiedArchive::canOpenType($archiveType))
+            $this->markTestSkipped($archiveType.' is not supported with current system configuration');
+
+        $this->cleanWorkDir();
+
+        $test_archive_filename = WORK_DIR.$archiveFileName;
+        copy(ARCHIVES_DIR.'/'.$archiveFileName, $test_archive_filename);
+
+        $archive = UnifiedArchive::open($test_archive_filename);
+        $this->assertInstanceOf('\wapmorgan\UnifiedArchive\AbstractArchive', $archive);
+
+        // adding file
+        $this->assertTrue($archive->addFiles([__FILE__]));
+        $this->assertTrue($archive->isFileExists(basename(__FILE__)));
+        $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
+
+        // removing file
+        $this->assertTrue($archive->deleteFiles(basename(__FILE__)));
+        $this->assertFalse($archive->isFileExists(basename(__FILE__)));
+
+        unlink($test_archive_filename);
     }
 
     /**
@@ -100,12 +134,12 @@ class UnifiedArchiveTest extends PhpUnitTestCase
     /**
      * @return array
      */
-    public function creatableArchiveTypes()
+    public function modifyableArchiveTypes()
     {
         return [
-            ['archive.zip', UnifiedArchive::ZIP],
-            ['archive.7z', UnifiedArchive::SEVEN_ZIP],
-            ['archive.tar', TarArchive::TAR],
+            ['fixtures.zip', UnifiedArchive::ZIP],
+            ['fixtures.7z', UnifiedArchive::SEVEN_ZIP],
+            ['fixtures.tar', TarArchive::TAR],
         ];
     }
 
