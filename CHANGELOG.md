@@ -1,6 +1,6 @@
 # Change Log
 
-### 0.1.1 - ***
+### 0.1.1 - Sep 21, 2018
 API changes:
 * **Changed algorithm of files list generation in `archiveFiles()` and `addFiles()`**:
     ```php
