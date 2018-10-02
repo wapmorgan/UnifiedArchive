@@ -358,15 +358,17 @@ class TarArchive extends BasicArchive
                 }
             }
         } else {
-            foreach ($fileOrFiles as $localname => $filename) {
-                if (is_null($filename)) {
-                    if ($this->tar->addEmptyDir($localname) === false)
-                        return false;
-                } else {
-                    if ($this->tar->addFile($filename, $localname) === false)
-                        return false;
-                    $added_files++;
+            try {
+                foreach ($fileOrFiles as $localname => $filename) {
+                    if (is_null($filename)) {
+                        $this->tar->addEmptyDir($localname);
+                    } else {
+                        $this->tar->addFile($filename, $localname);
+                        $added_files++;
+                    }
                 }
+            } catch (Exception $e) {
+                return false;
             }
         }
 

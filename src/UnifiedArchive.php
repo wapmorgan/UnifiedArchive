@@ -875,7 +875,8 @@ class UnifiedArchive extends BasicArchive
                 foreach ($files_list as $localname => $filename) {
                     if (!is_null($filename)) {
                         try {
-                            $this->seven_zip->addEntry($filename, false, $localname);
+                            $this->seven_zip->addEntry($filename);
+                            $this->seven_zip->renameEntry($filename, $localname);
                             $added_files++;
                         } catch (Exception $e) {
                             return false;
