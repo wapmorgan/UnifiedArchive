@@ -83,7 +83,7 @@ class UnifiedArchiveTest extends PhpUnitTestCase
         $this->assertInstanceOf('\wapmorgan\UnifiedArchive\AbstractArchive', $archive);
 
         // adding file
-        $this->assertTrue($archive->addFiles([__FILE__]));
+        $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
         $this->assertTrue($archive->isFileExists(basename(__FILE__)));
         $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
 

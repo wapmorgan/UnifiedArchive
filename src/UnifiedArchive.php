@@ -841,6 +841,7 @@ class UnifiedArchive extends BasicArchive
      *
      * @return int|bool False if failed, number of added files if success
      * @throws \Archive7z\Exception
+     * @throws Exception
      */
     public function addFiles($fileOrFiles)
     {
@@ -861,14 +862,12 @@ class UnifiedArchive extends BasicArchive
                     }
                 }
 
-                $this->files = array();
-                $this->compressedFilesSize =
-                $this->uncompressedFilesSize = 0;
-                for ($i = 0; $i < $this->zip->numFiles; $i++) {
-                    $file = $this->zip->statIndex($i);
-                    $this->files[$i] = $file['name'];
-                    $this->compressedFilesSize += $file['comp_size'];
-                    $this->uncompressedFilesSize += $file['size'];
+                // reopen archive to save changes
+                $archive_filename = $this->zip->filename;
+                $this->zip->close();
+                $open_result = $this->zip->open($archive_filename);
+                if ($open_result !== true) {
+                    throw new Exception('Could not open Zip archive: '.$open_result);
                 }
             break;
 
@@ -883,16 +882,6 @@ class UnifiedArchive extends BasicArchive
                         }
                     }
                 }
-
-                $this->files = array();
-                $this->compressedFilesSize =
-                $this->uncompressedFilesSize = 0;
-                foreach ($this->seven_zip->getEntries() as $entry) {
-                    $this->files[] = $entry->getPath();
-                    $this->compressedFilesSize += $entry->getPackedSize();
-                    $this->uncompressedFilesSize += $entry->getSize();
-                }
-                $this->seven_zip->numFiles = count($this->files);
             break;
 
             default:
