@@ -36,7 +36,8 @@ class PhpUnitTestCase extends TestCase
     public function cleanWorkDir()
     {
         foreach (glob(WORK_DIR.'/*') as $file) {
-            unlink($file);
+            if (basename($file) !== '.gitignore')
+                unlink($file);
         }
     }
 }
