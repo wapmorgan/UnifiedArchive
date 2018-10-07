@@ -157,43 +157,8 @@ class TarArchive extends BasicArchive
         if (!self::$enabledPharData && !self::$enabledPearTar)
             throw new Exception('Archive_Tar nor PharData not available');
 
-        if ($type === null)
-            $type = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-        switch ($type) {
-            case 'gz':
-            case 'tgz':
-                if (self::$enabledPharData)
-                    $this->tar = new PharData($fileName);
-                else
-                    $this->tar = new Archive_Tar($fileName, 'gz');
-                break;
-            case 'bz2':
-            case 'tbz2':
-                if (self::$enabledPharData)
-                    $this->tar = new PharData($fileName);
-                else
-                    $this->tar = new Archive_Tar($fileName, 'bz2');
-                break;
-            case 'xz':
-                if (!self::$enabledPharData)
-                    throw new Exception('Archive_Tar not available');
-                $this->tar = new Archive_Tar($fileName, 'lzma2');
-                break;
-            case 'z':
-                if (!self::$enabledPharData)
-                    throw new Exception('Archive_Tar not available');
-                $this->tar = new Archive_Tar('compress.lzw://'.$fileName);
-                break;
-            default:
-                if (self::$enabledPharData)
-                    $this->tar = new PharData($fileName, 0, null, Phar::TAR);
-                else
-                    $this->tar = new Archive_Tar($fileName);
-                break;
-        }
-
-        $this->scanArray();
+        $this->openArchive($type);
+        $this->scanArchive();
     }
 
     /**
@@ -331,12 +296,18 @@ class TarArchive extends BasicArchive
                 $deleted++;
         }
 
+        $this->tar = null;
+        $this->openArchive();
+        $this->scanArchive();
+
         return $deleted;
     }
 
     /**
      * @param $fileOrFiles
+     *
      * @return int|bool
+     * @throws \Exception
      */
     public function addFiles($fileOrFiles)
     {
@@ -370,9 +341,13 @@ class TarArchive extends BasicArchive
             } catch (Exception $e) {
                 return false;
             }
+            $this->tar = null;
+            // reopen to refresh files list properly
+            $this->openArchive();
         }
 
-        $this->scanArray();
+
+        $this->scanArchive();
 
         return $added_files;
     }
@@ -487,21 +462,26 @@ class TarArchive extends BasicArchive
                 $basename = $match[1];
             } else {
                 $ext = pathinfo($archiveName, PATHINFO_EXTENSION);
-                $basename = basename($archiveName, '.'.$ext);
+                $basename = dirname($archiveName).'/'.basename($archiveName, '.'.$ext);
             }
             $tar = new PharData($basename.'.tar', 0, null, Phar::TAR);
 
-            foreach ($fileOrFiles as $localname => $filename) {
-                if (is_null($filename)) {
-                    if ($localname !== '/') {
-                        if ($tar->addEmptyDir($localname) === false) {
+            try {
+                foreach ($fileOrFiles as $localname => $filename) {
+                    if (is_null($filename)) {
+                        if ($localname !== '/') {
+                            if ($tar->addEmptyDir($localname) === false) {
+                                return false;
+                            }
+                        }
+                    } else {
+                        if ($tar->addFile($filename, $localname) === false) {
                             return false;
                         }
                     }
-                } else {
-                    if ($tar->addFile($filename, $localname) === false)
-                        return false;
                 }
+            } catch (Exception $e) {
+                return false;
             }
 
             switch (strtolower(pathinfo($archiveName, PATHINFO_EXTENSION))) {
@@ -514,6 +494,7 @@ class TarArchive extends BasicArchive
                     $tar->compress(Phar::BZ2, $ext);
                     break;
             }
+            $tar = null;
         } else {
             throw new Exception('Archive_Tar nor PharData not available');
         }
@@ -524,9 +505,9 @@ class TarArchive extends BasicArchive
     /**
      * Rescans array
      */
-    protected function scanArray()
+    protected function scanArchive()
     {
-        $this->files = array();
+        $this->files = [];
         $this->compressedFilesSize =
         $this->uncompressedFilesSize = 0;
 
@@ -593,5 +574,55 @@ class TarArchive extends BasicArchive
 
         rewind($resource);
         return $resource;
+    }
+
+    /**
+     * @param $type
+     *
+     * @throws \Exception
+     */
+    private function openArchive($type = null)
+    {
+        if ($type === null) {
+            $type = strtolower(pathinfo($this->path, PATHINFO_EXTENSION));
+        }
+
+        switch ($type) {
+            case 'gz':
+            case 'tgz':
+                if (self::$enabledPharData) {
+                    $this->tar = new PharData($this->path);
+                } else {
+                    $this->tar = new Archive_Tar($this->path, 'gz');
+                }
+                break;
+            case 'bz2':
+            case 'tbz2':
+                if (self::$enabledPharData) {
+                    $this->tar = new PharData($this->path);
+                } else {
+                    $this->tar = new Archive_Tar($this->path, 'bz2');
+                }
+                break;
+            case 'xz':
+                if (!self::$enabledPharData) {
+                    throw new Exception('Archive_Tar not available');
+                }
+                $this->tar = new Archive_Tar($this->path, 'lzma2');
+                break;
+            case 'z':
+                if (!self::$enabledPharData) {
+                    throw new Exception('Archive_Tar not available');
+                }
+                $this->tar = new Archive_Tar('compress.lzw://' . $this->path);
+                break;
+            default:
+                if (self::$enabledPharData) {
+                    $this->tar = new PharData($this->path, 0, null, Phar::TAR);
+                } else {
+                    $this->tar = new Archive_Tar($this->path);
+                }
+                break;
+        }
     }
 }

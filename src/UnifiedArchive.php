@@ -806,6 +806,8 @@ class UnifiedArchive extends BasicArchive
             if (!in_array($file, $this->files, true)) unset($files[$i]);
         }
 
+        $count = 0;
+
         switch ($this->type) {
             case self::ZIP:
                 $count = 0;
@@ -817,12 +819,15 @@ class UnifiedArchive extends BasicArchive
             break;
 
             case self::SEVEN_ZIP:
-                foreach ($files as $file) {
-                    $this->seven_zip->delEntry($file);
-                    unset($this->files[array_search($file, $this->files, true)]);
+                try {
+                    foreach ($files as $file) {
+                        $this->seven_zip->delEntry($file);
+                        unset($this->files[array_search($file, $this->files, true)]);
+                        $count++;
+                    }
+                } catch (Exception $e) {
+                    return false;
                 }
-
-                $count = count($this->files) - ($this->seven_zip->numFiles = count($this->files));
             break;
 
             default:
@@ -831,7 +836,7 @@ class UnifiedArchive extends BasicArchive
 
         $this->scanArchive();
 
-        return isset($count) ? $count : false;
+        return $count;
     }
 
     /**
@@ -981,7 +986,8 @@ class UnifiedArchive extends BasicArchive
                 $seven_zip = new Archive7z($archiveName);
                 foreach ($files_list as $localname => $filename) {
                     if ($filename !== null) {
-                        $seven_zip->addEntry($filename, false, $localname);
+                        $seven_zip->addEntry($filename, false);
+                        $seven_zip->renameEntry($filename, $localname);
                     }
                 }
                 unset($seven_zip);

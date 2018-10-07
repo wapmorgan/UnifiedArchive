@@ -5,7 +5,7 @@ use PHPUnit\Framework\TestCase;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 define('ARCHIVES_DIR', __DIR__ . '/archives');
-define('FIXTURES_DIR', __DIR__ . '/archives');
+define('FIXTURES_DIR', __DIR__ . '/fixtures');
 define('WORK_DIR', __DIR__ . '/workdir');
 
 class PhpUnitTestCase extends TestCase
@@ -36,7 +36,7 @@ class PhpUnitTestCase extends TestCase
     public function cleanWorkDir()
     {
         foreach (glob(WORK_DIR.'/*') as $file) {
-            echo $file.PHP_EOL;
+            unlink($file);
         }
     }
 }
