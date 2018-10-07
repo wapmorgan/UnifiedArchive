@@ -984,13 +984,17 @@ class UnifiedArchive extends BasicArchive
 
             case self::SEVEN_ZIP:
                 $seven_zip = new Archive7z($archiveName);
-                foreach ($files_list as $localname => $filename) {
-                    if ($filename !== null) {
-                        $seven_zip->addEntry($filename, false);
-                        $seven_zip->renameEntry($filename, $localname);
+                try {
+                    foreach ($files_list as $localname => $filename) {
+                        if ($filename !== null) {
+                            $seven_zip->addEntry($filename, false);
+                            $seven_zip->renameEntry($filename, $localname);
+                        }
                     }
+                    unset($seven_zip);
+                } catch (Exception $e) {
+                    return false;
                 }
-                unset($seven_zip);
 
                 return count($files_list);
 
