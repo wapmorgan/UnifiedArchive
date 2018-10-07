@@ -1,10 +1,10 @@
 # Change Log
 
 ### 0.1.2 - ***
-- Fixed list of files for zip after `addFiles()` usage.
-- Fixed result of `addFiles()` for `TarArchive`.
-- Fixed list of files for phar after `addFiles()`/`deleteFiles()` usage and path generation of archive in `archiveFiles()`. 
-- Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths for 7zip.
+- **zip**: Fixed list of files after `addFiles()` usage.
+- **tar**: Fixed result of `addFiles()` for `TarArchive`.
+- **phar**: Fixed list of files after `addFiles()`/`deleteFiles()` usage and path generation of archive in `archiveFiles()`. 
+- **7zip**: Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
 
 ### 0.1.1 - Sep 21, 2018
 API changes:
