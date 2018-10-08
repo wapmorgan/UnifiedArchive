@@ -57,7 +57,7 @@ class UnifiedArchiveTest extends PhpUnitTestCase
 
         $result = UnifiedArchive::archiveFiles(FIXTURES_DIR, $test_archive_filename);
         $this->assertInternalType('integer', $result);
-        $this->assertEquals(6, $result);
+        $this->assertEquals(5, $result);
 
         unlink($test_archive_filename);
     }
@@ -145,29 +145,29 @@ class UnifiedArchiveTest extends PhpUnitTestCase
         ];
     }
 
-    //    /**
-//     * @depends testCountFiles
-//     * @dataProvider getFixtures
-//     */
-//    public function testFilesData($md5hash, $filename, $remoteUrl)
-//    {
-//        $full_filename = self::getFixturePath($filename);
-//
-//        if (!UnifiedArchive::canOpenArchive($full_filename))
-//            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
-//
-//        $archive = UnifiedArchive::open($full_filename);
-//        $flatten_list = [];
-//        $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
-//
-//        foreach ($flatten_list as $filename => $content) {
-//            var_dump($archive, $filename);
-//            $file_data = $archive->getFileData($filename);
-//            $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data);
-//
-//            $this->assertAttributeEquals(strlen($content), 'uncompressedSize', $file_data);
-//        }
-//    }
+        /**
+     * @depends testCountFiles
+     * @dataProvider getFixtures
+     */
+    public function testFilesData($md5hash, $filename, $remoteUrl)
+    {
+        $full_filename = self::getArchivePath($filename);
+
+        if (!UnifiedArchive::canOpenArchive($full_filename))
+            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
+
+        $archive = UnifiedArchive::open($full_filename);
+        $flatten_list = [];
+        $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
+
+        foreach ($flatten_list as $filename => $content) {
+            var_dump($archive, $filename);
+            $file_data = $archive->getFileData($filename);
+            $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data);
+
+            $this->assertAttributeEquals(strlen($content), 'uncompressedSize', $file_data);
+        }
+    }
 
     protected function flattenFilesList($prefix, array $list, array &$output)
     {

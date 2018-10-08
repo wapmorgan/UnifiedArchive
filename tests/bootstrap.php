@@ -64,6 +64,12 @@ PhpUnitTestCase::$fixtureContents = [
 
 /**
  * Downloading function with retrying
+ * @param $url
+ * @param $target
+ * @param $md5
+ * @param int $retry
+ * @return bool
+ * @throws Exception
  */
 function downloadFixture($url, $target, $md5, $retry = 3)
 {
