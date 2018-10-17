@@ -88,9 +88,9 @@ only names of files)
     ```php
     var_dump($archive->getFileNames()); // array with files list
     ```
-    
+
 4. Further, check that specific file is in archive.
-    
+
     ```php
     var_dump($archive->isFileExists('README.md')); // boolean
     ```
@@ -119,7 +119,7 @@ and final symbol of division of catalogs are very important! Don't forget them.
 
     // to unpack all contents of archive
     $archive->extractFiles('output');
- 
+
     // to unpack specific files from archive
     $archive->extractFiles('output', ['README.md', 'composer.json']);
 
@@ -140,7 +140,7 @@ and final symbol of division of catalogs are very important! Don't forget them.
 
     // To delete multiple files from an archive
     $archive->deleteFiles(['README.md', 'MANIFEST.MF']);
-     
+
     // To delete directories from archive
     $archive->deleteFiles('/src/', true);
     ```
@@ -174,18 +174,15 @@ UnifiedArchive::archiveFiles('/var/log/syslog', 'Archive.zip');
 UnifiedArchive::archiveFiles([$directory, $file, $file2, ...], 'Archive.zip');
 ```
 
-Extended syntax with possibility of paths rewriting:
+Also, there is extended syntax for `addFiles()` and `archiveFiles()`:
 
 ```php
-$nodes = [
-    '/etc/php5/fpm/php.ini' => 'php.ini',
-    '/media/pictures/other/cats' => 'Pictures', // all files from `cats` dir will be stored in Pictures
-    '/media/pictures/Cats' => 'Pictures', // the same
-    '/home/user/Desktop/catties' => 'Pictures',  // the same
-    '/home/user/Dropbox/software/1' => 'SoftwareVersions', // all files will be stored in SoftwareVersions
-    '/home/user/Dropbox/software/2' => 'SoftwareVersions', // the same
-];
-UnifiedArchive::archiveFiles($nodes, 'Archive.zip');
+UnifiedArchive::archiveFiles([
+          '/var/www/site/abc.log' => 'abc.log',   // stored as 'abc.log'
+          '/var/www/site/abc.log',                // stored as '/var/www/site/abc.log'
+          '/var/www/site/runtime/logs' => 'logs', // directory content stored in 'logs' dir
+          '/var/www/site/runtime/logs',           // stored as '/var/www/site/runtime/logs'
+    ], 'archive.zip');
 ```
 
 ## Formats support
@@ -288,19 +285,17 @@ archiving, their number and total size.
 ### `ArchiveEntry`
 The class representing a file from archive as result of a call to `getFileData()`.
 It contains fields with file information:
-* `string $path` - file name in archive.
-* `boolean $isCompressed` - the boolean value, containing `true` if the file
-was packed with compression.
-* `integer $compressedSize` - the size of the PACKED contents of the file in
-bytes. If no compression used, will have the same value with next field.
-* `integer $uncompressedSize` - the size of the UNPACKED contents of the file
-in bytes.
-* `integer $modificationTime` - time of change of the file (the integer value
-containing number
-of seconds passed since the beginning of an era of Unix).
+
+| Property                    | Description                                                                                                               |
+|-----------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `string $path`              | File name in archive.                                                                                                     |
+| `boolean $isCompressed`     | Boolean value, containing `true` if the file was stored with compression.                                                 |
+| `integer $compressedSize`   | Size of the PACKED contents of the file in bytes. If no compression used, will have the same value with next field.       |
+| `integer $uncompressedSize` | Size of the original unpacked contents of the file in bytes.                                                              |
+| `integer $modificationTime` | Time of change of the file (the integer value containing number of seconds passed since the beginning of an era of Unix). |
 
 ### PclZip-like interface
-UnifiedArchive provides for zip archives full realization of the interface 
+UnifiedArchive provides for zip archives full realization of the interface
 known by popular archiving library "PclZip" (the last version 2.8.2).
 
 Let's look at it:

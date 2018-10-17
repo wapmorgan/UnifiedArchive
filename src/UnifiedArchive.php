@@ -205,7 +205,7 @@ class UnifiedArchive extends BasicArchive
      *
      * @param string $fileName Filename
      * @param string $type Archive type.
-     * @throws Exception
+     * @throws Exception If archive can not be opened
      */
     public function __construct($fileName, $type)
     {
@@ -362,8 +362,7 @@ class UnifiedArchive extends BasicArchive
                 return new PclZipLikeZipArchiveInterface($this->zip);
         }
 
-        throw new Exception(basename(__FILE__).', line '.__LINE__.' : PclZip-like interface IS'.
-         'NOT available for '.$this->type.' archive format');
+        throw new Exception('PclZip-like interface IS NOT available for '.$this->type.' archive format');
     }
 
     /**
@@ -668,120 +667,104 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
-     * Unpacks node with its content to disk. Pass any node from getHierarchy()
-     * method.
-     * @param $outputFolder
-     * @param string|array|null $files
-     * @return bool|int
-     * @throws \Archive7z\Exception
+     * Unpacks files to disk.
+     * @param string $outputFolder Extraction output dir.
+     * @param string|array|null $files One files or list of files or null to extract all content.
+     * @param bool $expandFilesList Should be expanded paths like 'src/' to all files inside 'src/' dir or not.
+     * @return false|int
+     * @throws Exception If files can not be extracted
      */
     public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
-        if ($expandFilesList && $files !== null)
-            $files = self::expandFileList($this->files, is_string($files) ? [$files] : $files);
+        if ($files !== null) {
+            if (is_string($files)) $files = [$files];
+
+            if ($expandFilesList)
+                $files = self::expandFileList($this->files, $files);
+        } else {
+            $files = array_values($this->files);
+        }
 
         switch ($this->type) {
             case self::ZIP:
-                $entries = array();
-                if ($files === null) {
-                    $entries = array_values($this->files);
+                if (count($files) === count($this->files)) {
+                    if ($this->zip->extractTo($outputFolder) === false)
+                        throw new Exception($this->zip->getStatusString(), $this->zip->status);
+                    return $this->zip->numFiles;
                 } else {
-                    foreach ($this->files as $fname) {
-                        if (strpos($fname, $files) === 0) {
-                            $entries[] = $fname;
-                        }
-                    }
+                    if ($this->zip->extractTo($outputFolder, $files) === false)
+                        throw new Exception($this->zip->getStatusString(), $this->zip->status);
+
+                    return count($files);
                 }
-                $result = $this->zip->extractTo($outputFolder, $entries);
-                if ($result === true) {
-                    return count($entries);
-                }
-                return false;
 
             case self::SEVEN_ZIP:
                 if (!is_dir($outputFolder))
                     mkdir($outputFolder);
+
                 $this->seven_zip->setOutputDirectory($outputFolder);
                 $count = 0;
-                if ($files === null) {
-                    try {
+                try {
+                    if (count($files) === count($this->files)) {
                         $this->seven_zip->extract();
                         return $this->seven_zip->numFiles;
-                    } catch (Exception $e) {
-                        return false;
-                    }
-                } else {
-                    foreach ($this->files as $fname) {
-                        if (strpos($fname, $files) === 0) {
-                            if ($this->seven_zip->extractEntry($fname))
+                    } else {
+                        foreach ($files as $file) {
+                            if ($this->seven_zip->extractEntry($file))
                                 $count++;
                         }
+                        return $count;
                     }
+                } catch (Exception $e) {
+                    throw new Exception('Could not extract archive: '.$e->getMessage(), $e->getCode(), $e);
                 }
-                return $count;
 
             case self::RAR:
                 $count = 0;
-                foreach ($this->files as $fname) {
-                    if ($files === null || strpos($fname, $files) === 0) {
-                        if ($this->rar->getEntry($fname)
-                            ->extract($outputFolder)) {
-                            $count++;
-                        }
+                foreach ($files as $file) {
+                    if ($this->rar->getEntry($file)->extract($outputFolder)) {
+                        $count++;
                     }
                 }
                 return $count;
             break;
 
             case self::GZIP:
-                if ($files === null || $files === $this->files) {
-                    $dir = rtrim($outputFolder, '/').'/';
-                    if (!is_dir($dir) && !mkdir($dir))
-                        return false;
-                    if (file_put_contents($dir.
-                        basename($this->gzipFilename, '.gz'),
-                        gzdecode(file_get_contents($this->gzipFilename)))
-                        !== false)
-                        return 1;
-                    else
-                        return false;
-                }
-                return 0;
-
             case self::BZIP:
-                if ($files === null || $files === $this->files) {
-                    $dir = rtrim($outputFolder, '/').'/';
-                    if (!is_dir($dir) && !mkdir($dir))
-                        return false;
-                    if (file_put_contents($dir.
-                        basename($this->bzipFilename, '.bz2'),
-                        bzdecompress(file_get_contents($this->bzipFilename)))
-                        !== false)
-                        return 1;
-                    else
-                        return false;
-                }
-                return 0;
-
             case self::LZMA:
-                if ($files === null || $files === $this->files) {
-                    $dir = rtrim($outputFolder, '/').'/';
-                    if (!is_dir($dir) && !mkdir($dir))
-                        return false;
-                    $fp = xzopen($this->lzmaFilename, 'r');
-                    ob_start();
-                    xzpassthru($fp);
-                    $content = ob_get_flush();
-                    xzclose($fp);
-                    if (file_put_contents($dir.
-                        basename($this->lzmaFilename, '.xz'),
-                        $content)
-                        !== false)
-                        return 1;
-                    else
-                        return false;
+                if ($files !== null && $files !== $this->files)
+                    return 0;
+
+                $dir = rtrim($outputFolder, '/').'/';
+                if (!is_dir($dir) && !mkdir($dir))
+                    return false;
+
+                switch ($this->type) {
+                    case self::GZIP:
+                        $data = gzdecode(file_get_contents($this->gzipFilename));
+                        if ($data === false)
+                            throw new Exception('Could not extract archive');
+                        break;
+                    case self::BZIP:
+                        $data = bzdecompress(file_get_contents($this->bzipFilename));
+                        if (is_integer($data))
+                            throw new Exception('Could not extract archive', $data);
+                        break;
+                    case self::LZMA:
+                        $fp = xzopen($this->lzmaFilename, 'r');
+                        if ($fp === false)
+                            throw new Exception('Could not extract archive');
+                        ob_start();
+                        xzpassthru($fp);
+                        $data = ob_get_flush();
+                        xzclose($fp);
+                        break;
                 }
-                return 0;
+
+                if (file_put_contents($dir.$this->files[0], $data) !== false)
+                    return 1;
+
+                return false;
 
             default:
                 return false;
@@ -790,11 +773,12 @@ class UnifiedArchive extends BasicArchive
 
     /**
      * Updates existing archive by removing files from it.
-     *
+     * Only 7zip and zip types support deletion.
      * @param string|string[] $fileOrFiles
-     * @param bool            $expandFilesList
+     * @param bool $expandFilesList
      *
      * @return bool|int
+     * @throws Exception
      */
     public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
@@ -813,8 +797,9 @@ class UnifiedArchive extends BasicArchive
                 $count = 0;
                 foreach ($files as $file) {
                     $index = array_search($file, $this->files, true);
-                    if ($this->zip->deleteIndex($index))
-                        $count++;
+                    if ($this->zip->deleteIndex($index) === false)
+                        throw new Exception($this->zip->getStatusString(), $this->zip->status);
+                    $count++;
                 }
             break;
 
@@ -826,7 +811,7 @@ class UnifiedArchive extends BasicArchive
                         $count++;
                     }
                 } catch (Exception $e) {
-                    return false;
+                    throw new Exception('Could not modify archive: '.$e->getMessage(), $e->getCode(), $e);
                 }
             break;
 
@@ -859,10 +844,10 @@ class UnifiedArchive extends BasicArchive
                 foreach ($files_list as $localname => $filename) {
                     if (is_null($filename)) {
                         if ($this->zip->addEmptyDir($localname) === false)
-                            return false;
+                            throw new Exception($this->zip->getStatusString(), $this->zip->status);
                     } else {
                         if ($this->zip->addFile($filename, $localname) === false)
-                            return false;
+                            throw new Exception($this->zip->getStatusString(), $this->zip->status);
                         $added_files++;
                     }
                 }
@@ -884,7 +869,7 @@ class UnifiedArchive extends BasicArchive
                             $this->seven_zip->renameEntry($filename, $localname);
                             $added_files++;
                         } catch (Exception $e) {
-                            return false;
+                            throw new Exception('Could not modify archive: '.$e->getMessage(), $e->getCode(), $e);
                         }
                     }
                 }
@@ -1036,7 +1021,7 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
-     *
+     * Tests system configuration
      */
     protected static function checkRequirements()
     {
@@ -1049,6 +1034,9 @@ class UnifiedArchive extends BasicArchive
             self::$enabledTypes[self::LZMA] = extension_loaded('xz');
             self::$enabledTypes[self::ISO] = class_exists('\CISOFile');
             self::$enabledTypes[self::CAB] = class_exists('\CabArchive');
+
+            if (class_exists('\RarException'))
+                \RarException::setUsingExceptions(true);
         }
     }
 }

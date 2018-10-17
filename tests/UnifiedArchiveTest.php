@@ -161,7 +161,6 @@ class UnifiedArchiveTest extends PhpUnitTestCase
         $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
 
         foreach ($flatten_list as $filename => $content) {
-            var_dump($archive, $filename);
             $file_data = $archive->getFileData($filename);
             $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data);
 
