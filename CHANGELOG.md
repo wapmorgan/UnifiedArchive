@@ -5,6 +5,7 @@
 - **tar**: Fixed result of `addFiles()` for `TarArchive`.
 - **phar**: Fixed list of files after `addFiles()`/`deleteFiles()` usage and path generation of archive in `archiveFiles()`. 
 - **7zip**: Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
+- Make `addFiles()` / `deleteFiles()` / `archiveFiles()` throw `\Exception`s when any error occurred.
 
 ### 0.1.1 - Sep 21, 2018
 API changes:
