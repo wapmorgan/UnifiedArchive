@@ -401,6 +401,8 @@ class TarArchive extends BasicArchive
      */
     public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
     {
+        self::checkRequirements();
+
         if (file_exists($archiveName))
             throw new Exception('Archive '.$archiveName.' already exists!');
 
