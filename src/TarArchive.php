@@ -143,7 +143,7 @@ class TarArchive extends BasicArchive
                 return (self::$enabledPearTar || self::$enabledPharData) && extension_loaded('zlib');
 
             case self::TAR_BZIP:
-                return (self::$enabledPearTar || self::$enabledPharData) && extension_loaded('bzip2');
+                return (self::$enabledPearTar || self::$enabledPharData) && extension_loaded('bz2');
 
 
             case self::TAR_LZMA:

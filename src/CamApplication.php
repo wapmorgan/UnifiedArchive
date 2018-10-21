@@ -38,7 +38,7 @@ class CamApplication {
 
             '.tar' => [TarArchive::canOpenType(TarArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
             '.tar.gz' => [TarArchive::canOpenType(TarArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
-            '.tar.bz2' => [TarArchive::canOpenType(TarArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bzip2" extension'],
+            '.tar.bz2' => [TarArchive::canOpenType(TarArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
             '.tar.xz' => [TarArchive::canOpenType(TarArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
             '.tar.Z' => [TarArchive::canOpenType(TarArchive::TAR_LZW), 'install "compress" system utility'],
         ];
