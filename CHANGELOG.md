@@ -1,11 +1,23 @@
 # Change Log
 
 ### 0.1.2 - ***
+
+**BC-breaking changes**:
+- PclZip-interface getter renamed to `getPclZipInterface()`.
+- Make `addFiles()` return number of **added files** instead of total files number.
+
 - **zip**: Fixed list of files after `addFiles()` usage.
-- **tar**: Fixed result of `addFiles()` for `TarArchive`.
+- **tar**:
+    - Fixed number of added files of `addFiles()`.
+    - Fixed list of files after `deleteFiles()` usage.
+    - Added checks for compressed tar's support in `canOpenArchive()` and `canOpenType()`.
 - **phar**: Fixed list of files after `addFiles()`/`deleteFiles()` usage and path generation of archive in `archiveFiles()`. 
-- **7zip**: Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
+- **7zip**:
+    - Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
+    - Fixed calculation of compressed file size in `getFileData()`.
+
 - Make `addFiles()` / `deleteFiles()` / `archiveFiles()` throw `\Exception`s when any error occurred.
+- Fixed usage of `/` always as directory separator in `addFiles()` and `archiveFiles()`.
 
 ### 0.1.1 - Sep 21, 2018
 API changes:
