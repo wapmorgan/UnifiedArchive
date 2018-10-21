@@ -16,6 +16,9 @@ install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - travis_retry composer install
 
+  - composer require gemorroj/archive7z
+  - composer require phpclasses/php-iso-file
+
 script:
   # PHP tests
   - vendor/bin/phpunit --verbose
