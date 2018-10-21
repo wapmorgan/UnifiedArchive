@@ -9,6 +9,7 @@ matrix:
     - php: 5.4
 
 install:
+  - apt-get install p7zip-full
   - phpenv config-rm xdebug.ini || echo "xdebug is not installed"
 
   # install composer dependencies
