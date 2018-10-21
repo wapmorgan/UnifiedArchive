@@ -6,6 +6,11 @@
 - PclZip-interface getter renamed to `getPclZipInterface()`.
 - Make `addFiles()` return number of **added files** instead of total files number.
 
+Other changes:
+- Make `addFiles()` / `deleteFiles()` / `archiveFiles()` throw `\Exception`s when any error occurred.
+- Fixed usage of `/` always as directory separator in `addFiles()` and `archiveFiles()`.
+
+Format-specific changes:
 - **zip**: Fixed list of files after `addFiles()` usage.
 - **tar**:
     - Fixed number of added files of `addFiles()`.
@@ -15,9 +20,6 @@
 - **7zip**:
     - Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
     - Fixed calculation of compressed file size in `getFileData()`.
-
-- Make `addFiles()` / `deleteFiles()` / `archiveFiles()` throw `\Exception`s when any error occurred.
-- Fixed usage of `/` always as directory separator in `addFiles()` and `archiveFiles()`.
 
 ### 0.1.1 - Sep 21, 2018
 API changes:
