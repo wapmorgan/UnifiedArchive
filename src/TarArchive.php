@@ -96,15 +96,19 @@ class TarArchive extends BasicArchive
             switch ($match['ext']) {
                 case 'tar':
                     return self::TAR;
+
                 case 'tgz':
                 case 'tar.gz':
                     return self::TAR_GZIP;
+
                 case 'tbz2':
                 case 'tar.bz2':
                     return self::TAR_BZIP;
+
                 case 'txz':
                 case 'tar.xz':
                     return self::TAR_LZMA;
+
                 case 'tar.z':
                     return self::TAR_LZW;
             }
@@ -126,6 +130,7 @@ class TarArchive extends BasicArchive
 
     /**
      * Checks whether specific archive type can be opened with current system configuration
+     * @param $type
      * @return boolean
      */
     public static function canOpenType($type)
@@ -592,34 +597,40 @@ class TarArchive extends BasicArchive
         }
 
         switch ($type) {
+            case self::TAR_GZIP:
             case 'gz':
-            case 'tgz':
                 if (self::$enabledPharData) {
                     $this->tar = new PharData($this->path, self::PHAR_FLAGS);
                 } else {
                     $this->tar = new Archive_Tar($this->path, 'gz');
                 }
                 break;
+
+            case self::TAR_BZIP:
             case 'bz2':
-            case 'tbz2':
                 if (self::$enabledPharData) {
                     $this->tar = new PharData($this->path, self::PHAR_FLAGS);
                 } else {
                     $this->tar = new Archive_Tar($this->path, 'bz2');
                 }
                 break;
+
+            case self::TAR_LZMA:
             case 'xz':
                 if (!self::$enabledPharData) {
                     throw new Exception('Archive_Tar not available');
                 }
                 $this->tar = new Archive_Tar($this->path, 'lzma2');
                 break;
+
+            case self::TAR_LZW:
             case 'z':
                 if (!self::$enabledPharData) {
                     throw new Exception('Archive_Tar not available');
                 }
                 $this->tar = new Archive_Tar('compress.lzw://' . $this->path);
                 break;
+
             default:
                 if (self::$enabledPharData) {
                     $this->tar = new PharData($this->path, self::PHAR_FLAGS, null, Phar::TAR);
