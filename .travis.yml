@@ -9,8 +9,13 @@ matrix:
     - php: 5.4
 
 install:
-  - sudo apt-get install p7zip-full
   - phpenv config-rm xdebug.ini || echo "xdebug is not installed"
+
+  - sudo apt-get install p7zip-full
+
+  # install php-lzma2
+  - git clone https://github.com/payden/php-xz /tmp/xz
+  - cd /tmp/xz && phpize && ./configure && make && sudo make install && cd -
 
   # install composer dependencies
   - travis_retry composer self-update
