@@ -3,6 +3,7 @@ namespace wapmorgan\UnifiedArchive;
 
 use Archive_Tar;
 use Exception;
+use FilesystemIterator;
 use Phar;
 use PharData;
 use RecursiveIteratorIterator;
@@ -44,6 +45,8 @@ class TarArchive extends BasicArchive
 
     /** @var float */
     protected $compressionRatio;
+
+    const PHAR_FLAGS = FilesystemIterator::UNIX_PATHS;
 
     /**
      * @param $fileName
@@ -204,7 +207,6 @@ class TarArchive extends BasicArchive
             return new ArchiveEntry($fileName, $entry_info->getSize(), filesize($entry_info->getPathname()),
                 0, $entry_info->isCompressed());
         }
-        return false;
     }
 
     /**
@@ -471,7 +473,7 @@ class TarArchive extends BasicArchive
             try {
                 foreach ($fileOrFiles as $localname => $filename) {
                     if (is_null($filename)) {
-                        if ($localname !== '/') {
+                        if (!in_array($localname, ['/', ''], true)) {
                             if ($tar->addEmptyDir($localname) === false) {
                                 return false;
                             }
@@ -593,7 +595,7 @@ class TarArchive extends BasicArchive
             case 'gz':
             case 'tgz':
                 if (self::$enabledPharData) {
-                    $this->tar = new PharData($this->path);
+                    $this->tar = new PharData($this->path, self::PHAR_FLAGS);
                 } else {
                     $this->tar = new Archive_Tar($this->path, 'gz');
                 }
@@ -601,7 +603,7 @@ class TarArchive extends BasicArchive
             case 'bz2':
             case 'tbz2':
                 if (self::$enabledPharData) {
-                    $this->tar = new PharData($this->path);
+                    $this->tar = new PharData($this->path, self::PHAR_FLAGS);
                 } else {
                     $this->tar = new Archive_Tar($this->path, 'bz2');
                 }
@@ -620,7 +622,7 @@ class TarArchive extends BasicArchive
                 break;
             default:
                 if (self::$enabledPharData) {
-                    $this->tar = new PharData($this->path, 0, null, Phar::TAR);
+                    $this->tar = new PharData($this->path, self::PHAR_FLAGS, null, Phar::TAR);
                 } else {
                     $this->tar = new Archive_Tar($this->path);
                 }

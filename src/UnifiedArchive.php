@@ -1,5 +1,6 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
+
 use Archive7z\Archive7z;
 use Exception;
 use ZipArchive;
@@ -86,7 +87,7 @@ class UnifiedArchive extends BasicArchive
         self::checkRequirements();
 
         if (!file_exists($fileName) || !is_readable($fileName))
-            throw new Exception('Count not open file: '.$fileName);
+            throw new Exception('Could not open file: '.$fileName);
 
         $type = self::detectArchiveType($fileName);
         if (!self::canOpenType($type, true)) {
@@ -496,9 +497,8 @@ class UnifiedArchive extends BasicArchive
 
             case self::SEVEN_ZIP:
                 $entry = $this->seven_zip->getEntry($fileName);
-                $size = $entry->getSize();
 
-                return new ArchiveEntry($fileName, $size, ceil($size * ($this->compressedFilesSize / $this->uncompressedFilesSize)),
+                return new ArchiveEntry($fileName, $entry->getPackedSize(), $entry->getSize(),
                     strtotime($entry->getModified()), $this->compressedFilesSize != $this->uncompressedFilesSize);
 
             case self::RAR:
@@ -927,6 +927,8 @@ class UnifiedArchive extends BasicArchive
         if (file_exists($archiveName))
             throw new Exception('Archive '.$archiveName.' already exists!');
 
+        self::checkRequirements();
+
         $atype = self::detectArchiveType($archiveName, false);
         if (in_array($atype, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
             return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
@@ -972,7 +974,7 @@ class UnifiedArchive extends BasicArchive
                 try {
                     foreach ($files_list as $localname => $filename) {
                         if ($filename !== null) {
-                            $seven_zip->addEntry($filename, false);
+                            $seven_zip->addEntry($filename, true);
                             $seven_zip->renameEntry($filename, $localname);
                         }
                     }

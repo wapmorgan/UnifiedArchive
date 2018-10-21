@@ -51,10 +51,10 @@ abstract class BasicArchive implements AbstractArchive
      */
     protected static function createFilesList($nodes)
     {
-        // -1: empty folder
         $files = array();
-        if (is_array($nodes)) {
 
+        // passed an extended list
+        if (is_array($nodes)) {
             foreach ($nodes as $source => $destination) {
                 if (is_numeric($source))
                     $source = $destination;
@@ -69,7 +69,7 @@ abstract class BasicArchive implements AbstractArchive
                     $files[$destination] = $source;
             }
 
-        } else if (is_string($nodes)) {
+        } else if (is_string($nodes)) { // passed one file or directory
             // if is directory
             if (is_dir($nodes))
                 self::importFilesFromDir(rtrim($nodes, '/\\*').'/*', null, true,
@@ -97,7 +97,7 @@ abstract class BasicArchive implements AbstractArchive
 
         foreach (glob($source, GLOB_MARK) as $node) {
             if (in_array(substr($node, -1), ['/', '\\'], true) && $recursive) {
-                self::importFilesFromDir($node.'*',
+                self::importFilesFromDir(str_replace('\\', '/', $node).'*',
                     $destination.basename($node).'/', $recursive, $map);
             } elseif (is_file($node) && is_readable($node)) {
                 $map[$destination.basename($node)] = $node;
