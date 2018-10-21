@@ -61,7 +61,6 @@ class TarArchive extends BasicArchive
             throw new Exception('Count not open file: '.$fileName);
 
         $type = self::detectArchiveType($fileName);
-
         if (!self::canOpenType($type)) {
             return null;
         }
@@ -138,13 +137,20 @@ class TarArchive extends BasicArchive
         self::checkRequirements();
         switch ($type) {
             case self::TAR:
-            case self::TAR_GZIP:
-            case self::TAR_BZIP:
                 return self::$enabledPearTar || self::$enabledPharData;
 
+            case self::TAR_GZIP:
+                return (self::$enabledPearTar || self::$enabledPharData) && extension_loaded('zlib');
+
+            case self::TAR_BZIP:
+                return (self::$enabledPearTar || self::$enabledPharData) && extension_loaded('bzip2');
+
+
             case self::TAR_LZMA:
+                return self::$enabledPearTar && extension_loaded('lzma2');
+
             case self::TAR_LZW:
-                return self::$enabledPearTar;
+                return self::$enabledPearTar && LzwStreamWrapper::isBinaryAvailable();
         }
 
         return false;

@@ -28,14 +28,19 @@ class CamApplication {
     public function checkFormats()
     {
         $types = [
-            '.zip' => [extension_loaded('zip'), 'install "zip" extension'],
-            '.rar' => [extension_loaded('rar'), 'install "rar" extension'],
-            '.gz' => [extension_loaded('zlib'), 'install "zlib" extension'],
-            '.bz2' => [extension_loaded('bz2'), 'install "bz2" extension'],
-            '.xz' => [extension_loaded('xz'), 'install "xz" extension'],
-            '.7z' => [class_exists('\Archive7z\Archive7z'), 'install "gemorroj/archive7z" package'],
-            '.tar' => [class_exists('\Archive_Tar') || class_exists('\PharData'), 'install "phar" extension or "pear/archive_tar" package'],
-            '.iso' => [class_exists('\CISOFile'), 'install "phpclasses/php-iso-file" package'],
+            '.zip' => [UnifiedArchive::canOpenType(UnifiedArchive::ZIP), 'install "zip" extension'],
+            '.rar' => [UnifiedArchive::canOpenType(UnifiedArchive::RAR), 'install "rar" extension'],
+            '.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::GZIP), 'install "zlib" extension'],
+            '.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::BZIP), 'install "bz2" extension'],
+            '.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::LZMA), 'install "xz" extension'],
+            '.7z' => [UnifiedArchive::canOpenType(UnifiedArchive::SEVEN_ZIP), 'install "gemorroj/archive7z" package'],
+            '.iso' => [UnifiedArchive::canOpenType(UnifiedArchive::ISO), 'install "phpclasses/php-iso-file" package'],
+
+            '.tar' => [TarArchive::canOpenType(TarArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
+            '.tar.gz' => [TarArchive::canOpenType(TarArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
+            '.tar.bz2' => [TarArchive::canOpenType(TarArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bzip2" extension'],
+            '.tar.xz' => [TarArchive::canOpenType(TarArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
+            '.tar.Z' => [TarArchive::canOpenType(TarArchive::TAR_LZW), 'install "compress" system utility'],
         ];
 
         $installed = $not_installed = [];

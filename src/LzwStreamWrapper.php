@@ -4,7 +4,7 @@ namespace wapmorgan\UnifiedArchive;
 class LzwStreamWrapper
 {
     private static $registered = false;
-    private static $installed = 0;
+    private static $installed;
 
     public static function registerWrapper()
     {
@@ -39,17 +39,9 @@ class LzwStreamWrapper
     public function stream_open($path, $mode, $options)
     {
         // check for compress & uncompress utility
-        if (self::$installed === 0) {
-            $this->exec('command -v compress', $output);
-            if (empty($output))
-                throw new \Exception(__FILE__.', line '.__LINE__.
-                    ': compress command is required');
-            $this->exec('command -v uncompress', $output);
-            if (empty($output))
-                throw new \Exception(__FILE__.', line '.__LINE__.
-                    ': uncompress command is required');
-            self::$installed = true;
-        }
+        $this->checkBinary();
+        if (self::$installed === false)
+            throw new \Exception('compress and uncompress commands are required');
 
         $schema = 'compress.lzw://';
         if (strncasecmp($schema, $path, strlen($schema)) == 0)
@@ -128,7 +120,7 @@ class LzwStreamWrapper
      */
     public function getSystemMemory()
     {
-        $this->exec('free --bytes | head -n3 | tail -n1 | awk \'{print $4}\'',
+        self::exec('free --bytes | head -n3 | tail -n1 | awk \'{print $4}\'',
             $output, $resultCode);
 
         return trim($output);
@@ -140,7 +132,7 @@ class LzwStreamWrapper
      * @param null $resultCode
      * @throws \Exception
      */
-    private function exec($command, &$output, &$resultCode = null)
+    private static function exec($command, &$output, &$resultCode = null)
     {
         if (function_exists('system')) {
             ob_start();
@@ -180,7 +172,7 @@ class LzwStreamWrapper
     private function read()
     {
         if ($this->tmp !== null) {
-            $this->exec('uncompress --stdout '.escapeshellarg($this->path).
+            self::exec('uncompress --stdout '.escapeshellarg($this->path).
                 ' > '.$this->tmp, $output, $resultCode);
             // var_dump(['command' => 'uncompress --stdout '.
             // escapeshellarg($this->path).' > '.$this->tmp, 'output' =>
@@ -194,7 +186,7 @@ class LzwStreamWrapper
                     ': Could not read file '.$this->path);
             }
         } else {
-            $this->exec('uncompress --stdout '.escapeshellarg($this->path),
+            self::exec('uncompress --stdout '.escapeshellarg($this->path),
                 $output, $resultCode);
             $this->data = &$output;
             if ($resultCode == 0 || $resultCode == 2 || is_null($resultCode)) {
@@ -228,7 +220,7 @@ class LzwStreamWrapper
             // stored in temp file
             if ($this->tmp !== null) {
                 // compress in tmp2
-                $this->exec('compress -c '.escapeshellarg($this->tmp).' > '.
+                self::exec('compress -c '.escapeshellarg($this->tmp).' > '.
                     escapeshellarg($this->tmp2), $output, $code);
                 // var_dump(['command' => 'compress -c '.
                 // escapeshellarg($this->tmp).' > '.escapeshellarg($this->tmp2),
@@ -403,5 +395,32 @@ class LzwStreamWrapper
                 fclose($fp);
             }
         }
+    }
+
+    /**
+     */
+    protected static function checkBinary()
+    {
+        if (self::$installed === null) {
+            self::exec('command -v compress', $output);
+            if (empty($output)) {
+                self::$installed = false;
+            } else {
+                self::exec('command -v uncompress', $output);
+                if (empty($output))
+                    self::$installed = false;
+                else
+                    self::$installed = true;
+            }
+        }
+    }
+
+    /**
+     * @return boolean
+     */
+    public static function isBinaryAvailable()
+    {
+        self::checkBinary();
+        return self::$installed;
     }
 }
