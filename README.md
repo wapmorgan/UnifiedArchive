@@ -304,7 +304,7 @@ Let's look at it:
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 require 'vendor/autoload.php';
 $archive = UnifiedArchive::open('ziparchive.zip');
-$pclzip = $archive->pclzipInteface();
+$pclzip = $archive->getPclZipInterface();
 ```
 
 You are from this point free to use all available methods provided by the class

@@ -342,7 +342,7 @@ class UnifiedArchive extends BasicArchive
                 break;
 
             default:
-                throw new Exception('Unsupported archive type: '.$type.' for archive '.$fileName);
+                throw new Exception('Unsupported archive type: '.$type.' of archive '.$fileName);
         }
 
         $this->scanArchive();
@@ -356,7 +356,7 @@ class UnifiedArchive extends BasicArchive
      * implementing PclZipOriginalInterface
      * @throws Exception
      */
-    public function pclzipInterace()
+    public function getPclZipInterface()
     {
         switch ($this->type) {
             case 'zip':
