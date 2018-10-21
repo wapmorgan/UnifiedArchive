@@ -16,8 +16,7 @@ install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - travis_retry composer install
 
-  - composer require gemorroj/archive7z
-  - composer require phpclasses/php-iso-file
+  - composer require --no-interaction gemorroj/archive7z phpclasses/php-iso-file pear/archive_tar
 
 script:
   # PHP tests
