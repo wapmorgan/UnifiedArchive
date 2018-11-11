@@ -8,8 +8,8 @@ about: Create a report to help us improve
 A clear and concise description of what the bug is.
 
 **Configration (please complete the following information):**
- - OS: [e.g. linux / windows]
- - Version [e.g. 0.1.0]
+ - OS: [e.g. linux / windows / osx]
+ - Version of library: [e.g. 0.1.0]
 
 **To Reproduce**
 Steps to reproduce the behavior (your code).
