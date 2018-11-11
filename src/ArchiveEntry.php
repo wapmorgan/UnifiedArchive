@@ -57,12 +57,14 @@ class ArchiveEntry
      * @param $modificationTime
      * @param $isCompressed
      */
-    public function __construct($path, $compressedSize, $uncompressedSize, $modificationTime, $isCompressed)
+    public function __construct($path, $compressedSize, $uncompressedSize, $modificationTime, $isCompressed = null)
     {
         $this->filename = $this->path = $path;
         $this->compressed_size = $this->compressedSize = $compressedSize;
         $this->uncompressed_size = $this->uncompressedSize = $uncompressedSize;
         $this->mtime = $this->modificationTime = $modificationTime;
+        if ($isCompressed === null)
+            $isCompressed = $uncompressedSize !== $compressedSize;
         $this->is_compressed = $this->isCompressed = $isCompressed;
     }
 }
