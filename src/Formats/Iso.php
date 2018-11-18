@@ -3,6 +3,7 @@ namespace wapmorgan\UnifiedArchive\Formats;
 
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\UnsupportedOperationException;
 
 class Iso extends BasicFormat
 {
@@ -138,7 +139,14 @@ class Iso extends BasicFormat
      */
     public function getFileContent($fileName)
     {
-        // TODO: Implement getFileContent() method.
+        $Location = array_search($fileName, $this->files, true);
+        if (!isset($this->filesData[$fileName])) return false;
+        $data = $this->filesData[$fileName];
+        $Location_Real = $Location * $this->blockSize;
+        if ($this->iso->Seek($Location_Real, SEEK_SET) === false)
+            return false;
+
+        return $this->iso->Read($data['size']);
     }
 
     /**
@@ -148,57 +156,72 @@ class Iso extends BasicFormat
      */
     public function getFileResource($fileName)
     {
-        // TODO: Implement getFileResource() method.
+        $Location = array_search($fileName, $this->files, true);
+        if (!isset($this->filesData[$fileName])) return false;
+        $data = $this->filesData[$fileName];
+        $Location_Real = $Location * $this->blockSize;
+        if ($this->iso->Seek($Location_Real, SEEK_SET) === false)
+            return false;
+
+        $resource = fopen('php://temp', 'r+');
+        fwrite($resource, $this->iso->Read($data['size']));
+        rewind($resource);
+        return $resource;
     }
 
     /**
      * @param string $outputFolder
-     * @param array  $files
+     * @param array $files
      *
      * @return false|resource
+     * @throws UnsupportedOperationException
      */
     public function extractFiles($outputFolder, array $files)
     {
-        // TODO: Implement extractFiles() method.
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @param string $outputFolder
      *
      * @return false|resource
+     * @throws UnsupportedOperationException
      */
     public function extractArchive($outputFolder)
     {
-        // TODO: Implement extractArchive() method.
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @param array $files
      *
      * @return false|int
+     * @throws UnsupportedOperationException
      */
     public function deleteFiles(array $files)
     {
-        // TODO: Implement deleteFiles() method.
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @param array $files
      *
      * @return false|int
+     * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
     {
-        // TODO: Implement addFiles() method.
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $archiveFileName
      *
      * @return false|int
+     * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName){
- // TODO: Implement createArchive() method.
-}
+        throw new UnsupportedOperationException();
+    }
 }

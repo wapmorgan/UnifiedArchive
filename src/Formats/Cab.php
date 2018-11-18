@@ -1,48 +1,46 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Formats;
 
+use CabArchive;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\UnsupportedOperationException;
 
-class Rar extends BasicFormat
+class Cab extends BasicFormat
 {
-    /** @var \RarArchive */
-    protected $rar;
+    /** @var CabArchive */
+    protected $cab;
 
     /**
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
-     *
-     * @throws \Exception
      */
     public function __construct($archiveFileName)
     {
-        \RarException::setUsingExceptions(true);
         $this->open($archiveFileName);
     }
 
     /**
-     * @param $archiveFileName
-     *
-     * @throws \Exception
-     */
-    protected function open($archiveFileName)
-    {
-        $this->rar = \RarArchive::open($archiveFileName);
-        if ($this->rar === false) {
-            throw new Exception('Could not open Rar archive');
-        }
-    }
-
-    /**
-     * Rar format destructor
+     * Iso format destructor
      */
     public function __destruct()
     {
-        $this->rar->close();
+        unset($this->cab);
+    }
+
+    /**
+     * @param $archiveFileName
+     * @throws Exception
+     */
+    protected function open($archiveFileName)
+    {
+        try {
+            $this->cab = new CabArchive($archiveFileName);
+        } catch (Exception $e) {
+            throw new Exception('Could not open Cab archive: '.$e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
@@ -51,10 +49,11 @@ class Rar extends BasicFormat
     public function getArchiveInformation()
     {
         $information = new ArchiveInformation();
-        foreach ($this->rar->getEntries() as $i => $entry) {
-            $information->files[] = $entry->getName();
-            $information->compressedFilesSize += $entry->getPackedSize();
-            $information->uncompressedFilesSize += $entry->getUnpackedSize();
+        foreach ($this->cab->getFileNames() as $file) {
+            $information->files[] = $file;
+            $file_info = $this->cab->getFileData($file);
+            $information->uncompressedFilesSize += $file_info->size;
+            $information->compressedFilesSize += $file_info->packedSize;
         }
         return $information;
     }
@@ -64,11 +63,7 @@ class Rar extends BasicFormat
      */
     public function getFileNames()
     {
-        $files = [];
-        foreach ($this->rar->getEntries() as $i => $entry) {
-            $files[] = $entry->getName();
-        }
-        return $files;
+        return $this->cab->getFileNames();
     }
 
     /**
@@ -78,7 +73,7 @@ class Rar extends BasicFormat
      */
     public function isFileExists($fileName)
     {
-        return $this->rar->getEntry($fileName) !== false;
+        return in_array($fileName, $this->cab->getFileNames(), true);
     }
 
     /**
@@ -88,65 +83,66 @@ class Rar extends BasicFormat
      */
     public function getFileData($fileName)
     {
-        $entry = $this->rar->getEntry($fileName);
-        return new ArchiveEntry($fileName, $entry->getPackedSize(), $entry->getUnpackedSize(),
-            strtotime($entry->getFileTime()), $entry->getMethod() != 48);
+        $data = $this->cab->getFileData($fileName);
+
+        return new ArchiveEntry($fileName, $data->packedSize, $data->size, $data->unixtime, $data->is_compressed);
     }
 
     /**
      * @param string $fileName
      *
      * @return string|false
+     * @throws Exception
      */
     public function getFileContent($fileName)
     {
-        $entry = $this->rar->getEntry($fileName);
-        if ($entry->isDirectory()) return false;
-        return stream_get_contents($entry->getStream());
+        return $this->cab->getFileContent($fileName);
     }
 
     /**
      * @param string $fileName
      *
      * @return bool|resource|string
+     * @throws Exception
      */
     public function getFileResource($fileName)
     {
-        $entry = $this->rar->getEntry($fileName);
-        if ($entry->isDirectory()) return false;
-        return $entry->getStream();
+        $resource = fopen('php://temp', 'r+');
+        fwrite($resource, $this->cab->getFileContent($fileName));
+        rewind($resource);
+        return $resource;
     }
 
     /**
      * @param string $outputFolder
-     * @param array  $files
+     * @param array $files
      *
-     * @return false|int
+     * @return false|resource
+     * @throws UnsupportedOperationException
+     * @throws Exception
      */
     public function extractFiles($outputFolder, array $files)
     {
-        $count = 0;
-        foreach ($files as $file) {
-            if ($this->rar->getEntry($file)->extract($outputFolder)) {
-                $count++;
-            }
-        }
-        return $count;
+        return $this->cab->extract($outputFolder, $files);
     }
 
     /**
      * @param string $outputFolder
      *
      * @return false|resource
+     * @throws UnsupportedOperationException
+     * @throws Exception
      */
     public function extractArchive($outputFolder)
     {
-        return $this->extractFiles($outputFolder, $this->getFileNames());
+        return $this->cab->extract($outputFolder);
     }
 
     /**
      * @param array $files
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     *
+     * @return false|int
+     * @throws UnsupportedOperationException
      */
     public function deleteFiles(array $files)
     {
@@ -155,7 +151,9 @@ class Rar extends BasicFormat
 
     /**
      * @param array $files
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     *
+     * @return false|int
+     * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
     {
@@ -163,9 +161,11 @@ class Rar extends BasicFormat
     }
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $archiveFileName
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     *
+     * @return false|int
+     * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName){
         throw new UnsupportedOperationException();

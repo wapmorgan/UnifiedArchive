@@ -3,6 +3,7 @@ namespace wapmorgan\UnifiedArchive;
 
 use Archive7z\Archive7z;
 use Exception;
+use wapmorgan\UnifiedArchive\Formats\BasicFormat;
 use wapmorgan\UnifiedArchive\Formats\SevenZip;
 use wapmorgan\UnifiedArchive\Formats\Zip;
 use ZipArchive;
@@ -23,18 +24,6 @@ class UnifiedArchive extends BasicArchive
     const ISO = 'iso';
     const CAB = 'cab';
 
-    /** @var string */
-    protected $type;
-
-    /** @var \wapmorgan\UnifiedArchive\Formats\BasicFormat */
-    protected $archive;
-
-    /** @var array */
-    protected $files;
-
-    /** @var int Number of files */
-    protected $filesQuantity;
-
     /** @var array List of archive format handlers */
     protected static $formatHandlers = [
         self::ZIP => 'Zip',
@@ -47,53 +36,29 @@ class UnifiedArchive extends BasicArchive
         self::CAB => 'Cab',
     ];
 
-    /** @var int */
-    protected $uncompressedFilesSize;
-
-    /** @var int */
-    protected $compressedFilesSize;
-
-    /** @var int */
-    protected $archiveSize;
-
-    /** @var ZipArchive */
-    protected $zip;
-
-    /** @var \Archive7z\Archive7z */
-    protected $seven_zip;
-
-    /** @var \RarArchive */
-    protected $rar;
-
-    /** @var array|null */
-    protected $gzipStat;
-
-    /** @var string */
-    protected $gzipFilename;
-
-    /** @var array */
-    protected $bzipStat;
-
-    /** @var string */
-    protected $bzipFilename;
-
-    /** @var string */
-    protected $lzmaFilename;
-
-    /** @var \CISOFile */
-    protected $iso;
-
-    /** @var int */
-    protected $isoBlockSize;
-
-    /** @var mixed */
-    protected $isoFilesData;
-
-    /** @var \CabArchive */
-    protected $cab;
-
     /** @var array List of archive formats with support state */
     static protected $enabledTypes = [];
+
+    /** @var string Type of current archive */
+    protected $type;
+
+    /** @var BasicFormat Adapte for current archive */
+    protected $archive;
+
+    /** @var array List of files in current archive */
+    protected $files;
+
+    /** @var int Number of files */
+    protected $filesQuantity;
+
+    /** @var int Size of uncompressed files */
+    protected $uncompressedFilesSize;
+
+    /** @var int Size of compressed files */
+    protected $compressedFilesSize;
+
+    /** @var int Size of archive */
+    protected $archiveSize;
 
     /**
      * Creates instance with right type.
@@ -241,74 +206,27 @@ class UnifiedArchive extends BasicArchive
         $handler_class = __NAMESPACE__.'\\Formats\\'.static::$formatHandlers[$type];
 
         $this->archive = new $handler_class($fileName);
-
-        switch ($this->type) {
-            case self::ISO:
-                // load php-iso-files
-                $this->iso = new \CISOFile;
-                $this->iso->open($fileName);
-                $this->iso->ISOInit();
-                $size = 0;
-
-                $usedDesc =
-                    $this->iso->GetDescriptor(SUPPLEMENTARY_VOLUME_DESC);
-                if (!$usedDesc)
-                    $usedDesc = $this->iso->GetDescriptor(PRIMARY_VOLUME_DESC);
-                $this->isoBlockSize = $usedDesc->iBlockSize;
-                $directories = $usedDesc->LoadMPathTable($this->iso);
-                foreach ($directories as $Directory) {
-                    $directory = $Directory->GetFullPath($directories, false);
-                    $directory = trim($directory, '/');
-                    if ($directory != '') {
-                        $directory .= '/';
-                        $this->files[$Directory->Location] = $directory;
-                    }
-                    $this->isoCatalogsStructure[$Directory->Location]
-                        = $directory;
-
-                    $files = $Directory->LoadExtents($this->iso,
-                        $usedDesc->iBlockSize, true);
-                    if ($files) {
-                        foreach ($files as $file) {
-                            if (in_array($file->strd_FileId, ['.', '..']))
-                                continue;
-                            $this->files[$file->Location]
-                                = $directory . $file->strd_FileId;
-                            $size += $file->DataLen;
-
-                            $this->isoFilesData[$directory . $file->strd_FileId] =
-                                [
-                                    'size' => $file->DataLen,
-                                    'mtime' =>
-                                        strtotime((string)$file->isoRecDate),
-                                ];
-                        }
-                    }
-                    // break;
-                }
-                $this->uncompressedFilesSize = $this->compressedFilesSize = $size;
-
-                break;
-
-            case self::CAB:
-                try {
-                    $this->cab = new \CabArchive($fileName);
-                } catch (Exception $e) {
-                    throw new Exception('Could not open Cab archive: '.$e->getMessage(), $e->getCode(), $e);
-                }
-                foreach ($this->cab->getFileNames() as $file) {
-                    $this->files[] = $file;
-                    $file_info = $this->cab->getFileData($file);
-                    $this->uncompressedFilesSize += $file_info->size;
-                    $this->compressedFilesSize += $file_info->packedSize;
-                }
-                break;
-
-            default:
-
-        }
-
         $this->scanArchive();
+    }
+
+    /**
+     * Rescans array after modification
+     */
+    protected function scanArchive()
+    {
+        $information = $this->archive->getArchiveInformation();
+        $this->files = $information->files;
+        $this->compressedFilesSize = $information->compressedFilesSize;
+        $this->uncompressedFilesSize = $information->uncompressedFilesSize;
+        $this->filesQuantity = count($information->files);
+    }
+
+    /**
+     * Closes archive.
+     */
+    public function __destruct()
+    {
+        unset($this->archive);
     }
 
     /**
@@ -330,44 +248,12 @@ class UnifiedArchive extends BasicArchive
     }
 
     /**
-     * Closes archive.
-     */
-    public function __destruct()
-    {
-        switch ($this->type) {
-
-            case self::ISO:
-                $this->iso->close();
-            break;
-
-            case self::CAB:
-                unset($this->cab);
-            break;
-        }
-    }
-
-    /**
      * Counts number of files
      * @return int
      */
     public function countFiles()
     {
-        switch ($this->type) {
-            case self::ZIP:
-                return $this->zip->numFiles;
-
-            case self::SEVEN_ZIP:
-                return $this->seven_zip->numFiles;
-
-            case self::RAR:
-                return $this->rar->numberOfFiles;
-
-            case self::ISO:
-                return count($this->files);
-
-            case self::CAB:
-                return $this->cab->filesCount;
-        }
+        return $this->filesQuantity;
     }
 
     /**
@@ -436,16 +322,6 @@ class UnifiedArchive extends BasicArchive
             return false;
 
         return $this->archive->getFileData($fileName);
-
-        switch ($this->type) {
-            case self::CAB:
-                $data = $this->cab->getFileData($fileName);
-
-                return new ArchiveEntry($fileName, $data->packedSize, $data->size, $data->unixtime, $data->is_compressed);
-
-            default:
-                return false;
-        }
     }
 
     /**
@@ -462,76 +338,20 @@ class UnifiedArchive extends BasicArchive
         if (!in_array($fileName, $this->files, true))
             return false;
 
-        switch ($this->type) {
-            case self::ISO:
-                $Location = array_search($fileName, $this->files, true);
-                if (!isset($this->isoFilesData[$fileName])) return false;
-                $data = $this->isoFilesData[$fileName];
-                $Location_Real = $Location * $this->isoBlockSize;
-                if ($this->iso->Seek($Location_Real, SEEK_SET) === false)
-                    return false;
-
-                return $this->iso->Read($data['size']);
-
-            case self::CAB:
-                return $this->cab->getFileContent($fileName);
-
-            default:
-                return false;
-        }
+        return $this->archive->getFileContent($fileName);
     }
 
     /**
      * Returns a resource for reading file from archive
      * @param string $fileName
      * @return bool|resource|string
-     * @throws \Archive7z\Exception
      */
     public function getFileResource($fileName)
     {
         if (!in_array($fileName, $this->files, true))
             return false;
 
-        switch ($this->type) {
-            case self::ZIP:
-
-            case self::SEVEN_ZIP:
-
-
-            case self::RAR:
-
-
-            case self::GZIP:
-                return gzopen($this->gzipFilename, 'rb');
-
-            case self::BZIP:
-
-
-            case self::LZMA:
-
-
-            case self::ISO:
-                $Location = array_search($fileName, $this->files, true);
-                if (!isset($this->isoFilesData[$fileName])) return false;
-                $data = $this->isoFilesData[$fileName];
-                $Location_Real = $Location * $this->isoBlockSize;
-                if ($this->iso->Seek($Location_Real, SEEK_SET) === false)
-                    return false;
-
-                $resource = fopen('php://temp', 'r+');
-                fwrite($resource, $this->iso->Read($data['size']));
-                rewind($resource);
-                return $resource;
-
-            case self::CAB:
-                $resource = fopen('php://temp', 'r+');
-                fwrite($resource, $this->cab->getFileContent($fileName));
-                rewind($resource);
-                return $resource;
-
-            default:
-                return false;
-        }
+        return $this->archive->getFileResource($fileName);
     }
 
     /**
@@ -582,15 +402,12 @@ class UnifiedArchive extends BasicArchive
      */
     public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
+        $fileOrFiles = is_string($fileOrFiles) ? [$fileOrFiles] : $fileOrFiles;
+
         if ($expandFilesList && $fileOrFiles !== null)
-            $fileOrFiles = self::expandFileList($this->files, is_string($fileOrFiles) ? [$fileOrFiles] : $fileOrFiles);
+            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
 
-        $files = is_string($fileOrFiles) ? array($fileOrFiles) : $fileOrFiles;
-        foreach ($files as $i => $file) {
-            if (!in_array($file, $this->files, true)) unset($files[$i]);
-        }
-
-        $result = $this->archive->deleteFiles($files);
+        $result = $this->archive->deleteFiles($fileOrFiles);
         $this->scanArchive();
         return $result;
     }
@@ -610,18 +427,6 @@ class UnifiedArchive extends BasicArchive
         $result = $this->archive->addFiles($files_list);
         $this->scanArchive();
         return $result;
-    }
-
-    /**
-     * Rescans array after modification
-     */
-    protected function scanArchive()
-    {
-        $information = $this->archive->getArchiveInformation();
-        $this->files = $information->files;
-        $this->compressedFilesSize = $information->compressedFilesSize;
-        $this->uncompressedFilesSize = $information->uncompressedFilesSize;
-        $this->filesQuantity = count($information->files);
     }
 
     /**
@@ -682,9 +487,6 @@ class UnifiedArchive extends BasicArchive
             self::$enabledTypes[self::LZMA] = extension_loaded('xz');
             self::$enabledTypes[self::ISO] = class_exists('\CISOFile');
             self::$enabledTypes[self::CAB] = class_exists('\CabArchive');
-
-            if (class_exists('\RarException'))
-                \RarException::setUsingExceptions(true);
         }
     }
 }
