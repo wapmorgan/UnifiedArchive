@@ -11,7 +11,9 @@ Other changes:
 - Fixed usage of `/` always as directory separator in `addFiles()` and `archiveFiles()`.
 
 Format-specific changes:
-- **zip**: Fixed list of files after `addFiles()` usage.
+- **zip**: 
+    - Fixed retrieving new list of files after `addFiles()` usage.
+    - Fixed invalid "/" archive entry after `archiveFiles()` usage.
 - **tar**:
     - Fixed number of added files of `addFiles()`.
     - Fixed list of files after `deleteFiles()` usage.
