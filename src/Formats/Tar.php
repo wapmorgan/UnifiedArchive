@@ -263,7 +263,7 @@ class Tar extends BasicFormat
     protected $pearFilesIndex;
 
     /** @var int Flags for iterator */
-    const PHAR_FLAGS = FilesystemIterator::UNIX_PATHS;
+    const PHAR_FLAGS = 0;
 
     /**
      * Tar format constructor.
@@ -329,7 +329,7 @@ class Tar extends BasicFormat
 
             default:
                 if (self::$enabledPharData) {
-                    $this->tar = new PharData($this->archiveFileName, self::PHAR_FLAGS, null, Phar::TAR);
+                    $this->tar = new PharData($this->archiveFileName, self::PHAR_FLAGS);
                 } else {
                     $this->tar = new Archive_Tar($this->archiveFileName);
                 }
@@ -360,7 +360,15 @@ class Tar extends BasicFormat
             $this->pearCompressionRatio = $information->uncompressedFilesSize != 0
                 ? ceil($information->compressedFilesSize / $information->uncompressedFilesSize)
                 : 1;
+        } else {
+            $stream_path_length = strlen('phar://'.$this->archiveFileName.'/');
+            foreach (new RecursiveIteratorIterator($this->tar) as $i => $file) {
+                $information->files[] = substr($file->getPathname(), $stream_path_length);
+                $information->compressedFilesSize += $file->getCompressedSize();
+                $information->uncompressedFilesSize += filesize($file->getPathname());
+            }
         }
+
         return $information;
     }
 
