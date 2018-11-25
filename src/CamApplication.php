@@ -35,6 +35,7 @@ class CamApplication {
             '.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::LZMA), 'install "xz" extension'],
             '.7z' => [UnifiedArchive::canOpenType(UnifiedArchive::SEVEN_ZIP), 'install "gemorroj/archive7z" package'],
             '.iso' => [UnifiedArchive::canOpenType(UnifiedArchive::ISO), 'install "phpclasses/php-iso-file" package'],
+            '.cab' => [UnifiedArchive::canOpenType(UnifiedArchive::CAB), 'install "wapmorgan/cab-archive" package'],
 
             '.tar' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
             '.tar.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
