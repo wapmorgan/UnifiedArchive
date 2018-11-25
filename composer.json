@@ -38,11 +38,7 @@
 	"autoload": {
 		"psr-4": {
 			"wapmorgan\\UnifiedArchive\\": "src/"
-		},
-		"files": [
-			"src/function.gzip_stat.php",
-			"src/stream.compress.lzw.php"
-		]
+		}
 	},
 	"bin": ["bin/cam"],
 	"minimum-stability": "dev",

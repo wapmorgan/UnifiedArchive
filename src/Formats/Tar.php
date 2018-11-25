@@ -9,6 +9,7 @@ use PharData;
 use RecursiveIteratorIterator;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\LzwStreamWrapper;
 use wapmorgan\UnifiedArchive\UnsupportedOperationException;
 
 /**
@@ -324,6 +325,8 @@ class Tar extends BasicFormat
                 if (!self::$enabledPharData) {
                     throw new Exception('Archive_Tar not available');
                 }
+
+                LzwStreamWrapper::registerWrapper();
                 $this->tar = new Archive_Tar('compress.lzw://' . $this->archiveFileName);
                 break;
 
