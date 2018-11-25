@@ -1,7 +1,7 @@
 UnifiedArchive - unified interface to all popular archive formats (zip # 7z #
 rar # gz # bz2 # xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # iso-9660)
 for listing, reading, extracting and creation + built-in console archive
-manager + PclZip-like interface for zip archives.
+manager.
 
 [![Composer package](http://composer.network/badge/wapmorgan/unified-archive)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive)
@@ -21,7 +21,6 @@ manager + PclZip-like interface for zip archives.
 5. [**API**](#api)
     1. [**UnifiedArchive**](#unifiedarchive)
     2. [**ArchiveEntry**](#archiveentry)
-    3. [**PclZip-like interface**](#pclzip-like-interface)
 6. [**Built-in console archive manager**](#built-in-console-archive-manager)
 7. [**Changelog**](#changelog)
 
@@ -293,68 +292,6 @@ It contains fields with file information:
 | `integer $compressedSize`   | Size of the PACKED contents of the file in bytes. If no compression used, will have the same value with next field.       |
 | `integer $uncompressedSize` | Size of the original unpacked contents of the file in bytes.                                                              |
 | `integer $modificationTime` | Time of change of the file (the integer value containing number of seconds passed since the beginning of an era of Unix). |
-
-### PclZip-like interface
-UnifiedArchive provides for zip archives full realization of the interface
-known by popular archiving library "PclZip" (the last version 2.8.2).
-
-Let's look at it:
-
-```php
-use wapmorgan\UnifiedArchive\UnifiedArchive;
-require 'vendor/autoload.php';
-$archive = UnifiedArchive::open('ziparchive.zip');
-$pclzip = $archive->getPclZipInterface();
-```
-
-You are from this point free to use all available methods provided by the class
-PclZip:
-
-1. `create()` - creation of new archive, packing of files and catalogs.
-2. `listContent()` - receiving contents of archive.
-3. `extract()` - unpacking of files and catalogs.
-4. `properties()` - obtaining information on archive.
-5. `add()` - addition of files in archive.
-6. `delete()` - cleaning of archive of files.
-7. `merge()` - "pasting" of two archives.
-8. `duplicate()` - archive cloning.
-
-All available options and the parameters accepted by original PclZip are also
-available.
-
-It is also important to note increase in productivity when using my version of
-the PclZip-interface using a native class for work, over old and working with
-"crude" contents of archive means of the PHP-interpreter.
-
-*The PclZip-interface is at present in a stage of experimental realization. I
-ask to take it into account.*
-
-For those who isn't familiar with the PclZip interface or wishes to refresh
-knowledge, visit official documentation on PclZip on the official site:
-http://www.phpconcept.net/pclzip.
-
-Also I need to note that one of an option nevertheless is unrealizable:
-_PCLZIP_OPT_NO_COMPRESSION_. This option allows to disconnect compression for
-added files. At present the native library for work *doesn't allow* to change
-compression parameters from zip-archive - all added the file forcibly contract.
-I tried to find a roundabout way, but at present to make it it didn't turn out.
-
-**Performance comparision**
-
-To confirm my words about boost that UnifiedArchive can make in your project,
-here's comparation table of UnifiedArchive and PclZip extracting the same
-archives.
-
-| Filename            | UA (time) | % of PZ     | PZ (time) |
-|---------------------|-----------|-------------|-----------|
-| googletools.zip     | 0.014     | **67%**     | 0.020     |
-| PHPWord-develop.zip | 0.573     | **63%**     | 0.907     |
-| turbosale_1.0.0.zip | 0.250     | **80%**     | 0.309     |
-| meteor-devel.zip    | 6.553     | **62%**     | 10.429    |
-| subrion-develop.zip | 10.682    | **82%**     | 12.996    |
-| OptiKey-master.zip  | 3.445     | **82%**     | 4.180     |
-
-**Average growth is 27%!**
 
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular
