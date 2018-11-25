@@ -23,6 +23,11 @@ class UnifiedArchive extends BasicArchive
     const LZMA = 'lzma2';
     const ISO = 'iso';
     const CAB = 'cab';
+    const TAR = 'tar';
+    const TAR_GZIP = 'tgz';
+    const TAR_BZIP = 'tbz2';
+    const TAR_LZMA = 'txz';
+    const TAR_LZW = 'tar.z';
 
     /** @var array List of archive format handlers */
     protected static $formatHandlers = [
@@ -34,6 +39,11 @@ class UnifiedArchive extends BasicArchive
         self::LZMA => 'Lzma',
         self::ISO => 'Iso',
         self::CAB => 'Cab',
+        self::TAR => 'Tar',
+        self::TAR_GZIP => 'Tar',
+        self::TAR_BZIP => 'Tar',
+        self::TAR_LZMA => 'Tar',
+        self::TAR_LZW => 'Tar',
     ];
 
     /** @var array List of archive formats with support state */
@@ -63,8 +73,7 @@ class UnifiedArchive extends BasicArchive
     /**
      * Creates instance with right type.
      * @param  string $fileName Filename
-     * @return AbstractArchive|null Returns AbstractArchive in case of successful
-     * parsing of the file
+     * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
      * @throws \Exception
      */
     public static function open($fileName)
@@ -75,10 +84,7 @@ class UnifiedArchive extends BasicArchive
             throw new Exception('Could not open file: '.$fileName);
 
         $type = self::detectArchiveType($fileName);
-        if (!self::canOpenType($type, true)) {
-            if (TarArchive::canOpenType($type)) {
-                return TarArchive::open($fileName);
-            }
+        if (!self::canOpenType($type)) {
             return null;
         }
 
@@ -95,12 +101,8 @@ class UnifiedArchive extends BasicArchive
         self::checkRequirements();
 
         $type = self::detectArchiveType($fileName);
-        if ($type !== false) {
-            if (self::canOpenType($type, true)) {
-                return true;
-            } else if (TarArchive::canOpenType($type)) {
-                return true;
-            }
+        if ($type !== false && self::canOpenType($type)) {
+            return true;
         }
 
         return false;
@@ -114,13 +116,13 @@ class UnifiedArchive extends BasicArchive
      * @param bool $onOwn
      * @return boolean
      */
-    public static function canOpenType($type, $onOwn = false)
+    public static function canOpenType($type)
     {
         self::checkRequirements();
 
         return (isset(self::$enabledTypes[$type]))
             ? self::$enabledTypes[$type]
-            : ($onOwn ? false : TarArchive::canOpenType($type));
+            : false;
     }
 
     /**
@@ -134,8 +136,19 @@ class UnifiedArchive extends BasicArchive
     {
         // by file name
         $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        if (in_array($ext, ['tar', 'tgz', 'tbz2', 'txz']) || preg_match('~\.tar\.(gz|bz2|xz|z)$~', strtolower($fileName))) {
-            return TarArchive::detectArchiveType($fileName);
+
+        // by file name
+        if (stripos($fileName, '.tar.') !== false && preg_match('~\.(?<ext>tar\.(gz|bz2|xz|z))$~', strtolower($fileName), $match)) {
+            switch ($match['ext']) {
+                case 'tar.gz':
+                    return self::TAR_GZIP;
+                case 'tar.bz2':
+                    return self::TAR_BZIP;
+                case 'tar.xz':
+                    return self::TAR_LZMA;
+                case 'tar.z':
+                    return self::TAR_LZW;
+            }
         }
 
         switch ($ext) {
@@ -155,6 +168,15 @@ class UnifiedArchive extends BasicArchive
                 return self::ISO;
             case 'cab':
                 return self::CAB;
+            case 'tar':
+                return self::TAR;
+            case 'tgz':
+                return self::TAR_GZIP;
+            case 'tbz2':
+                return self::TAR_BZIP;
+            case 'txz':
+                return self::TAR_LZMA;
+
         }
 
         // by content
@@ -177,10 +199,12 @@ class UnifiedArchive extends BasicArchive
                     return self::ISO;
                 case 'application/vnd.ms-cab-compressed':
                     return self::CAB;
-            }
+                case 'application/x-tar':
+                    return self::TAR;
+                case 'application/x-gtar':
+                    return self::TAR_GZIP;
 
-            if ($type = TarArchive::detectArchiveType($fileName))
-                return $type;
+            }
         }
 
         return false;
@@ -229,23 +253,23 @@ class UnifiedArchive extends BasicArchive
         unset($this->archive);
     }
 
-    /**
-     * Returns an instance of class implementing PclZipOriginalInterface
-     * interface.
-     *
-     * @return PclZipOriginalInterface Returns an instance of a class
-     * implementing PclZipOriginalInterface
-     * @throws Exception
-     */
-    public function getPclZipInterface()
-    {
-        switch ($this->type) {
-            case 'zip':
-                return new PclZipLikeZipArchiveInterface($this->zip);
-        }
-
-        throw new Exception('PclZip-like interface IS NOT available for '.$this->type.' archive format');
-    }
+//    /**
+//     * Returns an instance of class implementing PclZipOriginalInterface
+//     * interface.
+//     *
+//     * @return PclZipOriginalInterface Returns an instance of a class
+//     * implementing PclZipOriginalInterface
+//     * @throws Exception
+//     */
+//    public function getPclZipInterface()
+//    {
+//        switch ($this->type) {
+//            case 'zip':
+//                return new PclZipLikeZipArchiveInterface($this->zip);
+//        }
+//
+//        throw new Exception('PclZip-like interface IS NOT available for '.$this->type.' archive format');
+//    }
 
     /**
      * Counts number of files
@@ -330,7 +354,6 @@ class UnifiedArchive extends BasicArchive
      * @param $fileName
      *
      * @return bool|string
-     * @throws \Archive7z\Exception
      * @throws \Exception
      */
     public function getFileContent($fileName)
@@ -352,21 +375,6 @@ class UnifiedArchive extends BasicArchive
             return false;
 
         return $this->archive->getFileResource($fileName);
-    }
-
-    /**
-     * Returns hierarchy
-     * @return array
-     */
-    public function getHierarchy()
-    {
-        $tree = array(DIRECTORY_SEPARATOR);
-        foreach ($this->files as $filename) {
-            if (in_array(substr($filename, -1), array('/', '\\')))
-                $tree[] = DIRECTORY_SEPARATOR.$filename;
-        }
-
-        return $tree;
     }
 
     /**
@@ -418,7 +426,6 @@ class UnifiedArchive extends BasicArchive
      * @param string[] $fileOrFiles
      *
      * @return int|bool False if failed, number of added files if success
-     * @throws \Archive7z\Exception
      * @throws Exception
      */
     public function addFiles($fileOrFiles)
@@ -445,8 +452,8 @@ class UnifiedArchive extends BasicArchive
         self::checkRequirements();
 
         $archiveType = self::detectArchiveType($archiveName, false);
-        if (in_array($archiveType, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
-            return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
+//        if (in_array($archiveType, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
+//            return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
         if ($archiveType === false)
             return false;
 
@@ -487,6 +494,11 @@ class UnifiedArchive extends BasicArchive
             self::$enabledTypes[self::LZMA] = extension_loaded('xz');
             self::$enabledTypes[self::ISO] = class_exists('\CISOFile');
             self::$enabledTypes[self::CAB] = class_exists('\CabArchive');
+            self::$enabledTypes[self::TAR] = class_exists('\Archive_Tar') || class_exists('\PharData');
+            self::$enabledTypes[self::TAR_GZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('zlib');
+            self::$enabledTypes[self::TAR_BZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('bz2');
+            self::$enabledTypes[self::TAR_LZMA] = class_exists('\Archive_Tar') && extension_loaded('lzma2');
+            self::$enabledTypes[self::TAR_LZMA] = class_exists('\Archive_Tar') && LzwStreamWrapper::isBinaryAvailable();
         }
     }
 }

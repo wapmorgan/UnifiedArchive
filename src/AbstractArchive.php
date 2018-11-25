@@ -90,12 +90,6 @@ interface AbstractArchive
     public function getFileResource($fileName);
 
     /**
-     * Returns hierarchy
-     * @return array
-     */
-    public function getHierarchy();
-
-    /**
      * @param                   $outputFolder
      * @param string|array|null $files
      * @param bool              $expandFilesList

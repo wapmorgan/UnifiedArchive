@@ -16,13 +16,13 @@ class UnifiedArchiveTest extends PhpUnitTestCase
     public function archiveTypes()
     {
         return [
-            ['archive.tar', TarArchive::TAR],
-            ['archive.tgz', TarArchive::TAR_GZIP],
-            ['archive.tar.gz', TarArchive::TAR_GZIP],
-            ['archive.tbz2', TarArchive::TAR_BZIP],
-            ['archive.tar.bz2', TarArchive::TAR_BZIP],
-            ['archive.txz', TarArchive::TAR_LZMA],
-            ['archive.tar.xz', TarArchive::TAR_LZMA],
+            ['archive.tar', UnifiedArchive::TAR],
+            ['archive.tgz', UnifiedArchive::TAR_GZIP],
+            ['archive.tar.gz', UnifiedArchive::TAR_GZIP],
+            ['archive.tbz2', UnifiedArchive::TAR_BZIP],
+            ['archive.tar.bz2', UnifiedArchive::TAR_BZIP],
+            ['archive.txz', UnifiedArchive::TAR_LZMA],
+            ['archive.tar.xz', UnifiedArchive::TAR_LZMA],
             ['archive.zip', UnifiedArchive::ZIP],
             ['archive.rar', UnifiedArchive::RAR],
             ['archive.iso', UnifiedArchive::ISO],
@@ -103,16 +103,12 @@ class UnifiedArchiveTest extends PhpUnitTestCase
      */
     public function testOpen($md5hash, $filename, $remoteUrl)
     {
-        $class = (strpos($filename, '.tar') !== false)
-            ? 'wapmorgan\UnifiedArchive\TarArchive'
-            : 'wapmorgan\UnifiedArchive\UnifiedArchive';
-
         $full_filename = self::getArchivePath($filename);
 
         if (!UnifiedArchive::canOpenArchive($full_filename))
             $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
 
-        $this->assertInstanceOf($class, UnifiedArchive::open($full_filename),
+        $this->assertInstanceOf('wapmorgan\UnifiedArchive\UnifiedArchive', UnifiedArchive::open($full_filename),
             'UnifiedArchive::open() on '.$full_filename.' should return an object');
     }
 
@@ -146,7 +142,7 @@ class UnifiedArchiveTest extends PhpUnitTestCase
         return [
             ['fixtures.zip', UnifiedArchive::ZIP],
             ['fixtures.7z', UnifiedArchive::SEVEN_ZIP],
-            ['fixtures.tar', TarArchive::TAR],
+            ['fixtures.tar', UnifiedArchive::TAR],
         ];
     }
 

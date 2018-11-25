@@ -16,6 +16,7 @@ class Cab extends BasicFormat
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
+     * @throws Exception
      */
     public function __construct($archiveFileName)
     {

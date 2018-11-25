@@ -36,11 +36,11 @@ class CamApplication {
             '.7z' => [UnifiedArchive::canOpenType(UnifiedArchive::SEVEN_ZIP), 'install "gemorroj/archive7z" package'],
             '.iso' => [UnifiedArchive::canOpenType(UnifiedArchive::ISO), 'install "phpclasses/php-iso-file" package'],
 
-            '.tar' => [TarArchive::canOpenType(TarArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
-            '.tar.gz' => [TarArchive::canOpenType(TarArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
-            '.tar.bz2' => [TarArchive::canOpenType(TarArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
-            '.tar.xz' => [TarArchive::canOpenType(TarArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
-            '.tar.Z' => [TarArchive::canOpenType(TarArchive::TAR_LZW), 'install "compress" system utility'],
+            '.tar' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
+            '.tar.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
+            '.tar.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
+            '.tar.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
+            '.tar.Z' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZW), 'install "compress" system utility'],
         ];
 
         $installed = $not_installed = [];
