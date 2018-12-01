@@ -141,11 +141,11 @@ class Tar extends BasicFormat
     {
         static::checkRequirements();
 
-        if (static::$enabledPearTar)
-            return static::createArchiveForPear($files, $archiveFileName);
-
         if (static::$enabledPharData)
             return static::createArchiveForPhar($files, $archiveFileName);
+
+        if (static::$enabledPearTar)
+            return static::createArchiveForPear($files, $archiveFileName);
 
         throw new Exception('Archive_Tar nor PharData not available');
     }
@@ -155,6 +155,7 @@ class Tar extends BasicFormat
      * @param array $files
      * @param $archiveFileName
      * @return bool|int
+     * @throws Exception
      */
     protected static function createArchiveForPear(array $files, $archiveFileName)
     {
@@ -187,10 +188,10 @@ class Tar extends BasicFormat
 
             if (is_null($filename)) {
                 if ($tar->addString($localName, '') === false)
-                    return false;
+                    throw new Exception('Error when adding directory '.$localName.' to archive');
             } else {
-                if ($tar->addModify($filename, $add_dir, $remove_dir)
-                    === false) return false;
+                if ($tar->addModify($filename, $add_dir, $remove_dir) === false)
+                    throw new Exception('Error when adding file '.$filename.' to archive');
             }
         }
         $tar = null;
