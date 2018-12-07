@@ -6,6 +6,9 @@ class LzwStreamWrapper
     private static $registered = false;
     private static $installed;
 
+    /**
+     *
+     */
     public static function registerWrapper()
     {
         if (!self::$registered)
@@ -398,19 +401,25 @@ class LzwStreamWrapper
     }
 
     /**
+     * @throws \Exception
      */
     protected static function checkBinary()
     {
         if (self::$installed === null) {
-            self::exec('command -v compress', $output);
-            if (empty($output)) {
+            if (strncasecmp(PHP_OS, 'win', 3) === 0) {
                 self::$installed = false;
             } else {
-                self::exec('command -v uncompress', $output);
-                if (empty($output))
+                self::exec('command -v compress', $output);
+                if (empty($output)) {
                     self::$installed = false;
-                else
-                    self::$installed = true;
+                } else {
+                    self::exec('command -v uncompress', $output);
+                    if (empty($output)) {
+                        self::$installed = false;
+                    } else {
+                        self::$installed = true;
+                    }
+                }
             }
         }
     }

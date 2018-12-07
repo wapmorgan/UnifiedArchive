@@ -1,12 +1,8 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
-use Archive7z\Archive7z;
 use Exception;
 use wapmorgan\UnifiedArchive\Formats\BasicFormat;
-use wapmorgan\UnifiedArchive\Formats\SevenZip;
-use wapmorgan\UnifiedArchive\Formats\Zip;
-use ZipArchive;
 
 /**
  * Class which represents archive in one of supported formats.
@@ -253,23 +249,23 @@ class UnifiedArchive implements AbstractArchive
         unset($this->archive);
     }
 
-//    /**
-//     * Returns an instance of class implementing PclZipOriginalInterface
-//     * interface.
-//     *
-//     * @return PclZipOriginalInterface Returns an instance of a class
-//     * implementing PclZipOriginalInterface
-//     * @throws Exception
-//     */
-//    public function getPclZipInterface()
-//    {
-//        switch ($this->type) {
-//            case 'zip':
-//                return new PclZipLikeZipArchiveInterface($this->zip);
-//        }
-//
-//        throw new Exception('PclZip-like interface IS NOT available for '.$this->type.' archive format');
-//    }
+    //    /**
+    //     * Returns an instance of class implementing PclZipOriginalInterface
+    //     * interface.
+    //     *
+    //     * @return PclZipOriginalInterface Returns an instance of a class
+    //     * implementing PclZipOriginalInterface
+    //     * @throws Exception
+    //     */
+    //    public function getPclZipInterface()
+    //    {
+    //        switch ($this->type) {
+    //            case 'zip':
+    //                return new PclZipLikeZipArchiveInterface($this->zip);
+    //        }
+    //
+    //        throw new Exception('PclZip-like interface IS NOT available for '.$this->type.' archive format');
+    //    }
 
     /**
      * Counts number of files
@@ -421,10 +417,8 @@ class UnifiedArchive implements AbstractArchive
     }
 
     /**
-     * Updates existing archive by adding new files.
-     *
-     * @param string[] $fileOrFiles
-     *
+     * Updates existing archive by adding new files
+     * @param string[] $fileOrFiles See [[archiveFiles]] method for file list format.
      * @return int|bool False if failed, number of added files if success
      * @throws Exception
      */
@@ -437,10 +431,63 @@ class UnifiedArchive implements AbstractArchive
     }
 
     /**
-     * Creates an archive.
-     * @param string|string[]|array $fileOrFiles
-     * @param $archiveName
-     * @param bool $emulate
+     * Adds file into archive
+     * @param string $file
+     * @param string|null $inArchiveName If not passed, full path will be preserved.
+     * @return bool
+     * @throws Exception
+     */
+    public function addFile($file, $inArchiveName = null)
+    {
+        if (!is_file($file))
+            throw new \InvalidArgumentException($file.' is not a valid file to add in archive');
+
+        return ($inArchiveName !== null
+                ? $this->addFiles([$file => $inArchiveName])
+                : $this->addFiles([$file])) === 1;
+    }
+
+    /**
+     * Adds directory contents to archive.
+     * @param string $directory
+     * @param string|null $inArchivePath If not passed, full paths will be preserved.
+     * @return bool
+     * @throws Exception
+     */
+    public function addDirectory($directory, $inArchivePath = null)
+    {
+        if (!is_dir($directory) || !is_readable($directory))
+            throw new \InvalidArgumentException($directory.' is not a valid directory to add in archive');
+
+        return ($inArchivePath !== null
+                ? $this->addFiles([$directory => $inArchivePath])
+                : $this->addFiles([$inArchivePath])) > 0;
+    }
+
+    /**
+     * Creates an archive with passed files list
+     *
+     * @param string|string[]|array<string,string> $fileOrFiles List of files. Can be one of three formats:
+     *                             1. A string containing path to file or directory.
+     *                                  File will have it's basename.
+     *                                  `UnifiedArchive::archiveFiles(['/etc/php.ini'], 'archive.zip)` will store
+     * file with 'php.ini' name.
+     *                                  Directory contents will be stored in archive root.
+     *                                  `UnifiedArchive::archiveFiles(['/var/log/'], 'archive.zip')` will store all
+     * directory contents in archive root.
+     *                             2. An array with strings containing pats to files or directories.
+     *                                  Files and directories will be stored with full paths.
+     *                                  `UnifiedArchive::archiveFiles(['/etc/php.ini', '/var/log/'], 'archive.zip)`
+     * will preserve full paths.
+     *                             3. An array with strings where keys are strings.
+     *                                  Files will have name from key.
+     *                                  Directories contents will have prefix from key.
+     *                                  `UnifiedArchive::archiveFiles(['doc.txt' => 'very_long_name_of_document.txt',
+     *  'static' => '/var/www/html/static/'], 'archive.zip')`
+     *
+     * @param string $archiveName File name of archive. Type of archive will be determined via it's name.
+     * @param bool $emulate If true, emulation mode is performed instead of real archiving.
+     *
      * @return array|bool|int
      * @throws Exception
      */
@@ -452,8 +499,8 @@ class UnifiedArchive implements AbstractArchive
         self::checkRequirements();
 
         $archiveType = self::detectArchiveType($archiveName, false);
-//        if (in_array($archiveType, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
-//            return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
+        //        if (in_array($archiveType, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
+        //            return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
         if ($archiveType === false)
             return false;
 
@@ -481,6 +528,36 @@ class UnifiedArchive implements AbstractArchive
     }
 
     /**
+     * Creates an archive with one file
+     * @param string $file
+     * @param string $archiveName
+     * @return bool
+     * @throws \Exception
+     */
+    public static function archiveFile($file, $archiveName)
+    {
+        if (!is_file($file))
+            throw new \InvalidArgumentException($file.' is not a valid file to archive');
+
+        return static::archiveFiles($file, $archiveName) === 1;
+    }
+
+    /**
+     * Creates an archive with full directory contents
+     * @param string $directory
+     * @param string $archiveName
+     * @return bool
+     * @throws Exception
+     */
+    public static function archiveDirectory($directory, $archiveName)
+    {
+        if (!is_dir($directory) || !is_readable($directory))
+            throw new \InvalidArgumentException($directory.' is not a valid directory to archive');
+
+        return static::archiveFiles($directory, $archiveName) > 0;
+    }
+
+    /**
      * Tests system configuration
      */
     protected static function checkRequirements()
@@ -503,6 +580,7 @@ class UnifiedArchive implements AbstractArchive
     }
 
     /**
+     * Deprecated method for extracting files
      * @param $outputFolder
      * @param string|array|null $files
      * @deprecated 0.1.0
@@ -516,6 +594,7 @@ class UnifiedArchive implements AbstractArchive
     }
 
     /**
+     * Deprecated method for archiving files
      * @param $filesOrFiles
      * @param $archiveName
      * @deprecated 0.1.0
@@ -604,64 +683,5 @@ class UnifiedArchive implements AbstractArchive
                 $map[$destination.basename($node)] = $node;
             }
         }
-    }
-
-    /**
-     * @param string $file
-     * @param string $archiveName
-     * @return bool
-     */
-    static public function archiveFile($file, $archiveName)
-    {
-        if (!is_file($file))
-            throw new \InvalidArgumentException($file.' is not a valid file to archive');
-
-        return static::archiveFiles($file, $archiveName) === 1;
-    }
-
-    /**
-     * @param string $directory
-     * @param string $archiveName
-     * @return bool
-     * @throws Exception
-     */
-    static public function archiveDirectory($directory, $archiveName)
-    {
-        if (!is_dir($directory) || !is_readable($directory))
-            throw new \InvalidArgumentException($directory.' is not a valid directory to archive');
-
-        return static::archiveFiles($directory, $archiveName) > 0;
-    }
-
-    /**
-     * @param string $file
-     * @param string|null $inArchiveName
-     * @return bool
-     * @throws Exception
-     */
-    public function addFile($file, $inArchiveName = null)
-    {
-        if (!is_file($file))
-            throw new \InvalidArgumentException($file.' is not a valid file to add in archive');
-
-        return ($inArchiveName !== null
-                ? $this->addFiles([$file => $inArchiveName])
-                : $this->addFiles([$file])) === 1;
-    }
-
-    /**
-     * @param string $directory
-     * @param string|null $inArchivePath
-     * @return bool
-     * @throws Exception
-     */
-    public function addDirectory($directory, $inArchivePath = null)
-    {
-        if (!is_dir($directory) || !is_readable($directory))
-            throw new \InvalidArgumentException($directory.' is not a valid directory to add in archive');
-
-        return ($inArchivePath !== null
-                ? $this->addFiles([$directory => $inArchivePath])
-                : $this->addFiles([$inArchivePath])) > 0;
     }
 }
