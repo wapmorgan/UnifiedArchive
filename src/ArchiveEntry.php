@@ -1,6 +1,11 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+/**
+ * Information class. Represent information about concrete file in archive.
+ *
+ * @package wapmorgan\UnifiedArchive
+ */
 class ArchiveEntry
 {
     /** @var string Path of archive entry */

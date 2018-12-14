@@ -48,7 +48,7 @@ class UnifiedArchive implements AbstractArchive
     /** @var string Type of current archive */
     protected $type;
 
-    /** @var BasicFormat Adapte for current archive */
+    /** @var BasicFormat Adapter for current archive */
     protected $archive;
 
     /** @var array List of files in current archive */
@@ -249,23 +249,21 @@ class UnifiedArchive implements AbstractArchive
         unset($this->archive);
     }
 
-    //    /**
-    //     * Returns an instance of class implementing PclZipOriginalInterface
-    //     * interface.
-    //     *
-    //     * @return PclZipOriginalInterface Returns an instance of a class
-    //     * implementing PclZipOriginalInterface
-    //     * @throws Exception
-    //     */
-    //    public function getPclZipInterface()
-    //    {
-    //        switch ($this->type) {
-    //            case 'zip':
-    //                return new PclZipLikeZipArchiveInterface($this->zip);
-    //        }
-    //
-    //        throw new Exception('PclZip-like interface IS NOT available for '.$this->type.' archive format');
-    //    }
+    /**
+     * Returns an instance of class implementing PclZipOriginalInterface
+     * interface.
+     *
+     * @return \wapmorgan\UnifiedArchive\PclzipZipInterface Returns an instance of a class
+     * implementing PclZipOriginalInterface
+     * @throws Exception
+     */
+    public function getPclZipInterface()
+    {
+        if ($this->type !== self::ZIP)
+            throw new UnsupportedOperationException();
+
+        return new $this->archive->getPclZip();
+    }
 
     /**
      * Counts number of files

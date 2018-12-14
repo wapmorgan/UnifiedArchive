@@ -1,6 +1,12 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+/**
+ * Stream-wrapper and handler for lzw-compressed data.
+ * @requires "compress" system command (linux-only)
+ *
+ * @package wapmorgan\UnifiedArchive
+ */
 class LzwStreamWrapper
 {
     private static $registered = false;

@@ -4,6 +4,7 @@ namespace wapmorgan\UnifiedArchive\Formats;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\PclzipZipInterface;
 use ZipArchive;
 
 /**
@@ -222,5 +223,13 @@ class Zip extends BasicFormat
         $zip->close();
 
         return count($files);
+    }
+
+    /**
+     * @return \wapmorgan\UnifiedArchive\PclzipZipInterface
+     */
+    public function getPclZip()
+    {
+        return new PclzipZipInterface($this->zip);
     }
 }
