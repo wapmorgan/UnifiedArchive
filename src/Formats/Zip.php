@@ -59,6 +59,9 @@ class Zip extends BasicFormat
         $information = new ArchiveInformation();
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
             $file = $this->zip->statIndex($i);
+            // skip directories
+            if (in_array(substr($file['name'], -1), ['/', '\\'], true))
+                continue;
             $information->files[$i] = $file['name'];
             $information->compressedFilesSize += $file['comp_size'];
             $information->uncompressedFilesSize += $file['size'];
@@ -72,8 +75,13 @@ class Zip extends BasicFormat
     public function getFileNames()
     {
         $files = [];
-        for ($i = 0; $i < $this->zip->numFiles; $i++)
-            $files[] = $this->zip->getNameIndex($i);
+        for ($i = 0; $i < $this->zip->numFiles; $i++) {
+            $file_name = $this->zip->getNameIndex($i);
+            // skip directories
+            if (in_array(substr($file_name, -1), ['/', '\\'], true))
+                continue;
+            $files[] = $file_name;
+        }
         return $files;
     }
 

@@ -1,5 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -10,7 +11,7 @@ define('WORK_DIR', __DIR__ . '/workdir');
 class PhpUnitTestCase extends TestCase
 {
     /**
-     * @var array Array of arrays[md5_hash, filename, remote file]
+     * @var array<string format, array<string md5_hash, string filename, string remote_file>>
      */
     static public $archives;
 
@@ -39,16 +40,31 @@ class PhpUnitTestCase extends TestCase
                 unlink($file);
         }
     }
+
+    /**
+     * @param       $prefix
+     * @param array $list
+     * @param array $output
+     */
+    protected function flattenFilesList($prefix, array $list, array &$output)
+    {
+        foreach ($list as $name => $value) {
+            if (is_array($value))
+                $this->flattenFilesList($prefix.$name.'/', $value, $output);
+            else
+                $output[$prefix.$name] = $value;
+        }
+    }
 }
 
 PhpUnitTestCase::$archives = [
-    ['a91fb294d6eb88df24ab26ae5f713775', 'fixtures.7z', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.7z'],
-    ['f3bb89062d2c62fb2339c913933db112', 'fixtures.iso', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.iso'],
-    ['d64474b28bfd036abb885b4e80c847b3', 'fixtures.tar', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar'],
-    ['e2ca07d2f1007f312493a12b239544df', 'fixtures.tar.bz2', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.bz2'],
-    ['fdc239490189e7bf6239a26067424d42', 'fixtures.tar.gz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.gz'],
-    ['ef64468ec5a1a582db6d3f77fbd5d2b5', 'fixtures.tar.xz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.xz'],
-    ['69dcdf13d2a8b7630e2f54fa5ab97d5a', 'fixtures.zip', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.zip'],
+    UnifiedArchive::SEVEN_ZIP => ['a91fb294d6eb88df24ab26ae5f713775', 'fixtures.7z', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.7z'],
+    UnifiedArchive::ISO => ['f3bb89062d2c62fb2339c913933db112', 'fixtures.iso', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.iso'],
+    UnifiedArchive::TAR => ['d64474b28bfd036abb885b4e80c847b3', 'fixtures.tar', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar'],
+    UnifiedArchive::TAR_BZIP => ['e2ca07d2f1007f312493a12b239544df', 'fixtures.tar.bz2', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.bz2'],
+    UnifiedArchive::TAR_GZIP => ['fdc239490189e7bf6239a26067424d42', 'fixtures.tar.gz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.gz'],
+    UnifiedArchive::TAR_LZMA => ['ef64468ec5a1a582db6d3f77fbd5d2b5', 'fixtures.tar.xz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.xz'],
+    UnifiedArchive::ZIP => ['69dcdf13d2a8b7630e2f54fa5ab97d5a', 'fixtures.zip', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.zip'],
 ];
 
 PhpUnitTestCase::$fixtureContents = [

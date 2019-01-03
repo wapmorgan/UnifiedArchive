@@ -1,7 +1,7 @@
 <?php
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
-class UnifiedArchiveTest extends PhpUnitTestCase
+class ArchivingTest extends PhpUnitTestCase
 {
 
     public function getFixtures()
@@ -96,44 +96,6 @@ class UnifiedArchiveTest extends PhpUnitTestCase
     }
 
     /**
-     * @dataProvider getFixtures
-     * @return bool
-     * @throws \Exception
-     */
-    public function testOpen($md5hash, $filename, $remoteUrl)
-    {
-        $full_filename = self::getArchivePath($filename);
-
-        if (!UnifiedArchive::canOpenArchive($full_filename))
-            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
-
-        $this->assertInstanceOf('wapmorgan\UnifiedArchive\UnifiedArchive', UnifiedArchive::open($full_filename),
-            'UnifiedArchive::open() on '.$full_filename.' should return an object');
-    }
-
-    /**
-     * @depends testOpen
-     * @dataProvider getFixtures
-     * @throws Exception
-     */
-    public function testCountFiles($md5hash, $filename, $remoteUrl)
-    {
-        // for 7z count only leaves of fixtures (due to 7z cli output without directories)
-        if (fnmatch('*.7z', $filename)) {
-            $files_number = 0;
-            array_walk_recursive(self::$fixtureContents, function () use (&$files_number) { $files_number++; });
-        } else
-            $files_number = count(self::$fixtureContents, COUNT_RECURSIVE);
-        $full_filename = self::getArchivePath($filename);
-
-        if (!UnifiedArchive::canOpenArchive($full_filename))
-            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
-
-        $archive = UnifiedArchive::open($full_filename);
-        $this->assertEquals($files_number, $archive->countFiles(), 'Invalid files count for '.$filename);
-    }
-
-    /**
      * @return array
      */
     public function modifyableArchiveTypes()
@@ -143,45 +105,5 @@ class UnifiedArchiveTest extends PhpUnitTestCase
             ['fixtures.7z', UnifiedArchive::SEVEN_ZIP],
             ['fixtures.tar', UnifiedArchive::TAR],
         ];
-    }
-
-    /**
-     * @depends      testCountFiles
-     * @dataProvider getFixtures
-     * @throws \Exception
-     */
-    public function testFilesData($md5hash, $archiveFilename, $remoteUrl)
-    {
-        $full_filename = self::getArchivePath($archiveFilename);
-
-        if (!UnifiedArchive::canOpenArchive($full_filename))
-            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
-
-        $archive = UnifiedArchive::open($full_filename);
-        $flatten_list = [];
-        $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
-
-        foreach ($flatten_list as $filename => $content) {
-
-            if (fnmatch('*.7z', $archiveFilename) && DIRECTORY_SEPARATOR == '\\')
-                $filename = str_replace('/', '\\', $filename);
-
-            $file_data = $archive->getFileData($filename);
-            $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data, 'Could not find '
-                .$filename);
-
-            $this->assertAttributeEquals(strlen($content), 'uncompressedSize', $file_data, 'Uncompressed size of '
-                .$filename.' should be '.strlen($content).', but it is '.$file_data->uncompressedSize);
-        }
-    }
-
-    protected function flattenFilesList($prefix, array $list, array &$output)
-    {
-        foreach ($list as $name => $value) {
-            if (is_array($value))
-                $this->flattenFilesList($prefix.$name.'/', $value, $output);
-            else
-                $output[$prefix.$name] = $value;
-        }
     }
 }
