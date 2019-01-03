@@ -21,26 +21,6 @@ class PhpUnitTestCase extends TestCase
     static public $fixtureContents;
 
     /**
-     * PhpUnitTestCase constructor.
-     *
-     * @param null   $name
-     * @param array  $data
-     * @param string $dataName
-     *
-     * @throws \Exception
-     */
-    public function __construct($name = null, array $data = [], $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-        foreach ([ARCHIVES_DIR, WORK_DIR] as $dir) {
-            if (!is_dir($dir)) {
-                if (!mkdir($dir, 0777))
-                    throw new Exception('Could not create '.$dir.' directory');
-            }
-        }
-    }
-
-    /**
      * @return array
      */
     public function getFixtures()
@@ -133,6 +113,13 @@ function downloadFixture($url, $target, $md5, $retry = 3)
 /**
  * Checking fixtures
  */
+foreach ([ARCHIVES_DIR, WORK_DIR] as $dir) {
+    if (!is_dir($dir)) {
+        if (!mkdir($dir, 0777))
+            throw new Exception('Could not create '.$dir.' directory');
+    }
+}
+
 foreach (PhpUnitTestCase::$archives as $fixture) {
     $fixture_file = PhpUnitTestCase::getArchivePath($fixture[1]);
     if (!file_exists($fixture_file)) {
