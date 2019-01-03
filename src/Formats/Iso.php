@@ -19,7 +19,7 @@ class Iso extends BasicFormat
     /** @var int */
     protected $filesSize = 0;
 
-    /** @var null|int */
+    /** @var null|int Size of block in ISO. Used to find real position of file in ISO */
     protected $blockSize;
 
     /**
@@ -50,15 +50,16 @@ class Iso extends BasicFormat
         $this->iso->open($archiveFileName);
         $this->iso->ISOInit();
 
-        $usedDesc =
-            $this->iso->GetDescriptor(SUPPLEMENTARY_VOLUME_DESC);
+        /** @var \CVolumeDescriptor $usedDesc */
+        $usedDesc = $this->iso->GetDescriptor(SUPPLEMENTARY_VOLUME_DESC);
         if (!$usedDesc)
             $usedDesc = $this->iso->GetDescriptor(PRIMARY_VOLUME_DESC);
         $this->blockSize = $usedDesc->iBlockSize;
-
         $directories = $usedDesc->LoadMPathTable($this->iso);
+        // iterate over all directories
+        /** @var \CPathTableRecord $Directory */
         foreach ($directories as $Directory) {
-            $directory = $Directory->GetFullPath($directories, false);
+            $directory = $Directory->GetFullPath($directories);
             $directory = trim($directory, '/');
             if ($directory != '') {
                 $directory .= '/';
@@ -67,14 +68,15 @@ class Iso extends BasicFormat
 //            $this->isoCatalogsStructure[$Directory->Location]
 //                = $directory;
 
+            /** @var \CFileDirDescriptors[] $files */
             $files = $Directory->LoadExtents($this->iso,
                 $usedDesc->iBlockSize, true);
             if ($files) {
+                /** @var \CFileDirDescriptors $file */
                 foreach ($files as $file) {
-                    if (in_array($file->strd_FileId, ['.', '..']))
+                    if (in_array($file->strd_FileId, ['.', '..']) || $file->IsDirectory())
                         continue;
-                    $this->files[$file->Location]
-                        = $directory . $file->strd_FileId;
+                    $this->files[$file->Location] = $directory.$file->strd_FileId;
                     $this->filesSize += $file->DataLen;
 
                     $this->filesData[$directory . $file->strd_FileId] =

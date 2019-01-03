@@ -15,11 +15,15 @@ Format-specific changes:
 - **zip**: 
     - Fixed retrieving new list of files after `addFiles()` usage.
     - Fixed invalid "/" archive entry after `archiveFiles()` usage.
-- **tar**:
+- **tar** (`TarArchive` adapter):
     - Fixed number of added files of `addFiles()`.
     - Fixed list of files after `deleteFiles()` usage.
     - Added checks for compressed tar's support in `canOpenArchive()` and `canOpenType()`.
-- **phar**: Fixed list of files after `addFiles()`/`deleteFiles()` usage and path generation of archive in `archiveFiles()`. 
+- **tar** (`PharData` adapter):
+    - Fixed list of files after `addFiles()`/`deleteFiles()` usage and path generation of archive in `archiveFiles()`.
+    - Fixed path of files in `getFileNames()` to use UNIX path separator ("/").
+- **iso**:
+    - Excluded directories from files list (`getFileNames()`).
 - **7zip**:
     - Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
     - Fixed calculation of compressed file size in `getFileData()`.

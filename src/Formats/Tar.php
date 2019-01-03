@@ -265,7 +265,7 @@ class Tar extends BasicFormat
     protected $pearFilesIndex;
 
     /** @var int Flags for iterator */
-    const PHAR_FLAGS = 0;
+    const PHAR_FLAGS = FilesystemIterator::UNIX_PATHS;
 
     /**
      * Tar format constructor.
