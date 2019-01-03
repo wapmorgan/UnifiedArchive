@@ -2,11 +2,12 @@
 namespace wapmorgan\UnifiedArchive;
 
 use Exception;
+use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class CamApplication {
     /**
      * @param $file
-     * @return AbstractArchive
+     * @return UnifiedArchive
      * @throws Exception
      * @throws \Archive7z\Exception
      */

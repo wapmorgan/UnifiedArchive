@@ -8,7 +8,7 @@ use wapmorgan\UnifiedArchive\Formats\BasicFormat;
 /**
  * Class which represents archive in one of supported formats.
  */
-class UnifiedArchive implements AbstractArchive
+class UnifiedArchive
 {
     const VERSION = '0.1.2';
 

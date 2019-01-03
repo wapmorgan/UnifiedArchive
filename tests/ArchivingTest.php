@@ -44,9 +44,8 @@ class ArchivingTest extends PhpUnitTestCase
 
         $test_archive_filename = WORK_DIR.'/'.$archiveFileName;
         copy(ARCHIVES_DIR.'/'.$archiveFileName, $test_archive_filename);
-
         $archive = UnifiedArchive::open($test_archive_filename);
-        $this->assertInstanceOf('\wapmorgan\UnifiedArchive\AbstractArchive', $archive);
+        $this->assertInstanceOf('\wapmorgan\UnifiedArchive\UnifiedArchive', $archive);
 
         // adding file
         $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
