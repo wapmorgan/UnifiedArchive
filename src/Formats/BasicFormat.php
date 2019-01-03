@@ -3,6 +3,7 @@ namespace wapmorgan\UnifiedArchive\Formats;
 
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\UnsupportedOperationException;
 
 abstract class BasicFormat
 {
@@ -77,9 +78,13 @@ abstract class BasicFormat
     abstract public function addFiles(array $files);
 
     /**
-     * @param array $files
+     * @param array  $files
      * @param string $archiveFileName
+     *
      * @return false|int Number of archived files
+     * @throws UnsupportedOperationException
      */
-    abstract public static function createArchive(array $files, $archiveFileName);
+    public static function createArchive(array $files, $archiveFileName) {
+        throw new UnsupportedOperationException();
+    }
 }
