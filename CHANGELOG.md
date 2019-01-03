@@ -13,6 +13,7 @@ Other changes:
 Format-specific changes:
 - Divided format-specific code into separate components.
 - **zip**: 
+    - Excluded directories from files list (`getFileNames()`).
     - Fixed retrieving new list of files after `addFiles()` usage.
     - Fixed invalid "/" archive entry after `archiveFiles()` usage.
 - **tar** (`TarArchive` adapter):
