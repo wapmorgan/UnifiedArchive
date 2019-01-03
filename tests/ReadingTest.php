@@ -4,11 +4,6 @@ use wapmorgan\UnifiedArchive\UnifiedArchive;
 class ReadingTest extends PhpUnitTestCase
 {
 
-    public function getFixtures()
-    {
-        return self::$archives;
-    }
-
     /**
      * @return array
      */

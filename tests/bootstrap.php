@@ -23,8 +23,19 @@ class PhpUnitTestCase extends TestCase
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        if (!is_dir(WORK_DIR))
-            mkdir(WORK_DIR, 0777);
+        foreach ([ARCHIVES_DIR, WORK_DIR] as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777);
+            }
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getFixtures()
+    {
+        return self::$archives;
     }
 
     /**
