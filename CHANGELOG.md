@@ -1,6 +1,6 @@
 # Change Log
 
-### 0.1.2 - ***
+### 0.1.2 - Jan 03, 2019
 
 **BC-breaking changes**:
 - PclZip-interface getter renamed to `getPclZipInterface()`.
