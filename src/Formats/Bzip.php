@@ -1,8 +1,6 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Formats;
 
-use Exception;
-
 class Bzip extends OneFileFormat
 {
     const FORMAT_SUFFIX =  'bz2';

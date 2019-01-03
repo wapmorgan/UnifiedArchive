@@ -28,7 +28,7 @@ class Cab extends BasicFormat
      */
     public function __destruct()
     {
-        unset($this->cab);
+        $this->cab = null;
     }
 
     /**

@@ -21,7 +21,7 @@ class SevenZip extends BasicFormat
     public function __construct($archiveFileName)
     {
         try {
-            $this->sevenZip = new Archive7z($archiveFileName);
+            $this->sevenZip = new Archive7z($archiveFileName, null, null);
         } catch (\Archive7z\Exception $e) {
             throw new Exception('Could not open 7Zip archive: '.$e->getMessage(), $e->getCode(), $e);
         }
