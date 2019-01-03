@@ -20,12 +20,22 @@ class PhpUnitTestCase extends TestCase
      */
     static public $fixtureContents;
 
+    /**
+     * PhpUnitTestCase constructor.
+     *
+     * @param null   $name
+     * @param array  $data
+     * @param string $dataName
+     *
+     * @throws \Exception
+     */
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
         foreach ([ARCHIVES_DIR, WORK_DIR] as $dir) {
             if (!is_dir($dir)) {
-                mkdir($dir, 0777);
+                if (!mkdir($dir, 0777))
+                    throw new Exception('Could not create '.$dir.' directory');
             }
         }
     }
