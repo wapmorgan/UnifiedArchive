@@ -30,6 +30,8 @@ Format-specific changes:
     - Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
     - Fixed calculation of compressed file size in `getFileData()`.
     - Set infinite timeout of `7z` system call (useful for big archives).
+- **cab**:
+    - Fixed `extractFiles()` functionality.
 
 ### 0.1.1 - Sep 21, 2018
 API changes:
