@@ -20,6 +20,13 @@ class PhpUnitTestCase extends TestCase
      */
     static public $fixtureContents;
 
+    public function __construct($name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        if (!is_dir(WORK_DIR))
+            mkdir(WORK_DIR, 0777);
+    }
+
     /**
      * @param $fixture
      *
