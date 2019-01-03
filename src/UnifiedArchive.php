@@ -2,6 +2,7 @@
 namespace wapmorgan\UnifiedArchive;
 
 use Exception;
+use InvalidArgumentException;
 use wapmorgan\UnifiedArchive\Formats\BasicFormat;
 
 /**
@@ -423,6 +424,8 @@ class UnifiedArchive implements AbstractArchive
     public function addFiles($fileOrFiles)
     {
         $files_list = self::createFilesList($fileOrFiles);
+        if (empty($files_list))
+            throw new InvalidArgumentException('Files list is empty!');
         $result = $this->archive->addFiles($files_list);
         $this->scanArchive();
         return $result;
@@ -438,7 +441,7 @@ class UnifiedArchive implements AbstractArchive
     public function addFile($file, $inArchiveName = null)
     {
         if (!is_file($file))
-            throw new \InvalidArgumentException($file.' is not a valid file to add in archive');
+            throw new InvalidArgumentException($file.' is not a valid file to add in archive');
 
         return ($inArchiveName !== null
                 ? $this->addFiles([$file => $inArchiveName])
@@ -455,7 +458,7 @@ class UnifiedArchive implements AbstractArchive
     public function addDirectory($directory, $inArchivePath = null)
     {
         if (!is_dir($directory) || !is_readable($directory))
-            throw new \InvalidArgumentException($directory.' is not a valid directory to add in archive');
+            throw new InvalidArgumentException($directory.' is not a valid directory to add in archive');
 
         return ($inArchivePath !== null
                 ? $this->addFiles([$directory => $inArchivePath])
@@ -503,6 +506,8 @@ class UnifiedArchive implements AbstractArchive
             return false;
 
         $files_list = self::createFilesList($fileOrFiles);
+        if (empty($files_list))
+            throw new InvalidArgumentException('Files list is empty!');
 
         // fake creation: return archive data
         if ($emulate) {
@@ -535,7 +540,7 @@ class UnifiedArchive implements AbstractArchive
     public static function archiveFile($file, $archiveName)
     {
         if (!is_file($file))
-            throw new \InvalidArgumentException($file.' is not a valid file to archive');
+            throw new InvalidArgumentException($file.' is not a valid file to archive');
 
         return static::archiveFiles($file, $archiveName) === 1;
     }
@@ -550,7 +555,7 @@ class UnifiedArchive implements AbstractArchive
     public static function archiveDirectory($directory, $archiveName)
     {
         if (!is_dir($directory) || !is_readable($directory))
-            throw new \InvalidArgumentException($directory.' is not a valid directory to archive');
+            throw new InvalidArgumentException($directory.' is not a valid directory to archive');
 
         return static::archiveFiles($directory, $archiveName) > 0;
     }
@@ -629,7 +634,7 @@ class UnifiedArchive implements AbstractArchive
      */
     protected static function createFilesList($nodes)
     {
-        $files = array();
+        $files = [];
 
         // passed an extended list
         if (is_array($nodes)) {
