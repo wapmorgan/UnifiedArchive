@@ -36,7 +36,7 @@ Composer package: `wapmorgan/unified-archive`
 ```json
 {
     "require": {
-        "wapmorgan/unified-archive": "~0.1.1"
+        "wapmorgan/unified-archive": "~0.1.2"
     }
 }
 ```
