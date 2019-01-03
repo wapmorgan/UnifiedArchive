@@ -10,7 +10,7 @@ use wapmorgan\UnifiedArchive\Formats\BasicFormat;
  */
 class UnifiedArchive implements AbstractArchive
 {
-    const VERSION = '0.1.1';
+    const VERSION = '0.1.2';
 
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
@@ -108,9 +108,7 @@ class UnifiedArchive implements AbstractArchive
     /**
      * Checks whether specific archive type can be opened with current system configuration
      *
-     * @param $type
-     *
-     * @param bool $onOwn
+     * @param string $type One of predefined archive types
      * @return boolean
      */
     public static function canOpenType($type)
