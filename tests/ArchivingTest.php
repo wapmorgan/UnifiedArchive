@@ -1,5 +1,4 @@
 <?php
-use wapmorgan\UnifiedArchive\TarArchive;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class UnifiedArchiveTest extends PhpUnitTestCase
