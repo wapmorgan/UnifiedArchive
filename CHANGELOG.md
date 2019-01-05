@@ -16,7 +16,7 @@ Format-specific changes:
 - **zip**: 
     - Excluded directories from files list (`getFileNames()`).
     - Fixed retrieving new list of files after `addFiles()` usage.
-    - Fixed invalid "/" archive entry after `archiveFiles()` usage.
+    - (#11) Fixed invalid "/" archive entry after `archiveFiles()` usage.
 - **tar** (`TarArchive` adapter):
     - Fixed number of added files of `addFiles()`.
     - Fixed list of files after `deleteFiles()` usage.
@@ -29,7 +29,7 @@ Format-specific changes:
 - **7zip**:
     - Fixed result of `deleteFiles()` and `archiveFiles()` in-archive paths.
     - Fixed calculation of compressed file size in `getFileData()`.
-    - Set infinite timeout of `7z` system call (useful for big archives).
+    - (#10) Set infinite timeout of `7z` system call (useful for big archives).
 - **cab**:
     - Fixed `extractFiles()` functionality.
 
