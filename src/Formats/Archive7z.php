@@ -12,11 +12,11 @@ class Archive7z extends \Archive7z\Archive7z
     public static function getBinaryVersion()
     {
         $binary = static::makeBinary7z();
-        $process = new Process(escapeshellarg(str_replace('\\', '/', $binary)));
+        $process = new Process([str_replace('\\', '/', $binary)]);
         $result = $process->mustRun()->getOutput();
-        if (!preg_match('~7-Zip (\d+\.\d+)~i', $result, $version))
+        if (!preg_match('~7-Zip (\[[\d]+\] )?(?<version>\d+\.\d+)~i', $result, $version))
             return false;
 
-        return $version[1];
+        return $version['version'];
     }
 }

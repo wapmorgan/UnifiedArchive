@@ -280,7 +280,7 @@ class UnifiedArchive
         if ($this->type !== self::ZIP)
             throw new UnsupportedOperationException('Format '.$this->type.' does not support PclZip-interface');
 
-        return new $this->archive->getPclZip();
+        return $this->archive->getPclZip();
     }
 
     /**
