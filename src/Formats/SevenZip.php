@@ -4,6 +4,9 @@ namespace wapmorgan\UnifiedArchive\Formats;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 
 class SevenZip extends BasicFormat
 {
@@ -103,17 +106,15 @@ class SevenZip extends BasicFormat
 
     /**
      * @param string $outputFolder
-     * @param array  $files
-     *
-     * @return false|int
-     * @throws \Archive7z\Exception
-     * @throws \Exception
+     * @param array $files
+     * @return int
+     * @throws ArchiveExtractionException
      */
     public function extractFiles($outputFolder, array $files)
     {
-        $this->sevenZip->setOutputDirectory($outputFolder);
         $count = 0;
         try {
+            $this->sevenZip->setOutputDirectory($outputFolder);
 
             foreach ($files as $file) {
                 $this->sevenZip->extractEntry($file);
@@ -121,32 +122,31 @@ class SevenZip extends BasicFormat
             }
             return $count;
         } catch (Exception $e) {
-            throw new Exception('Could not extract archive: '.$e->getMessage(), $e->getCode(), $e);
+            throw new ArchiveExtractionException('Could not extract archive: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * @param string $outputFolder
      *
-     * @return false|bool
-     * @throws \Exception
+     * @return bool
+     * @throws ArchiveExtractionException
      */
     public function extractArchive($outputFolder)
     {
-        $this->sevenZip->setOutputDirectory($outputFolder);
         try {
+            $this->sevenZip->setOutputDirectory($outputFolder);
             $this->sevenZip->extract();
             return true;
         } catch (Exception $e) {
-            throw new Exception('Could not extract archive: '.$e->getMessage(), $e->getCode(), $e);
+            throw new ArchiveExtractionException('Could not extract archive: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * @param array $files
-     *
-     * @return false|int
-     * @throws \Exception
+     * @return int Number of deleted files
+     * @throws ArchiveModificationException
      */
     public function deleteFiles(array $files)
     {
@@ -158,15 +158,15 @@ class SevenZip extends BasicFormat
             }
             return $count;
         } catch (Exception $e) {
-            throw new Exception('Could not modify archive: '.$e->getMessage(), $e->getCode(), $e);
+            throw new ArchiveModificationException('Could not modify archive: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * @param array $files
      *
-     * @return false|int
-     * @throws \Exception
+     * @return int
+     * @throws ArchiveModificationException
      */
     public function addFiles(array $files)
     {
@@ -179,23 +179,21 @@ class SevenZip extends BasicFormat
                     $added_files++;
                 }
             }
+            return $added_files;
         } catch (Exception $e) {
-            throw new Exception('Could not modify archive: '.$e->getMessage(), $e->getCode(), $e);
+            throw new ArchiveModificationException('Could not modify archive: '.$e->getMessage(), $e->getCode(), $e);
         }
-        return $added_files;
     }
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $archiveFileName
-     *
-     * @return false|int
-     * @throws \Archive7z\Exception
-     * @throws \Exception
+     * @return int
+     * @throws ArchiveCreationException
      */
     public static function createArchive(array $files, $archiveFileName) {
-        $seven_zip = new Archive7z($archiveFileName);
         try {
+            $seven_zip = new Archive7z($archiveFileName);
             foreach ($files as $localName => $filename) {
                 if ($filename !== null) {
                     $seven_zip->addEntry($filename, true);
@@ -204,7 +202,7 @@ class SevenZip extends BasicFormat
             }
             unset($seven_zip);
         } catch (Exception $e) {
-            throw new Exception('Could not create archive: '.$e->getMessage(), $e->getCode(), $e);
+            throw new ArchiveCreationException('Could not create archive: '.$e->getMessage(), $e->getCode(), $e);
         }
         return count($files);
     }

@@ -9,8 +9,13 @@ use PharData;
 use RecursiveIteratorIterator;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\LzwStreamWrapper;
-use wapmorgan\UnifiedArchive\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 /**
  * Tar format handler
@@ -147,15 +152,15 @@ class Tar extends BasicFormat
         if (static::$enabledPearTar)
             return static::createArchiveForPear($files, $archiveFileName);
 
-        throw new Exception('Archive_Tar nor PharData not available');
+        throw new UnsupportedOperationException('Archive_Tar nor PharData not available');
     }
 
     /**
      * Creates an archive via Pear library
      * @param array $files
      * @param $archiveFileName
-     * @return bool|int
-     * @throws Exception
+     * @return int
+     * @throws ArchiveCreationException
      */
     protected static function createArchiveForPear(array $files, $archiveFileName)
     {
@@ -188,10 +193,10 @@ class Tar extends BasicFormat
 
             if (is_null($filename)) {
                 if ($tar->addString($localName, '') === false)
-                    throw new Exception('Error when adding directory '.$localName.' to archive');
+                    throw new ArchiveCreationException('Error when adding directory '.$localName.' to archive');
             } else {
                 if ($tar->addModify($filename, $add_dir, $remove_dir) === false)
-                    throw new Exception('Error when adding file '.$filename.' to archive');
+                    throw new ArchiveCreationException('Error when adding file '.$filename.' to archive');
             }
         }
         $tar = null;
@@ -204,6 +209,7 @@ class Tar extends BasicFormat
      * @param array $files
      * @param $archiveFileName
      * @return bool
+     * @throws ArchiveCreationException
      */
     protected static function createArchiveForPhar(array $files, $archiveFileName)
     {
@@ -221,17 +227,17 @@ class Tar extends BasicFormat
                 if (is_null($filename)) {
                     if (!in_array($localName, ['/', ''], true)) {
                         if ($tar->addEmptyDir($localName) === false) {
-                            return false;
+                            throw new ArchiveCreationException('Error when adding directory '.$localName.' to archive');
                         }
                     }
                 } else {
                     if ($tar->addFile($filename, $localName) === false) {
-                        return false;
+                        throw new ArchiveCreationException('Error when adding file '.$localName.' to archive');
                     }
                 }
             }
         } catch (Exception $e) {
-            return false;
+            throw new ArchiveCreationException('Error when creating archive: '.$e->getMessage(), $e->getCode(), $e);
         }
 
         switch (strtolower(pathinfo($archiveFileName, PATHINFO_EXTENSION))) {
@@ -271,7 +277,7 @@ class Tar extends BasicFormat
      * Tar format constructor.
      *
      * @param string $archiveFileName
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct($archiveFileName)
     {
@@ -279,8 +285,10 @@ class Tar extends BasicFormat
 
         $this->archiveFileName = realpath($archiveFileName);
         $this->archiveType = static::detectArchiveType($this->archiveFileName);
+
         if ($this->archiveType === false)
-            throw new \Exception('Could not detect type for archive '.$this->archiveFileName);
+            throw new UnsupportedArchiveException('Could not detect type for archive '.$this->archiveFileName);
+
         $this->open($this->archiveType);
     }
 
@@ -293,8 +301,8 @@ class Tar extends BasicFormat
     }
 
     /**
-     * @param $archiveType
-     * @throws Exception
+     * @param string $archiveType
+     * @throws UnsupportedArchiveException
      */
     protected function open($archiveType)
     {
@@ -317,14 +325,14 @@ class Tar extends BasicFormat
 
             case self::TAR_LZMA:
                 if (!self::$enabledPharData) {
-                    throw new Exception('Archive_Tar not available');
+                    throw new UnsupportedArchiveException('Archive_Tar not available');
                 }
                 $this->tar = new Archive_Tar($this->archiveFileName, 'lzma2');
                 break;
 
             case self::TAR_LZW:
                 if (!self::$enabledPharData) {
-                    throw new Exception('Archive_Tar not available');
+                    throw new UnsupportedArchiveException('Archive_Tar not available');
                 }
 
                 LzwStreamWrapper::registerWrapper();
@@ -405,20 +413,20 @@ class Tar extends BasicFormat
 
     /**
      * @param string $fileName
-     * @return ArchiveEntry|false
-     * @throws Exception
+     * @return ArchiveEntry
+     * @throws NonExistentArchiveFileException
      */
     public function getFileData($fileName)
     {
         if ($this->tar instanceof Archive_Tar) {
             if (!isset($this->pearFilesIndex[$fileName]))
-                throw new Exception('File '.$fileName.' is not found in archive files list');
+                throw new NonExistentArchiveFileException('File '.$fileName.' is not found in archive files list');
 
             $index = $this->pearFilesIndex[$fileName];
 
             $files_list = $this->tar->listContent();
             if (!isset($files_list[$index]))
-                throw new Exception('File '.$fileName.' is not found in Tar archive');
+                throw new NonExistentArchiveFileException('File '.$fileName.' is not found in Tar archive');
 
             $data = $files_list[$index];
             unset($files_list);
@@ -436,14 +444,14 @@ class Tar extends BasicFormat
 
     /**
      * @param string $fileName
-     * @return string|false
-     * @throws Exception
+     * @return string
+     * @throws NonExistentArchiveFileException
      */
     public function getFileContent($fileName)
     {
         if ($this->tar instanceof Archive_Tar) {
             if (!isset($this->pearFilesIndex[$fileName]))
-                throw new Exception('File '.$fileName.' is not found in archive files list');
+                throw new NonExistentArchiveFileException('File '.$fileName.' is not found in archive files list');
 
             return $this->tar->extractInString($fileName);
         }
@@ -453,15 +461,15 @@ class Tar extends BasicFormat
 
     /**
      * @param string $fileName
-     * @return bool|resource|string
-     * @throws Exception
+     * @return resource
+     * @throws NonExistentArchiveFileException
      */
     public function getFileResource($fileName)
     {
         $resource = fopen('php://temp', 'r+');
         if ($this->tar instanceof Archive_Tar) {
             if (!isset($this->pearFilesIndex[$fileName]))
-                throw new Exception('File '.$fileName.' is not found in archive files list');
+                throw new NonExistentArchiveFileException('File '.$fileName.' is not found in archive files list');
 
             fwrite($resource, $this->tar->extractInString($fileName));
         } else
@@ -474,8 +482,8 @@ class Tar extends BasicFormat
     /**
      * @param string $outputFolder
      * @param array $files
-     * @return false|int
-     * @throws Exception
+     * @return int
+     * @throws ArchiveExtractionException
      */
     public function extractFiles($outputFolder, array $files)
     {
@@ -486,7 +494,7 @@ class Tar extends BasicFormat
         }
 
         if ($result === false) {
-            throw new Exception('Error when extracting from '.$this->archiveFileName);
+            throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
         }
 
         return count($files);
@@ -495,7 +503,7 @@ class Tar extends BasicFormat
     /**
      * @param string $outputFolder
      * @return false|int
-     * @throws Exception
+     * @throws ArchiveExtractionException
      */
     public function extractArchive($outputFolder)
     {
@@ -506,7 +514,7 @@ class Tar extends BasicFormat
         }
 
         if ($result === false) {
-            throw new Exception('Error when extracting from '.$this->archiveFileName);
+            throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
         }
 
         return 1;
@@ -514,9 +522,8 @@ class Tar extends BasicFormat
 
     /**
      * @param array $files
-     * @return false|int
+     * @return int
      * @throws UnsupportedOperationException
-     * @throws Exception
      */
     public function deleteFiles(array $files)
     {
@@ -539,7 +546,7 @@ class Tar extends BasicFormat
     /**
      * @param array $files
      * @return false|int
-     * @throws Exception
+     * @throws ArchiveModificationException
      */
     public function addFiles(array $files)
     {
@@ -550,11 +557,13 @@ class Tar extends BasicFormat
                 $remove_dir = dirname($filename);
                 $add_dir = dirname($localName);
                 if (is_null($filename)) {
-                    if ($this->tar->addString($localName, "") === false)
-                        return false;
+                    if ($this->tar->addString($localName, "") === false) {
+                        throw new ArchiveModificationException('Could not add directory "'.$filename.'": '.$this->tar->error_object->message, $this->tar->error_object->code);
+                    }
                 } else {
-                    if ($this->tar->addModify($filename, $add_dir, $remove_dir) === false)
-                        return false;
+                    if ($this->tar->addModify($filename, $add_dir, $remove_dir) === false) {
+                        throw new ArchiveModificationException('Could not add file "'.$filename.'": '.$this->tar->error_object->message, $this->tar->error_object->code);
+                    }
                     $added++;
                 }
             }
@@ -569,7 +578,7 @@ class Tar extends BasicFormat
                     }
                 }
             } catch (Exception $e) {
-                return false;
+                throw new ArchiveModificationException('Could not add file "'.$filename.'": '.$e->getMessage(), $e->getCode());
             }
             $this->tar = null;
             // reopen to refresh files list properly

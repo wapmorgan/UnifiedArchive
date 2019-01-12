@@ -4,7 +4,11 @@ namespace wapmorgan\UnifiedArchive\Formats;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 abstract class OneFileFormat extends BasicFormat
 {
@@ -63,21 +67,22 @@ abstract class OneFileFormat extends BasicFormat
 
     /**
      * @param string $fileName
-     *
      * @return ArchiveEntry|false
      */
     public function getFileData($fileName)
     {
-        return new ArchiveEntry($this->inArchiveFileName, filesize($this->fileName),
-            $this->uncompressedSize, $this->modificationTime);
+        return new ArchiveEntry(
+            $this->inArchiveFileName,
+            filesize($this->fileName),
+            $this->uncompressedSize,
+            $this->modificationTime);
     }
 
     /**
      * @param string $outputFolder
-     * @param array  $files
-     *
-     * @return false|int
-     * @throws \Exception
+     * @param array $files
+     * @return int
+     * @throws ArchiveExtractionException
      */
     public function extractFiles($outputFolder, array $files = null)
     {
@@ -86,25 +91,30 @@ abstract class OneFileFormat extends BasicFormat
 
     /**
      * @param string $outputFolder
-     *
-     * @return false|int
-     * @throws \Exception
+     * @return int
+     * @throws ArchiveExtractionException
      */
     public function extractArchive($outputFolder)
     {
         $data = $this->getFileContent($this->inArchiveFileName);
         if ($data === false)
-            throw new Exception('Could not extract archive');
+            throw new ArchiveExtractionException('Could not extract archive');
 
-        if (file_put_contents($outputFolder.$this->inArchiveFileName, $data) !== false)
-            return 1;
+        $size = strlen($data);
+        $written = file_put_contents($outputFolder.$this->inArchiveFileName, $data);
+
+        if ($written === true) {
+            throw new ArchiveExtractionException('Could not extract file "'.$this->inArchiveFileName.'": could not write data');
+        } else if ($written < $size) {
+            throw new ArchiveExtractionException('Could not archive file "'.$this->inArchiveFileName.'": written '.$written.' of '.$size);
+        }
+        return 1;
     }
 
     /**
      * @param array $files
-     *
-     * @return false|int
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     * @return void
+     * @throws UnsupportedOperationException
      */
     public function deleteFiles(array $files)
     {
@@ -113,9 +123,8 @@ abstract class OneFileFormat extends BasicFormat
 
     /**
      * @param array $files
-     *
-     * @return false|int
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     * @return void
+     * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
     {
@@ -123,26 +132,40 @@ abstract class OneFileFormat extends BasicFormat
     }
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $archiveFileName
-     *
-     * @return false|int
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     * @return int
+     * @throws UnsupportedOperationException
+     * @throws EmptyFileListException
+     * @throws ArchiveCreationException
      */
     public static function createArchive(array $files, $archiveFileName){
-        if (count($files) > 1) return false;
+        if (count($files) > 1) {
+            throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not archive few files');
+        }
+        if (empty($files)) {
+            throw new EmptyFileListException();
+        }
+
         $filename = array_shift($files);
-        if (is_null($filename)) return false; // invalid list
-        if (file_put_contents($archiveFileName,
-                static::compressData(file_get_contents($filename))) !== false)
-            return 1;
+
+        $compressed_content = static::compressData(file_get_contents($filename));
+        $size = strlen($compressed_content);
+        $written = file_put_contents($archiveFileName, $compressed_content);
+
+        if ($written === true) {
+            throw new ArchiveCreationException('Could not archive file: could not write data');
+        } else if ($written < $size) {
+            throw new ArchiveCreationException('Could not archive file: written '.$written.' of '.$size);
+        }
+        return 1;
     }
 
     /**
      * @param $data
      *
      * @return mixed
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     * @throws UnsupportedOperationException
      */
     protected static function compressData($data)
     {

@@ -1,5 +1,29 @@
 # Change Log
 
+### 0.2.0 - , 2020
+
+**BC-breaking changes**:
+- Minimal PHP version is 5.5.0.
+- **Deleted deprecated UnifiedArchive methods**: `extractNode`, `archiveNodes`.
+- Functionality of preparing files list for archiving is moved from `archiveFiles()` to `prepareForArchiving()`.
+- **All mutable methods throws exceptions on errors now**:
+    * `getFileData`, `getFileContent`, `getFileResource` throws `NonExistentArchiveFileException` when file is not present in archive.
+    * `extractFiles` throws:
+        - `EmptyFileListException`
+        - `ArchiveExtractionException`
+    * `deleteFiles`, `addFiles`, `addFile` and `addDirectory` throws:
+        - `EmptyFileListException`
+        - `UnsupportedOperationException`
+        - `ArchiveModificationException`
+    *  `archiveFiles`, `archiveFile` and `archiveDirectory` throws:
+        - `FileAlreadyExistsException`
+        - `EmptyFileListException`
+        - `UnsupportedOperationException`
+        - `ArchiveCreationException`
+
+New features:
+- Added `canCreateType(): bool`, `canAddFiles(): bool`, `canDeleteFiles(): bool`
+
 ### 0.1.2 - Jan 03, 2019
 
 **BC-breaking changes**:

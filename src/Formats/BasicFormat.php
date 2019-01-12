@@ -3,7 +3,12 @@ namespace wapmorgan\UnifiedArchive\Formats;
 
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\PclzipZipInterface;
 
 abstract class BasicFormat
 {
@@ -55,34 +60,40 @@ abstract class BasicFormat
     /**
      * @param string $outputFolder
      * @param array  $files
-     * @return false|int Number of extracted files
+     * @return int Number of extracted files
+     * @throws ArchiveExtractionException
      */
     abstract public function extractFiles($outputFolder, array $files);
 
     /**
      * @param string $outputFolder
-     * @return false|int Number of extracted files
+     * @return int Number of extracted files
+     * @throws ArchiveExtractionException
      */
     abstract public function extractArchive($outputFolder);
 
     /**
      * @param array $files
      * @return false|int Number of deleted files
+     * @throws UnsupportedOperationException
+     * @throws ArchiveModificationException
      */
     abstract public function deleteFiles(array $files);
 
     /**
      * @param array $files
-     * @return false|int Number of added files
+     * @return int Number of added files
+     * @throws UnsupportedOperationException
+     * @throws ArchiveModificationException
      */
     abstract public function addFiles(array $files);
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $archiveFileName
-     *
-     * @return false|int Number of archived files
+     * @return int Number of archived files
      * @throws UnsupportedOperationException
+     * @throws ArchiveCreationException
      */
     public static function createArchive(array $files, $archiveFileName) {
         throw new UnsupportedOperationException();
@@ -110,5 +121,14 @@ abstract class BasicFormat
     public static function canDeleteFiles()
     {
         return false;
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     * @return PclzipZipInterface
+     */
+    public function getPclZip()
+    {
+        throw new UnsupportedOperationException('Format '.get_class($this).' does not support PclZip-interface');
     }
 }

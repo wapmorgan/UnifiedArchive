@@ -5,7 +5,8 @@ use CabArchive;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 class Cab extends BasicFormat
 {
@@ -117,32 +118,41 @@ class Cab extends BasicFormat
     /**
      * @param string $outputFolder
      * @param array $files
-     *
-     * @return false|resource
-     * @throws UnsupportedOperationException
-     * @throws Exception
+     * @return int Number of extracted files
+     * @throws ArchiveExtractionException
      */
     public function extractFiles($outputFolder, array $files)
     {
-        return $this->cab->extract($outputFolder, $files);
+        try {
+            return $this->cab->extract($outputFolder, $files);
+        } catch (Exception $e) {
+            throw new ArchiveExtractionException($e->getMessage(),
+                $e->getCode(),
+                $e->getPrevious()
+            );
+        }
     }
 
     /**
      * @param string $outputFolder
-     *
-     * @return false|resource
-     * @throws UnsupportedOperationException
-     * @throws Exception
+     * @return int
+     * @throws ArchiveExtractionException
      */
     public function extractArchive($outputFolder)
     {
-        return $this->cab->extract($outputFolder);
+        try {
+            return $this->cab->extract($outputFolder);
+        } catch (Exception $e) {
+            throw new ArchiveExtractionException($e->getMessage(),
+                $e->getCode(),
+                $e->getPrevious()
+            );
+        }
     }
 
     /**
      * @param array $files
-     *
-     * @return false|int
+     * @return void
      * @throws UnsupportedOperationException
      */
     public function deleteFiles(array $files)
@@ -152,8 +162,7 @@ class Cab extends BasicFormat
 
     /**
      * @param array $files
-     *
-     * @return false|int
+     * @return void
      * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
@@ -164,8 +173,7 @@ class Cab extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
-     *
-     * @return false|int
+     * @return void
      * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName){

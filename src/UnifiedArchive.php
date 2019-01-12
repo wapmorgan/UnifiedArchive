@@ -3,6 +3,14 @@ namespace wapmorgan\UnifiedArchive;
 
 use Exception;
 use InvalidArgumentException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
+use wapmorgan\UnifiedArchive\Exceptions\FileAlreadyExistsException;
+use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats\BasicFormat;
 use wapmorgan\UnifiedArchive\Formats\Bzip;
 use wapmorgan\UnifiedArchive\Formats\Cab;
@@ -52,7 +60,7 @@ class UnifiedArchive
         self::TAR_LZW => Tar::class,
     ];
 
-    /** @var array List of archive formats with support state */
+    /** @var array List of archive types with support-state */
     static protected $enabledTypes = [];
 
     /** @var string Type of current archive */
@@ -64,31 +72,31 @@ class UnifiedArchive
     /** @var array List of files in current archive */
     protected $files;
 
-    /** @var int Number of files */
+    /** @var int Number of files in archive */
     protected $filesQuantity;
 
-    /** @var int Size of uncompressed files */
+    /** @var int Cumulative size of uncompressed files */
     protected $uncompressedFilesSize;
 
-    /** @var int Size of compressed files */
+    /** @var int Cumulative size of compressed files */
     protected $compressedFilesSize;
 
-    /** @var int Size of archive */
+    /** @var int Total size of archive file */
     protected $archiveSize;
 
     /**
-     * Creates instance with right type
+     * Creates a UnifiedArchive instance for passed archive
      *
-     * @param  string $fileName Filename
+     * @param  string $fileName Archive filename
      * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
-     * @throws \Exception
+     * @throws InvalidArgumentException If archive file is not readable
      */
     public static function open($fileName)
     {
         self::checkRequirements();
 
         if (!file_exists($fileName) || !is_readable($fileName))
-            throw new Exception('Could not open file: '.$fileName);
+            throw new InvalidArgumentException('Could not open file: '.$fileName);
 
         $type = self::detectArchiveType($fileName);
         if (!self::canOpenType($type)) {
@@ -101,8 +109,8 @@ class UnifiedArchive
     /**
      * Checks whether archive can be opened with current system configuration
      *
-     * @param string $fileName
-     * @return boolean
+     * @param string $fileName Archive filename
+     * @return bool
      */
     public static function canOpenArchive($fileName)
     {
@@ -116,8 +124,8 @@ class UnifiedArchive
     /**
      * Checks whether specific archive type can be opened with current system configuration
      *
-     * @param string $type One of predefined archive types
-     * @return boolean
+     * @param string $type One of predefined archive types (class constants)
+     * @return bool
      */
     public static function canOpenType($type)
     {
@@ -129,12 +137,15 @@ class UnifiedArchive
     }
 
     /**
-     * @param string $type One of predefined archive types
+     * Checks whether specified archive can be created
+     *
+     * @param string $type One of predefined archive types (class constants)
      * @return bool
      */
     public static function canCreateType($type)
     {
         self::checkRequirements();
+
         return isset(self::$enabledTypes[$type])
             ? call_user_func([static::$formatHandlers[$type], 'canCreateArchive'])
             : false;
@@ -143,16 +154,15 @@ class UnifiedArchive
     /**
      * Detect archive type by its filename or content
      *
-     * @param string $fileName
-     * @param bool $contentCheck
-     * @return string|boolean One of UnifiedArchive type constants OR false if type is not detected
+     * @param string $fileName Archive filename
+     * @param bool $contentCheck Whether archive type can be detected by content
+     * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
      */
     public static function detectArchiveType($fileName, $contentCheck = true)
     {
         // by file name
         $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
-        // by file name
         if (stripos($fileName, '.tar.') !== false && preg_match('~\.(?<ext>tar\.(gz|bz2|xz|z))$~', strtolower($fileName), $match)) {
             switch ($match['ext']) {
                 case 'tar.gz':
@@ -194,7 +204,7 @@ class UnifiedArchive
 
         }
 
-        // by content
+        // by file content
         if ($contentCheck) {
             $mime_type = mime_content_type($fileName);
             switch ($mime_type) {
@@ -228,9 +238,9 @@ class UnifiedArchive
     /**
      * Opens the file as one of supported formats
      *
-     * @param string $fileName Filename
-     * @param string $type Archive type.
-     * @throws Exception If archive can not be opened
+     * @param string $fileName Archive filename
+     * @param string $type Archive type
+     * @throws UnsupportedArchiveException If archive can not be opened
      */
     public function __construct($fileName, $type)
     {
@@ -240,7 +250,7 @@ class UnifiedArchive
         $this->archiveSize = filesize($fileName);
 
         if (!isset(static::$formatHandlers[$type]))
-            throw new Exception('Unsupported archive type: '.$type.' of archive '.$fileName);
+            throw new UnsupportedArchiveException('Unsupported archive type: '.$type.' of archive '.$fileName);
 
         $handler_class = static::$formatHandlers[$type];
 
@@ -273,13 +283,10 @@ class UnifiedArchive
      * interface.
      *
      * @return PclzipZipInterface Returns an instance of a class implementing PclZipOriginalInterface
-     * @throws Exception
+     * @throws UnsupportedOperationException
      */
     public function getPclZipInterface()
     {
-        if ($this->type !== self::ZIP)
-            throw new UnsupportedOperationException('Format '.$this->type.' does not support PclZip-interface');
-
         return $this->archive->getPclZip();
     }
 
@@ -294,7 +301,7 @@ class UnifiedArchive
     }
 
     /**
-     * Counts size of all uncompressed data (bytes)
+     * Counts cumulative size of all uncompressed data (bytes)
      *
      * @return int
      */
@@ -304,7 +311,7 @@ class UnifiedArchive
     }
 
     /**
-     * Returns size of archive
+     * Returns size of archive file in bytes
      *
      * @return int
      */
@@ -316,7 +323,7 @@ class UnifiedArchive
     /**
      * Returns type of archive
      *
-     * @return string
+     * @return string One of class constants
      */
     public function getArchiveType()
     {
@@ -324,7 +331,7 @@ class UnifiedArchive
     }
 
     /**
-     * Counts size of all compressed data (in bytes)
+     * Counts cumulative size of all compressed data (in bytes)
      *
      * @return int
      */
@@ -334,7 +341,9 @@ class UnifiedArchive
     }
 
     /**
-     * Returns list of files
+     * Returns list of files, excluding folders.
+     *
+     * Paths is present in unix-style (with forward slash - /).
      *
      * @return array List of files
      */
@@ -346,7 +355,7 @@ class UnifiedArchive
     /**
      * Checks that file exists in archive
      *
-     * @param string $fileName
+     * @param string $fileName File name in archive
      * @return bool
      */
     public function isFileExists($fileName)
@@ -355,30 +364,31 @@ class UnifiedArchive
     }
 
     /**
-     * Returns file metadata
+     * Returns file metadata of file in archive
      *
-     * @param string $fileName
-     * @return ArchiveEntry|bool
+     * @param string $fileName File name in archive
+     * @return ArchiveEntry
+     * @throws NonExistentArchiveFileException
      */
     public function getFileData($fileName)
     {
         if (!in_array($fileName, $this->files, true))
-            return false;
+            throw new NonExistentArchiveFileException('File '.$fileName.' does not exist in archive');
 
         return $this->archive->getFileData($fileName);
     }
 
     /**
-     * Returns file content
+     * Returns full file content as string
      *
-     * @param string $fileName
-     * @return bool|string
-     * @throws \Exception
+     * @param string $fileName File name in archive
+     * @return string
+     * @throws NonExistentArchiveFileException
      */
     public function getFileContent($fileName)
     {
         if (!in_array($fileName, $this->files, true))
-            return false;
+            throw new NonExistentArchiveFileException('File '.$fileName.' does not exist in archive');
 
         return $this->archive->getFileContent($fileName);
     }
@@ -386,13 +396,14 @@ class UnifiedArchive
     /**
      * Returns a resource for reading file from archive
      *
-     * @param string $fileName
-     * @return bool|resource
+     * @param string $fileName File name in archive
+     * @return resource
+     * @throws NonExistentArchiveFileException
      */
     public function getFileResource($fileName)
     {
         if (!in_array($fileName, $this->files, true))
-            return false;
+            throw new NonExistentArchiveFileException('File '.$fileName.' does not exist in archive');
 
         return $this->archive->getFileResource($fileName);
     }
@@ -400,11 +411,12 @@ class UnifiedArchive
     /**
      * Unpacks files to disk
      *
-     * @param string $outputFolder Extraction output dir.
-     * @param string|array|null $files One files or list of files or null to extract all content.
-     * @param bool $expandFilesList Should be expanded paths like 'src/' to all files inside 'src/' dir or not.
-     * @return false|int
-     * @throws Exception If files can not be extracted
+     * @param string $outputFolder Extraction output dir
+     * @param string|array|null $files One file or files list or null to extract all content.
+     * @param bool $expandFilesList Whether paths like 'src/' should be expanded to all files inside 'src/' dir or not.
+     * @return int Number of extracted files
+     * @throws EmptyFileListException
+     * @throws ArchiveExtractionException
      */
     public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
@@ -413,6 +425,9 @@ class UnifiedArchive
 
             if ($expandFilesList)
                 $files = self::expandFileList($this->files, $files);
+
+            if (empty($files))
+                throw new EmptyFileListException('Files list is empty!');
 
             return $this->archive->extractFiles($outputFolder, $files);
         } else {
@@ -428,7 +443,9 @@ class UnifiedArchive
      * @param bool $expandFilesList
      *
      * @return bool|int
-     * @throws Exception
+     * @throws EmptyFileListException
+     * @throws UnsupportedOperationException
+     * @throws ArchiveModificationException
      */
     public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
@@ -436,6 +453,9 @@ class UnifiedArchive
 
         if ($expandFilesList && $fileOrFiles !== null)
             $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
+
+        if (empty($fileOrFiles))
+            throw new EmptyFileListException('Files list is empty!');
 
         $result = $this->archive->deleteFiles($fileOrFiles);
         $this->scanArchive();
@@ -446,14 +466,18 @@ class UnifiedArchive
      * Updates existing archive by adding new files
      *
      * @param string[] $fileOrFiles See [[archiveFiles]] method for file list format.
-     * @return int|bool False if failed, number of added files if success
-     * @throws Exception
+     * @return int|bool Number of added files
+     * @throws ArchiveModificationException
+     * @throws EmptyFileListException
+     * @throws UnsupportedOperationException
      */
     public function addFiles($fileOrFiles)
     {
         $files_list = self::createFilesList($fileOrFiles);
+
         if (empty($files_list))
-            throw new InvalidArgumentException('Files list is empty!');
+            throw new EmptyFileListException('Files list is empty!');
+
         $result = $this->archive->addFiles($files_list);
         $this->scanArchive();
         return $result;
@@ -462,10 +486,12 @@ class UnifiedArchive
     /**
      * Adds file into archive
      *
-     * @param string $file
+     * @param string $file File name to be added
      * @param string|null $inArchiveName If not passed, full path will be preserved.
      * @return bool
-     * @throws Exception
+     * @throws ArchiveModificationException
+     * @throws EmptyFileListException
+     * @throws UnsupportedOperationException
      */
     public function addFile($file, $inArchiveName = null)
     {
@@ -483,7 +509,9 @@ class UnifiedArchive
      * @param string $directory
      * @param string|null $inArchivePath If not passed, full paths will be preserved.
      * @return bool
-     * @throws Exception
+     * @throws ArchiveModificationException
+     * @throws EmptyFileListException
+     * @throws UnsupportedOperationException
      */
     public function addDirectory($directory, $inArchivePath = null)
     {
@@ -493,6 +521,44 @@ class UnifiedArchive
         return ($inArchivePath !== null
                 ? $this->addFiles([$directory => $inArchivePath])
                 : $this->addFiles([$inArchivePath])) > 0;
+    }
+
+    /**
+     * Prepare files list for archiving
+     *
+     * @param string $fileOrFiles File of list of files. See [[archiveFiles]] for details.
+     * @param string $archiveName File name of archive. See [[archiveFiles]] for details.
+     * @return array An array containing entries:
+     * - totalSize (int) - size in bytes for all files
+     * - numberOfFiles (int) - quantity of files
+     * - files (array) - list of files prepared for archiving
+     * - type (string) - prepared format for archive. One of class constants
+     * @throws EmptyFileListException
+     * @throws UnsupportedArchiveException
+     */
+    public static function prepareForArchiving($fileOrFiles, $archiveName)
+    {
+        $archiveType = self::detectArchiveType($archiveName, false);
+
+        if ($archiveType === false)
+            throw new UnsupportedArchiveException('Could not detect archive type for name "'.$archiveName.'"');
+
+        $files_list = self::createFilesList($fileOrFiles);
+
+        if (empty($files_list))
+            throw new EmptyFileListException('Files list is empty!');
+
+        $totalSize = 0;
+        foreach ($files_list as $fn) {
+            $totalSize += filesize($fn);
+        }
+
+        return [
+            'totalSize' => $totalSize,
+            'numberOfFiles' => count($files_list),
+            'files' => $files_list,
+            'type' => $archiveType,
+        ];
     }
 
     /**
@@ -516,48 +582,29 @@ class UnifiedArchive
      *                                  `UnifiedArchive::archiveFiles(['doc.txt' => 'very_long_name_of_document.txt',
      *  'static' => '/var/www/html/static/'], 'archive.zip')`
      *
-     * @param string $archiveName File name of archive. Type of archive will be determined via it's name.
-     * @param bool $emulate If true, emulation mode is performed instead of real archiving.
-     *
-     * @return array|bool|int Count of stored files is returned.
-     * @throws Exception
+     * @param string $archiveName File name of archive. Type of archive will be determined by it's name.
+     * @return int Count of stored files is returned.
+     * @throws EmptyFileListException
+     * @throws FileAlreadyExistsException
+     * @throws UnsupportedOperationException
+     * @throws ArchiveCreationException
      */
-    public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
+    public static function archiveFiles($fileOrFiles, $archiveName)
     {
         if (file_exists($archiveName))
-            throw new Exception('Archive '.$archiveName.' already exists!');
+            throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
 
         self::checkRequirements();
 
-        $archiveType = self::detectArchiveType($archiveName, false);
-        //        if (in_array($archiveType, [TarArchive::TAR, TarArchive::TAR_GZIP, TarArchive::TAR_BZIP, TarArchive::TAR_LZMA, TarArchive::TAR_LZW], true))
-        //            return TarArchive::archiveFiles($fileOrFiles, $archiveName, $emulate);
-        if ($archiveType === false)
-            return false;
+        $info = static::prepareForArchiving($fileOrFiles, $archiveName);
 
-        $files_list = self::createFilesList($fileOrFiles);
-        if (empty($files_list))
-            throw new InvalidArgumentException('Files list is empty!');
+        if (!isset(static::$formatHandlers[$info['type']]))
+            throw new UnsupportedArchiveException('Unsupported archive type: '.$info['type'].' of archive '.$archiveName);
 
-        // fake creation: return archive data
-        if ($emulate) {
-            $totalSize = 0;
-            foreach ($files_list as $fn) $totalSize += filesize($fn);
+        /** @var BasicFormat $handler_class */
+        $handler_class = static::$formatHandlers[$info['type']];
 
-            return array(
-                'totalSize' => $totalSize,
-                'numberOfFiles' => count($files_list),
-                'files' => $files_list,
-                'type' => $archiveType,
-            );
-        }
-
-        if (!isset(static::$formatHandlers[$archiveType]))
-            throw new Exception('Unsupported archive type: '.$archiveType.' of archive '.$archiveName);
-
-        $handler_class = static::$formatHandlers[$archiveType];
-
-        return $handler_class::createArchive($files_list, $archiveName);
+        return $handler_class::createArchive($info['files'], $archiveName);
     }
 
     /**
@@ -566,12 +613,16 @@ class UnifiedArchive
      * @param string $file
      * @param string $archiveName
      * @return bool
-     * @throws \Exception
+     * @throws EmptyFileListException
+     * @throws FileAlreadyExistsException
+     * @throws UnsupportedOperationException
+     * @throws ArchiveCreationException
      */
     public static function archiveFile($file, $archiveName)
     {
-        if (!is_file($file))
-            throw new InvalidArgumentException($file.' is not a valid file to archive');
+        if (!is_file($file)) {
+            throw new InvalidArgumentException($file . ' is not a valid file to archive');
+        }
 
         return static::archiveFiles($file, $archiveName) === 1;
     }
@@ -582,7 +633,10 @@ class UnifiedArchive
      * @param string $directory
      * @param string $archiveName
      * @return bool
-     * @throws Exception
+     * @throws ArchiveCreationException
+     * @throws EmptyFileListException
+     * @throws FileAlreadyExistsException
+     * @throws UnsupportedOperationException
      */
     public static function archiveDirectory($directory, $archiveName)
     {
@@ -615,38 +669,7 @@ class UnifiedArchive
     }
 
     /**
-     * Deprecated method for extracting files
-     *
-     * @param string $outputFolder
-     * @param string|array|null $files
-     * @deprecated 0.1.0
-     * @see extractFiles()
-     * @return bool|int
-     * @throws Exception
-     */
-    public function extractNode($outputFolder, $files = null)
-    {
-        return $this->extractFiles($outputFolder, $files);
-    }
-
-    /**
-     * Deprecated method for archiving files
-     *
-     * @param string|array $filesOrFiles
-     * @param string $archiveName
-     * @deprecated 0.1.0
-     * @see archiveFiles()
-     * @return mixed
-     * @throws Exception
-     */
-    public static function archiveNodes($filesOrFiles, $archiveName)
-    {
-        return static::archiveFiles($filesOrFiles, $archiveName);
-    }
-
-    /**
      * Expands files list
-     *
      * @param $archiveFiles
      * @param $files
      * @return array

@@ -2,34 +2,52 @@ This file describes all UnifiedArchive API.
 
 UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArchive` namespace:
 - `UnifiedArchive` - represents an archive and provides related functions.
+    - Archive creation:
+    - [`UnifiedArchive::canCreateType`](#UnifiedArchive--canCreateType)
     - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
     - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
     - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
+    - Archive opening
     - [`UnifiedArchive::canOpenArchive`](#UnifiedArchive--canOpenArchive)
     - [`UnifiedArchive::canOpenType`](#UnifiedArchive--canOpenType)
-    - [`UnifiedArchive::canCreateType`](#UnifiedArchive--canCreateType)
     - [`UnifiedArchive::open`](#UnifiedArchive--open)
-    - [`UnifiedArchive::getArchiveType`](#UnifiedArchive--getArchiveType)
-    - [`UnifiedArchive::getArchiveSize`](#UnifiedArchive--getArchiveSize)
-    - [`UnifiedArchive::countCompressedFilesSize`](#UnifiedArchive--countCompressedFilesSize)
-    - [`UnifiedArchive::countUncompressedFilesSize`](#UnifiedArchive--countUncompressedFilesSize)
-    - [`UnifiedArchive::countFiles`](#UnifiedArchive--countFiles)
-    - [`UnifiedArchive::getFileNames`](#UnifiedArchive--getFileNames)
-    - [`UnifiedArchive::isFileExists`](#UnifiedArchive--isFileExists)
-    - [`UnifiedArchive::getFileData`](#UnifiedArchive--getFileData)
-    - [`UnifiedArchive::getFileResource`](#UnifiedArchive--getFileResource)
-    - [`UnifiedArchive::getFileContent`](#UnifiedArchive--getFileContent)
-    - [`UnifiedArchive::extractFiles`](#UnifiedArchive--extractFiles)
-    - [`UnifiedArchive::canAddFiles`](#UnifiedArchive--canAddFiles)
-    - [`UnifiedArchive::canDeleteFiles`](#UnifiedArchive--canDeleteFiles)
-    - [`UnifiedArchive::addDirectory`](#UnifiedArchive--addDirectory)
-    - [`UnifiedArchive::addFile`](#UnifiedArchive--addFile)
-    - [`UnifiedArchive::addFiles`](#UnifiedArchive--addFiles)
-    - [`UnifiedArchive::deleteFiles`](#UnifiedArchive--deleteFiles)
+    - Archive information:
+        - [`UnifiedArchive::getArchiveType`](#UnifiedArchive--getArchiveType)
+        - [`UnifiedArchive::getArchiveSize`](#UnifiedArchive--getArchiveSize)
+        - [`UnifiedArchive::countCompressedFilesSize`](#UnifiedArchive--countCompressedFilesSize)
+        - [`UnifiedArchive::countUncompressedFilesSize`](#UnifiedArchive--countUncompressedFilesSize)
+        - [`UnifiedArchive::countFiles`](#UnifiedArchive--countFiles)
+    - Archive content:
+        - [`UnifiedArchive::getFileNames`](#UnifiedArchive--getFileNames)
+        - [`UnifiedArchive::isFileExists`](#UnifiedArchive--isFileExists)
+        - [`UnifiedArchive::getFileData`](#UnifiedArchive--getFileData)
+        - [`UnifiedArchive::getFileResource`](#UnifiedArchive--getFileResource)
+        - [`UnifiedArchive::getFileContent`](#UnifiedArchive--getFileContent)
+        - [`UnifiedArchive::extractFiles`](#UnifiedArchive--extractFiles)
+    - Archive modification:
+        - [`UnifiedArchive::canAddFiles`](#UnifiedArchive--canAddFiles)
+        - [`UnifiedArchive::canDeleteFiles`](#UnifiedArchive--canDeleteFiles)
+        - [`UnifiedArchive::addDirectory`](#UnifiedArchive--addDirectory)
+        - [`UnifiedArchive::addFile`](#UnifiedArchive--addFile)
+        - [`UnifiedArchive::addFiles`](#UnifiedArchive--addFiles)
+        - [`UnifiedArchive::deleteFiles`](#UnifiedArchive--deleteFiles)
 - [`ArchiveEntry`](#ArchiveEntry) - represents information about specific file from archive. This object can be obtained
 by call to one of  `UnifiedArchive` methods.
 
 ## UnifiedArchive
+
+### Archive creation
+
+- <span id="UnifiedArchive--canCreateType"></span>
+    ```php
+    UnifiedArchive::canCreateType(string $type): boolean
+    ```
+
+    Tests if an archive format can be created with current system and php configuration.
+    _If you want to enabled specific format support, you need to install additional program or php extension. List of
+     extensions that should be install can be obtained by execuing built-in `cam` with `--formats` flag: `
+     ./vendor/bin/cam --formats`_
+    Returns `true` if given archive can be created and `false` otherwise.
 
 - <span id="UnifiedArchive::archiveDirectory"></span>
     ```php
@@ -40,6 +58,12 @@ by call to one of  `UnifiedArchive` methods.
     resolved by extension). All files have relative path in archive. 
     If case of success, `true` is returned.
     
+    Throws:
+    - `UnsupportedOperationException`
+    - `FileAlreadyExistsException`
+    - `EmptyFileListException`
+    - `ArchiveCreationException`
+
 - <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>
     ```php
     UnifiedArchive::archiveFile(string $file, string $archiveName): boolean
@@ -49,6 +73,12 @@ by call to one of  `UnifiedArchive` methods.
     resolved by extension). File has only relative nam in archive.  
     If case of success, `true` is returned.
     
+    Throws:
+    - `UnsupportedOperationException`
+    - `FileAlreadyExistsException`
+    - `EmptyFileListException`
+    - `ArchiveCreationException`
+
 - <span id="UnifiedArchive--archiveFiles"></span>
     ```php
     UnifiedArchive::archiveFiles(array $files, string $archiveName): int
@@ -58,9 +88,16 @@ by call to one of  `UnifiedArchive` methods.
     If file/directory passed with numeric key (e.g `['file', 'directory']`), then file/directory will have it's full 
     path in archive. If file/directory is a key (e.g `['file1' => 'in_archive_path']`), then file/directory will have 
     path as it's value.
-    If any error occurred (such as file already exists, files list is empty, ...), an `\Exception` is throwing.
     In case of success, number of stored files will be returned.
     
+    Throws:
+    - `UnsupportedOperationException`
+    - `FileAlreadyExistsException`
+    - `EmptyFileListException`
+    - `ArchiveCreationException`
+
+### Archive opening
+
 - <span id="UnifiedArchive--canOpenArchive"></span>
     ```php
     UnifiedArchive::canOpenArchive(string $fileName): boolean
@@ -81,31 +118,22 @@ by call to one of  `UnifiedArchive` methods.
     configuration. `$type` should be one of `UnifiedArchive` constants (such as `UnifiedArchive::ZIP` and so on).
     Full list of constants provided in the [appendix of this document](#unifiedArchive-formats-constants).
     Returns `true` if given archive can be opened and `false` otherwise.
-    
-- <span id="UnifiedArchive--canCreateType"></span>
-    ```php
-    UnifiedArchive::canCreateType(string $type): boolean
-    ```
 
-    Tests if an archive format can be created with current system and php configuration.
-    _If you want to enabled specific format support, you need to install additional program or php extension. List of
-     extensions that should be install can be obtained by execuing built-in `cam` with `--formats` flag: `
-     ./vendor/bin/cam --formats`_
-    Returns `true` if given archive can be created and `false` otherwise.
-    
 - <span id="UnifiedArchive--open"></span>
     ```php
     UnifiedArchive::open(string $fileName): UnifiedArchive|null
     ```
 
     Opens an archive and returns instance of `UnifiedArchive`.
-    In case of failure, `null` is returned.
-    
+    In case of failure (format is not supported), `null` is returned.
+
+#### Archive information
+
 All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--getArchiveType"></span>
     ```php
-    UnifiedArchive::getArchiveType() string
+    UnifiedArchive::getArchiveType(): string
     ```
 
     Returns type of archive as one of `UnifiedArchive` [constants](#unifiedArchive-formats-constants).
@@ -137,6 +165,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     ```
     Returns number of files stored in archive.
 
+#### Archive content
+
 - <span id="UnifiedArchive--getFileNames"></span>
     ```php
     UnifiedArchive::getFileNames(): string[]
@@ -156,7 +186,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
     Returns `ArchiveEntry` that contains all specific information about file stored in archive and
      described [later in the document](#archiveentry).
-    If file is not in archive, `false` is returned.
+    If file is not in archive, `NonExistentArchiveFileException` is thrown.
     
 - <span id="UnifiedArchive--getFileResource"></span>
     ```php
@@ -165,7 +195,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
     Returns a resource of in-archive file that can be used to get it's content (by `fread()` and so on).
     This method of extraction is useful for large files or when you need to read files in portions.
-    If file is not in archive, `false` is returned.
+    If file is not in archive, `NonExistentArchiveFileException` is thrown.
     
 - <span id="UnifiedArchive--getFileContent"></span>
     ```php
@@ -173,17 +203,35 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     ```
 
     Returns content of in-archive file as raw string.
-    If file is not in archive, `false` is returned.
-    
+    If file is not in archive, `NonExistentArchiveFileException` is thrown.
+
 - <span id="UnifiedArchive--extractFiles"></span>
     ```php
     UnifiedArchive::extractFiles(string $outputFolder): int|false
     ```
 
     Extracts all archive content with full paths to output folder and rewriting existing files.
-    In case of success, number of extracted files is returned. Otherwise, an `\Exception` is throwed of `false` is 
-    returned.
+    In case of success, number of extracted files is returned.
+
+    Throws:
+    - `ArchiveExtractionException`
+
+- <span id="UnifiedArchive--extractFiles"></span>
+    ```php
+    UnifiedArchive::extractFiles(string $outputFolder, array $files, boolean $expandFilesList = false): int|false
+    ```
+
+    Extracts given files or directories to output folder. If directories is passed, you need to use
+    `$expandFilesList` feature that will expand directory names to all nested files (e.g `dir` will be expanded to
+    `dir/file1, dir/file2, dir/subdir/file3`).
+    In case of success, number of extracted files is returned.
     
+    Throws:
+    - `EmptyFileListException`
+    - `ArchiveExtractionException`
+
+#### Archive modification
+
 - <span id="UnifiedArchive--canAddFiles"></span>
     ```php
     UnifiedArchive::canAddFiles(): boolean
@@ -198,17 +246,6 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
     Returns `true` if there's ability of deleting files from this archive.
 
-- <span id="UnifiedArchive--extractFiles"></span>
-    ```php
-    UnifiedArchive::extractFiles(string $outputFolder, array $files, boolean $expandFilesList = false): int|false
-    ```
-
-    Extracts given files or directories to output folder. If directories is passed, you need to use 
-    `$expandFilesList` feature that will expand directory names to all nested files (e.g `dir` will be expanded to 
-    `dir/file1, dir/file2, dir/subdir/file3`).
-    In case of success, number of extracted files is returned. Otherwise, an `\Exception` is throwed of `false` is 
-    returned.
-
 - <span id="UnifiedArchive--addDirectory"></span>
     ```php
     UnifiedArchive::addDirectory(string $directory, string $inArchivePath = null): boolean
@@ -218,6 +255,11 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     stored with full directory path. If in-archive path is set, all nested files will have given in-archive path.
     If case of success, `true` is returned.
     
+    Throws:
+    - `EmptyFileListException`
+    - `UnsupportedOperationException`
+    - `ArchiveModificationException`
+
 - <span id="UnifiedArchive--addFile"></span>
     ```php
     UnifiedArchive::addFile(string $file, string $inArchiveName = null): boolean
@@ -226,6 +268,11 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     Packs file in archive. If in-archive path is not specified, file will have it's original path. 
     If in-archive path is set, file wil be packed with given path.
     If case of success, `true` is returned.
+
+    Throws:
+    - `EmptyFileListException`
+    - `UnsupportedOperationException`
+    - `ArchiveModificationException`
 
 - <span id="UnifiedArchive--addFiles"></span>
     ```php
@@ -239,6 +286,11 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     If any error occurred (such as file already exists, files list is empty, ...), an `\Exception` is throwing.
     In case of success, number of packed files will be returned.
 
+    Throws:
+    - `EmptyFileListException`
+    - `UnsupportedOperationException`
+    - `ArchiveModificationException`
+
 - <span id="UnifiedArchive--deleteFiles"></span>
     ```php
     UnifiedArchive::deleteFiles(string|array $fileOrFiles, $expandFilesList = false): int|false
@@ -246,9 +298,13 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
     Deletes passed `$fileOrFiles` from archive. `$fileOrFiles` is a string with file/directory name or an array
     of files or directories.
-    If any error occurred, an `\Exception` is throwing.
     In case of success, number of deleted files will be returned.
     
+    Throws:
+    - `EmptyFileListException`
+    - `UnsupportedOperationException`
+    - `ArchiveModificationException`
+
 ## ArchiveEntry
 
 The class represents a file from archive as result of a call to `UnifiedArchive::getFileData(string $fileName)`.

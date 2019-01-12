@@ -4,7 +4,7 @@ namespace wapmorgan\UnifiedArchive\Formats;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 class Rar extends BasicFormat
 {
@@ -146,7 +146,7 @@ class Rar extends BasicFormat
 
     /**
      * @param array $files
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     * @throws UnsupportedOperationException
      */
     public function deleteFiles(array $files)
     {
@@ -155,7 +155,7 @@ class Rar extends BasicFormat
 
     /**
      * @param array $files
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
     {
@@ -165,7 +165,7 @@ class Rar extends BasicFormat
     /**
      * @param array  $files
      * @param string $archiveFileName
-     * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
+     * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName){
         throw new UnsupportedOperationException();

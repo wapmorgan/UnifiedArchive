@@ -3,7 +3,7 @@ namespace wapmorgan\UnifiedArchive\Formats;
 
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 class Iso extends BasicFormat
 {
@@ -174,9 +174,9 @@ class Iso extends BasicFormat
     /**
      * @param string $outputFolder
      * @param array $files
-     *
-     * @return false|resource
+     * @return void
      * @throws UnsupportedOperationException
+     * @todo Implement extracting with reading & writing to FS
      */
     public function extractFiles($outputFolder, array $files)
     {
@@ -185,9 +185,9 @@ class Iso extends BasicFormat
 
     /**
      * @param string $outputFolder
-     *
-     * @return false|resource
+     * @return void
      * @throws UnsupportedOperationException
+     * @todo Implement extracting with reading & writing to FS
      */
     public function extractArchive($outputFolder)
     {
@@ -196,8 +196,7 @@ class Iso extends BasicFormat
 
     /**
      * @param array $files
-     *
-     * @return false|int
+     * @return void
      * @throws UnsupportedOperationException
      */
     public function deleteFiles(array $files)
@@ -207,8 +206,7 @@ class Iso extends BasicFormat
 
     /**
      * @param array $files
-     *
-     * @return false|int
+     * @return void
      * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
@@ -219,8 +217,7 @@ class Iso extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
-     *
-     * @return false|int
+     * @return void
      * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName){

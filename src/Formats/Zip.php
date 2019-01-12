@@ -4,6 +4,10 @@ namespace wapmorgan\UnifiedArchive\Formats;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\PclzipZipInterface;
 use ZipArchive;
 
@@ -30,16 +34,15 @@ class Zip extends BasicFormat
     }
 
     /**
-     * @param $archiveFileName
-     *
-     * @throws \Exception
+     * @param string $archiveFileName
+     * @throws UnsupportedOperationException
      */
     protected function open($archiveFileName)
     {
         $this->zip = new ZipArchive();
         $open_result = $this->zip->open($archiveFileName);
         if ($open_result !== true) {
-            throw new Exception('Could not open Zip archive: '.$open_result);
+            throw new UnsupportedOperationException('Could not open Zip archive: '.$open_result);
         }
     }
 
@@ -134,40 +137,42 @@ class Zip extends BasicFormat
     /**
      * @param string $outputFolder
      * @param array $files
-     * @return false|resource
-     * @throws \Exception
+     * @return int Number of extracted files
+     * @throws ArchiveExtractionException
      */
     public function extractFiles($outputFolder, array $files)
     {
         if ($this->zip->extractTo($outputFolder, $files) === false)
-            throw new Exception($this->zip->getStatusString(), $this->zip->status);
+            throw new ArchiveExtractionException($this->zip->getStatusString(), $this->zip->status);
 
         return count($files);
     }
 
     /**
      * @param string $outputFolder
-     * @throws \Exception
+     * @return int Number of extracted files
+     *@throws ArchiveExtractionException
      */
     public function extractArchive($outputFolder)
     {
         if ($this->zip->extractTo($outputFolder) === false)
-            throw new Exception($this->zip->getStatusString(), $this->zip->status);
+            throw new ArchiveExtractionException($this->zip->getStatusString(), $this->zip->status);
+
         return $this->zip->numFiles;
     }
 
     /**
      * @param array $files
-     *
      * @return int
-     * @throws \Exception
+     * @throws ArchiveModificationException
+     * @throws UnsupportedOperationException
      */
     public function deleteFiles(array $files)
     {
         $count = 0;
         foreach ($files as $file) {
             if ($this->zip->deleteName($file) === false)
-                throw new Exception($this->zip->getStatusString(), $this->zip->status);
+                throw new ArchiveModificationException($this->zip->getStatusString(), $this->zip->status);
             $count++;
         }
 
@@ -181,9 +186,9 @@ class Zip extends BasicFormat
 
     /**
      * @param array $files
-     *
      * @return int
-     * @throws \Exception
+     * @throws ArchiveModificationException
+     * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
     {
@@ -191,10 +196,10 @@ class Zip extends BasicFormat
         foreach ($files as $localName => $fileName) {
             if (is_null($fileName)) {
                 if ($this->zip->addEmptyDir($localName) === false)
-                    throw new Exception($this->zip->getStatusString(), $this->zip->status);
+                    throw new ArchiveModificationException($this->zip->getStatusString(), $this->zip->status);
             } else {
                 if ($this->zip->addFile($fileName, $localName) === false)
-                    throw new Exception($this->zip->getStatusString(), $this->zip->status);
+                    throw new ArchiveModificationException($this->zip->getStatusString(), $this->zip->status);
                 $added_files++;
             }
         }
@@ -208,24 +213,25 @@ class Zip extends BasicFormat
     }
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $archiveFileName
-     *
-     * @return false|int
-     * @throws \Exception
+     * @return int
+     * @throws ArchiveCreationException
      */
     public static function createArchive(array $files, $archiveFileName){
         $zip = new ZipArchive();
         $result = $zip->open($archiveFileName, ZipArchive::CREATE);
+
         if ($result !== true)
-            throw new Exception('ZipArchive error: '.$result);
+            throw new ArchiveCreationException('ZipArchive error: '.$result);
+
         foreach ($files as $localName => $fileName) {
             if ($fileName === null) {
                 if ($zip->addEmptyDir($localName) === false)
-                    return false;
+                    throw new ArchiveCreationException('Could not archive directory "'.$localName.'": '.$zip->getStatusString(), $zip->status);
             } else {
                 if ($zip->addFile($fileName, $localName) === false)
-                    return false;
+                    throw new ArchiveCreationException('Could not archive file "'.$fileName.'": '.$zip->getStatusString(), $zip->status);
             }
         }
         $zip->close();
@@ -234,7 +240,7 @@ class Zip extends BasicFormat
     }
 
     /**
-     * @return \wapmorgan\UnifiedArchive\PclzipZipInterface
+     * @return PclzipZipInterface
      */
     public function getPclZip()
     {

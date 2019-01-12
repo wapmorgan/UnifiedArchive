@@ -5,7 +5,6 @@ use Symfony\Component\Process\Process;
 
 class Archive7z extends \Archive7z\Archive7z
 {
-
     /**
      * @throws \Archive7z\Exception
      */
