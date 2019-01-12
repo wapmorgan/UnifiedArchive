@@ -34,13 +34,12 @@ install:
   - travis_retry composer install
 
   # Install old archive7z version (that don't work on <7.1)
-  -|
-   if [[ $TRAVIS_PHP_VERSION == 5.6 || $TRAVIS_PHP_VERSION == 7.0 ]]; then
+  - |
+    if [[ $TRAVIS_PHP_VERSION == 5.6 || $TRAVIS_PHP_VERSION == 7.0 ]]; then
       composer require --no-interaction gemorroj/archive7z:4.0.0
-   else
+    else
       composer require --no-interaction gemorroj/archive7z
-   fi
-
+    fi
   - composer require --no-interaction phpclasses/php-iso-file pear/archive_tar
 
   - |
