@@ -1,9 +1,8 @@
 # Change Log
 
-### 0.2.0 - , 2020
+### 0.2.0 - Jan , 2020
 
 **BC-breaking changes**:
-- Minimal PHP version is 5.5.0.
 - **Deleted deprecated UnifiedArchive methods**: `extractNode`, `archiveNodes`.
 - Functionality of preparing files list for archiving is moved from `archiveFiles()` to `prepareForArchiving()`.
 - **All mutable methods throws exceptions on errors now**:
@@ -21,8 +20,20 @@
         - `UnsupportedOperationException`
         - `ArchiveCreationException`
 
+### 0.1.3 - Jan 13, 2020
+
+**BC-breaking changes**:
+- **Minimal version is 5.5.0**.
+
+Format specific:
+- **zip**: Fixed PclZip-interface
+- **7zip**: Fixed 7z-archiving, when archiving files should be renamed in archive
+- **lzw**: Fixed check for availability (#15)
+
 New features:
-- Added `canCreateType(): bool`, `canAddFiles(): bool`, `canDeleteFiles(): bool`
+- Added `canCreateType(): bool`
+- Added `canAddFiles(): bool`
+- Added `canDeleteFiles(): bool`
 
 ### 0.1.2 - Jan 03, 2019
 
