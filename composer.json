@@ -12,11 +12,7 @@
 	],
 	"require": {
 		"php": ">=5.5.0",
-		"ext-fileinfo": "*",
-		"gemorroj/archive7z": "dev-master",
-		"wapmorgan/cab-archive": "dev-master",
-		"phpclasses/php-iso-file": "dev-master",
-		"pear/archive_tar": "^1.4@dev"
+		"ext-fileinfo": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.8",

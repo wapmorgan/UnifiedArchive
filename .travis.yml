@@ -40,7 +40,7 @@ install:
     else
       composer require --no-interaction gemorroj/archive7z
     fi
-  - composer require --no-interaction phpclasses/php-iso-file pear/archive_tar
+  - composer require --no-interaction phpclasses/php-iso-file pear/archive_tar wapmorgan/cab-archive
 
   - |
     if [[ $TASK_TESTS_COVERAGE == 1 ]]; then
