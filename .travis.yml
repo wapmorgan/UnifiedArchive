@@ -21,7 +21,7 @@ install:
       phpenv config-rm xdebug.ini || echo "xdebug is not installed"
     fi
   - sudo apt-get install p7zip-full
-  -
+
   # install php-lzma2
   # fails on php 7.x
   # - git clone https://github.com/payden/php-xz /tmp/xz
@@ -33,7 +33,16 @@ install:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - travis_retry composer install
 
-  - composer require --no-interaction gemorroj/archive7z phpclasses/php-iso-file pear/archive_tar
+  # Install old archive7z version (that don't work on <7.1)
+  -|
+   if [[ $TRAVIS_PHP_VERSION == 5.6 || $TRAVIS_PHP_VERSION == 7.0 ]]; then
+      composer require --no-interaction gemorroj/archive7z:4.0.0
+   else
+      composer require --no-interaction gemorroj/archive7z
+   fi
+
+  - composer require --no-interaction phpclasses/php-iso-file pear/archive_tar
+
   - |
     if [[ $TASK_TESTS_COVERAGE == 1 ]]; then
       PHPUNIT_FLAGS="--coverage-clover=coverage.clover"
