@@ -576,7 +576,7 @@ class UnifiedArchive
             self::$enabledTypes[self::TAR_GZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('zlib');
             self::$enabledTypes[self::TAR_BZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('bz2');
             self::$enabledTypes[self::TAR_LZMA] = class_exists('\Archive_Tar') && extension_loaded('lzma2');
-            self::$enabledTypes[self::TAR_LZMA] = class_exists('\Archive_Tar') && LzwStreamWrapper::isBinaryAvailable();
+            self::$enabledTypes[self::TAR_LZW] = class_exists('\Archive_Tar') && LzwStreamWrapper::isBinaryAvailable();
         }
     }
 
