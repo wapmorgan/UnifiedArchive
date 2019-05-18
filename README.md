@@ -18,8 +18,6 @@ manager.
     2. [**Archive creation**](#archive-creation)
 4. [**Formats support**](#formats-support)
 5. [**API**](#api)
-    1. [**UnifiedArchive**](#unifiedarchive)
-    2. [**ArchiveEntry**](#archiveentry)
 6. [**Built-in console archive manager**](#built-in-console-archive-manager)
 7. [**Changelog**](#changelog)
 
@@ -200,7 +198,7 @@ UnifiedArchive::archiveFiles([
 
 ## API
 
-API of UnifiedArchive is stored in (API document)[docs/API.md].
+API of UnifiedArchive is stored in [API document](docs/API.md).
 
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular
