@@ -469,10 +469,10 @@ class UnifiedArchive
      * @param string|string[]|array<string,string> $fileOrFiles List of files. Can be one of three formats:
      *                             1. A string containing path to file or directory.
      *                                  File will have it's basename.
-     *                                  `UnifiedArchive::archiveFiles(['/etc/php.ini'], 'archive.zip)` will store
+     *                                  `UnifiedArchive::archiveFiles('/etc/php.ini', 'archive.zip)` will store
      * file with 'php.ini' name.
      *                                  Directory contents will be stored in archive root.
-     *                                  `UnifiedArchive::archiveFiles(['/var/log/'], 'archive.zip')` will store all
+     *                                  `UnifiedArchive::archiveFiles('/var/log/', 'archive.zip')` will store all
      * directory contents in archive root.
      *                             2. An array with strings containing pats to files or directories.
      *                                  Files and directories will be stored with full paths.
@@ -487,7 +487,7 @@ class UnifiedArchive
      * @param string $archiveName File name of archive. Type of archive will be determined via it's name.
      * @param bool $emulate If true, emulation mode is performed instead of real archiving.
      *
-     * @return array|bool|int
+     * @return array|bool|int Count of stored files is returned.
      * @throws Exception
      */
     public static function archiveFiles($fileOrFiles, $archiveName, $emulate = false)
