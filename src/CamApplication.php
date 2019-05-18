@@ -42,7 +42,7 @@ class CamApplication {
             '.tar.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
             '.tar.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
             '.tar.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
-            '.tar.Z' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZW), 'install "compress" system utility'],
+            '.tar.Z' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZW), 'install "pear/archive_tar" package and "compress" system utility'],
         ];
 
         $installed = $not_installed = [];
