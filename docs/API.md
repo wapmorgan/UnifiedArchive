@@ -44,7 +44,8 @@ one of  `UnifiedArchive` methods.
     resolved by extension). File has only relative nam in archive.  
     If case of success, `true` is returned.
     
-- <span id="UnifiedArchive--archiveFiles"></span>```php
+- <span id="UnifiedArchive--archiveFiles"></span>
+    ```php
     UnifiedArchive::archiveFiles(array $files, string $archiveName): int
     ```
 
@@ -55,7 +56,8 @@ one of  `UnifiedArchive` methods.
     If any error occurred (such as file already exists, files list is empty, ...), an `\Exception` is throwing.
     In case of success, number of stored files will be returned.
     
-- <span id="UnifiedArchive--canOpenArchive"></span>```php
+- <span id="UnifiedArchive--canOpenArchive"></span>
+    ```php
     UnifiedArchive::canOpenArchive(string $fileName): boolean
     ```
 
@@ -65,7 +67,8 @@ one of  `UnifiedArchive` methods.
      ./vendor/bin/cam --formats`_
     Returns `true` if given archive can be opened and `false` otherwise.
     
-- <span id="UnifiedArchive--canOpenType"></span>```php
+- <span id="UnifiedArchive--canOpenType"></span>
+    ```php
     UnifiedArchive::canOpenType(string $type): boolean
     ```
 
@@ -74,7 +77,8 @@ one of  `UnifiedArchive` methods.
     Full list of constants provided in the [appendix of this document](#unifiedArchive-formats-constants).
     Returns `true` if given archive can be opened and `false` otherwise.
     
-- <span id="UnifiedArchive--open"></span>```php
+- <span id="UnifiedArchive--open"></span>
+    ```php
     UnifiedArchive::open(string $fileName): UnifiedArchive|null
     ```
 
@@ -83,46 +87,54 @@ one of  `UnifiedArchive` methods.
     
 All following methods is intended to be called to `UnifiedArchive` instance.
 
-- <span id="UnifiedArchive--getArchiveType"></span>```php
+- <span id="UnifiedArchive--getArchiveType"></span>
+    ```php
     UnifiedArchive::getArchiveType() string
     ```
 
     Returns type of archive as one of `UnifiedArchive` [constants](#unifiedArchive-formats-constants).
     
-- <span id="UnifiedArchive--getArchiveSize"></span>```php
+- <span id="UnifiedArchive--getArchiveSize"></span>
+    ```php
     UnifiedArchive::getArchiveSize(): int
     ```
     Returns size of archive file in bytes.
-- <span id="UnifiedArchive--countCompressedFilesSize"></span>```php
+- <span id="UnifiedArchive--countCompressedFilesSize"></span>
+    ```php
     UnifiedArchive::countCompressedFilesSize(): int
     ```
 
     Returns size of all stored files in archive with archive compression in bytes.
     This can be used to measure efficiency of format compression.
     
-- <span id="UnifiedArchive--countUncompressedFilesSize"></span>```php
+- <span id="UnifiedArchive--countUncompressedFilesSize"></span>
+    ```php
     UnifiedArchive::countUncompressedFilesSize(): int
     ```
 
     Returns size of all stored files in archive without compression in bytes.
     This can be used to measure size that extracted files will use.
 
-- <span id="UnifiedArchive--countFiles"></span>```php
+- <span id="UnifiedArchive--countFiles"></span>
+    ```php
     UnifiedArchive::countFiles(): int
     ```
     Returns number of files stored in archive.
 
-- <span id="UnifiedArchive--getFileNames"></span>```php
+- <span id="UnifiedArchive--getFileNames"></span>
+    ```php
     UnifiedArchive::getFileNames(): string[]
     ```
     Returns full list of files stored in archive.
     
-- <span id="UnifiedArchive--isFileExists"></span>```php
+- <span id="UnifiedArchive--isFileExists"></span>
+    ```php
     UnifiedArchive::isFileExists(string $fileName): boolean
     ```
     Checks whether file is presented in archive.
     
-- <span id="UnifiedArchive--getFileData"></span>```php
+- <span id="UnifiedArchive--getFileData"></span>
+    ```php
     UnifiedArchive::getFileData(string $fileName): ArchiveEntry|false
     ```
 
@@ -130,7 +142,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
      described [later in the document](#archiveentry).
     If file is not in archive, `false` is returned.
     
-- <span id="UnifiedArchive--getFileResource"></span>```php
+- <span id="UnifiedArchive--getFileResource"></span>
+    ```php
     UnifiedArchive::getFileResource(string $fileName): resource|false
     ```
 
@@ -138,14 +151,16 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     This method of extraction is useful for large files or when you need to read files in portions.
     If file is not in archive, `false` is returned.
     
-- <span id="UnifiedArchive--getFileContent"></span>```php
+- <span id="UnifiedArchive--getFileContent"></span>
+    ```php
     UnifiedArchive::getFileContent(string $fileName): resource|false
     ```
 
     Returns content of in-archive file as raw string.
     If file is not in archive, `false` is returned.
     
-- <span id="UnifiedArchive--extractFiles"></span>```php
+- <span id="UnifiedArchive--extractFiles"></span>
+    ```php
     UnifiedArchive::extractFiles(string $outputFolder): int|false
     ```
 
@@ -153,7 +168,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     In case of success, number of extracted files is returned. Otherwise, an `\Exception` is throwed of `false` is 
     returned.
     
-- <span id="UnifiedArchive--extractFiles"></span>```php
+- <span id="UnifiedArchive--extractFiles"></span>
+    ```php
     UnifiedArchive::extractFiles(string $outputFolder, array $files, boolean $expandFilesList = false): int|false
     ```
 
@@ -163,7 +179,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     In case of success, number of extracted files is returned. Otherwise, an `\Exception` is throwed of `false` is 
     returned.
 
-- <span id="UnifiedArchive--addDirectory"></span>```php
+- <span id="UnifiedArchive--addDirectory"></span>
+    ```php
     UnifiedArchive::addDirectory(string $directory, string $inArchivePath = null): boolean
     ```
 
@@ -171,7 +188,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     stored with full directory path. If in-archive path is set, all nested files will have given in-archive path.
     If case of success, `true` is returned.
     
-- <span id="UnifiedArchive--addFile"></span>```php
+- <span id="UnifiedArchive--addFile"></span>
+    ```php
     UnifiedArchive::addFile(string $file, string $inArchiveName = null): boolean
     ```
 
@@ -179,7 +197,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     If in-archive path is set, file wil be packed with given path.
     If case of success, `true` is returned.
 
-- <span id="UnifiedArchive--addFiles"></span>```php
+- <span id="UnifiedArchive--addFiles"></span>
+    ```php
     UnifiedArchive::addFiles(array $files): int|false
     ```
 
