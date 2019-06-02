@@ -97,7 +97,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 - <span id="UnifiedArchive--getFileData"></span>`UnifiedArchive::getFileData(string $fileName): ArchiveEntry|false`
 
     Returns `ArchiveEntry` that contains all specific information about file stored in archive and
-     described [later in the document](#archive-entry).
+     described [later in the document](#archiveentry).
     If file is not in archive, `false` is returned.
     
 - <span id="UnifiedArchive--getFileResource"></span>`UnifiedArchive::getFileResource(string $fileName): resource|false`
