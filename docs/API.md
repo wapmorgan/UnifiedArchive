@@ -36,7 +36,8 @@ one of  `UnifiedArchive` methods.
     resolved by extension). All files have relative path in archive. 
     If case of success, `true` is returned.
     
-- <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>```php
+- <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>
+    ```php
     UnifiedArchive::archiveFile(string $file, string $archiveName): boolean
     ```
 
