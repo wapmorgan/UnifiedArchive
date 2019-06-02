@@ -27,7 +27,10 @@ one of  `UnifiedArchive` methods.
 
 ## UnifiedArchive
 
-- <span id="UnifiedArchive::archiveDirectory"></span>`UnifiedArchive::archiveDirectory(string $directory, string $archiveName): boolean`
+- <span id="UnifiedArchive::archiveDirectory"></span>
+    ```php
+    UnifiedArchive::archiveDirectory(string $directory, string $archiveName): boolean
+    ```
 
     Creates an archive with all content from given directory and saves archive to `$archiveName` (format is 
     resolved by extension). All files have relative path in archive. 
