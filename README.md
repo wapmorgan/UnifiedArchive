@@ -13,7 +13,7 @@ manager.
 ---
 1. [**Preamble**](#preamble)
 2. [**Installation**](#installation)
-3. [**Reading of archive**](#reading-of-archive)
+3. [**Usage**](#usage)
     1. [**Archive modification**](#archive-modification)
     2. [**Archive creation**](#archive-creation)
 4. [**Formats support**](#formats-support)
@@ -38,8 +38,8 @@ Composer package: `wapmorgan/unified-archive`
 }
 ```
 
-## Reading of archive
-1. Import a class
+## Usage
+1. Import `UnifiedArchive`
 
     ```php
     require 'vendor/autoload.php';
@@ -47,8 +47,8 @@ Composer package: `wapmorgan/unified-archive`
     ```
 
 2. At the beginning, try to open the file with automatic detection of a format
-by name. In case of successful recognition a `UnifiedArchive` object will be
-returned. In case of failure - **null**
+by name. In case of successful recognition an `UnifiedArchive` object will be
+returned. In case of failure - _null_ will be returned.
 
     ```php
     $archive = UnifiedArchive::open('filename.rar');
@@ -78,75 +78,82 @@ returned. In case of failure - **null**
     $archive = UnifiedArchive::open('filename.iso');
     ```
 
-3. Further, read the list of files of archive (note: this function returns
-only names of files)
+3. Further, read the list of files of archive.
 
     ```php
-    var_dump($archive->getFileNames()); // array with files list
+    $files_list = $archive->getFileNames(); // array with files list
+   // ['file', 'file2', 'file3', ...]
     ```
 
 4. Further, check that specific file is in archive.
 
     ```php
-    var_dump($archive->isFileExists('README.md')); // boolean
+    if ($archive->isFileExists('README.md')) {
+       // some operations
+    }
     ```
 
-5. Further, you can get additional information about concrete file by
-`getFileData()` method
+5. To get common information about specific file use `getFileData()` method. 
+This method returns [an `ArchiveEntry` instance](docs/API.md#ArchiveEntry)
 
     ```php
-    var_dump($archive->getFileData('README.md')); // ArchiveEntry with file information
+    $file_data = $archive->getFileData('README.md')); // ArchiveEntry with file information
     ```
 
-6. Further, you can get raw file contents by `getFileContent()`
-method
+6. To get raw file contents use `getFileContent()` method
 
     ```php
-    var_dump($archive->getFileContent('README.md')); // string
+    $file_content = $archive->getFileContent('README.md')); // string
+   // raw file content
     ```
 
-7. Further, you can unpack any internal catalog or the whole archive with files
-on a disk. The `extractFiles()` method is engaged in it. In case of success, it
-returns number of the extracted files, in case of failure - **false**. Initial
-and final symbol of division of catalogs are very important! Don't forget them.
+7. Further, you can unpack all archive or specific files on a disk. The `extractFiles()` method is intended to it.
 
     ```php
-    $archive->extractFiles($outputFolder, $archiveFiles);
+    $archive->extractFiles(string $outputFolder, string|array $archiveFiles);
+    ```
 
-    // to unpack all contents of archive
-    $archive->extractFiles('output');
+    _Example:_
+    ```php
+    // to unpack all contents of archive to "output" folder
+    $archive->extractFiles(__DIR__.'/output');
 
-    // to unpack specific files from archive
-    $archive->extractFiles('output', ['README.md', 'composer.json']);
+    // to unpack specific files (README.md and composer.json) from archive to "output" folder
+    $archive->extractFiles(__DIR__.'/output', ['README.md', 'composer.json']);
 
-    // to unpack the src catalog in archive in the sources catalog on a disk
-    $archive->extractFiles('output', '/src/', true);
-
-    // to unpack the bookmarks catalog in archive in the sources catalog on a
-    // disk
-    $archive->extractFiles('output', '/bookmarks/', true);
+    // to unpack the "src" catalog with all content from archive into the "sources" catalog on a disk
+    $archive->extractFiles(__DIR__.'/output', '/src/', true);
     ```
 
 ### Archive modification
+Only few archive formats support modification:
+- zip
+- 7z
+- tar (with restrictions)
+
+For details go to [Formats support](#Formats-support) section.
+
 1. Deletion files from archive
 
     ```php
-    // To delete a single file from an archive
+    // Delete a single file
     $archive->deleteFiles('README.md');
 
-    // To delete multiple files from an archive
+    // Delete multiple files
     $archive->deleteFiles(['README.md', 'MANIFEST.MF']);
 
-    // To delete directories from archive
+    // Delete directory with full content
     $archive->deleteFiles('/src/', true);
     ```
 
     In case of success the number of successfully deleted files will be returned.
 
+    [Details](docs/API.md#UnifiedArchive--deleteFiles).
+
 2. Addition files to archive
 
     ```php
-    // To add completely the catalog with all attached files and subdirectories (all directory contents will be stored in archive root)
+    // Add a catalog with all contents with full paths
     $archive->addFiles('/var/log');
 
     // To add one file (will be stored as one file "syslog")
@@ -156,9 +163,17 @@ and final symbol of division of catalogs are very important! Don't forget them.
     $archive->addFiles([$directory, $file, $file2, ...]);
     ```
 
+   [Details](docs/API.md#UnifiedArchive--addFiles).
+
 ### Archive creation
-To pack completely the catalog with all attached files and subdirectories
-in new archive:
+Only few archive formats support modification:
+- zip
+- 7z
+- tar (with restrictions)
+
+For details go to [Formats support](#Formats-support) section.
+
+To pack completely the catalog with all attached files and subdirectories in new archive:
 
 ```php
 UnifiedArchive::archiveFiles('/var/log', 'Archive.zip');
@@ -180,6 +195,8 @@ UnifiedArchive::archiveFiles([
           '/var/www/site/runtime/logs',           // stored as '/var/www/site/runtime/logs'
     ], 'archive.zip');
 ```
+
+[Details](docs/API.md#UnifiedArchive--archiveFiles).
 
 ## Formats support
 
@@ -210,35 +227,6 @@ support launch it with `-f` flag in console:
 
 ```
 $ php vendor/bin/cam -f
-```
-
-### Full usage help
-```
-USAGE: cam (-l|--list)  ARCHIVE
-       cam (-t|--table) ARCHIVE
-       cam (-i|--info)  ARCHIVE
-       cam (-e|--extract) [--output=DIR] [--replace=(all|ask|none|time|size)] [--flat=(file|path)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
-       cam (-p|--print)   ARCHIVE FILES_IN_ARCHIVE...
-       cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
-       cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
-       cam (-a|--add)     ARCHIVE FILES_ON_DISK...
-       cam (-c|--create)  ARCHIVE FILES_ON_DISK...
-       cam (-f|--formats)
-
-ACTIONS:
-      -l(--list)    List files
-      -t(--table)   List files in table
-      -i(--info)    Summary about archive
-
-      -e(--extract) Extract from archive
-
-      -p(--print)   Print files' content
-      -d(--details) Details about files
-      -x(--delete)  Delete files
-
-      -a(--add)     Add to archive
-      -c(--create)  Create new archive
-
 ```
 
 ## Changelog

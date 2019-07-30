@@ -22,8 +22,9 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
     - [`UnifiedArchive::addDirectory`](#UnifiedArchive--addDirectory)
     - [`UnifiedArchive::addFile`](#UnifiedArchive--addFile)
     - [`UnifiedArchive::addFiles`](#UnifiedArchive--addFiles)
-- `ArchiveEntry` - represents information about specific file from archive. This object can be obtained by call to 
-one of  `UnifiedArchive` methods.
+    - [`UnifiedArchive::deleteFiles`](#UnifiedArchive--deleteFiles)
+- [`ArchiveEntry`](#ArchiveEntry) - represents information about specific file from archive. This object can be obtained
+by call to one of  `UnifiedArchive` methods.
 
 ## UnifiedArchive
 
@@ -209,6 +210,16 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     path as it's value.
     If any error occurred (such as file already exists, files list is empty, ...), an `\Exception` is throwing.
     In case of success, number of packed files will be returned.
+
+- <span id="UnifiedArchive--deleteFiles"></span>
+    ```php
+    UnifiedArchive::deleteFiles(string|array $fileOrFiles, $expandFilesList = false): int|false
+    ```
+
+    Deletes passed `$fileOrFiles` from archive. `$fileOrFiles` is a string with file/directory name or an array
+    of files or directories.
+    If any error occurred, an `\Exception` is throwing.
+    In case of success, number of deleted files will be returned.
     
 ## ArchiveEntry
 
