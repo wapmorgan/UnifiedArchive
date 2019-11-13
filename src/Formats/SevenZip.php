@@ -1,14 +1,13 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Formats;
 
-use Archive7z\Archive7z;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 
 class SevenZip extends BasicFormat
 {
-    /** @var \Archive7z\Archive7z */
+    /** @var Archive7z */
     protected $sevenZip;
 
     /**
@@ -210,10 +209,12 @@ class SevenZip extends BasicFormat
 
     /**
      * @return bool
+     * @throws \Archive7z\Exception
      */
     public static function canAddFiles()
     {
-        return true;
+        $version = Archive7z::getBinaryVersion();
+        return $version !== false && version_compare('9.30', $version, '<=');
     }
 
     /**

@@ -1,4 +1,6 @@
 <?php
+
+use wapmorgan\UnifiedArchive\Formats\SevenZip;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class ArchivingTest extends PhpUnitTestCase
@@ -64,13 +66,19 @@ class ArchivingTest extends PhpUnitTestCase
 
     /**
      * @return array
+     * @throws \Archive7z\Exception
      */
     public function modifyableArchiveTypes()
     {
-        return [
+        // dynamic types list
+        $types = [
             ['fixtures.zip', UnifiedArchive::ZIP],
-            ['fixtures.7z', UnifiedArchive::SEVEN_ZIP],
             ['fixtures.tar', UnifiedArchive::TAR],
         ];
+
+        if (SevenZip::canAddFiles())
+            $types[] = ['fixtures.7z', UnifiedArchive::SEVEN_ZIP];
+
+        return $types;
     }
 }
