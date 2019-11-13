@@ -211,6 +211,15 @@ class SevenZip extends BasicFormat
      * @return bool
      * @throws \Archive7z\Exception
      */
+    public static function canCreateArchive()
+    {
+        return static::canAddFiles();
+    }
+
+    /**
+     * @return bool
+     * @throws \Archive7z\Exception
+     */
     public static function canAddFiles()
     {
         $version = Archive7z::getBinaryVersion();

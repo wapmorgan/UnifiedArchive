@@ -7,6 +7,7 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
     - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
     - [`UnifiedArchive::canOpenArchive`](#UnifiedArchive--canOpenArchive)
     - [`UnifiedArchive::canOpenType`](#UnifiedArchive--canOpenType)
+    - [`UnifiedArchive::canCreateType`](#UnifiedArchive--canCreateType)
     - [`UnifiedArchive::open`](#UnifiedArchive--open)
     - [`UnifiedArchive::getArchiveType`](#UnifiedArchive--getArchiveType)
     - [`UnifiedArchive::getArchiveSize`](#UnifiedArchive--getArchiveSize)
@@ -80,6 +81,17 @@ by call to one of  `UnifiedArchive` methods.
     configuration. `$type` should be one of `UnifiedArchive` constants (such as `UnifiedArchive::ZIP` and so on).
     Full list of constants provided in the [appendix of this document](#unifiedArchive-formats-constants).
     Returns `true` if given archive can be opened and `false` otherwise.
+    
+- <span id="UnifiedArchive--canCreateType"></span>
+    ```php
+    UnifiedArchive::canCreateType(string $type): boolean
+    ```
+
+    Tests if an archive format can be created with current system and php configuration.
+    _If you want to enabled specific format support, you need to install additional program or php extension. List of
+     extensions that should be install can be obtained by execuing built-in `cam` with `--formats` flag: `
+     ./vendor/bin/cam --formats`_
+    Returns `true` if given archive can be created and `false` otherwise.
     
 - <span id="UnifiedArchive--open"></span>
     ```php

@@ -144,7 +144,8 @@ abstract class OneFileFormat extends BasicFormat
      * @return mixed
      * @throws \wapmorgan\UnifiedArchive\UnsupportedOperationException
      */
-    protected static function compressData($data) {
+    protected static function compressData($data)
+    {
         throw new UnsupportedOperationException();
     }
 }

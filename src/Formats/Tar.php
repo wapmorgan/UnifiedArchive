@@ -616,6 +616,14 @@ class Tar extends BasicFormat
     /**
      * @return bool
      */
+    public static function canCreateArchive()
+    {
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
     public static function canAddFiles()
     {
         return true;

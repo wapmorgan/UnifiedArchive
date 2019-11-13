@@ -18,6 +18,9 @@ class ArchivingTest extends PhpUnitTestCase
         if (!UnifiedArchive::canOpenType($archiveType))
             $this->markTestSkipped($archiveType.' is not supported with current system configuration');
 
+        if (!UnifiedArchive::canCreateType($archiveType))
+            $this->markTestSkipped($archiveType.' does not support archiving');
+
         $this->cleanWorkDir();
 
         $test_archive_filename = WORK_DIR.'/'.$archiveFileName;
@@ -50,15 +53,21 @@ class ArchivingTest extends PhpUnitTestCase
         $this->assertInstanceOf('\wapmorgan\UnifiedArchive\UnifiedArchive', $archive);
 
         // adding file
-        $this->assertTrue($archive->canAddFiles());
-        $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
-        $this->assertTrue($archive->isFileExists(basename(__FILE__)));
-        $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
+        if ($archive->canAddFiles()) {
+            $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
+            $this->assertTrue($archive->isFileExists(basename(__FILE__)));
+            $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
+        } else {
+            $this->markTestSkipped($archiveType.' does not support adding files to archive');
+        }
 
         // removing file
-        $this->assertTrue($archive->canDeleteFiles());
-        $this->assertEquals(1, $archive->deleteFiles(basename(__FILE__)));
-        $this->assertFalse($archive->isFileExists(basename(__FILE__)));
+        if ($archive->canDeleteFiles()) {
+            $this->assertEquals(1, $archive->deleteFiles(basename(__FILE__)));
+            $this->assertFalse($archive->isFileExists(basename(__FILE__)));
+        } else {
+            $this->markTestSkipped($archiveType.' does not support deleting files from archive');
+        }
         $archive = null;
 
         unlink($test_archive_filename);
@@ -70,15 +79,10 @@ class ArchivingTest extends PhpUnitTestCase
      */
     public function modifyableArchiveTypes()
     {
-        // dynamic types list
-        $types = [
+        return [
             ['fixtures.zip', UnifiedArchive::ZIP],
             ['fixtures.tar', UnifiedArchive::TAR],
+            ['fixtures.7z', UnifiedArchive::SEVEN_ZIP]
         ];
-
-        if (SevenZip::canAddFiles())
-            $types[] = ['fixtures.7z', UnifiedArchive::SEVEN_ZIP];
-
-        return $types;
     }
 }

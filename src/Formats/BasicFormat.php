@@ -91,6 +91,14 @@ abstract class BasicFormat
     /**
      * @return bool
      */
+    public static function canCreateArchive()
+    {
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
     public static function canAddFiles()
     {
         return false;

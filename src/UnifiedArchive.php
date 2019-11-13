@@ -128,6 +128,14 @@ class UnifiedArchive
             : false;
     }
 
+    public static function canCreateType($type)
+    {
+        self::checkRequirements();
+        return isset(self::$enabledTypes[$type])
+            ? static::$formatHandlers[$type]::canCreateArchive()
+            : false;
+    }
+
     /**
      * Detect archive type by its filename or content
      *
