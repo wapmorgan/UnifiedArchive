@@ -612,4 +612,21 @@ class Tar extends BasicFormat
 
         return $files;
     }
+
+    /**
+     * @return bool
+     */
+    public static function canAddFiles()
+    {
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function canDeleteFiles()
+    {
+        static::checkRequirements();
+        return self::$enabledPharData;
+    }
 }

@@ -133,7 +133,9 @@ class CamApplication {
 
     /**
      * @param $unixtime
+     *
      * @return string
+     * @throws \Exception
      */
     public function formatDate($unixtime)
     {

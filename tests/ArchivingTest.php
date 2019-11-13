@@ -48,11 +48,13 @@ class ArchivingTest extends PhpUnitTestCase
         $this->assertInstanceOf('\wapmorgan\UnifiedArchive\UnifiedArchive', $archive);
 
         // adding file
+        $this->assertTrue($archive->canAddFiles());
         $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
         $this->assertTrue($archive->isFileExists(basename(__FILE__)));
         $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
 
         // removing file
+        $this->assertTrue($archive->canDeleteFiles());
         $this->assertEquals(1, $archive->deleteFiles(basename(__FILE__)));
         $this->assertFalse($archive->isFileExists(basename(__FILE__)));
         $archive = null;

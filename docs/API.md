@@ -19,6 +19,8 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
     - [`UnifiedArchive::getFileResource`](#UnifiedArchive--getFileResource)
     - [`UnifiedArchive::getFileContent`](#UnifiedArchive--getFileContent)
     - [`UnifiedArchive::extractFiles`](#UnifiedArchive--extractFiles)
+    - [`UnifiedArchive::canAddFiles`](#UnifiedArchive--canAddFiles)
+    - [`UnifiedArchive::canDeleteFiles`](#UnifiedArchive--canDeleteFiles)
     - [`UnifiedArchive::addDirectory`](#UnifiedArchive--addDirectory)
     - [`UnifiedArchive::addFile`](#UnifiedArchive--addFile)
     - [`UnifiedArchive::addFiles`](#UnifiedArchive--addFiles)
@@ -170,6 +172,20 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     In case of success, number of extracted files is returned. Otherwise, an `\Exception` is throwed of `false` is 
     returned.
     
+- <span id="UnifiedArchive--canAddFiles"></span>
+    ```php
+    UnifiedArchive::canAddFiles(): boolean
+    ```
+
+    Returns `true` if there's ability of adding files to this archive.
+
+- <span id="UnifiedArchive--canDeleteFiles"></span>
+    ```php
+    UnifiedArchive::canDeleteFiles(): boolean
+    ```
+
+    Returns `true` if there's ability of deleting files from this archive.
+
 - <span id="UnifiedArchive--extractFiles"></span>
     ```php
     UnifiedArchive::extractFiles(string $outputFolder, array $files, boolean $expandFilesList = false): int|false

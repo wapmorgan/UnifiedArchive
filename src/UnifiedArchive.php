@@ -4,6 +4,15 @@ namespace wapmorgan\UnifiedArchive;
 use Exception;
 use InvalidArgumentException;
 use wapmorgan\UnifiedArchive\Formats\BasicFormat;
+use wapmorgan\UnifiedArchive\Formats\Bzip;
+use wapmorgan\UnifiedArchive\Formats\Cab;
+use wapmorgan\UnifiedArchive\Formats\Gzip;
+use wapmorgan\UnifiedArchive\Formats\Iso;
+use wapmorgan\UnifiedArchive\Formats\Lzma;
+use wapmorgan\UnifiedArchive\Formats\Rar;
+use wapmorgan\UnifiedArchive\Formats\SevenZip;
+use wapmorgan\UnifiedArchive\Formats\Tar;
+use wapmorgan\UnifiedArchive\Formats\Zip;
 
 /**
  * Class which represents archive in one of supported formats.
@@ -28,19 +37,19 @@ class UnifiedArchive
 
     /** @var array List of archive format handlers */
     protected static $formatHandlers = [
-        self::ZIP => 'Zip',
-        self::SEVEN_ZIP => 'SevenZip',
-        self::RAR => 'Rar',
-        self::GZIP => 'Gzip',
-        self::BZIP => 'Bzip',
-        self::LZMA => 'Lzma',
-        self::ISO => 'Iso',
-        self::CAB => 'Cab',
-        self::TAR => 'Tar',
-        self::TAR_GZIP => 'Tar',
-        self::TAR_BZIP => 'Tar',
-        self::TAR_LZMA => 'Tar',
-        self::TAR_LZW => 'Tar',
+        self::ZIP => Zip::class,
+        self::SEVEN_ZIP => SevenZip::class,
+        self::RAR => Rar::class,
+        self::GZIP => Gzip::class,
+        self::BZIP => Bzip::class,
+        self::LZMA => Lzma::class,
+        self::ISO => Iso::class,
+        self::CAB => Cab::class,
+        self::TAR => Tar::class,
+        self::TAR_GZIP => Tar::class,
+        self::TAR_BZIP => Tar::class,
+        self::TAR_LZMA => Tar::class,
+        self::TAR_LZW => Tar::class,
     ];
 
     /** @var array List of archive formats with support state */
@@ -221,7 +230,7 @@ class UnifiedArchive
         if (!isset(static::$formatHandlers[$type]))
             throw new Exception('Unsupported archive type: '.$type.' of archive '.$fileName);
 
-        $handler_class = __NAMESPACE__.'\\Formats\\'.static::$formatHandlers[$type];
+        $handler_class = static::$formatHandlers[$type];
 
         $this->archive = new $handler_class($fileName);
         $this->scanArchive();
@@ -534,7 +543,7 @@ class UnifiedArchive
         if (!isset(static::$formatHandlers[$archiveType]))
             throw new Exception('Unsupported archive type: '.$archiveType.' of archive '.$archiveName);
 
-        $handler_class = __NAMESPACE__.'\\Formats\\'.static::$formatHandlers[$archiveType];
+        $handler_class = static::$formatHandlers[$archiveType];
 
         return $handler_class::createArchive($files_list, $archiveName);
     }
@@ -700,5 +709,21 @@ class UnifiedArchive
                 $map[$destination.basename($node)] = $node;
             }
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function canAddFiles()
+    {
+        return call_user_func([static::$formatHandlers[$this->type], 'canAddFiles']);
+    }
+
+    /**
+     * @return bool
+     */
+    public function canDeleteFiles()
+    {
+        return call_user_func([static::$formatHandlers[$this->type], 'canDeleteFiles']);
     }
 }

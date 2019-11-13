@@ -240,4 +240,20 @@ class Zip extends BasicFormat
     {
         return new PclzipZipInterface($this->zip);
     }
+
+    /**
+     * @return bool
+     */
+    public static function canAddFiles()
+    {
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function canDeleteFiles()
+    {
+        return true;
+    }
 }

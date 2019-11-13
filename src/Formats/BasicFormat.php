@@ -87,4 +87,20 @@ abstract class BasicFormat
     public static function createArchive(array $files, $archiveFileName) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @return bool
+     */
+    public static function canAddFiles()
+    {
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function canDeleteFiles()
+    {
+        return false;
+    }
 }
