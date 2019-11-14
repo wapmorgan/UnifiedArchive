@@ -5,13 +5,18 @@ matrix:
     - php: 7.3
     - php: 7.2
     - php: 7.1
+      env: TASK_TESTS_COVERAGE=1
     - php: 7.0
     - php: 5.6
 
 install:
-  - phpenv config-rm xdebug.ini || echo "xdebug is not installed"
+  - |
+    if [[ $TASK_TESTS_COVERAGE != 1 ]]; then
+      # disable xdebug for performance reasons when code coverage is not needed. note: xdebug on hhvm is disabled by default
+      phpenv config-rm xdebug.ini || echo "xdebug is not installed"
+    fi
   - sudo apt-get install p7zip-full
-
+  -
   # install php-lzma2
   # fails on php 7.x
   # - git clone https://github.com/payden/php-xz /tmp/xz
@@ -24,7 +29,18 @@ install:
   - travis_retry composer install
 
   - composer require --no-interaction gemorroj/archive7z phpclasses/php-iso-file pear/archive_tar
+  - |
+    if [ $TASK_TESTS_COVERAGE == 1 ]; then
+      PHPUNIT_FLAGS="--coverage-clover=coverage.clover"
+    fi
 
 script:
   # PHP tests
-  - vendor/bin/phpunit --verbose
+  - vendor/bin/phpunit --verbose $PHPUNIT_FLAGS
+
+after_script:
+  - |
+    if [ $TASK_TESTS_COVERAGE == 1 ]; then
+      travis_retry wget https://scrutinizer-ci.com/ocular.phar
+      php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+    fi
