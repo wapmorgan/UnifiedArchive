@@ -1,5 +1,10 @@
 language: php
+
+env:
+  - TASK_TESTS_COVERAGE=0
+
 matrix:
+  fast_finish: true
   include:
 #    - php: 7.4
     - php: 7.3
@@ -30,7 +35,7 @@ install:
 
   - composer require --no-interaction gemorroj/archive7z phpclasses/php-iso-file pear/archive_tar
   - |
-    if [ $TASK_TESTS_COVERAGE == 1 ]; then
+    if [[ $TASK_TESTS_COVERAGE == 1 ]]; then
       PHPUNIT_FLAGS="--coverage-clover=coverage.clover"
     fi
 
@@ -40,7 +45,7 @@ script:
 
 after_script:
   - |
-    if [ $TASK_TESTS_COVERAGE == 1 ]; then
+    if [[ $TASK_TESTS_COVERAGE == 1 ]]; then
       travis_retry wget https://scrutinizer-ci.com/ocular.phar
       php ocular.phar code-coverage:upload --format=php-clover coverage.clover
     fi
