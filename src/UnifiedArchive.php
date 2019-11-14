@@ -136,7 +136,7 @@ class UnifiedArchive
     {
         self::checkRequirements();
         return isset(self::$enabledTypes[$type])
-            ? static::$formatHandlers[$type]::canCreateArchive()
+            ? call_user_func([static::$formatHandlers[$type], 'canCreateArchive'])
             : false;
     }
 
