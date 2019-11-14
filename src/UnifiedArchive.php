@@ -128,6 +128,10 @@ class UnifiedArchive
             : false;
     }
 
+    /**
+     * @param string $type One of predefined archive types
+     * @return bool
+     */
     public static function canCreateType($type)
     {
         self::checkRequirements();
