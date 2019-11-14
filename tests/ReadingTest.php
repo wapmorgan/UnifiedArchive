@@ -86,17 +86,32 @@ class ReadingTest extends PhpUnitTestCase
         $flatten_list = [];
         $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
 
+        // test uncompressed archive size calculation
+        $this->assertEquals(array_sum(array_map('strlen', $flatten_list)), $archive->countUncompressedFilesSize(),
+        'Uncompressed size of archive should be equal to real files size');
+
         foreach ($flatten_list as $filename => $content) {
 
             if (fnmatch('*.7z', $archiveFilename) && DIRECTORY_SEPARATOR == '\\')
                 $filename = str_replace('/', '\\', $filename);
 
+            // test ArchiveEntry
             $file_data = $archive->getFileData($filename);
             $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data, 'Could not find '
                 .$filename);
 
+            $this->assertAttributeEquals($filename, 'path', $file_data, 'Path should be '.$filename);
+            $this->assertTrue(is_numeric($file_data->compressedSize), 'Compressed size of '
+                .$filename.' should be int');
             $this->assertAttributeEquals(strlen($content), 'uncompressedSize', $file_data, 'Uncompressed size of '
                 .$filename.' should be '.strlen($content).', but it is '.$file_data->uncompressedSize);
+            $this->assertAttributeEquals($file_data->compressedSize !== $file_data->uncompressedSize, 'isCompressed',
+                $file_data, 'Is compressed of '
+                .$filename.' should be '.($file_data->compressedSize !== $file_data->uncompressedSize));
+
+            // test content
+            $this->assertEquals($content, $archive->getFileContent($filename), 'getFileContent() should return content of file that should be equal to real file content');
+            $this->assertEquals($content, stream_get_contents($archive->getFileResource($filename)), 'getFileResource() should return stream with content of file that should be equal to real file content');
         }
     }
 }
