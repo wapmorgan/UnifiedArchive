@@ -90,10 +90,16 @@ class ReadingTest extends PhpUnitTestCase
         $this->assertEquals(array_sum(array_map('strlen', $flatten_list)), $archive->countUncompressedFilesSize(),
         'Uncompressed size of archive should be equal to real files size');
 
+        $expected_files = array_keys($flatten_list);
+        sort($expected_files);
+        $actual_files = $archive->getFileNames();
+        sort($actual_files);
+        $this->assertEquals($expected_files, $actual_files, 'Files set is not identical');
+
         foreach ($flatten_list as $filename => $content) {
 
-            if (fnmatch('*.7z', $archiveFilename) && DIRECTORY_SEPARATOR == '\\')
-                $filename = str_replace('/', '\\', $filename);
+            // test file existence
+            $this->assertTrue($archive->isFileExists($filename), 'File '.$filename.' should be in archive');
 
             // test ArchiveEntry
             $file_data = $archive->getFileData($filename);
@@ -112,6 +118,9 @@ class ReadingTest extends PhpUnitTestCase
             // test content
             $this->assertEquals($content, $archive->getFileContent($filename), 'getFileContent() should return content of file that should be equal to real file content');
             $this->assertEquals($content, stream_get_contents($archive->getFileResource($filename)), 'getFileResource() should return stream with content of file that should be equal to real file content');
+
+            $this->assertInternalType('boolean', $archive->canAddFiles());
+            $this->assertInternalType('boolean', $archive->canDeleteFiles());
         }
     }
 }

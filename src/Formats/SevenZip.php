@@ -33,7 +33,7 @@ class SevenZip extends BasicFormat
     {
         $information = new ArchiveInformation();
         foreach ($this->sevenZip->getEntries() as $entry) {
-            $information->files[] = $entry->getPath();
+            $information->files[] = $entry->getUnixPath();
             $information->compressedFilesSize += (int)$entry->getPackedSize();
             $information->uncompressedFilesSize += (int)$entry->getSize();
         }
