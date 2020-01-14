@@ -1,6 +1,6 @@
 {
 	"name": "wapmorgan/unified-archive",
-	"description": "UnifiedArchive - unified interface to archive (zip, 7z, rar, gz, bz2, xz, cab, tar, tar.gz, tar.bz2, tar.x, tar.Z, iso) for listing, reading, extracting and creation + built-in console archive manager + fully implemented PclZip-like interface (create, listContent, extract, properties, add, delete, merge, duplicate).",
+	"description": "UnifiedArchive - unified interface to all popular archive formats (zip, 7z, rar, gz, bz2, xz, cab, tar, tar.gz, tar.bz2, tar.xz, tar.Z, iso) for listing, reading, extracting and creation + built-in console archive manager + PclZip-like interface for zip archives.",
 	"keywords": ["archive", "compression", "rar", "7z", "zip", "gzip", "bzip2", "tar", "lzma2", "cab", "ncompress", "iso"],
 	"license": "MIT",
 	"authors": [
@@ -11,10 +11,12 @@
 		}
 	],
 	"require": {
-		"php": ">=5.4.0"
+		"php": ">=5.5.0",
+		"ext-fileinfo": "*"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "~4.8"
+		"phpunit/phpunit": "~4.8",
+		"docopt/docopt": "~1.0"
 	},
 	"replace": {
 		"wapmorgan/cam": "1.0.2"
@@ -36,12 +38,24 @@
 	"autoload": {
 		"psr-4": {
 			"wapmorgan\\UnifiedArchive\\": "src/"
-		},
-		"files": [
-			"src/function.gzip_stat.php",
-			"src/stream.compress.lzw.php"
-		]
+		}
 	},
 	"bin": ["bin/cam"],
-	"minimum-stability": "dev"
+	"minimum-stability": "dev",
+	"extra": {
+        "phar-builder": {
+            "compression": "BZip2",
+            "name": "cam.phar",
+            "output-dir": "./",
+            "entry-point": "bin/cam",
+            "include": ["bin", "src", "vendor"],
+            "events": {
+                "command.package.start" : "git describe --tags > bin/version.txt",
+                "command.package.end": "chmod +x cam.phar && rm bin/version.txt"
+            }
+        }
+    },
+    "scripts": {
+        "build": "phar-builder package composer.json"
+    }
 }

@@ -1,15 +1,24 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+/**
+ * Stream-wrapper and handler for lzw-compressed data.
+ * @requires "compress" system command (linux-only)
+ *
+ * @package wapmorgan\UnifiedArchive
+ */
 class LzwStreamWrapper
 {
     private static $registered = false;
-    private static $installed = 0;
+    private static $installed;
 
+    /**
+     *
+     */
     public static function registerWrapper()
     {
         if (!self::$registered)
-            stream_register_wrapper('compress.lzw', __CLASS__);
+            stream_wrapper_register('compress.lzw', __CLASS__);
         self::$registered = true;
     }
 
@@ -28,20 +37,20 @@ class LzwStreamWrapper
     private $dataSize;
     private $pointer;
     private $writtenBytes = 0;
+
+    /**
+     * @param $path
+     * @param $mode
+     * @param $options
+     * @return bool
+     * @throws \Exception
+     */
     public function stream_open($path, $mode, $options)
     {
         // check for compress & uncompress utility
-        if (self::$installed === 0) {
-            $this->exec('command -v compress', $output);
-            if (empty($output))
-                throw new \Exception(__FILE__.', line '.__LINE__.
-                    ': compress command is required');
-            $this->exec('command -v uncompress', $output);
-            if (empty($output))
-                throw new \Exception(__FILE__.', line '.__LINE__.
-                    ': uncompress command is required');
-            self::$installed = true;
-        }
+        $this->checkBinary();
+        if (self::$installed === false)
+            throw new \Exception('compress and uncompress commands are required');
 
         $schema = 'compress.lzw://';
         if (strncasecmp($schema, $path, strlen($schema)) == 0)
@@ -83,8 +92,8 @@ class LzwStreamWrapper
                     throw new \Exception(__CLASS__.', line '.__LINE__.
                         ': Could not create temporary file in '.
                         sys_get_temp_dir());
-                $this->tmp = $tempfile;
-                $this->tmp2 = $tempfile2;
+                $this->tmp = $tmp;
+                $this->tmp2 = $tmp2;
                 $this->pointer = 0;
             } else {
                 $this->pointer = 0;
@@ -95,6 +104,10 @@ class LzwStreamWrapper
         return true;
     }
 
+    /**
+     * @return float|int|string
+     * @throws \Exception
+     */
     public function getAvailableMemory()
     {
         $limit = strtoupper(ini_get('memory_limit'));
@@ -110,15 +123,25 @@ class LzwStreamWrapper
         return $limit;
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public function getSystemMemory()
     {
-        $this->exec('free --bytes | head -n3 | tail -n1 | awk \'{print $4}\'',
+        self::exec('free --bytes | head -n3 | tail -n1 | awk \'{print $4}\'',
             $output, $resultCode);
 
         return trim($output);
     }
 
-    private function exec($command, &$output, &$resultCode = null)
+    /**
+     * @param $command
+     * @param $output
+     * @param null $resultCode
+     * @throws \Exception
+     */
+    private static function exec($command, &$output, &$resultCode = null)
     {
         if (function_exists('system')) {
             ob_start();
@@ -152,10 +175,13 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     private function read()
     {
         if ($this->tmp !== null) {
-            $this->exec('uncompress --stdout '.escapeshellarg($this->path).
+            self::exec('uncompress --stdout '.escapeshellarg($this->path).
                 ' > '.$this->tmp, $output, $resultCode);
             // var_dump(['command' => 'uncompress --stdout '.
             // escapeshellarg($this->path).' > '.$this->tmp, 'output' =>
@@ -169,7 +195,7 @@ class LzwStreamWrapper
                     ': Could not read file '.$this->path);
             }
         } else {
-            $this->exec('uncompress --stdout '.escapeshellarg($this->path),
+            self::exec('uncompress --stdout '.escapeshellarg($this->path),
                 $output, $resultCode);
             $this->data = &$output;
             if ($resultCode == 0 || $resultCode == 2 || is_null($resultCode)) {
@@ -183,6 +209,9 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @return array
+     */
     public function stream_stat()
     {
         return array(
@@ -190,6 +219,9 @@ class LzwStreamWrapper
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function stream_close()
     {
         // rewrite file
@@ -197,7 +229,7 @@ class LzwStreamWrapper
             // stored in temp file
             if ($this->tmp !== null) {
                 // compress in tmp2
-                $this->exec('compress -c '.escapeshellarg($this->tmp).' > '.
+                self::exec('compress -c '.escapeshellarg($this->tmp).' > '.
                     escapeshellarg($this->tmp2), $output, $code);
                 // var_dump(['command' => 'compress -c '.
                 // escapeshellarg($this->tmp).' > '.escapeshellarg($this->tmp2),
@@ -246,6 +278,10 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @param $count
+     * @return bool|string
+     */
     public function stream_read($count)
     {
         if ($this->tmp !== null) {
@@ -266,16 +302,26 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @return bool
+     */
     public function stream_eof()
     {
         return $this->pointer >= $this->dataSize;
     }
 
+    /**
+     * @return mixed
+     */
     public function stream_tell()
     {
         return $this->pointer;
     }
 
+    /**
+     * @param $data
+     * @return bool|int
+     */
     public function stream_write($data)
     {
         $this->writtenBytes += strlen($data);
@@ -299,6 +345,11 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @param $offset
+     * @param int $whence
+     * @return bool
+     */
     public function stream_seek($offset, $whence = SEEK_SET)
     {
         switch ($whence) {
@@ -320,6 +371,10 @@ class LzwStreamWrapper
         return true;
     }
 
+    /**
+     * @param $operation
+     * @return bool
+     */
     public function stream_lock($operation)
     {
         if ($this->tmp !== null) {
@@ -329,6 +384,9 @@ class LzwStreamWrapper
         }
     }
 
+    /**
+     * @param $new_size
+     */
     public function stream_truncate($new_size)
     {
         $actual_data_size = (is_null($this->tmp)) ? strlen($this->data)
@@ -346,5 +404,38 @@ class LzwStreamWrapper
                 fclose($fp);
             }
         }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected static function checkBinary()
+    {
+        if (self::$installed === null) {
+            if (strncasecmp(PHP_OS, 'win', 3) === 0) {
+                self::$installed = false;
+            } else {
+                self::exec('command -v compress', $output);
+                if (empty($output)) {
+                    self::$installed = false;
+                } else {
+                    self::exec('command -v uncompress', $output);
+                    if (empty($output)) {
+                        self::$installed = false;
+                    } else {
+                        self::$installed = true;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @return boolean
+     */
+    public static function isBinaryAvailable()
+    {
+        self::checkBinary();
+        return self::$installed;
     }
 }

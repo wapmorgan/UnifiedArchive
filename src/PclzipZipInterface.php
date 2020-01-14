@@ -1,24 +1,114 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
-//
-// Average ratio of zip compression: 2x
-//
-defined('AVERAGE_ZIP_COMPRESSION_RATIO')
-or define('AVERAGE_ZIP_COMPRESSION_RATIO', 2);
+if (!defined('PCLZIP_ERR_NO_ERROR')) {
+    // ----- Constants
+    if (!defined('PCLZIP_READ_BLOCK_SIZE')) {
+        define('PCLZIP_READ_BLOCK_SIZE', 2048);
+    }
+    if (!defined('PCLZIP_SEPARATOR')) {
+        define('PCLZIP_SEPARATOR', ',');
+    }
+    if (!defined('PCLZIP_ERROR_EXTERNAL')) {
+        define('PCLZIP_ERROR_EXTERNAL', 0);
+    }
+    if (!defined('PCLZIP_TEMPORARY_DIR')) {
+        define('PCLZIP_TEMPORARY_DIR', sys_get_temp_dir());
+    }
 
-class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
+    define('PCLZIP_ERR_USER_ABORTED', 2);
+    define('PCLZIP_ERR_NO_ERROR', 0);
+    define('PCLZIP_ERR_WRITE_OPEN_FAIL', -1);
+    define('PCLZIP_ERR_READ_OPEN_FAIL', -2);
+    define('PCLZIP_ERR_INVALID_PARAMETER', -3);
+    define('PCLZIP_ERR_MISSING_FILE', -4);
+    define('PCLZIP_ERR_FILENAME_TOO_LONG', -5);
+    define('PCLZIP_ERR_INVALID_ZIP', -6);
+    define('PCLZIP_ERR_BAD_EXTRACTED_FILE', -7);
+    define('PCLZIP_ERR_DIR_CREATE_FAIL', -8);
+    define('PCLZIP_ERR_BAD_EXTENSION', -9);
+    define('PCLZIP_ERR_BAD_FORMAT', -10);
+    define('PCLZIP_ERR_DELETE_FILE_FAIL', -11);
+    define('PCLZIP_ERR_RENAME_FILE_FAIL', -12);
+    define('PCLZIP_ERR_BAD_CHECKSUM', -13);
+    define('PCLZIP_ERR_INVALID_ARCHIVE_ZIP', -14);
+    define('PCLZIP_ERR_MISSING_OPTION_VALUE', -15);
+    define('PCLZIP_ERR_INVALID_OPTION_VALUE', -16);
+    define('PCLZIP_ERR_ALREADY_A_DIRECTORY', -17);
+    define('PCLZIP_ERR_UNSUPPORTED_COMPRESSION', -18);
+    define('PCLZIP_ERR_UNSUPPORTED_ENCRYPTION', -19);
+    define('PCLZIP_ERR_INVALID_ATTRIBUTE_VALUE', -20);
+    define('PCLZIP_ERR_DIRECTORY_RESTRICTION', -21);
+
+    // ----- Options values
+    define('PCLZIP_OPT_PATH', 77001);
+    define('PCLZIP_OPT_ADD_PATH', 77002);
+    define('PCLZIP_OPT_REMOVE_PATH', 77003);
+    define('PCLZIP_OPT_REMOVE_ALL_PATH', 77004);
+    define('PCLZIP_OPT_SET_CHMOD', 77005);
+    define('PCLZIP_OPT_EXTRACT_AS_STRING', 77006);
+    define('PCLZIP_OPT_NO_COMPRESSION', 77007);
+    define('PCLZIP_OPT_BY_NAME', 77008);
+    define('PCLZIP_OPT_BY_INDEX', 77009);
+    define('PCLZIP_OPT_BY_EREG', 77010);
+    define('PCLZIP_OPT_BY_PREG', 77011);
+    define('PCLZIP_OPT_COMMENT', 77012);
+    define('PCLZIP_OPT_ADD_COMMENT', 77013);
+    define('PCLZIP_OPT_PREPEND_COMMENT', 77014);
+    define('PCLZIP_OPT_EXTRACT_IN_OUTPUT', 77015);
+    define('PCLZIP_OPT_REPLACE_NEWER', 77016);
+    define('PCLZIP_OPT_STOP_ON_ERROR', 77017);
+    // Having big trouble with crypt. Need to multiply 2 long int
+    // which is not correctly supported by PHP ...
+    //define( 'PCLZIP_OPT_CRYPT', 77018 );
+    define('PCLZIP_OPT_EXTRACT_DIR_RESTRICTION', 77019);
+    define('PCLZIP_OPT_TEMP_FILE_THRESHOLD', 77020);
+    define('PCLZIP_OPT_ADD_TEMP_FILE_THRESHOLD', 77020); // alias
+    define('PCLZIP_OPT_TEMP_FILE_ON', 77021);
+    define('PCLZIP_OPT_ADD_TEMP_FILE_ON', 77021); // alias
+    define('PCLZIP_OPT_TEMP_FILE_OFF', 77022);
+    define('PCLZIP_OPT_ADD_TEMP_FILE_OFF', 77022); // alias
+
+    // ----- File description attributes
+    define('PCLZIP_ATT_FILE_NAME', 79001);
+    define('PCLZIP_ATT_FILE_NEW_SHORT_NAME', 79002);
+    define('PCLZIP_ATT_FILE_NEW_FULL_NAME', 79003);
+    define('PCLZIP_ATT_FILE_MTIME', 79004);
+    define('PCLZIP_ATT_FILE_CONTENT', 79005);
+    define('PCLZIP_ATT_FILE_COMMENT', 79006);
+
+    // ----- Call backs values
+    define('PCLZIP_CB_PRE_EXTRACT', 78001);
+    define('PCLZIP_CB_POST_EXTRACT', 78002);
+    define('PCLZIP_CB_PRE_ADD', 78003);
+    define('PCLZIP_CB_POST_ADD', 78004);
+}
+
+class PclzipZipInterface
 {
     const SELECT_FILTER_PASS = 1;
     const SELECT_FILTER_REFUSE = 0;
 
+    const AVERAGE_ZIP_COMPRESSION_RATIO = 2;
+
     private $archive;
 
+    /**
+     * PclzipZipInterface constructor.
+     *
+     * @param \ZipArchive $archive
+     */
     public function __construct(\ZipArchive $archive)
     {
         $this->archive = $archive;
     }
 
+    /**
+     * @param $localname
+     * @param $filename
+     *
+     * @return object
+     */
     public function createFileHeader($localname, $filename)
     {
         return (object) array(
@@ -26,7 +116,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
             'stored_filename' => $localname,
             'size' => filesize($filename),
             'compressed_size' => ceil(filesize($filename)
-                / AVERAGE_ZIP_COMPRESSION_RATIO),
+                / self::AVERAGE_ZIP_COMPRESSION_RATIO),
             'mtime' => filemtime($filename),
             'comment' => null,
             'folder' => is_dir($filename),
@@ -43,7 +133,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
     public function create($content)
     {
         if (is_array($content)) $paths_list = $content;
-        else $paths_list = array_map(explode(',', $content));
+        else $paths_list = explode(',', $content);
         $report = array();
 
         $options = func_get_args();
@@ -73,7 +163,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
         if (isset($options[PCLZIP_OPT_ADD_PATH]))
             $filters[] = function (&$key, &$value) use ($options) {
                 $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.
-                ltrim($key, '/');
+                    ltrim($key, '/');
             };
 
         if (isset($options[PCLZIP_CB_PRE_ADD])
@@ -203,15 +293,15 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
         if (isset($options[PCLZIP_OPT_REMOVE_PATH])
             && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
             $filters[] = function (&$key, &$value) use ($options) {
-             $key = str_replace($key, null, $key);
-         };
+                $key = str_replace($key, null, $key);
+            };
         if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
             $filters[] = function (&$key, &$value) { $key = basename($key); };
         if (isset($options[PCLZIP_OPT_ADD_PATH]))
             $filters[] = function (&$key, &$value) use ($options) {
-             $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.
-                ltrim($key, '/');
-        };
+                $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.
+                    ltrim($key, '/');
+            };
 
         if (isset($options[PCLZIP_CB_PRE_EXTRACT])
             && is_callable($options[PCLZIP_CB_PRE_EXTRACT]))
@@ -226,28 +316,28 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
         // exact matching
         if (isset($options[PCLZIP_OPT_BY_NAME]))
             $selectFilter = function ($key, $value) use ($options) {
-            $allowedNames = is_array($options[PCLZIP_OPT_BY_NAME])
-                ? $options[PCLZIP_OPT_BY_NAME]
-                : explode(',', $options[PCLZIP_OPT_BY_NAME]);
-            foreach ($allowedNames as $name) {
-                // select directory with nested files
-                if (in_array(substr($name, -1), array('/', '\\'))) {
-                    if (strncasecmp($name, $key, strlen($name)) === 0) {
-                        // that's a file inside a dir or that dir
-                        return self::SELECT_FILTER_PASS;
-                    }
-                } else {
-                    // select exact name only
-                    if (strcasecmp($name, $key) === 0) {
-                        // that's a file with this name
-                        return self::SELECT_FILTER_PASS;
+                $allowedNames = is_array($options[PCLZIP_OPT_BY_NAME])
+                    ? $options[PCLZIP_OPT_BY_NAME]
+                    : explode(',', $options[PCLZIP_OPT_BY_NAME]);
+                foreach ($allowedNames as $name) {
+                    // select directory with nested files
+                    if (in_array(substr($name, -1), array('/', '\\'))) {
+                        if (strncasecmp($name, $key, strlen($name)) === 0) {
+                            // that's a file inside a dir or that dir
+                            return self::SELECT_FILTER_PASS;
+                        }
+                    } else {
+                        // select exact name only
+                        if (strcasecmp($name, $key) === 0) {
+                            // that's a file with this name
+                            return self::SELECT_FILTER_PASS;
+                        }
                     }
                 }
-            }
 
-            // that file is not in allowed list
-            return self::SELECT_FILTER_REFUSE;
-        };
+                // that file is not in allowed list
+                return self::SELECT_FILTER_REFUSE;
+            };
         // <ereg> rule
         else if (isset($options[PCLZIP_OPT_BY_EREG]) && function_exists('ereg'))
             $selectFilter = function ($key, $value) use ($options) {
@@ -273,9 +363,9 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
                         range($parts[0], $parts[1]), $allowedIndexes);
                 }
 
-            return in_array($index, $allowedIndexes) ? self::SELECT_FILTER_PASS
-                : self::SELECT_FILTER_REFUSE;
-        };
+                return in_array($index, $allowedIndexes) ? self::SELECT_FILTER_PASS
+                    : self::SELECT_FILTER_REFUSE;
+            };
         // no rule
         else
             $selectFilter = function () { return self::SELECT_FILTER_PASS; };
@@ -300,7 +390,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
             $report[] = $file_header;
             // refuse by select rule
             if (call_user_func($selectFilter, $file_header->stored_filename,
-                $file_header->filename, $file_header->index)
+                    $file_header->filename, $file_header->index)
                 === self::SELECT_FILTER_REFUSE) {
                 //
                 // I don't know need to remain this file in report or not,
@@ -327,7 +417,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
                     $filename = $file_header->filename;
                     $restrictedDir = realpath($restrictExtractDir);
                     if (strncasecmp($restrictedDir, $filename,
-                        strlen($restrictedDir)) !== 0) {
+                            strlen($restrictedDir)) !== 0) {
                         // refuse file extraction
                         $file_header->status = 'filtered';
                         continue;
@@ -353,7 +443,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
             // return content
             if ($anotherOutputFormat == PCLZIP_OPT_EXTRACT_AS_STRING) {
                 $file_header->content
-                = $this->archive->getFromName($file_header->stored_filename);
+                    = $this->archive->getFromName($file_header->stored_filename);
             }
             // echo content
             else if ($anotherOutputFormat == PCLZIP_OPT_EXTRACT_IN_OUTPUT) {
@@ -442,8 +532,8 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
         return array(
             'nb' => $this->archive->numFiles,
             'comment' =>
-            (($comment = $this->archive->getArchiveComment() !== false)
-                ? $comment : null),
+                (($comment = $this->archive->getArchiveComment() !== false)
+                    ? $comment : null),
             'status' => 'OK',
         );
     }
@@ -487,7 +577,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
         if (isset($options[PCLZIP_OPT_ADD_PATH]))
             $filters[] = function (&$key, &$value) use ($options) {
                 $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.
-                ltrim($key, '/');
+                    ltrim($key, '/');
             };
 
         if (isset($options[PCLZIP_CB_PRE_ADD])
@@ -504,15 +594,15 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
             $this->archive->setArchiveComment($options[PCLZIP_OPT_COMMENT]);
         if (isset($options[PCLZIP_OPT_ADD_COMMENT])) {
             $comment =
-            ($comment = $this->archive->getArchiveComment() !== false)
-                ? $comment : null;
+                ($comment = $this->archive->getArchiveComment() !== false)
+                    ? $comment : null;
             $this->archive->setArchiveComment(
                 $comment . $options[PCLZIP_OPT_ADD_COMMENT]);
         }
         if (isset($options[PCLZIP_OPT_PREPEND_COMMENT])) {
             $comment =
-            ($comment = $this->archive->getArchiveComment() !== false)
-                ? $comment : null;
+                ($comment = $this->archive->getArchiveComment() !== false)
+                    ? $comment : null;
             $this->archive->setArchiveComment(
                 $options[PCLZIP_OPT_PREPEND_COMMENT] . $comment);
         }
@@ -532,7 +622,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
                     RecursiveIteratorIterator::SELF_FIRST);
                 foreach ($directory_contents as $file_to_add) {
                     $report[] = $this->addSnippet($file_to_add, $filters,
-                    $preAddCallback, $postAddCallback);
+                        $preAddCallback, $postAddCallback);
                 }
             }
         }
@@ -583,15 +673,15 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
         else if (isset($options[PCLZIP_OPT_BY_EREG]) && function_exists('ereg'))
             $selectFilter = function ($key, $value) use ($options) {
                 return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false)
-                ? self::SELECT_FILTER_PASS
-                : self::SELECT_FILTER_REFUSE;
+                    ? self::SELECT_FILTER_PASS
+                    : self::SELECT_FILTER_REFUSE;
             };
         // <preg_match> rule
         else if (isset($options[PCLZIP_OPT_BY_PREG]))
             $selectFilter = function ($key, $value) use ($options) {
                 return preg_match($options[PCLZIP_OPT_BY_PREG], $key)
-                ? self::SELECT_FILTER_PASS
-                : self::SELECT_FILTER_REFUSE;
+                    ? self::SELECT_FILTER_PASS
+                    : self::SELECT_FILTER_REFUSE;
             };
         // index rule
         else if (isset($options[PCLZIP_OPT_BY_INDEX]))
@@ -605,8 +695,8 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
                 }
 
                 return in_array($index, $allowedIndexes)
-                ? self::SELECT_FILTER_PASS
-                : self::SELECT_FILTER_REFUSE;
+                    ? self::SELECT_FILTER_PASS
+                    : self::SELECT_FILTER_REFUSE;
             };
         // no rule
         else
@@ -615,7 +705,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
         foreach ($this->listContent() as $file_header) {
             // select by select rule
             if (call_user_func($selectFilter, $file_header->stored_filename,
-                $file_header->filename, $file_header->index)
+                    $file_header->filename, $file_header->index)
                 === self::SELECT_FILTER_REFUSE) {
                 // delete file from archive
                 if ($this->archive->deleteName($file_header->stored_filename)) {
@@ -674,7 +764,7 @@ class PclZipLikeZipArchiveInterface implements PclZipOriginalInterface
             // file merging process
             else {
                 // extract file in temporary dir
-                if ($a->extractFiles($tempDir, '/'.$filename)) {
+                if ($a->extractNode($tempDir, '/'.$filename)) {
                     // go on
                 } else {
                     // extraction fails

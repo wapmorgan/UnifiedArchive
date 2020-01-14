@@ -2,18 +2,69 @@
 namespace wapmorgan\UnifiedArchive;
 
 use Exception;
+use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class CamApplication {
     /**
      * @param $file
-     * @return AbstractArchive
+     * @return UnifiedArchive
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    protected function open($file) {
+    protected function open($file)
+    {
+        if (!UnifiedArchive::canOpenArchive($file))
+            throw new Exception('Could not open archive '.$file.'. Try installing suggested packages or run `cam -f` to see formats support.');
+
         $archive = UnifiedArchive::open($file);
-        if ($archive === null) throw new Exception('Could not open archive '.$file);
+        if ($archive === null)
+            throw new Exception('Could not open archive '.$file);
+
         return $archive;
+    }
+
+    /**
+     *
+     */
+    public function checkFormats()
+    {
+        $types = [
+            '.zip' => [UnifiedArchive::canOpenType(UnifiedArchive::ZIP), 'install "zip" extension'],
+            '.rar' => [UnifiedArchive::canOpenType(UnifiedArchive::RAR), 'install "rar" extension'],
+            '.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::GZIP), 'install "zlib" extension'],
+            '.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::BZIP), 'install "bz2" extension'],
+            '.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::LZMA), 'install "xz" extension'],
+            '.7z' => [UnifiedArchive::canOpenType(UnifiedArchive::SEVEN_ZIP), 'install "gemorroj/archive7z" package'],
+            '.iso' => [UnifiedArchive::canOpenType(UnifiedArchive::ISO), 'install "phpclasses/php-iso-file" package'],
+            '.cab' => [UnifiedArchive::canOpenType(UnifiedArchive::CAB), 'install "wapmorgan/cab-archive" package'],
+
+            '.tar' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
+            '.tar.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
+            '.tar.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
+            '.tar.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
+            '.tar.Z' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZW), 'install "pear/archive_tar" package and "compress" system utility'],
+        ];
+
+        $installed = $not_installed = [];
+
+        foreach ($types as $extension => $configuration) {
+            if ($configuration[0]) {
+                $installed[] = $extension;
+            } else {
+                $not_installed[$extension] = $configuration[1];
+            }
+        }
+
+        if (!empty($installed)) {
+            echo 'Supported archive types: '.implode(', ', $installed).PHP_EOL;
+        }
+
+        if (!empty($not_installed)) {
+            echo 'Not supported archive types:'.PHP_EOL;
+            array_walk($not_installed, function ($instruction, $extension) {
+                echo '- '.$extension.': '.$instruction.PHP_EOL;
+            });
+        }
     }
 
     /**
@@ -21,7 +72,8 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function listArray($args) {
+    public function listArray($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
         foreach ($archive->getFileNames() as $file) {
             echo $file.PHP_EOL;
@@ -33,7 +85,8 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function table($args) {
+    public function table($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
 
         echo sprintf('%51s | %4s | %-18s'.PHP_EOL, 'File name', 'Size', 'Date');
@@ -61,7 +114,8 @@ class CamApplication {
      * @param int $precision
      * @return array
      */
-    public function formatSize($bytes, $precision = 1) {
+    public function formatSize($bytes, $precision = 1)
+    {
         $units = array('b', 'k', 'm', 'g', 't');
 
         $bytes = max($bytes, 0);
@@ -79,9 +133,12 @@ class CamApplication {
 
     /**
      * @param $unixtime
+     *
      * @return string
+     * @throws \Exception
      */
-    public function formatDate($unixtime) {
+    public function formatDate($unixtime)
+    {
         if (strtotime('today') < $unixtime)
             return 'Today, '.date('G:m', $unixtime);
         else if (strtotime('yesterday') < $unixtime)
@@ -101,13 +158,15 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function info($args) {
+    public function info($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
+        echo 'Archive              type: '.$archive->getArchiveType().PHP_EOL;
         echo 'Archive           changed: '.$this->formatDate(filemtime($args['ARCHIVE'])).PHP_EOL;
         echo 'Archive          contains: '.$archive->countFiles().' file'.($archive->countFiles() > 1 ? 's' : null).PHP_EOL;
         echo 'Archive   compressed size: '.implode(' ', $this->formatSize($archive->countCompressedFilesSize(), 2)).PHP_EOL;
         echo 'Archive uncompressed size: '.implode(' ', $this->formatSize($archive->countUncompressedFilesSize(), 2)).PHP_EOL;
-        echo 'Archive compression ratio: '.round($archive->countUncompressedFilesSize() / $archive->countCompressedFilesSize(), 6).'/1'.PHP_EOL;
+        echo 'Archive compression ratio: '.round($archive->countUncompressedFilesSize() / $archive->countCompressedFilesSize(), 6).'/1 ('.floor($archive->countCompressedFilesSize() / $archive->countUncompressedFilesSize() * 100).'%)'.PHP_EOL;
     }
 
     /**
@@ -115,7 +174,8 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function extract($args) {
+    public function extract($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
         $output = getcwd();
         if (isset($args['--output'])) {
@@ -146,7 +206,8 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function printFile($args) {
+    public function printFile($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
         foreach ($args['FILES_IN_ARCHIVE'] as $file) {
             $info = $archive->getFileData($file);
@@ -164,7 +225,8 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function details($args) {
+    public function details($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
         foreach ($args['FILES_IN_ARCHIVE'] as $file) {
             $info = $archive->getFileData($file);
@@ -185,7 +247,8 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function delete($args) {
+    public function delete($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
         $files = $archive->getFileNames();
         foreach ($args['FILES_IN_ARCHIVE'] as $file) {
@@ -203,7 +266,8 @@ class CamApplication {
      * @throws Exception
      * @throws \Archive7z\Exception
      */
-    public function add($args) {
+    public function add($args)
+    {
         $archive = $this->open($args['ARCHIVE']);
         $added_files = $archive->addFiles($args['FILES_ON_DISK']);
         if ($added_files === false)
@@ -216,7 +280,8 @@ class CamApplication {
      * @param $args
      * @throws Exception
      */
-    public function create($args) {
+    public function create($args)
+    {
         if (file_exists($args['ARCHIVE'])) {
             if (is_dir($args['ARCHIVE']))
                 echo $args['ARCHIVE'].' is a directory!'.PHP_EOL;

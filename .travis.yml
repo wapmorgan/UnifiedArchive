@@ -1,0 +1,59 @@
+language: php
+
+env:
+  - TASK_TESTS_COVERAGE=0
+
+matrix:
+  fast_finish: true
+  include:
+#    - php: 7.4
+    - php: 7.3
+    - php: 7.2
+    - php: 7.1
+      env: TASK_TESTS_COVERAGE=1
+    - php: 7.0
+    - php: 5.6
+
+install:
+  - |
+    if [[ $TASK_TESTS_COVERAGE != 1 ]]; then
+      # disable xdebug for performance reasons when code coverage is not needed. note: xdebug on hhvm is disabled by default
+      phpenv config-rm xdebug.ini || echo "xdebug is not installed"
+    fi
+  - sudo apt-get install p7zip-full
+
+  # install php-lzma2
+  # fails on php 7.x
+  # - git clone https://github.com/payden/php-xz /tmp/xz
+  # - cd /tmp/xz && phpize && ./configure && make && sudo make install && cd -
+  # - echo "extension=xz.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+  # install composer dependencies
+  - travis_retry composer self-update
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - travis_retry composer install
+
+  # Install old archive7z version (that don't work on <7.1)
+  - |
+    if [[ $TRAVIS_PHP_VERSION == 5.6 || $TRAVIS_PHP_VERSION == 7.0 ]]; then
+      composer require --no-interaction gemorroj/archive7z:4.0.0
+    else
+      composer require --no-interaction gemorroj/archive7z
+    fi
+  - composer require --no-interaction phpclasses/php-iso-file pear/archive_tar wapmorgan/cab-archive
+
+  - |
+    if [[ $TASK_TESTS_COVERAGE == 1 ]]; then
+      PHPUNIT_FLAGS="--coverage-clover=coverage.clover"
+    fi
+
+script:
+  # PHP tests
+  - vendor/bin/phpunit --verbose $PHPUNIT_FLAGS
+
+after_script:
+  - |
+    if [[ $TASK_TESTS_COVERAGE == 1 ]]; then
+      travis_retry wget https://scrutinizer-ci.com/ocular.phar
+      php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+    fi
