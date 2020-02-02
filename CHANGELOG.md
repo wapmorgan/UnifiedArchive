@@ -1,6 +1,6 @@
 # Change Log
 
-### 0.2.0 - Jan , 2020
+### 0.2.0 - Feb 2, 2020
 
 **BC-breaking changes**:
 - **Deleted deprecated UnifiedArchive methods**: `extractNode`, `archiveNodes`.
