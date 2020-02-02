@@ -27,7 +27,7 @@ use wapmorgan\UnifiedArchive\Formats\Zip;
  */
 class UnifiedArchive
 {
-    const VERSION = '0.2.0-x';
+    const VERSION = '0.2.0';
 
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
