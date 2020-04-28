@@ -52,6 +52,7 @@ class Rar extends BasicFormat
     {
         $information = new ArchiveInformation();
         foreach ($this->rar->getEntries() as $i => $entry) {
+            if ($entry->isDirectory()) continue;
             $information->files[] = $entry->getName();
             $information->compressedFilesSize += $entry->getPackedSize();
             $information->uncompressedFilesSize += $entry->getUnpackedSize();
@@ -66,6 +67,7 @@ class Rar extends BasicFormat
     {
         $files = [];
         foreach ($this->rar->getEntries() as $i => $entry) {
+            if ($entry->isDirectory()) continue;
             $files[] = $entry->getName();
         }
         return $files;
