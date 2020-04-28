@@ -16,31 +16,46 @@ Tests & Quality: [![Build status](https://travis-ci.org/wapmorgan/UnifiedArchive
 **Contents**:
 ---
 1. [**Preamble**](#preamble)
-2. [**Installation**](#installation)
-3. [**Usage**](#usage)
+2. [**Functions**](#functions)
+3. [**Installation**](#installation)
+4. [**Usage**](#usage)
     1. [**Archive modification**](#archive-modification)
     2. [**Archive creation**](#archive-creation)
-4. [**Formats support**](#formats-support)
-5. [**API**](#api)
-6. [**Built-in console archive manager**](#built-in-console-archive-manager)
-7. [**Changelog**](#changelog)
+5. [**Formats support**](#formats-support)
+6. [**API**](#api)
+7. [**Built-in console archive manager**](#built-in-console-archive-manager)
+8. [**Changelog**](#changelog)
 
 ## Preamble
 If on your site there is a possibility of uploading of archives and you would
 like to add functionality of their automatic unpacking and viewing with no
 dependency on format of the archive, you can use this library.
 
+## Functions
+- Opening an archive with automatic format detection
+- Getting information about uncompressed size of archive contents
+- Listing archive content
+- Getting details (\[un\]compressed size, date of modification) of every archived file
+- Extracting archived file content as is or on a disk
+- Reading archived file content as stream
+- Adding files to archive
+- Removing files from archive
+- Creating new archives with files/directories
+
 ## Installation
 Composer package: `wapmorgan/unified-archive`
 [[1](https://packagist.org/packages/wapmorgan/unified-archive)]
 
+- Add these lines to composer.json
 ```json
 {
     "require": {
-        "wapmorgan/unified-archive": "~0.1.2"
+        "wapmorgan/unified-archive": "~0.2.0"
     }
 }
 ```
+
+- Or run `composer require wapmorgan/unified-archive` from your main package root folder.
 
 ## Usage
 1. Import `UnifiedArchive`
@@ -133,7 +148,7 @@ This method returns [an `ArchiveEntry` instance](docs/API.md#ArchiveEntry)
 Only few archive formats support modification:
 - zip
 - 7z
-- tar (with restrictions)
+- tar (depends on low-level driver for tar - see Formats section for details)
 
 For details go to [Formats support](#Formats-support) section.
 
@@ -219,7 +234,7 @@ UnifiedArchive::archiveFiles([
 
 ## API
 
-API of UnifiedArchive is stored in [API document](docs/API.md).
+API of UnifiedArchive is described in [API document](docs/API.md).
 
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate popular
