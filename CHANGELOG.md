@@ -1,5 +1,13 @@
 # Change Log
 
+### 0.2.1 - *** **, 2020
+
+Format specific:
+- **tar**:
+   - Fixed automatic opening of .tar.Z and .tar.xz.
+- **rar**:
+   - Exclude directories from files list.
+
 ### 0.2.0 - Feb 2, 2020
 
 **BC-breaking changes**:
