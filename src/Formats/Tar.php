@@ -324,14 +324,14 @@ class Tar extends BasicFormat
                 break;
 
             case self::TAR_LZMA:
-                if (!self::$enabledPharData) {
+                if (!self::$enabledPearTar) {
                     throw new UnsupportedArchiveException('Archive_Tar not available');
                 }
                 $this->tar = new Archive_Tar($this->archiveFileName, 'lzma2');
                 break;
 
             case self::TAR_LZW:
-                if (!self::$enabledPharData) {
+                if (!self::$enabledPearTar) {
                     throw new UnsupportedArchiveException('Archive_Tar not available');
                 }
 
