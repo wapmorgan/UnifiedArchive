@@ -27,34 +27,6 @@ class ArchiveEntry
     public $filename;
 
     /**
-     * @var int Size of packed entry in bytes
-     * @deprecated 0.1.0
-     * @see $compressedSize property
-     */
-    public $compressed_size;
-
-    /**
-     * @var int Size of unpacked entry in bytes
-     * @deprecated 0.1.0
-     * @see $uncompressedSize property
-     */
-    public $uncompressed_size;
-
-    /**
-     * @var int Time of entry modification in unix timestamp format.
-     * @deprecated 0.1.0
-     * @see $modificationTime property
-     */
-    public $mtime;
-
-    /**
-     * @var bool
-     * @deprecated 0.1.0
-     * @see $isCompressed property
-     */
-    public $is_compressed;
-
-    /**
      * ArchiveEntry constructor.
      * @param $path
      * @param $compressedSize
@@ -64,12 +36,12 @@ class ArchiveEntry
      */
     public function __construct($path, $compressedSize, $uncompressedSize, $modificationTime, $isCompressed = null)
     {
-        $this->filename = $this->path = $path;
-        $this->compressed_size = $this->compressedSize = $compressedSize;
-        $this->uncompressed_size = $this->uncompressedSize = $uncompressedSize;
-        $this->mtime = $this->modificationTime = $modificationTime;
+        $this->path = $path;
+        $this->compressedSize = $compressedSize;
+        $this->uncompressedSize = $uncompressedSize;
+        $this->modificationTime = $modificationTime;
         if ($isCompressed === null)
             $isCompressed = $uncompressedSize !== $compressedSize;
-        $this->is_compressed = $this->isCompressed = $isCompressed;
+        $this->isCompressed = $isCompressed;
     }
 }

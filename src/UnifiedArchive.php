@@ -1,7 +1,6 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
-use Exception;
 use InvalidArgumentException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
@@ -27,7 +26,7 @@ use wapmorgan\UnifiedArchive\Formats\Zip;
  */
 class UnifiedArchive
 {
-    const VERSION = '0.2.1-x';
+    const VERSION = '1.0.0';
 
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
@@ -201,7 +200,6 @@ class UnifiedArchive
                 return self::TAR_BZIP;
             case 'txz':
                 return self::TAR_LZMA;
-
         }
 
         // by file content

@@ -231,19 +231,17 @@ class LzwStreamWrapper
                 // compress in tmp2
                 self::exec('compress -c '.escapeshellarg($this->tmp).' > '.
                     escapeshellarg($this->tmp2), $output, $code);
-                // var_dump(['command' => 'compress -c '.
+
                 // escapeshellarg($this->tmp).' > '.escapeshellarg($this->tmp2),
                 // 'output' => $output, 'code' => $code]);
                 if ($code == 0 || $code == 2 || is_null($code)) {
                     // rewrite original file
-                    if (rename($this->tmp2, $this->path) === true) {
-                        // ok
-                    } else {
-                        throw new \Exception(__FILE__.', line '.__LINE__.
-                            ': Could not replace original file '.$this->path);
+                    if (rename($this->tmp2, $this->path) !== true) {
+                        throw new \RuntimeException(__FILE__ . ', line ' . __LINE__ .
+                            ': Could not replace original file ' . $this->path);
                     }
                 } else {
-                    throw new \Exception(__FILE__.', line '.__LINE__.
+                    throw new \RuntimeException(__FILE__.', line '.__LINE__.
                         ': Could not compress changed data in '.$this->tmp2);
                 }
             } else { // stored in local var
@@ -265,7 +263,7 @@ class LzwStreamWrapper
                 if ($resultCode == 0 || $resultCode == 2) {
                     // ok
                 } else {
-                    throw new \Exception(__FILE__.', line '.__LINE__.
+                    throw new \RuntimeException(__FILE__.', line '.__LINE__.
                         ': Could not compress changed data in '.$this->path);
                 }
             }
@@ -432,6 +430,7 @@ class LzwStreamWrapper
 
     /**
      * @return boolean
+     * @throws \Exception
      */
     public static function isBinaryAvailable()
     {

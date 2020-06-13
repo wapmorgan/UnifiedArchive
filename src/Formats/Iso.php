@@ -141,13 +141,7 @@ class Iso extends BasicFormat
      */
     public function getFileContent($fileName)
     {
-        $Location = array_search($fileName, $this->files, true);
-        if (!isset($this->filesData[$fileName])) return false;
-        $data = $this->filesData[$fileName];
-        $Location_Real = $Location * $this->blockSize;
-        if ($this->iso->Seek($Location_Real, SEEK_SET) === false)
-            return false;
-
+        $data = $this->prepareForFileExtracting($fileName);
         return $this->iso->Read($data['size']);
     }
 
@@ -158,17 +152,26 @@ class Iso extends BasicFormat
      */
     public function getFileResource($fileName)
     {
+        $data = $this->prepareForFileExtracting($fileName);
+        $resource = fopen('php://temp', 'r+');
+        fwrite($resource, $this->iso->Read($data['size']));
+        rewind($resource);
+        return $resource;
+    }
+
+    /**
+     * @param string $fileName
+     * @return array
+     */
+    protected function prepareForFileExtracting($fileName)
+    {
         $Location = array_search($fileName, $this->files, true);
         if (!isset($this->filesData[$fileName])) return false;
         $data = $this->filesData[$fileName];
         $Location_Real = $Location * $this->blockSize;
         if ($this->iso->Seek($Location_Real, SEEK_SET) === false)
             return false;
-
-        $resource = fopen('php://temp', 'r+');
-        fwrite($resource, $this->iso->Read($data['size']));
-        rewind($resource);
-        return $resource;
+        return $data;
     }
 
     /**

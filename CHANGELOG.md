@@ -1,6 +1,6 @@
 # Change Log
 
-### 0.2.1 - *** **, 2020
+### 1.0.0 - Jun 13, 2020
 
 Format specific:
 - **tar**:
