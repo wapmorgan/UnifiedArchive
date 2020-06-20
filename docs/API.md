@@ -181,7 +181,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--getFileData"></span>
     ```php
-    UnifiedArchive::getFileData(string $fileName): ArchiveEntry|false
+    UnifiedArchive::getFileData(string $fileName): ArchiveEntry
     ```
 
     Returns `ArchiveEntry` that contains all specific information about file stored in archive and
@@ -190,7 +190,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--getFileResource"></span>
     ```php
-    UnifiedArchive::getFileResource(string $fileName): resource|false
+    UnifiedArchive::getFileResource(string $fileName): resource
     ```
 
     Returns a resource of in-archive file that can be used to get it's content (by `fread()` and so on).
@@ -199,7 +199,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--getFileContent"></span>
     ```php
-    UnifiedArchive::getFileContent(string $fileName): resource|false
+    UnifiedArchive::getFileContent(string $fileName): string
     ```
 
     Returns content of in-archive file as raw string.
@@ -207,7 +207,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--extractFiles"></span>
     ```php
-    UnifiedArchive::extractFiles(string $outputFolder): int|false
+    UnifiedArchive::extractFiles(string $outputFolder): int
     ```
 
     Extracts all archive content with full paths to output folder and rewriting existing files.
