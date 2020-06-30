@@ -1,6 +1,8 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+use ZipArchive;
+
 if (!defined('PCLZIP_ERR_NO_ERROR')) {
     // ----- Constants
     if (!defined('PCLZIP_READ_BLOCK_SIZE')) {
@@ -91,14 +93,17 @@ class PclzipZipInterface
 
     const AVERAGE_ZIP_COMPRESSION_RATIO = 2;
 
+    /**
+     * @var ZipArchive
+     */
     private $archive;
 
     /**
      * PclzipZipInterface constructor.
      *
-     * @param \ZipArchive $archive
+     * @param ZipArchive $archive
      */
-    public function __construct(\ZipArchive $archive)
+    public function __construct(ZipArchive $archive)
     {
         $this->archive = $archive;
     }

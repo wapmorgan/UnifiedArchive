@@ -34,6 +34,7 @@ class Tar extends BasicFormat
 
     /** @var bool */
     static protected $enabledPharData;
+
     /**
      * Checks system configuration for available Tar-manipulation libraries
      */
