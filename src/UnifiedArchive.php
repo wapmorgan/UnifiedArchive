@@ -92,17 +92,18 @@ class UnifiedArchive
      */
     public static function open($fileName)
     {
-        self::checkRequirements();
+        static::checkRequirements();
 
-        if (!file_exists($fileName) || !is_readable($fileName))
-            throw new InvalidArgumentException('Could not open file: '.$fileName);
+        if (!file_exists($fileName) || !is_readable($fileName)) {
+            throw new InvalidArgumentException('Could not open file: ' . $fileName);
+        }
 
-        $type = self::detectArchiveType($fileName);
-        if (!self::canOpenType($type)) {
+        $type = static::detectArchiveType($fileName);
+        if (!static::canOpenType($type)) {
             return null;
         }
 
-        return new self($fileName, $type);
+        return new static($fileName, $type);
     }
 
     /**
@@ -113,11 +114,11 @@ class UnifiedArchive
      */
     public static function canOpenArchive($fileName)
     {
-        self::checkRequirements();
+        static::checkRequirements();
 
-        $type = self::detectArchiveType($fileName);
+        $type = static::detectArchiveType($fileName);
 
-        return $type !== false && self::canOpenType($type);
+        return $type !== false && static::canOpenType($type);
     }
 
     /**
@@ -128,10 +129,10 @@ class UnifiedArchive
      */
     public static function canOpenType($type)
     {
-        self::checkRequirements();
+        static::checkRequirements();
 
-        return isset(self::$enabledTypes[$type])
-            ? self::$enabledTypes[$type]
+        return isset(static::$enabledTypes[$type])
+            ? static::$enabledTypes[$type]
             : false;
     }
 
@@ -143,9 +144,9 @@ class UnifiedArchive
      */
     public static function canCreateType($type)
     {
-        self::checkRequirements();
+        static::checkRequirements();
 
-        return isset(self::$enabledTypes[$type])
+        return isset(static::$enabledTypes[$type])
             ? call_user_func([static::$formatHandlers[$type], 'canCreateArchive'])
             : false;
     }
@@ -242,7 +243,7 @@ class UnifiedArchive
      */
     public function __construct($fileName, $type)
     {
-        self::checkRequirements();
+        static::checkRequirements();
 
         $this->type = $type;
         $this->archiveSize = filesize($fileName);
@@ -370,8 +371,9 @@ class UnifiedArchive
      */
     public function getFileData($fileName)
     {
-        if (!in_array($fileName, $this->files, true))
-            throw new NonExistentArchiveFileException('File '.$fileName.' does not exist in archive');
+        if (!in_array($fileName, $this->files, true)) {
+            throw new NonExistentArchiveFileException('File ' . $fileName . ' does not exist in archive');
+        }
 
         return $this->archive->getFileData($fileName);
     }
@@ -385,8 +387,9 @@ class UnifiedArchive
      */
     public function getFileContent($fileName)
     {
-        if (!in_array($fileName, $this->files, true))
-            throw new NonExistentArchiveFileException('File '.$fileName.' does not exist in archive');
+        if (!in_array($fileName, $this->files, true)) {
+            throw new NonExistentArchiveFileException('File ' . $fileName . ' does not exist in archive');
+        }
 
         return $this->archive->getFileContent($fileName);
     }
@@ -400,8 +403,9 @@ class UnifiedArchive
      */
     public function getFileResource($fileName)
     {
-        if (!in_array($fileName, $this->files, true))
-            throw new NonExistentArchiveFileException('File '.$fileName.' does not exist in archive');
+        if (!in_array($fileName, $this->files, true)) {
+            throw new NonExistentArchiveFileException('File ' . $fileName . ' does not exist in archive');
+        }
 
         return $this->archive->getFileResource($fileName);
     }
@@ -419,18 +423,22 @@ class UnifiedArchive
     public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
     {
         if ($files !== null) {
-            if (is_string($files)) $files = [$files];
+            if (is_string($files)) {
+                $files = [$files];
+            }
 
-            if ($expandFilesList)
-                $files = self::expandFileList($this->files, $files);
+            if ($expandFilesList) {
+                $files = static::expandFileList($this->files, $files);
+            }
 
-            if (empty($files))
+            if (empty($files)) {
                 throw new EmptyFileListException('Files list is empty!');
+            }
 
             return $this->archive->extractFiles($outputFolder, $files);
-        } else {
-            return $this->archive->extractArchive($outputFolder);
         }
+
+        return $this->archive->extractArchive($outputFolder);
     }
 
     /**
@@ -449,14 +457,17 @@ class UnifiedArchive
     {
         $fileOrFiles = is_string($fileOrFiles) ? [$fileOrFiles] : $fileOrFiles;
 
-        if ($expandFilesList && $fileOrFiles !== null)
-            $fileOrFiles = self::expandFileList($this->files, $fileOrFiles);
+        if ($expandFilesList && $fileOrFiles !== null) {
+            $fileOrFiles = static::expandFileList($this->files, $fileOrFiles);
+        }
 
-        if (empty($fileOrFiles))
+        if (empty($fileOrFiles)) {
             throw new EmptyFileListException('Files list is empty!');
+        }
 
         $result = $this->archive->deleteFiles($fileOrFiles);
         $this->scanArchive();
+
         return $result;
     }
 
@@ -471,7 +482,7 @@ class UnifiedArchive
      */
     public function addFiles($fileOrFiles)
     {
-        $files_list = self::createFilesList($fileOrFiles);
+        $files_list = static::createFilesList($fileOrFiles);
 
         if (empty($files_list))
             throw new EmptyFileListException('Files list is empty!');
@@ -536,12 +547,12 @@ class UnifiedArchive
      */
     public static function prepareForArchiving($fileOrFiles, $archiveName)
     {
-        $archiveType = self::detectArchiveType($archiveName, false);
+        $archiveType = static::detectArchiveType($archiveName, false);
 
         if ($archiveType === false)
             throw new UnsupportedArchiveException('Could not detect archive type for name "'.$archiveName.'"');
 
-        $files_list = self::createFilesList($fileOrFiles);
+        $files_list = static::createFilesList($fileOrFiles);
 
         if (empty($files_list))
             throw new EmptyFileListException('Files list is empty!');
@@ -592,7 +603,7 @@ class UnifiedArchive
         if (file_exists($archiveName))
             throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
 
-        self::checkRequirements();
+        static::checkRequirements();
 
         $info = static::prepareForArchiving($fileOrFiles, $archiveName);
 
@@ -649,20 +660,20 @@ class UnifiedArchive
      */
     protected static function checkRequirements()
     {
-        if (empty(self::$enabledTypes)) {
-            self::$enabledTypes[self::ZIP] = extension_loaded('zip');
-            self::$enabledTypes[self::SEVEN_ZIP] = class_exists('\Archive7z\Archive7z');
-            self::$enabledTypes[self::RAR] = extension_loaded('rar');
-            self::$enabledTypes[self::GZIP] = extension_loaded('zlib');
-            self::$enabledTypes[self::BZIP] = extension_loaded('bz2');
-            self::$enabledTypes[self::LZMA] = extension_loaded('xz');
-            self::$enabledTypes[self::ISO] = class_exists('\CISOFile');
-            self::$enabledTypes[self::CAB] = class_exists('\CabArchive');
-            self::$enabledTypes[self::TAR] = class_exists('\Archive_Tar') || class_exists('\PharData');
-            self::$enabledTypes[self::TAR_GZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('zlib');
-            self::$enabledTypes[self::TAR_BZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('bz2');
-            self::$enabledTypes[self::TAR_LZMA] = class_exists('\Archive_Tar') && extension_loaded('lzma2');
-            self::$enabledTypes[self::TAR_LZW] = class_exists('\Archive_Tar') && LzwStreamWrapper::isBinaryAvailable();
+        if (empty(static::$enabledTypes)) {
+            static::$enabledTypes[self::ZIP] = extension_loaded('zip');
+            static::$enabledTypes[self::SEVEN_ZIP] = class_exists('\Archive7z\Archive7z');
+            static::$enabledTypes[self::RAR] = extension_loaded('rar');
+            static::$enabledTypes[self::GZIP] = extension_loaded('zlib');
+            static::$enabledTypes[self::BZIP] = extension_loaded('bz2');
+            static::$enabledTypes[self::LZMA] = extension_loaded('xz');
+            static::$enabledTypes[self::ISO] = class_exists('\CISOFile');
+            static::$enabledTypes[self::CAB] = class_exists('\CabArchive');
+            static::$enabledTypes[self::TAR] = class_exists('\Archive_Tar') || class_exists('\PharData');
+            static::$enabledTypes[self::TAR_GZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('zlib');
+            static::$enabledTypes[self::TAR_BZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('bz2');
+            static::$enabledTypes[self::TAR_LZMA] = class_exists('\Archive_Tar') && extension_loaded('lzma2');
+            static::$enabledTypes[self::TAR_LZW] = class_exists('\Archive_Tar') && LzwStreamWrapper::isBinaryAvailable();
         }
     }
 
@@ -677,8 +688,9 @@ class UnifiedArchive
         $newFiles = [];
         foreach ($files as $file) {
             foreach ($archiveFiles as $archiveFile) {
-                if (fnmatch($file.'*', $archiveFile))
+                if (fnmatch($file.'*', $archiveFile)) {
                     $newFiles[] = $archiveFile;
+                }
             }
         }
         return $newFiles;
@@ -702,7 +714,7 @@ class UnifiedArchive
 
                 // if is directory
                 if (is_dir($source))
-                    self::importFilesFromDir(rtrim($source, '/\\*').'/*',
+                    static::importFilesFromDir(rtrim($source, '/\\*').'/*',
                         !empty($destination) ? $destination.'/' : null, true, $files);
                 else if (is_file($source))
                     $files[$destination] = $source;
@@ -711,7 +723,7 @@ class UnifiedArchive
         } else if (is_string($nodes)) { // passed one file or directory
             // if is directory
             if (is_dir($nodes))
-                self::importFilesFromDir(rtrim($nodes, '/\\*').'/*', null, true,
+                static::importFilesFromDir(rtrim($nodes, '/\\*').'/*', null, true,
                     $files);
             else if (is_file($nodes))
                 $files[basename($nodes)] = $nodes;
@@ -736,7 +748,7 @@ class UnifiedArchive
 
         foreach (glob($source, GLOB_MARK) as $node) {
             if (in_array(substr($node, -1), ['/', '\\'], true) && $recursive) {
-                self::importFilesFromDir(str_replace('\\', '/', $node).'*',
+                static::importFilesFromDir(str_replace('\\', '/', $node).'*',
                     $destination.basename($node).'/', $recursive, $map);
             } elseif (is_file($node) && is_readable($node)) {
                 $map[$destination.basename($node)] = $node;
