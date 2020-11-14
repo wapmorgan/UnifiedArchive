@@ -214,6 +214,8 @@ class UnifiedArchive
                 case 'application/x-rar':
                     return self::RAR;
                 case 'application/zlib':
+                case 'application/gzip':
+                case 'application/x-gzip':
                     return self::GZIP;
                 case 'application/x-bzip2':
                     return self::BZIP;
