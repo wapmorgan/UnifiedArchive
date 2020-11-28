@@ -1,5 +1,12 @@
 # Change Log
 
+### 1.0.1 - Nov 28, 2020
+
+- Improved extendable for all classes - used late-static binding everywhere.
+
+Format specific:
+- **gzip**: improved detection of archive by content.
+
 ### 1.0.0 - Jun 13, 2020
 
 Format specific:
