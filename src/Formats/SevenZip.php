@@ -17,13 +17,15 @@ class SevenZip extends BasicFormat
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
-     *
-     * @throws \Exception
+     * @param string|null $password
+     * @throws Exception
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
         try {
             $this->sevenZip = new Archive7z($archiveFileName, null, null);
+            if ($password !== null)
+                $this->sevenZip->setPassword($password);
         } catch (\Archive7z\Exception $e) {
             throw new Exception('Could not open 7Zip archive: '.$e->getMessage(), $e->getCode(), $e);
         }
@@ -188,12 +190,23 @@ class SevenZip extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @return int
      * @throws ArchiveCreationException
      */
-    public static function createArchive(array $files, $archiveFileName) {
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    {
+        static $compressionLevelMap = [
+            self::COMPRESSION_NONE => 0,
+            self::COMPRESSION_WEAK => 2,
+            self::COMPRESSION_AVERAGE => 4,
+            self::COMPRESSION_STRONG => 7,
+            self::COMPRESSION_MAXIMUM => 9,
+        ];
+
         try {
             $seven_zip = new Archive7z($archiveFileName);
+            $seven_zip->setCompressionLevel($compressionLevelMap[$compressionLevel]);
             foreach ($files as $localName => $filename) {
                 if ($filename !== null) {
                     $seven_zip->addEntry($filename, true);
@@ -230,6 +243,14 @@ class SevenZip extends BasicFormat
      * @return bool
      */
     public static function canDeleteFiles()
+    {
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function canUsePassword()
     {
         return true;
     }

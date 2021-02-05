@@ -2,29 +2,29 @@ This file describes all UnifiedArchive API.
 
 UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArchive` namespace:
 - `UnifiedArchive` - represents an archive and provides related functions.
-    - Archive creation:
-    - [`UnifiedArchive::canCreateType`](#UnifiedArchive--canCreateType)
-    - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
-    - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
-    - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
-    - Archive opening
-    - [`UnifiedArchive::canOpenArchive`](#UnifiedArchive--canOpenArchive)
-    - [`UnifiedArchive::canOpenType`](#UnifiedArchive--canOpenType)
-    - [`UnifiedArchive::open`](#UnifiedArchive--open)
+    - Making an archive:
+      - [`UnifiedArchive::canCreateType`](#UnifiedArchive--canCreateType)
+      - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
+      - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
+      - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
+    - Opening an archive
+      - [`UnifiedArchive::canOpenArchive`](#UnifiedArchive--canOpenArchive)
+      - [`UnifiedArchive::canOpenType`](#UnifiedArchive--canOpenType)
+      - [`UnifiedArchive::open`](#UnifiedArchive--open)
     - Archive information:
         - [`UnifiedArchive::getArchiveType`](#UnifiedArchive--getArchiveType)
         - [`UnifiedArchive::getArchiveSize`](#UnifiedArchive--getArchiveSize)
         - [`UnifiedArchive::countCompressedFilesSize`](#UnifiedArchive--countCompressedFilesSize)
         - [`UnifiedArchive::countUncompressedFilesSize`](#UnifiedArchive--countUncompressedFilesSize)
         - [`UnifiedArchive::countFiles`](#UnifiedArchive--countFiles)
-    - Archive content:
+    - Extracting an archive:
         - [`UnifiedArchive::getFileNames`](#UnifiedArchive--getFileNames)
         - [`UnifiedArchive::isFileExists`](#UnifiedArchive--isFileExists)
         - [`UnifiedArchive::getFileData`](#UnifiedArchive--getFileData)
         - [`UnifiedArchive::getFileResource`](#UnifiedArchive--getFileResource)
         - [`UnifiedArchive::getFileContent`](#UnifiedArchive--getFileContent)
         - [`UnifiedArchive::extractFiles`](#UnifiedArchive--extractFiles)
-    - Archive modification:
+    - Updating an archive:
         - [`UnifiedArchive::canAddFiles`](#UnifiedArchive--canAddFiles)
         - [`UnifiedArchive::canDeleteFiles`](#UnifiedArchive--canDeleteFiles)
         - [`UnifiedArchive::addDirectory`](#UnifiedArchive--addDirectory)
@@ -33,7 +33,7 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
         - [`UnifiedArchive::deleteFiles`](#UnifiedArchive--deleteFiles)
 - [`ArchiveEntry`](#ArchiveEntry) - represents information about specific file from archive. This object can be obtained
 by call to one of  `UnifiedArchive` methods.
-
+  
 ## UnifiedArchive
 
 ### Archive creation
@@ -51,11 +51,17 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive::archiveDirectory"></span>
     ```php
-    UnifiedArchive::archiveDirectory(string $directory, string $archiveName): boolean
+    UnifiedArchive::archiveDirectory(string $directory, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): boolean
     ```
 
     Creates an archive with all content from given directory and saves archive to `$archiveName` (format is
-    resolved by extension). All files have relative path in archive.
+    resolved by extension). All files have relative path in the archive. By `$compressionLevel` you can adjust
+    compression level for files. Available values:
+    - `BasicFormat::COMPRESSION_NONE`
+    - `BasicFormat::COMPRESSION_WEAK`
+    - `BasicFormat::COMPRESSION_AVERAGE`
+    - `BasicFormat::COMPRESSION_STRONG`
+    - `BasicFormat::COMPRESSION_MAXIMUM`
     If case of success, `true` is returned.
 
     Throws:
@@ -66,11 +72,11 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>
     ```php
-    UnifiedArchive::archiveFile(string $file, string $archiveName): boolean
+    UnifiedArchive::archiveFile(string $file, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): boolean
     ```
 
     Creates an archive with file `$file` and saves archive to `$archiveName` (format is
-    resolved by extension). File has only relative nam in archive.
+    resolved by extension). File will has only relative name in the archive.
     If case of success, `true` is returned.
 
     Throws:
@@ -81,7 +87,7 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive--archiveFiles"></span>
     ```php
-    UnifiedArchive::archiveFiles(array $files, string $archiveName): int
+    UnifiedArchive::archiveFiles(array $files, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): int
     ```
 
     Creates an archive with given `$files` list. `$files` is an array of files or directories.
@@ -121,11 +127,13 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive--open"></span>
     ```php
-    UnifiedArchive::open(string $fileName): UnifiedArchive|null
+    UnifiedArchive::open(string $fileName, ?string $password = null): UnifiedArchive|null
     ```
 
     Opens an archive and returns instance of `UnifiedArchive`.
     In case of failure (format is not supported), `null` is returned.
+    If you provide `$password`, it will be used to open encrypted archive.
+    In case you provide password for an archive that don't support it, an `UnsupportedOperationException` will be throwed.
 
 #### Archive information
 

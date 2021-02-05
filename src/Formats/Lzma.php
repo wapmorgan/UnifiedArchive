@@ -15,12 +15,12 @@ class Lzma extends OneFileFormat
      * Lzma constructor.
      *
      * @param $archiveFileName
-     *
+     * @param string|null $password
      * @throws \Exception
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
-        parent::__construct($archiveFileName);
+        parent::__construct($archiveFileName, $password);
         $this->modificationTime = filemtime($this->fileName);
     }
 
@@ -46,10 +46,10 @@ class Lzma extends OneFileFormat
 
     /**
      * @param $data
-     *
+     * @param $compressionLevel
      * @return mixed|string
      */
-    protected static function compressData($data)
+    protected static function compressData($data, $compressionLevel)
     {
         $fp = xzopen('php://temp', 'w');
         xzwrite($fp, $data);

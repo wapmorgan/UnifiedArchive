@@ -9,12 +9,12 @@ class Bzip extends OneFileFormat
      * Bzip constructor.
      *
      * @param $archiveFileName
-     *
+     * @param string|null $password
      * @throws \Exception
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
-        parent::__construct($archiveFileName);
+        parent::__construct($archiveFileName, $password);
         $this->modificationTime = filemtime($this->fileName);
     }
 
@@ -39,12 +39,21 @@ class Bzip extends OneFileFormat
     }
 
     /**
-     * @param $data
-     *
+     * @param string $data
+     * @param int $compressionLevel
      * @return mixed|string
      */
-    protected static function compressData($data)
+    protected static function compressData($data, $compressionLevel)
     {
-        return bzcompress($data);
+        static $compressionLevelMap = [
+            self::COMPRESSION_NONE => 1,
+            self::COMPRESSION_WEAK => 2,
+            self::COMPRESSION_AVERAGE => 4,
+            self::COMPRESSION_STRONG => 7,
+            self::COMPRESSION_MAXIMUM => 9,
+        ];
+        // it seems not working at all
+        $work_factor = ($compressionLevelMap[$compressionLevel] * 28);
+        return bzcompress($data, $compressionLevelMap[$compressionLevel], $work_factor);
     }
 }

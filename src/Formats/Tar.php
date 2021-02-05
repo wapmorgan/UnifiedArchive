@@ -140,10 +140,12 @@ class Tar extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @return false|int
-     * @throws Exception
+     * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
     {
         static::checkRequirements();
 
@@ -278,9 +280,9 @@ class Tar extends BasicFormat
      * Tar format constructor.
      *
      * @param string $archiveFileName
-     * @throws Exception
+     * @param null $password
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
         static::checkRequirements();
 

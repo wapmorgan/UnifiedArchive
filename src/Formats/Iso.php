@@ -26,10 +26,14 @@ class Iso extends BasicFormat
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
+     * @param string|null $password
+     * @throws UnsupportedOperationException
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
         $this->open($archiveFileName);
+        if ($password !== null)
+            throw new UnsupportedOperationException('Iso archive does not support password!');
     }
 
     /**
@@ -220,10 +224,12 @@ class Iso extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @return void
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName){
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    {
         throw new UnsupportedOperationException();
     }
 }

@@ -8,6 +8,8 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 class Rar extends BasicFormat
 {
+    const NONE_RAR_COMPRESSION = 48;
+
     /** @var \RarArchive */
     protected $rar;
 
@@ -15,23 +17,23 @@ class Rar extends BasicFormat
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
-     *
-     * @throws \Exception
+     * @param string|null $password
+     * @throws Exception
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
         \RarException::setUsingExceptions(true);
-        $this->open($archiveFileName);
+        $this->open($archiveFileName, $password);
     }
 
     /**
      * @param $archiveFileName
-     *
-     * @throws \Exception
+     * @param $password
+     * @throws Exception
      */
-    protected function open($archiveFileName)
+    protected function open($archiveFileName, $password)
     {
-        $this->rar = \RarArchive::open($archiveFileName);
+        $this->rar = \RarArchive::open($archiveFileName, $password);
         if ($this->rar === false) {
             throw new Exception('Could not open Rar archive');
         }
@@ -92,7 +94,7 @@ class Rar extends BasicFormat
     {
         $entry = $this->rar->getEntry($fileName);
         return new ArchiveEntry($fileName, $entry->getPackedSize(), $entry->getUnpackedSize(),
-            strtotime($entry->getFileTime()), $entry->getMethod() != 48);
+            strtotime($entry->getFileTime()), $entry->getMethod() != self::NONE_RAR_COMPRESSION);
     }
 
     /**
@@ -165,11 +167,21 @@ class Rar extends BasicFormat
     }
 
     /**
-     * @param array  $files
+     * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName){
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return bool
+     */
+    public static function canUsePassword()
+    {
+        return true;
     }
 }

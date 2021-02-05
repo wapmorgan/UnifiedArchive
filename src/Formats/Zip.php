@@ -26,11 +26,14 @@ class Zip extends BasicFormat
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
-     * @throws \Exception
+     * @param null $password
+     * @throws UnsupportedOperationException
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
         $this->open($archiveFileName);
+        if ($password !== null)
+            $this->zip->setPassword($password);
     }
 
     /**
@@ -215,15 +218,27 @@ class Zip extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @return int
      * @throws ArchiveCreationException
      */
-    public static function createArchive(array $files, $archiveFileName){
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    {
+        static $compressionLevelMap = [
+            self::COMPRESSION_NONE => ZipArchive::CM_STORE,
+            self::COMPRESSION_WEAK => ZipArchive::CM_SHRINK,
+            self::COMPRESSION_AVERAGE => ZipArchive::CM_IMPLODE,
+            self::COMPRESSION_STRONG => ZipArchive::CM_DEFLATE,
+            self::COMPRESSION_MAXIMUM => ZipArchive::CM_DEFLATE64,
+        ];
+
         $zip = new ZipArchive();
         $result = $zip->open($archiveFileName, ZipArchive::CREATE);
 
         if ($result !== true)
             throw new ArchiveCreationException('ZipArchive error: '.$result);
+
+        $can_set_compression_level = method_exists($zip, 'setCompressionName');
 
         foreach ($files as $localName => $fileName) {
             if ($fileName === null) {
@@ -232,6 +247,9 @@ class Zip extends BasicFormat
             } else {
                 if ($zip->addFile($fileName, $localName) === false)
                     throw new ArchiveCreationException('Could not archive file "'.$fileName.'": '.$zip->getStatusString(), $zip->status);
+                if ($can_set_compression_level) {
+                    $zip->setCompressionName($localName, $compressionLevelMap[$compressionLevel]);
+                }
             }
         }
         $zip->close();
@@ -267,6 +285,14 @@ class Zip extends BasicFormat
      * @return bool
      */
     public static function canDeleteFiles()
+    {
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function canUsePassword()
     {
         return true;
     }

@@ -12,11 +12,18 @@ use wapmorgan\UnifiedArchive\PclzipZipInterface;
 
 abstract class BasicFormat
 {
+    const COMPRESSION_NONE = 0;
+    const COMPRESSION_WEAK = 1;
+    const COMPRESSION_AVERAGE = 2;
+    const COMPRESSION_STRONG = 3;
+    const COMPRESSION_MAXIMUM = 4;
+
     /**
      * BasicFormat constructor.
      * @param string $archiveFileName
+     * @param string|null $password Archive password for opening
      */
-    abstract public function __construct($archiveFileName);
+    abstract public function __construct($archiveFileName, $password = null);
 
     /**
      * Returns summary about an archive.
@@ -91,11 +98,12 @@ abstract class BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @return int Number of archived files
      * @throws UnsupportedOperationException
-     * @throws ArchiveCreationException
      */
-    public static function createArchive(array $files, $archiveFileName) {
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    {
         throw new UnsupportedOperationException();
     }
 
@@ -119,6 +127,14 @@ abstract class BasicFormat
      * @return bool
      */
     public static function canDeleteFiles()
+    {
+        return false;
+    }
+
+    /**
+     * @return false
+     */
+    public static function canUsePassword()
     {
         return false;
     }

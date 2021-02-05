@@ -26,4 +26,14 @@ class Archive7z extends \Archive7z\Archive7z
 
         return $version['version'];
     }
+
+    /**
+     * @param int $level 0-9 level
+     * @return $this
+     */
+    public function setCompressionLevel($level)
+    {
+        $this->compressionLevel = $level;
+        return $this;
+    }
 }

@@ -42,7 +42,7 @@ class UnifiedArchive
     const TAR_LZMA = 'txz';
     const TAR_LZW = 'tar.z';
 
-    /** @var array List of archive format handlers */
+    /** @var array<string, string> List of archive format handlers */
     protected static $formatHandlers = [
         self::ZIP => Zip::class,
         self::SEVEN_ZIP => SevenZip::class,
@@ -57,6 +57,10 @@ class UnifiedArchive
         self::TAR_BZIP => Tar::class,
         self::TAR_LZMA => Tar::class,
         self::TAR_LZW => Tar::class,
+    ];
+
+    public static $formatOptions = [
+
     ];
 
     /** @var array List of archive types with support-state */
@@ -82,15 +86,19 @@ class UnifiedArchive
 
     /** @var int Total size of archive file */
     protected $archiveSize;
+    /**
+     * @var null
+     */
+    protected $password;
 
     /**
      * Creates a UnifiedArchive instance for passed archive
      *
-     * @param  string $fileName Archive filename
+     * @param string $fileName Archive filename
+     * @param null $password
      * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
-     * @throws InvalidArgumentException If archive file is not readable
      */
-    public static function open($fileName)
+    public static function open($fileName, $password = null)
     {
         static::checkRequirements();
 
@@ -103,7 +111,7 @@ class UnifiedArchive
             return null;
         }
 
-        return new static($fileName, $type);
+        return new static($fileName, $type, $password);
     }
 
     /**
@@ -241,21 +249,25 @@ class UnifiedArchive
      *
      * @param string $fileName Archive filename
      * @param string $type Archive type
-     * @throws UnsupportedArchiveException If archive can not be opened
+     * @param string|null $password
      */
-    public function __construct($fileName, $type)
+    public function __construct($fileName, $type, $password = null)
     {
         static::checkRequirements();
-
-        $this->type = $type;
-        $this->archiveSize = filesize($fileName);
 
         if (!isset(static::$formatHandlers[$type]))
             throw new UnsupportedArchiveException('Unsupported archive type: '.$type.' of archive '.$fileName);
 
+        $this->type = $type;
+        $this->archiveSize = filesize($fileName);
+        $this->password = $password;
+
         $handler_class = static::$formatHandlers[$type];
 
+        /** @var BasicFormat archive */
         $this->archive = new $handler_class($fileName);
+        if ($password !== null)
+            $this->archive->setPasssword($password);
         $this->scanArchive();
     }
 
@@ -594,13 +606,12 @@ class UnifiedArchive
      *  'static' => '/var/www/html/static/'], 'archive.zip')`
      *
      * @param string $archiveName File name of archive. Type of archive will be determined by it's name.
+     * @param int $compressionLevel Level of compression
      * @return int Count of stored files is returned.
-     * @throws EmptyFileListException
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
-     * @throws ArchiveCreationException
      */
-    public static function archiveFiles($fileOrFiles, $archiveName)
+    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicFormat::COMPRESSION_AVERAGE)
     {
         if (file_exists($archiveName))
             throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
@@ -615,7 +626,7 @@ class UnifiedArchive
         /** @var BasicFormat $handler_class */
         $handler_class = static::$formatHandlers[$info['type']];
 
-        return $handler_class::createArchive($info['files'], $archiveName);
+        return $handler_class::createArchive($info['files'], $archiveName, $compressionLevel);
     }
 
     /**
@@ -623,19 +634,18 @@ class UnifiedArchive
      *
      * @param string $file
      * @param string $archiveName
+     * @param int $compressionLevel Level of compression
      * @return bool
-     * @throws EmptyFileListException
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
-     * @throws ArchiveCreationException
      */
-    public static function archiveFile($file, $archiveName)
+    public static function archiveFile($file, $archiveName, $compressionLevel = BasicFormat::COMPRESSION_AVERAGE)
     {
         if (!is_file($file)) {
             throw new InvalidArgumentException($file . ' is not a valid file to archive');
         }
 
-        return static::archiveFiles($file, $archiveName) === 1;
+        return static::archiveFiles($file, $archiveName, $compressionLevel) === 1;
     }
 
     /**
@@ -643,18 +653,41 @@ class UnifiedArchive
      *
      * @param string $directory
      * @param string $archiveName
+     * @param int $compressionLevel Level of compression
      * @return bool
-     * @throws ArchiveCreationException
-     * @throws EmptyFileListException
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveDirectory($directory, $archiveName)
+    public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicFormat::COMPRESSION_AVERAGE)
     {
         if (!is_dir($directory) || !is_readable($directory))
             throw new InvalidArgumentException($directory.' is not a valid directory to archive');
 
         return static::archiveFiles($directory, $archiveName) > 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function canAddFiles()
+    {
+        return call_user_func([static::$formatHandlers[$this->type], 'canAddFiles']);
+    }
+
+    /**
+     * @return bool
+     */
+    public function canDeleteFiles()
+    {
+        return call_user_func([static::$formatHandlers[$this->type], 'canDeleteFiles']);
+    }
+
+    /**
+     * @return bool
+     */
+    public function canUsePassword()
+    {
+        return call_user_func([static::$formatHandlers[$this->type], 'canUsePassword']);
     }
 
     /**
@@ -756,21 +789,5 @@ class UnifiedArchive
                 $map[$destination.basename($node)] = $node;
             }
         }
-    }
-
-    /**
-     * @return bool
-     */
-    public function canAddFiles()
-    {
-        return call_user_func([static::$formatHandlers[$this->type], 'canAddFiles']);
-    }
-
-    /**
-     * @return bool
-     */
-    public function canDeleteFiles()
-    {
-        return call_user_func([static::$formatHandlers[$this->type], 'canDeleteFiles']);
     }
 }

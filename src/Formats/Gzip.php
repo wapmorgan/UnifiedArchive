@@ -31,12 +31,12 @@ class Gzip extends OneFileFormat
      * Gzip constructor.
      *
      * @param $archiveFileName
-     *
-     * @throws \Exception
+     * @param string|null $password
+     * @throws Exception
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
-        parent::__construct($archiveFileName);
+        parent::__construct($archiveFileName, $password);
         $stat = static::gzipStat($archiveFileName);
         if ($stat === false) {
             throw new Exception('Could not open Gzip file');
@@ -67,11 +67,19 @@ class Gzip extends OneFileFormat
 
     /**
      * @param $data
-     *
+     * @param $compressionLevel
      * @return mixed|string
      */
-    protected static function compressData($data)
+    protected static function compressData($data, $compressionLevel)
     {
-        return gzencode($data);
+        static $compressionLevelMap = [
+            self::COMPRESSION_NONE => 0,
+            self::COMPRESSION_WEAK => 2,
+            self::COMPRESSION_AVERAGE => 4,
+            self::COMPRESSION_STRONG => 7,
+            self::COMPRESSION_MAXIMUM => 9,
+        ];
+        var_dump($compressionLevelMap[$compressionLevel]);
+        return gzencode($data, $compressionLevelMap[$compressionLevel]);
     }
 }

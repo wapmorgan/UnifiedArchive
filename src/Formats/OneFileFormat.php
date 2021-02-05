@@ -24,13 +24,16 @@ abstract class OneFileFormat extends BasicFormat
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
-     *
-     * @throws \Exception
+     * @param string|null $password Archive password for opening
+     * @throws Exception
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
         if (static::FORMAT_SUFFIX === null)
             throw new \Exception('Format should be initialized');
+        if ($password !== null)
+            throw new UnsupportedOperationException(self::FORMAT_SUFFIX.' archive does not support password!');
+
         $this->fileName = $archiveFileName;
         $this->inArchiveFileName = basename($archiveFileName, '.'.self::FORMAT_SUFFIX);
     }
@@ -134,12 +137,12 @@ abstract class OneFileFormat extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @return int
-     * @throws UnsupportedOperationException
-     * @throws EmptyFileListException
      * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName){
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE) {
         if (count($files) > 1) {
             throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not archive few files');
         }
@@ -149,7 +152,7 @@ abstract class OneFileFormat extends BasicFormat
 
         $filename = array_shift($files);
 
-        $compressed_content = static::compressData(file_get_contents($filename));
+        $compressed_content = static::compressData(file_get_contents($filename), $compressionLevel);
         $size = strlen($compressed_content);
         $written = file_put_contents($archiveFileName, $compressed_content);
 
@@ -162,12 +165,12 @@ abstract class OneFileFormat extends BasicFormat
     }
 
     /**
-     * @param $data
-     *
+     * @param string $data
+     * @param int $compressionLevel
      * @return mixed
      * @throws UnsupportedOperationException
      */
-    protected static function compressData($data)
+    protected static function compressData($data, $compressionLevel)
     {
         throw new UnsupportedOperationException();
     }

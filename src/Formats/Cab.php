@@ -17,10 +17,13 @@ class Cab extends BasicFormat
      * BasicFormat constructor.
      *
      * @param string $archiveFileName
+     * @param null $password
      * @throws Exception
      */
-    public function __construct($archiveFileName)
+    public function __construct($archiveFileName, $password = null)
     {
+        if ($password !== null)
+            throw new UnsupportedOperationException('Cab archive does not support password!');
         $this->open($archiveFileName);
     }
 
@@ -173,10 +176,12 @@ class Cab extends BasicFormat
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $compressionLevel
      * @return void
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName){
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    {
         throw new UnsupportedOperationException();
     }
 }
