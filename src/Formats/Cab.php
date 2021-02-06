@@ -7,11 +7,34 @@ use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats;
 
-class Cab extends BasicFormat
+class Cab extends BasicDriver
 {
     /** @var CabArchive */
     protected $cab;
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::CAB,
+        ];
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function checkFormatSupport($format)
+    {
+        switch ($format) {
+            case Formats::CAB:
+                return class_exists('\CabArchive');
+        }
+    }
 
     /**
      * BasicFormat constructor.

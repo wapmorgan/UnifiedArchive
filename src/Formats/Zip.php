@@ -8,6 +8,7 @@ use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\PclzipZipInterface;
 use ZipArchive;
 
@@ -17,10 +18,32 @@ use ZipArchive;
  * @package wapmorgan\UnifiedArchive\Formats
  * @requires ext-zip
  */
-class Zip extends BasicFormat
+class Zip extends BasicDriver
 {
     /** @var ZipArchive */
     protected $zip;
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::ZIP
+        ];
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function checkFormatSupport($format)
+    {
+        switch ($format) {
+            case Formats::ZIP:
+                return extension_loaded('zip');
+        }
+    }
 
     /**
      * BasicFormat constructor.
@@ -266,25 +289,28 @@ class Zip extends BasicFormat
     }
 
     /**
+     * @param $format
      * @return bool
      */
-    public static function canCreateArchive()
+    public static function canCreateArchive($format)
     {
         return true;
     }
 
     /**
+     * @param $format
      * @return bool
      */
-    public static function canAddFiles()
+    public static function canAddFiles($format)
     {
         return true;
     }
 
     /**
+     * @param $format
      * @return bool
      */
-    public static function canDeleteFiles()
+    public static function canDeleteFiles($format)
     {
         return true;
     }

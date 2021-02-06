@@ -4,8 +4,9 @@ namespace wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats;
 
-class Iso extends BasicFormat
+class Iso extends BasicDriver
 {
     /** @var \CISOFile */
     protected $iso;
@@ -21,6 +22,28 @@ class Iso extends BasicFormat
 
     /** @var null|int Size of block in ISO. Used to find real position of file in ISO */
     protected $blockSize;
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::ISO,
+        ];
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function checkFormatSupport($format)
+    {
+        switch ($format) {
+            case Formats::ISO:
+                return class_exists('\CISOFile');
+        }
+    }
 
     /**
      * BasicFormat constructor.

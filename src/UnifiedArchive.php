@@ -10,66 +10,19 @@ use wapmorgan\UnifiedArchive\Exceptions\FileAlreadyExistsException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\Formats\BasicFormat;
-use wapmorgan\UnifiedArchive\Formats\Bzip;
-use wapmorgan\UnifiedArchive\Formats\Cab;
-use wapmorgan\UnifiedArchive\Formats\Gzip;
-use wapmorgan\UnifiedArchive\Formats\Iso;
-use wapmorgan\UnifiedArchive\Formats\Lzma;
-use wapmorgan\UnifiedArchive\Formats\Rar;
-use wapmorgan\UnifiedArchive\Formats\SevenZip;
-use wapmorgan\UnifiedArchive\Formats\Tar;
-use wapmorgan\UnifiedArchive\Formats\Zip;
+use wapmorgan\UnifiedArchive\Formats\BasicDriver;
 
 /**
  * Class which represents archive in one of supported formats.
  */
 class UnifiedArchive
 {
-    const VERSION = '1.0.1';
-
-    const ZIP = 'zip';
-    const SEVEN_ZIP = '7zip';
-    const RAR = 'rar';
-    const GZIP = 'gzip';
-    const BZIP = 'bzip2';
-    const LZMA = 'lzma2';
-    const ISO = 'iso';
-    const CAB = 'cab';
-    const TAR = 'tar';
-    const TAR_GZIP = 'tgz';
-    const TAR_BZIP = 'tbz2';
-    const TAR_LZMA = 'txz';
-    const TAR_LZW = 'tar.z';
-
-    /** @var array<string, string> List of archive format handlers */
-    protected static $formatHandlers = [
-        self::ZIP => Zip::class,
-        self::SEVEN_ZIP => SevenZip::class,
-        self::RAR => Rar::class,
-        self::GZIP => Gzip::class,
-        self::BZIP => Bzip::class,
-        self::LZMA => Lzma::class,
-        self::ISO => Iso::class,
-        self::CAB => Cab::class,
-        self::TAR => Tar::class,
-        self::TAR_GZIP => Tar::class,
-        self::TAR_BZIP => Tar::class,
-        self::TAR_LZMA => Tar::class,
-        self::TAR_LZW => Tar::class,
-    ];
-
-    public static $formatOptions = [
-
-    ];
-
-    /** @var array List of archive types with support-state */
-    static protected $enabledTypes = [];
+    const VERSION = '1.0.2';
 
     /** @var string Type of current archive */
     protected $type;
 
-    /** @var BasicFormat Adapter for current archive */
+    /** @var BasicDriver Adapter for current archive */
     protected $archive;
 
     /** @var array List of files in current archive */
@@ -97,21 +50,20 @@ class UnifiedArchive
      * @param string $fileName Archive filename
      * @param null $password
      * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
+     * @throws UnsupportedOperationException
      */
     public static function open($fileName, $password = null)
     {
-        static::checkRequirements();
-
         if (!file_exists($fileName) || !is_readable($fileName)) {
             throw new InvalidArgumentException('Could not open file: ' . $fileName);
         }
 
-        $type = static::detectArchiveType($fileName);
-        if (!static::canOpenType($type)) {
+        $format = Formats::detectArchiveFormat($fileName);
+        if (!Formats::canOpen($format)) {
             return null;
         }
 
-        return new static($fileName, $type, $password);
+        return new static($fileName, $format, $password);
     }
 
     /**
@@ -120,152 +72,30 @@ class UnifiedArchive
      * @param string $fileName Archive filename
      * @return bool
      */
-    public static function canOpenArchive($fileName)
+    public static function canOpen($fileName)
     {
-        static::checkRequirements();
-
-        $type = static::detectArchiveType($fileName);
-
-        return $type !== false && static::canOpenType($type);
-    }
-
-    /**
-     * Checks whether specific archive type can be opened with current system configuration
-     *
-     * @param string $type One of predefined archive types (class constants)
-     * @return bool
-     */
-    public static function canOpenType($type)
-    {
-        static::checkRequirements();
-
-        return isset(static::$enabledTypes[$type])
-            ? static::$enabledTypes[$type]
-            : false;
-    }
-
-    /**
-     * Checks whether specified archive can be created
-     *
-     * @param string $type One of predefined archive types (class constants)
-     * @return bool
-     */
-    public static function canCreateType($type)
-    {
-        static::checkRequirements();
-
-        return isset(static::$enabledTypes[$type])
-            ? call_user_func([static::$formatHandlers[$type], 'canCreateArchive'])
-            : false;
-    }
-
-    /**
-     * Detect archive type by its filename or content
-     *
-     * @param string $fileName Archive filename
-     * @param bool $contentCheck Whether archive type can be detected by content
-     * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
-     */
-    public static function detectArchiveType($fileName, $contentCheck = true)
-    {
-        // by file name
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-        if (stripos($fileName, '.tar.') !== false && preg_match('~\.(?<ext>tar\.(gz|bz2|xz|z))$~', strtolower($fileName), $match)) {
-            switch ($match['ext']) {
-                case 'tar.gz':
-                    return self::TAR_GZIP;
-                case 'tar.bz2':
-                    return self::TAR_BZIP;
-                case 'tar.xz':
-                    return self::TAR_LZMA;
-                case 'tar.z':
-                    return self::TAR_LZW;
-            }
-        }
-
-        switch ($ext) {
-            case 'zip':
-                return self::ZIP;
-            case '7z':
-                return self::SEVEN_ZIP;
-            case 'rar':
-                return self::RAR;
-            case 'gz':
-                return self::GZIP;
-            case 'bz2':
-                return self::BZIP;
-            case 'xz':
-                return self::LZMA;
-            case 'iso':
-                return self::ISO;
-            case 'cab':
-                return self::CAB;
-            case 'tar':
-                return self::TAR;
-            case 'tgz':
-                return self::TAR_GZIP;
-            case 'tbz2':
-                return self::TAR_BZIP;
-            case 'txz':
-                return self::TAR_LZMA;
-        }
-
-        // by file content
-        if ($contentCheck) {
-            $mime_type = mime_content_type($fileName);
-            switch ($mime_type) {
-                case 'application/zip':
-                    return self::ZIP;
-                case 'application/x-7z-compressed':
-                    return self::SEVEN_ZIP;
-                case 'application/x-rar':
-                    return self::RAR;
-                case 'application/zlib':
-                case 'application/gzip':
-                case 'application/x-gzip':
-                    return self::GZIP;
-                case 'application/x-bzip2':
-                    return self::BZIP;
-                case 'application/x-lzma':
-                    return self::LZMA;
-                case 'application/x-iso9660-image':
-                    return self::ISO;
-                case 'application/vnd.ms-cab-compressed':
-                    return self::CAB;
-                case 'application/x-tar':
-                    return self::TAR;
-                case 'application/x-gtar':
-                    return self::TAR_GZIP;
-
-            }
-        }
-
-        return false;
+        $format = Formats::detectArchiveFormat($fileName);
+        return $format !== false && Formats::canOpen($format);
     }
 
     /**
      * Opens the file as one of supported formats
      *
      * @param string $fileName Archive filename
-     * @param string $type Archive type
+     * @param string $format Archive type
      * @param string|null $password
+     * @throws UnsupportedOperationException
      */
-    public function __construct($fileName, $type, $password = null)
+    public function __construct($fileName, $format, $password = null)
     {
-        static::checkRequirements();
+        $driver = Formats::getFormatDriver($format);
 
-        if (!isset(static::$formatHandlers[$type]))
-            throw new UnsupportedArchiveException('Unsupported archive type: '.$type.' of archive '.$fileName);
-
-        $this->type = $type;
+        $this->type = $format;
         $this->archiveSize = filesize($fileName);
         $this->password = $password;
 
-        $handler_class = static::$formatHandlers[$type];
-
-        /** @var BasicFormat archive */
-        $this->archive = new $handler_class($fileName);
+        /** @var BasicDriver archive */
+        $this->archive = new $driver($fileName);
         if ($password !== null)
             $this->archive->setPasssword($password);
         $this->scanArchive();
@@ -338,7 +168,7 @@ class UnifiedArchive
      *
      * @return string One of class constants
      */
-    public function getArchiveType()
+    public function getArchiveFormat()
     {
         return $this->type;
     }
@@ -561,7 +391,7 @@ class UnifiedArchive
      */
     public static function prepareForArchiving($fileOrFiles, $archiveName)
     {
-        $archiveType = static::detectArchiveType($archiveName, false);
+        $archiveType = Formats::detectArchiveFormat($archiveName, false);
 
         if ($archiveType === false)
             throw new UnsupportedArchiveException('Could not detect archive type for name "'.$archiveName.'"');
@@ -611,22 +441,20 @@ class UnifiedArchive
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicFormat::COMPRESSION_AVERAGE)
+    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
     {
         if (file_exists($archiveName))
             throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
 
-        static::checkRequirements();
-
         $info = static::prepareForArchiving($fileOrFiles, $archiveName);
 
-        if (!isset(static::$formatHandlers[$info['type']]))
+        if (!Formats::canCreate($info['type']))
             throw new UnsupportedArchiveException('Unsupported archive type: '.$info['type'].' of archive '.$archiveName);
 
-        /** @var BasicFormat $handler_class */
-        $handler_class = static::$formatHandlers[$info['type']];
+        /** @var BasicDriver $handler_class */
+        $driver = Formats::getFormatDriver($info['type'], true);
 
-        return $handler_class::createArchive($info['files'], $archiveName, $compressionLevel);
+        return $driver::createArchive($info['files'], $archiveName, $compressionLevel);
     }
 
     /**
@@ -639,7 +467,7 @@ class UnifiedArchive
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFile($file, $archiveName, $compressionLevel = BasicFormat::COMPRESSION_AVERAGE)
+    public static function archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
     {
         if (!is_file($file)) {
             throw new InvalidArgumentException($file . ' is not a valid file to archive');
@@ -658,58 +486,12 @@ class UnifiedArchive
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicFormat::COMPRESSION_AVERAGE)
+    public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
     {
         if (!is_dir($directory) || !is_readable($directory))
             throw new InvalidArgumentException($directory.' is not a valid directory to archive');
 
         return static::archiveFiles($directory, $archiveName) > 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function canAddFiles()
-    {
-        return call_user_func([static::$formatHandlers[$this->type], 'canAddFiles']);
-    }
-
-    /**
-     * @return bool
-     */
-    public function canDeleteFiles()
-    {
-        return call_user_func([static::$formatHandlers[$this->type], 'canDeleteFiles']);
-    }
-
-    /**
-     * @return bool
-     */
-    public function canUsePassword()
-    {
-        return call_user_func([static::$formatHandlers[$this->type], 'canUsePassword']);
-    }
-
-    /**
-     * Tests system configuration
-     */
-    protected static function checkRequirements()
-    {
-        if (empty(static::$enabledTypes)) {
-            static::$enabledTypes[self::ZIP] = extension_loaded('zip');
-            static::$enabledTypes[self::SEVEN_ZIP] = class_exists('\Archive7z\Archive7z');
-            static::$enabledTypes[self::RAR] = extension_loaded('rar');
-            static::$enabledTypes[self::GZIP] = extension_loaded('zlib');
-            static::$enabledTypes[self::BZIP] = extension_loaded('bz2');
-            static::$enabledTypes[self::LZMA] = extension_loaded('xz');
-            static::$enabledTypes[self::ISO] = class_exists('\CISOFile');
-            static::$enabledTypes[self::CAB] = class_exists('\CabArchive');
-            static::$enabledTypes[self::TAR] = class_exists('\Archive_Tar') || class_exists('\PharData');
-            static::$enabledTypes[self::TAR_GZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('zlib');
-            static::$enabledTypes[self::TAR_BZIP] = (class_exists('\Archive_Tar') || class_exists('\PharData')) && extension_loaded('bz2');
-            static::$enabledTypes[self::TAR_LZMA] = class_exists('\Archive_Tar') && extension_loaded('lzma2');
-            static::$enabledTypes[self::TAR_LZW] = class_exists('\Archive_Tar') && LzwStreamWrapper::isBinaryAvailable();
-        }
     }
 
     /**

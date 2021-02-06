@@ -10,13 +10,78 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\PclzipZipInterface;
 
-abstract class BasicFormat
+abstract class BasicDriver
 {
     const COMPRESSION_NONE = 0;
     const COMPRESSION_WEAK = 1;
     const COMPRESSION_AVERAGE = 2;
     const COMPRESSION_STRONG = 3;
     const COMPRESSION_MAXIMUM = 4;
+
+    /**
+     * @return mixed
+     * @throws UnsupportedOperationException
+     */
+    public static function getSupportedFormats()
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param $format
+     * @throws UnsupportedOperationException
+     */
+    public static function checkFormatSupport($format)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function canCreateArchive($format)
+    {
+        return false;
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function canAddFiles($format)
+    {
+        return false;
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function canDeleteFiles($format)
+    {
+        return false;
+    }
+
+    /**
+     * @return false
+     */
+    public static function canUsePassword()
+    {
+        return false;
+    }
+
+    /**
+     * @param array $files
+     * @param string $archiveFileName
+     * @param int $compressionLevel
+     * @return int Number of archived files
+     * @throws UnsupportedOperationException
+     */
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * BasicFormat constructor.
@@ -94,50 +159,6 @@ abstract class BasicFormat
      * @throws ArchiveModificationException
      */
     abstract public function addFiles(array $files);
-
-    /**
-     * @param array $files
-     * @param string $archiveFileName
-     * @param int $compressionLevel
-     * @return int Number of archived files
-     * @throws UnsupportedOperationException
-     */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return bool
-     */
-    public static function canCreateArchive()
-    {
-        return false;
-    }
-
-    /**
-     * @return bool
-     */
-    public static function canAddFiles()
-    {
-        return false;
-    }
-
-    /**
-     * @return bool
-     */
-    public static function canDeleteFiles()
-    {
-        return false;
-    }
-
-    /**
-     * @return false
-     */
-    public static function canUsePassword()
-    {
-        return false;
-    }
 
     /**
      * @throws UnsupportedOperationException

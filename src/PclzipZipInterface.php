@@ -1,6 +1,7 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+use RecursiveIteratorIterator;
 use ZipArchive;
 
 if (!defined('PCLZIP_ERR_NO_ERROR')) {

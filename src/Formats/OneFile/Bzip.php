@@ -1,9 +1,33 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Formats\OneFile;
 
-class Bzip extends OneFileFormat
+use wapmorgan\UnifiedArchive\Formats;
+
+class Bzip extends OneFileDriver
 {
     const FORMAT_SUFFIX =  'bz2';
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::BZIP,
+        ];
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function checkFormatSupport($format)
+    {
+        switch ($format) {
+            case Formats::BZIP:
+                return extension_loaded('bz2');
+        }
+    }
 
     /**
      * Bzip constructor.

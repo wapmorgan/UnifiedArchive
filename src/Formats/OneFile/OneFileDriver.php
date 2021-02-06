@@ -1,16 +1,16 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Formats\OneFile;
 
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
-use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats\BasicDriver;
 
-abstract class OneFileFormat extends BasicFormat
+abstract class OneFileDriver extends BasicDriver
 {
     /** @var null|string Should be filled for real format like 'gz' or other */
     const FORMAT_SUFFIX = null;
@@ -173,5 +173,10 @@ abstract class OneFileFormat extends BasicFormat
     protected static function compressData($data, $compressionLevel)
     {
         throw new UnsupportedOperationException();
+    }
+
+    public static function canCreateArchive($format)
+    {
+        return true;
     }
 }

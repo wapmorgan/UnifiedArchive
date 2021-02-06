@@ -1,4 +1,6 @@
 <?php
+
+use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class ReadingTest extends PhpUnitTestCase
@@ -29,7 +31,7 @@ class ReadingTest extends PhpUnitTestCase
      */
     public function testDetectArchiveType($filename, $type)
     {
-        $this->assertEquals($type, UnifiedArchive::detectArchiveType($filename));
+        $this->assertEquals($type, Formats::detectArchiveFormat($filename));
     }
 
     /**
@@ -41,8 +43,8 @@ class ReadingTest extends PhpUnitTestCase
     {
         $full_filename = self::getArchivePath($filename);
 
-        if (!UnifiedArchive::canOpenArchive($full_filename))
-            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
+        if (!UnifiedArchive::canOpen($full_filename))
+            $this->markTestSkipped(Formats::detectArchiveFormat($full_filename) .' is not supported with current system configuration');
 
         $this->assertInstanceOf('wapmorgan\UnifiedArchive\UnifiedArchive', UnifiedArchive::open($full_filename),
             'UnifiedArchive::open() on '.$full_filename.' should return an object');
@@ -61,8 +63,8 @@ class ReadingTest extends PhpUnitTestCase
 
         $full_filename = self::getArchivePath($filename);
 
-        if (!UnifiedArchive::canOpenArchive($full_filename))
-            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
+        if (!UnifiedArchive::canOpen($full_filename))
+            $this->markTestSkipped(Formats::detectArchiveFormat($full_filename) .' is not supported with current system configuration');
 
         $archive = UnifiedArchive::open($full_filename);
         if ($files_number != $archive->countFiles())
@@ -79,8 +81,8 @@ class ReadingTest extends PhpUnitTestCase
     {
         $full_filename = self::getArchivePath($archiveFilename);
 
-        if (!UnifiedArchive::canOpenArchive($full_filename))
-            $this->markTestSkipped(UnifiedArchive::detectArchiveType($full_filename).' is not supported with current system configuration');
+        if (!UnifiedArchive::canOpen($full_filename))
+            $this->markTestSkipped(Formats::detectArchiveFormat($full_filename) .' is not supported with current system configuration');
 
         $archive = UnifiedArchive::open($full_filename);
         $flatten_list = [];
@@ -119,8 +121,9 @@ class ReadingTest extends PhpUnitTestCase
             $this->assertEquals($content, $archive->getFileContent($filename), 'getFileContent() should return content of file that should be equal to real file content');
             $this->assertEquals($content, stream_get_contents($archive->getFileResource($filename)), 'getFileResource() should return stream with content of file that should be equal to real file content');
 
-            $this->assertInternalType('boolean', $archive->canAddFiles());
-            $this->assertInternalType('boolean', $archive->canDeleteFiles());
         }
+
+//        $this->assertInternalType('boolean', $archive->canAddFiles());
+//        $this->assertInternalType('boolean', $archive->canDeleteFiles());
     }
 }

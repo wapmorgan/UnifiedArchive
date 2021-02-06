@@ -1,5 +1,5 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive;
 
 use Symfony\Component\Process\Process;
 
@@ -11,10 +11,18 @@ class Archive7z extends \Archive7z\Archive7z
     public static function getBinaryVersion()
     {
         if (method_exists(__CLASS__, 'makeBinary7z'))
-            $binary = static::makeBinary7z();
+            try {
+                $binary = static::makeBinary7z();
+            } catch (\Exception $e) {
+                return false;
+            }
         else {
             // some hack for gemorroj/archive7z 4.x version
-            $seven_zip = new self(null);
+            try {
+                $seven_zip = new self(null);
+            } catch (\Exception $e) {
+                return false;
+            }
             $binary = $seven_zip->getAutoCli();
             unset($seven_zip);
         }

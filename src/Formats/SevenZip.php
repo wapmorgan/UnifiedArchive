@@ -2,16 +2,47 @@
 namespace wapmorgan\UnifiedArchive\Formats;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Archive7z;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Formats;
 
-class SevenZip extends BasicFormat
+class SevenZip extends BasicDriver
 {
     /** @var Archive7z */
     protected $sevenZip;
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::SEVEN_ZIP,
+            Formats::RAR,
+            Formats::TAR,
+        ];
+    }
+
+    /**
+     * @param string $format
+     * @return bool
+     * @throws \Archive7z\Exception
+     */
+    public static function checkFormatSupport($format)
+    {
+        $available = class_exists('\Archive7z\Archive7z') && Archive7z::getBinaryVersion() !== false;
+
+        switch ($format) {
+            case Formats::SEVEN_ZIP:
+            case Formats::RAR:
+            case Formats::TAR:
+                return $available;
+        }
+    }
 
     /**
      * BasicFormat constructor.
@@ -37,8 +68,13 @@ class SevenZip extends BasicFormat
     public function getArchiveInformation()
     {
         $information = new ArchiveInformation();
+
         foreach ($this->sevenZip->getEntries() as $entry) {
-            $information->files[] = method_exists($entry, 'getUnixPath')
+
+            if (!isset($can_get_unix_path))
+                $can_get_unix_path = method_exists($entry, 'getUnixPath');
+
+            $information->files[] = $can_get_unix_path
                 ? $entry->getUnixPath()
                 : str_replace('\\', '/', $entry->getPath());
             $information->compressedFilesSize += (int)$entry->getPackedSize();
@@ -221,29 +257,35 @@ class SevenZip extends BasicFormat
     }
 
     /**
+     * @param $format
      * @return bool
      * @throws \Archive7z\Exception
      */
-    public static function canCreateArchive()
+    public static function canCreateArchive($format)
     {
-        return static::canAddFiles();
+        if ($format === Formats::RAR) return false;
+        return static::canAddFiles($format);
     }
 
     /**
+     * @param $format
      * @return bool
      * @throws \Archive7z\Exception
      */
-    public static function canAddFiles()
+    public static function canAddFiles($format)
     {
+        if ($format === Formats::RAR) return false;
         $version = Archive7z::getBinaryVersion();
         return $version !== false && version_compare('9.30', $version, '<=');
     }
 
     /**
+     * @param $format
      * @return bool
      */
-    public static function canDeleteFiles()
+    public static function canDeleteFiles($format)
     {
+        if ($format === Formats::RAR) return false;
         return true;
     }
 

@@ -1,11 +1,34 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Formats\OneFile;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Formats;
 
-class Gzip extends OneFileFormat
+class Gzip extends OneFileDriver
 {
     const FORMAT_SUFFIX = 'gz';
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::GZIP,
+        ];
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function checkFormatSupport($format)
+    {
+        switch ($format) {
+            case Formats::GZIP:
+                return extension_loaded('zlib');
+        }
+    }
 
     /**
      * @param string $file GZipped file

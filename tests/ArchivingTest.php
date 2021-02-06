@@ -1,12 +1,13 @@
 <?php
 
-use wapmorgan\UnifiedArchive\Formats\SevenZip;
+use wapmorgan\UnifiedArchive\Formats;
+use wapmorgan\UnifiedArchive\Formats\OneFile\OneFile\OneFile\OneFile\SevenZip;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class ArchivingTest extends PhpUnitTestCase
 {
     /**
-     * @dataProvider modifyableArchiveTypes
+     * @dataProvider updatableArchiveTypes
      *
      * @param string $archiveFileName
      * @param string $archiveType
@@ -15,10 +16,10 @@ class ArchivingTest extends PhpUnitTestCase
      */
     public function testCreate($archiveFileName, $archiveType)
     {
-        if (!UnifiedArchive::canOpenType($archiveType))
+        if (!Formats::canOpen($archiveType))
             $this->markTestSkipped($archiveType.' is not supported with current system configuration');
 
-        if (!UnifiedArchive::canCreateType($archiveType))
+        if (!Formats::canCreate($archiveType))
             $this->markTestSkipped($archiveType.' does not support archiving');
 
         $this->cleanWorkDir();
@@ -33,7 +34,7 @@ class ArchivingTest extends PhpUnitTestCase
     }
 
     /**
-     * @dataProvider modifyableArchiveTypes
+     * @dataProvider updatableArchiveTypes
      *
      * @param string $archiveFileName
      * @param string $archiveType
@@ -42,7 +43,7 @@ class ArchivingTest extends PhpUnitTestCase
      */
     public function testModify($archiveFileName, $archiveType)
     {
-        if (!UnifiedArchive::canOpenType($archiveType))
+        if (!Formats::canOpen($archiveType))
             $this->markTestSkipped($archiveType.' is not supported with current system configuration');
 
         $this->cleanWorkDir();
@@ -53,7 +54,7 @@ class ArchivingTest extends PhpUnitTestCase
         $this->assertInstanceOf('\wapmorgan\UnifiedArchive\UnifiedArchive', $archive);
 
         // adding file
-        if ($archive->canAddFiles()) {
+        if (Formats::canAppend($archiveType)) {
             $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
             $this->assertTrue($archive->isFileExists(basename(__FILE__)));
             $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
@@ -62,7 +63,7 @@ class ArchivingTest extends PhpUnitTestCase
         }
 
         // removing file
-        if ($archive->canDeleteFiles()) {
+        if (Formats::canUpdate($archiveType)) {
             $this->assertEquals(1, $archive->deleteFiles(basename(__FILE__)));
             $this->assertFalse($archive->isFileExists(basename(__FILE__)));
         } else {
@@ -77,12 +78,12 @@ class ArchivingTest extends PhpUnitTestCase
      * @return array
      * @throws \Archive7z\Exception
      */
-    public function modifyableArchiveTypes()
+    public function updatableArchiveTypes()
     {
         return [
-            ['fixtures.zip', UnifiedArchive::ZIP],
-            ['fixtures.tar', UnifiedArchive::TAR],
-            ['fixtures.7z', UnifiedArchive::SEVEN_ZIP]
+            ['fixtures.zip', Formats::ZIP],
+            ['fixtures.tar', Formats::TAR],
+            ['fixtures.7z', Formats::SEVEN_ZIP]
         ];
     }
 }

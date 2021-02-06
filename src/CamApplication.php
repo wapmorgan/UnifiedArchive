@@ -13,7 +13,7 @@ class CamApplication {
      */
     protected function open($file)
     {
-        if (!UnifiedArchive::canOpenArchive($file))
+        if (!UnifiedArchive::canOpen($file))
             throw new Exception('Could not open archive '.$file.'. Try installing suggested packages or run `cam -f` to see formats support.');
 
         $archive = UnifiedArchive::open($file);
@@ -28,43 +28,54 @@ class CamApplication {
      */
     public function checkFormats()
     {
-        $types = [
-            '.zip' => [UnifiedArchive::canOpenType(UnifiedArchive::ZIP), 'install "zip" extension'],
-            '.rar' => [UnifiedArchive::canOpenType(UnifiedArchive::RAR), 'install "rar" extension'],
-            '.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::GZIP), 'install "zlib" extension'],
-            '.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::BZIP), 'install "bz2" extension'],
-            '.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::LZMA), 'install "xz" extension'],
-            '.7z' => [UnifiedArchive::canOpenType(UnifiedArchive::SEVEN_ZIP), 'install "gemorroj/archive7z" package'],
-            '.iso' => [UnifiedArchive::canOpenType(UnifiedArchive::ISO), 'install "phpclasses/php-iso-file" package'],
-            '.cab' => [UnifiedArchive::canOpenType(UnifiedArchive::CAB), 'install "wapmorgan/cab-archive" package'],
-
-            '.tar' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
-            '.tar.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
-            '.tar.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
-            '.tar.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
-            '.tar.Z' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZW), 'install "pear/archive_tar" package and "compress" system utility'],
-        ];
-
-        $installed = $not_installed = [];
-
-        foreach ($types as $extension => $configuration) {
-            if ($configuration[0]) {
-                $installed[] = $extension;
-            } else {
-                $not_installed[$extension] = $configuration[1];
-            }
+        echo "format\topen\tcreate\tappend\tupdate\tencrypt\tdrivers".PHP_EOL;
+        foreach(Formats::getFormatsReport() as $format => $config) {
+            echo $format."\t"
+                .($config['open'] ? '+' : '-')."\t"
+                .($config['create'] ? '+' : '-')."\t"
+                .($config['append'] ? '+' : '-')."\t"
+                .($config['update'] ? '+' : '-')."\t"
+                .($config['encrypt'] ? '+' : '-')."\t"
+                .implode(', ', $config['drivers']).PHP_EOL;
         }
 
-        if (!empty($installed)) {
-            echo 'Supported archive types: '.implode(', ', $installed).PHP_EOL;
-        }
+//        $types = [
+//            '.zip' => [UnifiedArchive::canOpenType(UnifiedArchive::ZIP), 'install "zip" extension'],
+//            '.rar' => [UnifiedArchive::canOpenType(UnifiedArchive::RAR), 'install "rar" extension'],
+//            '.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::GZIP), 'install "zlib" extension'],
+//            '.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::BZIP), 'install "bz2" extension'],
+//            '.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::LZMA), 'install "xz" extension'],
+//            '.7z' => [UnifiedArchive::canOpenType(UnifiedArchive::SEVEN_ZIP), 'install "gemorroj/archive7z" package'],
+//            '.iso' => [UnifiedArchive::canOpenType(UnifiedArchive::ISO), 'install "phpclasses/php-iso-file" package'],
+//            '.cab' => [UnifiedArchive::canOpenType(UnifiedArchive::CAB), 'install "wapmorgan/cab-archive" package'],
+//
+//            '.tar' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
+//            '.tar.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
+//            '.tar.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
+//            '.tar.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
+//            '.tar.Z' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZW), 'install "pear/archive_tar" package and "compress" system utility'],
+//        ];
 
-        if (!empty($not_installed)) {
-            echo 'Not supported archive types:'.PHP_EOL;
-            array_walk($not_installed, function ($instruction, $extension) {
-                echo '- '.$extension.': '.$instruction.PHP_EOL;
-            });
-        }
+//        $installed = $not_installed = [];
+//
+//        foreach ($types as $extension => $configuration) {
+//            if ($configuration[0]) {
+//                $installed[] = $extension;
+//            } else {
+//                $not_installed[$extension] = $configuration[1];
+//            }
+//        }
+//
+//        if (!empty($installed)) {
+//            echo 'Supported archive types: '.implode(', ', $installed).PHP_EOL;
+//        }
+//
+//        if (!empty($not_installed)) {
+//            echo 'Not supported archive types:'.PHP_EOL;
+//            array_walk($not_installed, function ($instruction, $extension) {
+//                echo '- '.$extension.': '.$instruction.PHP_EOL;
+//            });
+//        }
     }
 
     /**
@@ -161,7 +172,7 @@ class CamApplication {
     public function info($args)
     {
         $archive = $this->open($args['ARCHIVE']);
-        echo 'Archive              type: '.$archive->getArchiveType().PHP_EOL;
+        echo 'Archive              type: '.$archive->getArchiveFormat().PHP_EOL;
         echo 'Archive           changed: '.$this->formatDate(filemtime($args['ARCHIVE'])).PHP_EOL;
         echo 'Archive          contains: '.$archive->countFiles().' file'.($archive->countFiles() > 1 ? 's' : null).PHP_EOL;
         echo 'Archive   compressed size: '.implode(' ', $this->formatSize($archive->countCompressedFilesSize(), 2)).PHP_EOL;

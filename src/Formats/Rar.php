@@ -5,13 +5,36 @@ use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats;
 
-class Rar extends BasicFormat
+class Rar extends BasicDriver
 {
     const NONE_RAR_COMPRESSION = 48;
 
     /** @var \RarArchive */
     protected $rar;
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::RAR,
+        ];
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function checkFormatSupport($format)
+    {
+        switch ($format) {
+            case Formats::RAR:
+                return extension_loaded('rar');
+        }
+    }
 
     /**
      * BasicFormat constructor.

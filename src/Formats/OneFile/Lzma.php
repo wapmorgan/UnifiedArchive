@@ -1,5 +1,7 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Formats\OneFile;
+
+use wapmorgan\UnifiedArchive\Formats;
 
 /**
  * Class Lzma
@@ -7,9 +9,31 @@ namespace wapmorgan\UnifiedArchive\Formats;
  * @package wapmorgan\UnifiedArchive\Formats
  * @requires ext-lzma2
  */
-class Lzma extends OneFileFormat
+class Lzma extends OneFileDriver
 {
     const FORMAT_SUFFIX =  'xz';
+
+    /**
+     * @return array
+     */
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::LZMA,
+        ];
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function checkFormatSupport($format)
+    {
+        switch ($format) {
+            case Formats::LZMA:
+                return extension_loaded('xz');
+        }
+    }
 
     /**
      * Lzma constructor.

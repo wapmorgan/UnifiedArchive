@@ -25,12 +25,13 @@
 		"ext-zip": "ZIP support",
 		"ext-rar": "RAR support",
 		"ext-phar": "TAR support",
-		"ext-zlib": "GZ and TAR.GZ support",
-		"ext-bz2": "BZ2 and TAR.BZ2 support",
-		"ext-xz": "XZ and TAR.XZ support",
+		"ext-zlib": "GZ and TAR.GZ (GZIP) support",
+		"ext-bz2": "BZ2 and TAR.BZ2 (BZIP2) support",
+		"ext-xz": "XZ and TAR.XZ (LZMA) support",
 		"pear/archive_tar": "another TAR support",
-		"bin-ncompress": "TAR.Z support",
-		"gemorroj/archive7z": "7ZIP support",
+		"bin-ncompress": "TAR.Z support via console program",
+		"gemorroj/archive7z": "7ZIP (and a lot of formats) support via console program",
+		"alchemy/zippy": "ZIP, TAR, GZIP, BZIP2 support (with combinations) via console programs",
 		"wapmorgan/cab-archive": "CAB support",
 		"phpclasses/php-iso-file": "ISO support",
 		"docopt/docopt": "Requirement for cam (Console Archive Manager)"
@@ -41,7 +42,6 @@
 		}
 	},
 	"bin": ["bin/cam"],
-	"minimum-stability": "dev",
 	"extra": {
         "phar-builder": {
             "compression": "BZip2",
