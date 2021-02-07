@@ -34,13 +34,14 @@ class SevenZip extends BasicDriver
             Formats::CAB,
             Formats::ISO,
             Formats::ARJ,
-            Formats::XZ,
+            Formats::LZMA,
             Formats::UEFI,
             Formats::GPT,
             Formats::MBR,
             Formats::MSI,
             Formats::DMG,
             Formats::RPM,
+            Formats::DEB,
             Formats::UDF,
         ];
     }
@@ -63,13 +64,14 @@ class SevenZip extends BasicDriver
             case Formats::CAB:
             case Formats::ISO:
             case Formats::ARJ:
-            case Formats::XZ:
+            case Formats::LZMA:
             case Formats::UEFI:
             case Formats::GPT:
             case Formats::MBR:
             case Formats::MSI:
             case Formats::DMG:
             case Formats::RPM:
+            case Formats::DEB:
             case Formats::UDF:
                 return $available;
         }

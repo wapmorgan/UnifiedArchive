@@ -22,7 +22,6 @@ class Formats
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
     const RAR = 'rar';
-    const ISO = 'iso';
     const CAB = 'cab';
     const TAR = 'tar';
     const TAR_GZIP = 'tgz';
@@ -35,16 +34,17 @@ class Formats
     const GZIP = 'gzip';
     const BZIP = 'bzip2';
     const LZMA = 'lzma2';
-    const XZ = 'xz';
 
     // non-usual archives
     const UEFI = 'uefi';
     const GPT = 'gpt';
     const MBR = 'mbr';
     const MSI = 'msi';
+    const ISO = 'iso';
     const DMG = 'dmg';
-    const RPM = 'rpm';
     const UDF = 'udf';
+    const RPM = 'rpm';
+    const DEB = 'deb';
 
     /**
      * @var string[] List of archive format drivers
@@ -63,7 +63,7 @@ class Formats
         TarByPear::class,
     ];
 
-    /** @var array List of all available types */
+    /** @var array<string, array<string>> List of all available types with their drivers */
     static protected $availableFormats;
 
     /** @var array List of all drivers with formats and support-state */
@@ -120,6 +120,24 @@ class Formats
                 return Formats::TAR_BZIP;
             case 'txz':
                 return Formats::TAR_LZMA;
+            case 'arj':
+                return Formats::ARJ;
+            case 'efi':
+                return Formats::UEFI;
+            case 'gpt':
+                return Formats::GPT;
+            case 'mbr':
+                return Formats::MBR;
+            case 'msi':
+                return Formats::MSI;
+            case 'dmg':
+                return Formats::DMG;
+            case 'rpm':
+                return Formats::RPM;
+            case 'deb':
+                return Formats::DEB;
+            case 'udf':
+                return Formats::UDF;
         }
 
         // by file content
