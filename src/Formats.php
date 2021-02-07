@@ -96,6 +96,7 @@ class Formats
 
         switch ($ext) {
             case 'zip':
+            case 'jar':
                 return Formats::ZIP;
             case '7z':
                 return Formats::SEVEN_ZIP;
