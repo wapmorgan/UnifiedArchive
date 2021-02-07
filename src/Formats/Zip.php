@@ -328,4 +328,14 @@ class Zip extends BasicDriver
     {
         return true;
     }
+
+    /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        return $this->zip->addFromString($inArchiveName, $content);
+    }
 }

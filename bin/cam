@@ -35,6 +35,7 @@ USAGE: cam (-l|--list)  ARCHIVE
        cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
        cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
        cam (-a|--add)     ARCHIVE FILES_ON_DISK...
+       cam (-A|--add-from-stdin) ARCHIVE FILE_IN_ARCHIVE
        cam (-c|--create)  ARCHIVE FILES_ON_DISK...
        cam (-f|--formats)
        cam (-D|--drivers)
@@ -51,6 +52,7 @@ ACTIONS:
       -x(--delete)  Delete files from archive
 
       -a(--add)     Pack files to archive
+      -A(--add-from-stdin) Add file from STDIN
       -c(--create)  Create new archive
 
       -f(--formats) List all formats with support state
@@ -89,6 +91,7 @@ $actions = [
     'd:details' => 'details',
     'x:delete' => 'delete',
     'a:add' => 'add',
+    'A:add-from-stdin' => 'addFromStdin',
     'c:create' => 'create',
     'f:formats' => 'checkFormats',
     'D:drivers' => 'checkDrivers',

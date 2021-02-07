@@ -131,6 +131,17 @@ abstract class OneFileDriver extends BasicDriver
     }
 
     /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool|void
+     * @throws UnsupportedOperationException@
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel

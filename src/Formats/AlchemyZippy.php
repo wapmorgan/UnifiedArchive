@@ -296,4 +296,19 @@ class AlchemyZippy extends BasicDriver
         $this->getArchiveInformation();
         return $added;
     }
+
+    /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        $fp = fopen('php://memory', 'w');
+        fwrite($fp, $content);
+        rewind($fp);
+        $this->archive->addMembers([$inArchiveName => $fp]);
+        fclose($fp);
+        return true;
+    }
 }

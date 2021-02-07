@@ -8,7 +8,6 @@ use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\LzwStreamWrapper;
@@ -343,5 +342,15 @@ class TarByPear extends BasicDriver
     public static function canAddFiles($format)
     {
         return true;
+    }
+
+    /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool|true
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        return $this->tar->addString($inArchiveName, $content);
     }
 }

@@ -178,6 +178,15 @@ abstract class BasicDriver
     abstract public function addFiles(array $files);
 
     /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool
+     * @throws UnsupportedOperationException
+     * @throws ArchiveModificationException
+     */
+    abstract public function addFileFromString($inArchiveName, $content);
+
+    /**
      * @throws UnsupportedOperationException
      * @return PclzipZipInterface
      */

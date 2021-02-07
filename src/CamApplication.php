@@ -142,7 +142,7 @@ class CamApplication {
      */
     public function formatSize($bytes, $precision = 1)
     {
-        $units = array('b', 'k', 'm', 'g', 't');
+        $units = ['b', 'k', 'm', 'g', 't'];
 
         $bytes = max($bytes, 0);
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
@@ -154,7 +154,7 @@ class CamApplication {
             $pow++;
         }
 
-        return array($i, $units[$pow]);
+        return [$i, $units[$pow]];
     }
 
     /**
@@ -300,6 +300,30 @@ class CamApplication {
             echo 'Error'.PHP_EOL;
         else
             echo 'Added '.$added_files.' file(s)'.PHP_EOL;
+    }
+
+    /**
+     * @param $args
+     * @throws Exception
+     * @throws \Archive7z\Exception
+     */
+    public function addFromStdin($args)
+    {
+        $archive = $this->open($args['ARCHIVE']);
+        $content = null;
+        while (!feof(STDIN)) {
+            $content .= fgets(STDIN);
+        }
+        $len = strlen($content);
+
+        $added_files = $archive->addFileFromString($args['FILE_IN_ARCHIVE'], $content);
+        if ($added_files === false)
+            echo 'Error'.PHP_EOL;
+        else {
+            $size = $this->formatSize($len);
+            echo sprintf('Added %s(%1.1f%s) file to %s',
+                    $args['FILE_IN_ARCHIVE'], $size[0], $size[1], $args['ARCHIVE']) . PHP_EOL;
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ namespace wapmorgan\UnifiedArchive\Formats;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
@@ -197,6 +198,17 @@ class Rar extends BasicDriver
      * @throws UnsupportedOperationException
      */
     public function addFiles(array $files)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool|void
+     * @throws UnsupportedOperationException
+     */
+    public function addFileFromString($inArchiveName, $content)
     {
         throw new UnsupportedOperationException();
     }

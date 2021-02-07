@@ -8,6 +8,7 @@ use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class SevenZip extends BasicDriver
@@ -267,6 +268,27 @@ class SevenZip extends BasicDriver
         } catch (Exception $e) {
             throw new ArchiveModificationException('Could not modify archive: '.$e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool|void
+     * @throws ArchiveModificationException
+     * @throws \Archive7z\Exception
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        $tmp_file = tempnam(sys_get_temp_dir(), 'ua');
+        if (!$tmp_file)
+            throw new ArchiveModificationException('Could not create temporarily file');
+
+        file_put_contents($tmp_file, $content);
+        unset($content);
+        $this->sevenZip->addEntry($tmp_file, true);
+        $this->sevenZip->renameEntry($tmp_file, $inArchiveName);
+        unlink($tmp_file);
+        return true;
     }
 
     /**

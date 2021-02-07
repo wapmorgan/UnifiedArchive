@@ -304,4 +304,15 @@ class TarByPhar extends BasicDriver
 
         return count($files);
     }
+
+    /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        $this->tar->addFromString($inArchiveName, $content);
+        return true;
+    }
 }

@@ -257,6 +257,17 @@ class Iso extends BasicDriver
     }
 
     /**
+     * @param $inArchiveName
+     * @param $content
+     * @return void
+     * @throws UnsupportedOperationException
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel

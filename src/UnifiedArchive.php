@@ -355,6 +355,20 @@ class UnifiedArchive
     }
 
     /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool
+     * @throws ArchiveModificationException
+     * @throws UnsupportedOperationException
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        $result = $this->archive->addFileFromString($inArchiveName, $content);
+        $this->scanArchive();
+        return $result;
+    }
+
+    /**
      * Adds directory contents to archive
      *
      * @param string $directory
