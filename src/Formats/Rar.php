@@ -37,13 +37,25 @@ class Rar extends BasicDriver
     }
 
     /**
-     * BasicFormat constructor.
-     *
-     * @param string $archiveFileName
-     * @param string|null $password
-     * @throws Exception
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public static function getDescription()
+    {
+        return 'adapter for ext-rar';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install `rar` extension';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct($archiveFileName, $format, $password = null)
     {
         \RarException::setUsingExceptions(true);
         $this->open($archiveFileName, $password);

@@ -1,6 +1,7 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Formats;
 
+use Archive_Tar;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
@@ -18,6 +19,7 @@ class TarByPear extends BasicDriver
      * @var string Full path to archive
      */
     protected $archiveFileName;
+
     /**
      * @var Archive_Tar
      */
@@ -74,6 +76,22 @@ class TarByPear extends BasicDriver
     }
 
     /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'php-library for tar';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library `pear/archive_tar` and optionally php-extensions (zlib, bzip2)';
+    }
+
+    /**
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
@@ -125,10 +143,10 @@ class TarByPear extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public function __construct($archiveFileName, $format, $password = null)
     {
         $this->archiveFileName = realpath($archiveFileName);
-        $this->open();
+        $this->open($format);
     }
 
     protected function open($archiveType)
@@ -179,6 +197,7 @@ class TarByPear extends BasicDriver
         $this->pearCompressionRatio = $information->uncompressedFilesSize != 0
             ? ceil($information->compressedFilesSize / $information->uncompressedFilesSize)
             : 1;
+        return $information;
     }
 
     /**

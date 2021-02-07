@@ -45,14 +45,20 @@ class Zip extends BasicDriver
         }
     }
 
+    public static function getDescription()
+    {
+        return 'adapter for ext-zip';
+    }
+
+    public static function getInstallationInstruction()
+    {
+        return 'install `zip` extension';
+    }
+
     /**
-     * BasicFormat constructor.
-     *
-     * @param string $archiveFileName
-     * @param null $password
-     * @throws UnsupportedOperationException
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public function __construct($archiveFileName, $format, $password = null)
     {
         $this->open($archiveFileName);
         if ($password !== null)

@@ -21,13 +21,9 @@ abstract class OneFileDriver extends BasicDriver
     protected $modificationTime;
 
     /**
-     * BasicFormat constructor.
-     *
-     * @param string $archiveFileName
-     * @param string|null $password Archive password for opening
-     * @throws Exception
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public function __construct($archiveFileName, $format, $password = null)
     {
         if (static::FORMAT_SUFFIX === null)
             throw new \Exception('Format should be initialized');

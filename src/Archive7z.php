@@ -35,6 +35,11 @@ class Archive7z extends \Archive7z\Archive7z
         return $version['version'];
     }
 
+//    public static function getSupportedFormats()
+//    {
+//
+//    }
+
     /**
      * @param int $level 0-9 level
      * @return $this

@@ -95,7 +95,7 @@ class UnifiedArchive
         $this->password = $password;
 
         /** @var BasicDriver archive */
-        $this->archive = new $driver($fileName);
+        $this->archive = new $driver($fileName, $format, $password);
         if ($password !== null)
             $this->archive->setPasssword($password);
         $this->scanArchive();

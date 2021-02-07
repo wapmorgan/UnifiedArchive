@@ -37,6 +37,7 @@ USAGE: cam (-l|--list)  ARCHIVE
        cam (-a|--add)     ARCHIVE FILES_ON_DISK...
        cam (-c|--create)  ARCHIVE FILES_ON_DISK...
        cam (-f|--formats)
+       cam (-D|--drivers)
 
 ACTIONS:
       -l(--list)    List files in archive
@@ -51,6 +52,9 @@ ACTIONS:
 
       -a(--add)     Pack files to archive
       -c(--create)  Create new archive
+
+      -f(--formats) List all formats with support state
+      -D(--drivers) List all drivers with installation information
 
 OPTIONS:
   for --extract (-e):
@@ -86,6 +90,7 @@ $actions = array(
     'a:add' => 'add',
     'c:create' => 'create',
     'f:formats' => 'checkFormats',
+    'D:drivers' => 'checkDrivers',
 );
 
 foreach ($actions as $arg => $v) {

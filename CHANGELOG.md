@@ -1,4 +1,22 @@
 # Change Log
+### 1.1.0 - Feb ***, 2021
+**New features**:
+- Added ability to open archives encrypted with password.
+    Added `$password` argument to `UnifiedArchive::open($fileName, $password = null)`.
+  Works only with: zip, rar, 7z.
+- Added ability to adjust compression level for new archives.
+    Added `$compressionLevel` argument with default `BasicDriver::COMPRESSION_AVERAGE` level to:
+    - `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive::archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive::archiveDirectory($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+  Works only with: zip, gzip.
+
+**BC-breaking:**
+- Format-probes moved to `Formats` class.
+    - `UnifiedArchive::canOpenArchive` -> `UnifiedArchive::canOpen`
+    - `UnifiedArchive::canCreateType` -> `Formats::canCreate`
+    - `UnifiedArchive::canOpenType` -> `Formats::canOpen`
+- `UnifiedArchive::getArchiveType` -> `UnifiedArchive::getArchiveFormat`
 
 ### 1.0.1 - Nov 28, 2020
 

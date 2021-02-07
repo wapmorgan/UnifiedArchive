@@ -46,13 +46,25 @@ class Iso extends BasicDriver
     }
 
     /**
-     * BasicFormat constructor.
-     *
-     * @param string $archiveFileName
-     * @param string|null $password
-     * @throws UnsupportedOperationException
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public static function getDescription()
+    {
+        return 'php-library';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library `phpclasses/php-iso-file`';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct($archiveFileName, $format, $password = null)
     {
         $this->open($archiveFileName);
         if ($password !== null)

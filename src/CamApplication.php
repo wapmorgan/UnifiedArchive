@@ -2,6 +2,7 @@
 namespace wapmorgan\UnifiedArchive;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Formats\BasicDriver;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class CamApplication {
@@ -76,6 +77,19 @@ class CamApplication {
 //                echo '- '.$extension.': '.$instruction.PHP_EOL;
 //            });
 //        }
+    }
+
+    public function checkDrivers()
+    {
+        /** @var BasicDriver $driverClass */
+        foreach (Formats::$drivers as $i => $driverClass) {
+            $description = $driverClass::getDescription();
+            $install = $driverClass::getInstallationInstruction();
+            $formats = $driverClass::getSupportedFormats();
+            echo ($i+1).'. '.$driverClass . " - ".$description.PHP_EOL
+                .'installation: '.$install.PHP_EOL
+                . 'formats: '.implode(', ', $formats) . PHP_EOL;
+        }
     }
 
     /**

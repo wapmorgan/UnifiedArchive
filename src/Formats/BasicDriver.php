@@ -37,6 +37,22 @@ abstract class BasicDriver
     }
 
     /**
+     * @return string
+     */
+    public static function getDescription()
+    {
+        return 'adapter for ext-zip';
+    }
+
+    /**
+     * @return string
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install `zip` extension';
+    }
+
+    /**
      * @param $format
      * @return bool
      */
@@ -84,11 +100,12 @@ abstract class BasicDriver
     }
 
     /**
-     * BasicFormat constructor.
+     * BasicDriver constructor.
      * @param string $archiveFileName
+     * @param string $format
      * @param string|null $password Archive password for opening
      */
-    abstract public function __construct($archiveFileName, $password = null);
+    abstract public function __construct($archiveFileName, $format, $password = null);
 
     /**
      * Returns summary about an archive.

@@ -18,12 +18,10 @@ use wapmorgan\UnifiedArchive\Formats\Zip;
 
 class Formats
 {
+    // archived and compressed
     const ZIP = 'zip';
     const SEVEN_ZIP = '7zip';
     const RAR = 'rar';
-    const GZIP = 'gzip';
-    const BZIP = 'bzip2';
-    const LZMA = 'lzma2';
     const ISO = 'iso';
     const CAB = 'cab';
     const TAR = 'tar';
@@ -31,11 +29,27 @@ class Formats
     const TAR_BZIP = 'tbz2';
     const TAR_LZMA = 'txz';
     const TAR_LZW = 'tar.z';
+    const ARJ = 'arj';
+
+    // compressed
+    const GZIP = 'gzip';
+    const BZIP = 'bzip2';
+    const LZMA = 'lzma2';
+    const XZ = 'xz';
+
+    // non-usual archives
+    const UEFI = 'uefi';
+    const GPT = 'gpt';
+    const MBR = 'mbr';
+    const MSI = 'msi';
+    const DMG = 'dmg';
+    const RPM = 'rpm';
+    const UDF = 'udf';
 
     /**
      * @var string[] List of archive format drivers
      */
-    public static $formatHandlers = [
+    public static $drivers = [
         Zip::class,
         Rar::class,
         Gzip::class,
@@ -273,7 +287,7 @@ class Formats
     {
         if (static::$availableFormats === null) {
             static::$availableFormats = [];
-            foreach (Formats::$formatHandlers as $handlerClass)
+            foreach (Formats::$drivers as $handlerClass)
             {
                 $handler_formats = $handlerClass::getSupportedFormats();
                 foreach ($handler_formats as $handler_format)

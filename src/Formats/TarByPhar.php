@@ -64,12 +64,31 @@ class TarByPhar extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public static function getDescription()
+    {
+        return 'adapter for ext-phar';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install `phar` extension and optionally php-extensions (zlib, bzip2)';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct($archiveFileName, $format, $password = null)
     {
         $this->archiveFileName = realpath($archiveFileName);
         $this->open();
     }
 
+    /**
+     *
+     */
     protected function open()
     {
         $this->tar = new PharData($this->archiveFileName, self::PHAR_FLAGS);

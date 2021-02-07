@@ -31,6 +31,22 @@ class Gzip extends OneFileDriver
     }
 
     /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'adapter for ext-zlib';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install `zlib` extension';
+    }
+
+    /**
      * @param string $file GZipped file
      * @return array|false Array with 'mtime' and 'size' items
      */
@@ -51,13 +67,9 @@ class Gzip extends OneFileDriver
     }
 
     /**
-     * Gzip constructor.
-     *
-     * @param $archiveFileName
-     * @param string|null $password
-     * @throws Exception
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public function __construct($archiveFileName, $format, $password = null)
     {
         parent::__construct($archiveFileName, $password);
         $stat = static::gzipStat($archiveFileName);

@@ -37,13 +37,25 @@ class Cab extends BasicDriver
     }
 
     /**
-     * BasicFormat constructor.
-     *
-     * @param string $archiveFileName
-     * @param null $password
-     * @throws Exception
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public static function getDescription()
+    {
+        return 'php-library';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library `wapmorgan/cab-archive`';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct($archiveFileName, $format, $password = null)
     {
         if ($password !== null)
             throw new UnsupportedOperationException('Cab archive does not support password!');

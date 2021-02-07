@@ -36,13 +36,25 @@ class Lzma extends OneFileDriver
     }
 
     /**
-     * Lzma constructor.
-     *
-     * @param $archiveFileName
-     * @param string|null $password
-     * @throws \Exception
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public static function getDescription()
+    {
+        return 'adapter for ext-xz';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install `xz` extension';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct($archiveFileName, $format, $password = null)
     {
         parent::__construct($archiveFileName, $password);
         $this->modificationTime = filemtime($this->fileName);

@@ -34,6 +34,11 @@ class AlchemyZippy extends BasicDriver
     protected $files;
 
     /**
+     * @var string
+     */
+    protected $format;
+
+    /**
      * @return mixed|void
      */
     public static function getSupportedFormats()
@@ -48,16 +53,23 @@ class AlchemyZippy extends BasicDriver
 
     protected static function init()
     {
+        if (!class_exists('\Alchemy\Zippy\Zippy'))
+            static::$zippy = false;
+
         if (static::$zippy === null)
             static::$zippy = Zippy::load();
     }
 
     /**
      * @param $format
+     * @return bool
      */
     public static function checkFormatSupport($format)
     {
         static::init();
+
+        if (static::$zippy === false)
+            return false;
 
         switch ($format) {
             case Formats::TAR_BZIP:
@@ -66,6 +78,22 @@ class AlchemyZippy extends BasicDriver
             case Formats::ZIP:
                 return static::checkAdapterFor($format);
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'php-library and console programs';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library `alchemy/zippy` and console programs (tar, zip)';
     }
 
     /**
@@ -121,9 +149,10 @@ class AlchemyZippy extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public function __construct($archiveFileName, $format, $password = null)
     {
         $this->fileName = $archiveFileName;
+        $this->format = $format;
         $this->archive = static::$zippy->open($archiveFileName);
     }
 

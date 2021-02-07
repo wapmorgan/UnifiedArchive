@@ -16,6 +16,11 @@ class SevenZip extends BasicDriver
     protected $sevenZip;
 
     /**
+     * @var string
+     */
+    protected $format;
+
+    /**
      * @return array
      */
     public static function getSupportedFormats()
@@ -24,6 +29,19 @@ class SevenZip extends BasicDriver
             Formats::SEVEN_ZIP,
             Formats::RAR,
             Formats::TAR,
+            Formats::TAR_GZIP,
+            Formats::TAR_BZIP,
+            Formats::CAB,
+            Formats::ISO,
+            Formats::ARJ,
+            Formats::XZ,
+            Formats::UEFI,
+            Formats::GPT,
+            Formats::MBR,
+            Formats::MSI,
+            Formats::DMG,
+            Formats::RPM,
+            Formats::UDF,
         ];
     }
 
@@ -40,20 +58,46 @@ class SevenZip extends BasicDriver
             case Formats::SEVEN_ZIP:
             case Formats::RAR:
             case Formats::TAR:
+            case Formats::TAR_GZIP:
+            case Formats::TAR_BZIP:
+            case Formats::CAB:
+            case Formats::ISO:
+            case Formats::ARJ:
+            case Formats::XZ:
+            case Formats::UEFI:
+            case Formats::GPT:
+            case Formats::MBR:
+            case Formats::MSI:
+            case Formats::DMG:
+            case Formats::RPM:
+            case Formats::UDF:
                 return $available;
         }
     }
 
     /**
-     * BasicFormat constructor.
-     *
-     * @param string $archiveFileName
-     * @param string|null $password
-     * @throws Exception
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public static function getDescription()
+    {
+        return 'php-library and console program';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library `gemorroj/archive7z` and console program p7zip (7z)';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct($archiveFileName, $format, $password = null)
     {
         try {
+            $this->format = $format;
             $this->sevenZip = new Archive7z($archiveFileName, null, null);
             if ($password !== null)
                 $this->sevenZip->setPassword($password);

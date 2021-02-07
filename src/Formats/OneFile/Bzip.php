@@ -30,13 +30,25 @@ class Bzip extends OneFileDriver
     }
 
     /**
-     * Bzip constructor.
-     *
-     * @param $archiveFileName
-     * @param string|null $password
-     * @throws \Exception
+     * @inheritDoc
      */
-    public function __construct($archiveFileName, $password = null)
+    public static function getDescription()
+    {
+        return 'adapter for ext-bzip2';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install `bzip2` extension';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct($archiveFileName, $format, $password = null)
     {
         parent::__construct($archiveFileName, $password);
         $this->modificationTime = filemtime($this->fileName);
