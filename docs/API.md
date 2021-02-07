@@ -119,13 +119,14 @@ by call to one of  `UnifiedArchive` methods.
 
     Creates an archive with all content from given directory and saves archive to `$archiveName` (format is
     resolved by extension). All files have relative path in the archive. By `$compressionLevel` you can adjust
-    compression level for files. Available values:
+    compression level for files. If case of success, `true` is returned.
+
+    Available values for compression:
     - `BasicFormat::COMPRESSION_NONE`
     - `BasicFormat::COMPRESSION_WEAK`
     - `BasicFormat::COMPRESSION_AVERAGE`
     - `BasicFormat::COMPRESSION_STRONG`
     - `BasicFormat::COMPRESSION_MAXIMUM`
-    If case of success, `true` is returned.
 
     Throws:
     - `UnsupportedOperationException`

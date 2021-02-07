@@ -8,16 +8,17 @@ use wapmorgan\UnifiedArchive\UnifiedArchive;
 class CamApplication {
     /**
      * @param $file
+     * @param null $password
      * @return UnifiedArchive
+     * @throws Exceptions\UnsupportedOperationException
      * @throws Exception
-     * @throws \Archive7z\Exception
      */
-    protected function open($file)
+    protected function open($file, $password = null)
     {
         if (!UnifiedArchive::canOpen($file))
             throw new Exception('Could not open archive '.$file.'. Try installing suggested packages or run `cam -f` to see formats support.');
 
-        $archive = UnifiedArchive::open($file);
+        $archive = UnifiedArchive::open($file, $password);
         if ($archive === null)
             throw new Exception('Could not open archive '.$file);
 
@@ -201,7 +202,7 @@ class CamApplication {
      */
     public function extract($args)
     {
-        $archive = $this->open($args['ARCHIVE']);
+        $archive = $this->open($args['ARCHIVE'], isset($args['--password']) ? $args['--password'] : null);
         $output = getcwd();
         if (isset($args['--output'])) {
             if (!is_dir($args['--output']))
@@ -233,15 +234,15 @@ class CamApplication {
      */
     public function printFile($args)
     {
-        $archive = $this->open($args['ARCHIVE']);
+        $archive = $this->open($args['ARCHIVE'], isset($args['--password']) ? $args['--password'] : null);
         foreach ($args['FILES_IN_ARCHIVE'] as $file) {
-            $info = $archive->getFileData($file);
-            if ($info === false) {
+            if (!$archive->isFileExists($file)) {
                 echo 'File '.$file.' IS NOT PRESENT'.PHP_EOL;
-                continue;
+                exit(-1);
             }
-            echo 'File content: '.$file.' (size is '.implode('', $this->formatSize($info->uncompressedSize, 1)).')'.PHP_EOL;
-            echo $archive->getFileContent($file).PHP_EOL;
+            $info = $archive->getFileData($file);
+//            echo 'File content: '.$file.' (size is '.implode('', $this->formatSize($info->uncompressedSize, 1)).')'.PHP_EOL;
+            echo $archive->getFileContent($file);
         }
     }
 

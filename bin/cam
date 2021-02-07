@@ -30,8 +30,8 @@ Universal console archive manager for Windows/Linux (part of UnifiedArchive $ver
 USAGE: cam (-l|--list)  ARCHIVE
        cam (-t|--table) ARCHIVE
        cam (-i|--info)  ARCHIVE
-       cam (-e|--extract) [--output=DIR] [--replace=(all|ask|none|time|size)] [--flat=(file|path)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
-       cam (-p|--print)   ARCHIVE FILES_IN_ARCHIVE...
+       cam (-e|--extract) [--password=PASSWORD] [--output=DIR] [--replace=(all|ask|none|time|size)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
+       cam (-p|--print) [--password=PASSWORD] ARCHIVE FILES_IN_ARCHIVE...
        cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
        cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
        cam (-a|--add)     ARCHIVE FILES_ON_DISK...
@@ -57,29 +57,30 @@ ACTIONS:
       -D(--drivers) List all drivers with installation information
 
 OPTIONS:
-  for --extract (-e):
+    --password=PASSWORD
+        Password for decompression
+
     --replace=all|ask|none|time|size
-      Set how should be resolved cases in that extracting files already exist.
-        all - replaces all files
-        ask - ask for manual resolution on every case
-        none - preserve all existing on disk files
-        time - selects file with later timestamp
-        size - selects file with bigger size
+        Set how should be resolved cases in that extracting files already exist.
+            all - replaces all files
+            ask - ask for manual resolution on every case
+            none - preserve all existing on disk files
+            time - selects file with later timestamp
+            size - selects file with bigger size
 
     --flat=[file,path]
-       Removes all hierarchy and stores all files in one directory. With path option file name will be prepended with in-archive path (all "/" replaced by "-").
+        Removes all hierarchy and stores all files in one directory. With path option file name will be prepended with in-archive path (all "/" replaced by "-").
 
-    --exclude FILES... or
-    --exclude /PATTERN/
-       Excludes one or few files, directories by exact in-archive path or by regular expression pattern.
+    --exclude FILES...
+        or --exclude /PATTERN/. Excludes one or few files, directories by exact in-archive path or by regular expression pattern.
 
     --output=DIRECTORY
-       Set output directory in that all files will be extracted.
+        Set output directory in that all files will be extracted.
 DOC;
 
 $args = Docopt::handle($doc, ['version' => UnifiedArchive::VERSION]);
 
-$actions = array(
+$actions = [
     'l:list' => 'listArray',
     't:table' => 'table',
     'i:info' => 'info',
@@ -91,12 +92,12 @@ $actions = array(
     'c:create' => 'create',
     'f:formats' => 'checkFormats',
     'D:drivers' => 'checkDrivers',
-);
+];
 
 foreach ($actions as $arg => $v) {
   $arg = explode(':', $arg);
     if ($args['-'.$arg[0]] === true || $args['--'.$arg[1]] === true) {
         $application = new CamApplication();
-        call_user_func(array($application, $v), $args);
+        call_user_func([$application, $v], $args);
     }
 }

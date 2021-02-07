@@ -31,7 +31,7 @@ If on your system both `Zip` and `AlchemyZippy` driver available, the first will
 ## TarByPhar
 - Type: php-extension (`phar`) and optionally php-extensions (`zlib`, `bzip2`)
 - Formats: tar, tar.gz, tar.bz2
-- Has a bug [#71966](https://bugs.php.net/bug.php?id=71966&thanks=10) in `ext-phar` - an archive will `./` in paths cannot be opened.
+- Has a bug [#71966](https://bugs.php.net/bug.php?id=71966&thanks=10) in `ext-phar` ([related issue](https://github.com/wapmorgan/UnifiedArchive/issues/12)) - an archive will `./` in paths cannot be opened.
 
 ## TarByPear
 - Type: library ([`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar)) and optionally php-extensions (`zlib`, `bzip2`)

@@ -152,7 +152,7 @@ class Zip extends BasicDriver
     {
         $result = $this->zip->getFromName($fileName);
         if ($result === false)
-            throw new Exception('Could not get file information: '.$result);
+            throw new Exception('Could not get file information: '.$result.'. May use password?');
         return $result;
     }
 
