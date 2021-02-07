@@ -313,13 +313,23 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     UnifiedArchive::addFile(string $file, string $inArchiveName = null): boolean
     ```
 
-    Packs file in archive. If in-archive path is not specified, file will have it's original path.
+    Packs file in an archive. If in-archive path is not specified, file will have it's original path.
     If in-archive path is set, file wil be packed with given path.
     If case of success, `true` is returned.
 
     Throws:
     - `EmptyFileListException`
     - `UnsupportedOperationException`
+    - `ArchiveModificationException`
+
+- <span id="UnifiedArchive--addFileFromString"></span>
+    ```php
+    UnifiedArchive::addFileFromString(string $inArchiveName, string $content): boolean
+    ```
+
+    Packs file in an archive. If case of success, `true` is returned.
+
+    Throws:
     - `ArchiveModificationException`
 
 - <span id="UnifiedArchive--addFiles"></span>

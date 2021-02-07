@@ -6,10 +6,11 @@
   Works only with: zip, rar, 7z.
 - Added ability to adjust compression level for new archives.
     Added `$compressionLevel` argument with default `BasicDriver::COMPRESSION_AVERAGE` level to:
-    - `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
-    - `UnifiedArchive::archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
-    - `UnifiedArchive::archiveDirectory($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive->archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive->archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive->archiveDirectory($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
   Works only with: zip, gzip.
+- Added ability to append the archive with a file from string: `UnifiedArchive->addFileFromString(string $inArchiveName, string $content)`.
 
 **BC-breaking:**
 - Format-probes moved to `Formats` class.
