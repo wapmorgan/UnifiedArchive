@@ -2,7 +2,7 @@ This file describes all UnifiedArchive API.
 
 UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArchive` namespace:
 
-`Formats` keeps information about formats support and specific format functions.
+1. `Formats` keeps information about formats support and specific format functions.
 - [`Formats::detectArchiveFormat`](#Formats--detectArchiveFormat)
 - [`Formats::canOpen`](#Formats--canOpen)
 - [`Formats::canCreate`](#Formats--canCreate)
@@ -10,7 +10,7 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
 - [`Formats::canUpdate`](#Formats--canUpdate)
 - [`Formats::canEncrypt`](#Formats--canEncrypt)
 
-`UnifiedArchive` - represents an archive and provides related functions.
+2. `UnifiedArchive` - represents an archive and provides related functions.
   - Making an archive:
     - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
     - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
@@ -34,10 +34,11 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
   - Updating an archive:
     - [`UnifiedArchive->addDirectory`](#UnifiedArchive--addDirectory)
     - [`UnifiedArchive->addFile`](#UnifiedArchive--addFile)
+    - [`UnifiedArchive->addFileFromString`](#UnifiedArchive--addFileFromString)
     - [`UnifiedArchive->addFiles`](#UnifiedArchive--addFiles)
     - [`UnifiedArchive->deleteFiles`](#UnifiedArchive--deleteFiles)
 
-[`ArchiveEntry`](#ArchiveEntry) - represents information about a specific file from archive. This object can be obtained
+3. [`ArchiveEntry`](#ArchiveEntry) - represents information about a specific file from archive. This object can be obtained
 by call to one of  `UnifiedArchive` methods.
 
 ## Formats
