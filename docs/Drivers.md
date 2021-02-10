@@ -1,21 +1,29 @@
-Here is a list of available drivers with description in priority of selection:
+Here is a list of available drivers with description in selection priority.
 
-| Driver       | Memory-effective streaming            | appending | updating | encrypt | creation | formats   |
-|--------------|-------------------------------------- |-----------|----------|---------|----------|-----------|
-| Zip          | ✔                                     | ✔         | ✔        | ✔    | ✔          | zip |
-| Rar          | ✔                                     |           |          | ✔    |           | rar |
-| TarByPhar    |                                       | ✔         | ✔        |     | ✔           | tar, tar-gz, tar-bz2 |
-| TarByPear    |                                       |           |          |     | ✔          | tar, tar-gz, tar-bz2, tar-Z, tar-xz |
-| SevenZip     |                                       | ✔         | ✔        | ✔    | ✔          | zip, rar, tar, iso, uefi, ... |
-| AlchemyZippy |                                       | ✔         | ✔        |     | ✔          | zip, tar, tar-gz, tar-bz2 |
-| Gzip         | ✔                                     |           |          |     | ✔            | gz |
-| Bzip2        | ✔                                     |           |          |     | ✔            | bz2 |
-| Lzma2        | ✔                                     |           |          |     | ✔            | xz |
-| Iso          |                                       |           |          |     |            | iso |
-| Cab          |                                       |           |          |     |            | cab |
+| Driver       | Memory-effective streaming            | appending | updating | encrypt | creation | type | formats   |
+|--------------|-------------------------------------- |-----------|----------|---------|----------|-----------|------|
+| Zip          | ✔                                     | ✔         | ✔        | ✔    | ✔          | extension | zip |
+| Rar          | ✔                                     |           |          | ✔    |           | extension   | rar |
+| TarByPhar    |                                       | ✔         | ✔        |     | ✔           | extensions | tar, tar-gz, tar-bz2 |
+| TarByPear    |                                       |           |          |     | ✔          | library + extensions | tar, tar-gz, tar-bz2, tar-Z, tar-xz |
+| SevenZip     |                                       | ✔         | ✔        | ✔    | ✔          | library + program | zip, rar, tar, iso, uefi, ... |
+| AlchemyZippy |                                       | ✔         | ✔        |     | ✔          | library + programs | zip, tar, tar-gz, tar-bz2 |
+| Gzip         | ✔                                     |           |          |     | ✔            | extension | gz |
+| Bzip2        | ✔                                     |           |          |     | ✔            | extension | bz2 |
+| Lzma2        | ✔                                     |           |          |     | ✔            | extension | xz |
+| Iso          |                                       |           |          |     |            | library | iso |
+| Cab          |                                       |           |          |     |            | library | cab |
 
-If on your system both `Zip` and `AlchemyZippy` driver available, the first will be used for `zip` file.
+Example for `zip` with two drivers support: If on your system both `Zip` and `AlchemyZippy` driver available, the first will be used for `zip` file.
 
+# Proposals for installation drivers
+## In docker/VDS case
+Install extensions (`zip, rar, phar, zlib, bzip2`), program (`p7zip`) and SevenZip driver.
+
+## In common hosting case
+Install TarByPear, AlchemyZippy libraries.
+
+# Details about drivers
 ## Zip
 - Type: php-extension (`zip`)
 - Formats: zip
