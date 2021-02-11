@@ -205,7 +205,7 @@ class TarByPhar extends BasicDriver
         }
 
         $this->tar = null;
-        $this->open($this->archiveType);
+        $this->open();
 
         return $deleted;
     }
@@ -230,7 +230,7 @@ class TarByPhar extends BasicDriver
         }
         $this->tar = null;
         // reopen to refresh files list properly
-        $this->open($this->archiveType);
+        $this->open();
         return $added;
     }
 

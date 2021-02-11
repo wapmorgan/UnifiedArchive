@@ -12,17 +12,17 @@ class ReadingTest extends PhpUnitTestCase
     public function archiveTypes()
     {
         return [
-            ['archive.tar', UnifiedArchive::TAR],
-            ['archive.tgz', UnifiedArchive::TAR_GZIP],
-            ['archive.tar.gz', UnifiedArchive::TAR_GZIP],
-            ['archive.tbz2', UnifiedArchive::TAR_BZIP],
-            ['archive.tar.bz2', UnifiedArchive::TAR_BZIP],
-            ['archive.txz', UnifiedArchive::TAR_LZMA],
-            ['archive.tar.xz', UnifiedArchive::TAR_LZMA],
-            ['archive.zip', UnifiedArchive::ZIP],
-            ['archive.rar', UnifiedArchive::RAR],
-            ['archive.iso', UnifiedArchive::ISO],
-            ['archive.7z', UnifiedArchive::SEVEN_ZIP],
+            ['archive.tar', Formats::TAR],
+            ['archive.tgz', Formats::TAR_GZIP],
+            ['archive.tar.gz', Formats::TAR_GZIP],
+            ['archive.tbz2', Formats::TAR_BZIP],
+            ['archive.tar.bz2', Formats::TAR_BZIP],
+            ['archive.txz', Formats::TAR_LZMA],
+            ['archive.tar.xz', Formats::TAR_LZMA],
+            ['archive.zip', Formats::ZIP],
+            ['archive.rar', Formats::RAR],
+            ['archive.iso', Formats::ISO],
+            ['archive.7z', Formats::SEVEN_ZIP],
         ];
     }
 
@@ -67,8 +67,9 @@ class ReadingTest extends PhpUnitTestCase
             $this->markTestSkipped(Formats::detectArchiveFormat($full_filename) .' is not supported with current system configuration');
 
         $archive = UnifiedArchive::open($full_filename);
-        if ($files_number != $archive->countFiles())
-            var_dump($archive->getFileNames());
+        if ($files_number != $archive->countFiles()) {
+            throw new Exception(json_encode([$archive->getFileNames(), $archive->getDriverType()]));
+        }
         $this->assertEquals($files_number, $archive->countFiles(), 'Invalid files count for '.$filename);
     }
 
@@ -96,6 +97,9 @@ class ReadingTest extends PhpUnitTestCase
         sort($expected_files);
         $actual_files = $archive->getFileNames();
         sort($actual_files);
+        if ($expected_files != $actual_files) {
+            throw new Exception(json_encode([$expected_files, $actual_files, $archive->getDriverType()]));
+        }
         $this->assertEquals($expected_files, $actual_files, 'Files set is not identical');
 
         foreach ($flatten_list as $filename => $content) {

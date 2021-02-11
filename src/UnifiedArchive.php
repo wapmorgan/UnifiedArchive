@@ -388,6 +388,16 @@ class UnifiedArchive
                 : $this->addFiles([$inArchivePath])) > 0;
     }
 
+    public function getDriverType()
+    {
+        return get_class($this->archive);
+    }
+
+    public function getDriver()
+    {
+        return $this->archive;
+    }
+
     /**
      * Prepare files list for archiving
      *

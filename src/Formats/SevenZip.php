@@ -117,6 +117,9 @@ class SevenZip extends BasicDriver
         $information = new ArchiveInformation();
 
         foreach ($this->sevenZip->getEntries() as $entry) {
+            if ($entry->isDirectory()) {
+                continue;
+            }
 
             if (!isset($can_get_unix_path))
                 $can_get_unix_path = method_exists($entry, 'getUnixPath');
@@ -136,8 +139,11 @@ class SevenZip extends BasicDriver
     public function getFileNames()
     {
         $files = [];
-        foreach ($this->sevenZip->getEntries() as $entry)
+        foreach ($this->sevenZip->getEntries() as $entry) {
+            if ($entry->isDirectory())
+                continue;
             $files[] = $entry->getPath();
+        }
         return $files;
     }
 
