@@ -1,23 +1,32 @@
 # Change Log
 ### 1.1.0 - Feb ***, 2021
 **New features**:
-- Added ability to open archives encrypted with password.
-    Added `$password` argument to `UnifiedArchive::open($fileName, $password = null)`.
-  Works only with: zip, rar, 7z.
-- Added ability to adjust compression level for new archives.
-    Added `$compressionLevel` argument with default `BasicDriver::COMPRESSION_AVERAGE` level to:
+- Added ability to open archives encrypted with password - added `$password` argument to `UnifiedArchive::open($fileName, $password = null)`. Works only with: zip, rar, 7z.   
+- Added ability to adjust compression level for new archives - added `$compressionLevel` argument (with default `BasicDriver::COMPRESSION_AVERAGE` level) to:
     - `UnifiedArchive->archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
     - `UnifiedArchive->archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
     - `UnifiedArchive->archiveDirectory($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
   Works only with: zip, gzip.
-- Added ability to append the archive with a file from string: `UnifiedArchive->addFileFromString(string $inArchiveName, string $content)`.
+- Added ability to append the archive with a file from string - added `addFileFromString` method:
+  `UnifiedArchive->addFileFromString(string $inArchiveName, string $content)`.
+- Added tests for format support:
+    * `Formats::canOpen()`
+    * `Formats::canCreate()`
+    * `Formats::canAppend()` - check if file can be added to an archive
+    * `Formats::canUpdate()` - check if archive member can be removed
+    * `Formats::canEncrypt()` - check if encrypted archive can be opened
 
-**BC-breaking:**
-- Format-probes moved to `Formats` class.
-    - `UnifiedArchive::canOpenArchive` -> `UnifiedArchive::canOpen`
-    - `UnifiedArchive::canCreateType` -> `Formats::canCreate`
-    - `UnifiedArchive::canOpenType` -> `Formats::canOpen`
-- `UnifiedArchive::getArchiveType` -> `UnifiedArchive::getArchiveFormat`
+**Format changes**:
+- Extended *SevenZip* driver: now it supports a lot of formats (7z, zip, rar, iso, tar and so on).
+- Added *AlchemyZippy* driver: it works via command-line programs for zip, tar, tar.gz and tar.bz2.
+
+**Methods renamed:**
+- `UnifiedArchive::canOpenType` -> `Formats::canOpen`
+- `UnifiedArchive::canOpenArchive` -> `UnifiedArchive::canOpen`
+- `UnifiedArchive::canCreateType` -> `Formats::canCreate`
+- `UnifiedArchive->getArchiveType` -> `UnifiedArchive->getArchiveFormat`
+
+Old methods exist, but marked as deprecated.
 
 ### 1.0.1 - Nov 28, 2020
 

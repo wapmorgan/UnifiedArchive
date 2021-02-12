@@ -41,7 +41,7 @@ abstract class BasicDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-zip';
+        return null;
     }
 
     /**
@@ -49,7 +49,7 @@ abstract class BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `zip` extension';
+        return null;
     }
 
     /**

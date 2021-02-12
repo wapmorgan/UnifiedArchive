@@ -17,10 +17,10 @@ use wapmorgan\UnifiedArchive\Formats\BasicDriver;
  */
 class UnifiedArchive
 {
-    const VERSION = '1.0.2';
+    const VERSION = '1.1.0';
 
     /** @var string Type of current archive */
-    protected $type;
+    protected $format;
 
     /** @var BasicDriver Adapter for current archive */
     protected $archive;
@@ -90,7 +90,7 @@ class UnifiedArchive
     {
         $driver = Formats::getFormatDriver($format);
 
-        $this->type = $format;
+        $this->format = $format;
         $this->archiveSize = filesize($fileName);
         $this->password = $password;
 
@@ -168,7 +168,7 @@ class UnifiedArchive
      */
     public function getArchiveFormat()
     {
-        return $this->type;
+        return $this->format;
     }
 
     /**
@@ -593,5 +593,65 @@ class UnifiedArchive
                 $map[$destination.basename($node)] = $node;
             }
         }
+    }
+
+    /**
+     * Checks whether archive can be opened with current system configuration
+     *
+     * @param string $fileName Archive filename
+     * @deprecated See {UnifiedArchive::canOpen()}
+     * @return bool
+     */
+    public static function canOpenArchive($fileName)
+    {
+        return static::canOpen($fileName);
+    }
+
+    /**
+     * Checks whether specific archive type can be opened with current system configuration
+     *
+     * @deprecated See {{Formats::canOpen()}}
+     * @param string $type One of predefined archive types (class constants)
+     * @return bool
+     */
+    public static function canOpenType($type)
+    {
+        return Formats::canOpen($type);
+    }
+
+    /**
+     * Checks whether specified archive can be created
+     *
+     * @deprecated See {{Formats::canCreate()}}
+     * @param string $type One of predefined archive types (class constants)
+     * @return bool
+     */
+    public static function canCreateType($type)
+    {
+        return Formats::canCreate($type);
+    }
+
+    /**
+     * Returns type of archive
+     *
+     * @deprecated See {{UnifiedArchive::getArchiveFormat()}}
+     * @return string One of class constants
+     */
+    public function getArchiveType()
+    {
+        return $this->getArchiveFormat();
+    }
+
+    /**
+     * Detect archive type by its filename or content
+     *
+     * @deprecated See {{Formats::detectArchiveFormat()}}
+     * @param string $fileName Archive filename
+     * @param bool $contentCheck Whether archive type can be detected by content
+     * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
+     */
+    public static function detectArchiveType($fileName, $contentCheck = true)
+    {
+        return Formats::detectArchiveFormat($fileName, $contentCheck);
     }
 }
