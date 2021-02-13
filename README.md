@@ -32,11 +32,11 @@ like to work with them unified, you can use this library.
 ## Quick start
 ```sh
 composer require wapmorgan/unified-archive
-// install libraries for support: tar.gz, tar.bz2, zip
+# install libraries for support: tar.gz, tar.bz2, zip
 composer require pear/archive_tar alchemy/zippy
-// or if you can, install p7zip package in your OS and SevenZip driver for support a lot of formats (tar.*, zip, rar)
+# or if you can, install p7zip package in your OS and SevenZip driver for support a lot of formats (tar.*, zip, rar)
 composer require gemorroj/archive7z
-// to work with rar natively
+# to work with rar natively
 pecl install rar
 ```
 More information about formats support in [next section](#formats-support).
@@ -56,7 +56,7 @@ UnifiedArchive is distributed with a unified console program to manipulate archi
 It supports all formats that UnifiedArchive does and can be used to manipulate
 archives without other software. To show help, launch it:
 ```
-$ ./vendor/bin/cam --help
+./vendor/bin/cam --help
 ```
 
 ## Details
