@@ -39,7 +39,7 @@ composer require gemorroj/archive7z
 # to work with rar natively
 pecl install rar
 ```
-More information about formats support in [next section](#formats-support).
+More information about formats support in [formats page](docs/Drivers.md).
 
 Use it in code:
 ```php
