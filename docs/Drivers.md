@@ -86,5 +86,5 @@ These drivers support only compressed (not archived) data.
 - Formats: gz
 
 ### Lzma2
-- Type: php-extension ([`xz`](https://github.com/payden/php-xz))
+- Type: php-extension (`xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz))
 - Formats: xz

@@ -67,7 +67,7 @@ class TarByPear extends BasicDriver
                 return $availability && extension_loaded('bz2');
 
             case Formats::TAR_LZMA:
-                return $availability && extension_loaded('lzma2');
+                return $availability && extension_loaded('xz');
 
             case Formats::TAR_LZW:
                 return $availability && LzwStreamWrapper::isBinaryAvailable();
