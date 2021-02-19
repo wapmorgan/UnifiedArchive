@@ -22,11 +22,10 @@ install:
     fi
   - sudo apt-get install p7zip-full
 
-  # install php-lzma2
-  # fails on php 7.x
-  # - git clone https://github.com/payden/php-xz /tmp/xz
-  # - cd /tmp/xz && phpize && ./configure && make && sudo make install && cd -
-  # - echo "extension=xz.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  # install php-lzma2. fails on php 7.x
+  - git clone https://github.com/payden/php-xz /tmp/xz
+  - cd /tmp/xz && phpize && ./configure && make && sudo make install && cd -
+  - echo "extension=xz.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
   # install composer dependencies
   - travis_retry composer self-update
