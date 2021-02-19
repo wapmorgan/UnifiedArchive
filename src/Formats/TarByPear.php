@@ -187,12 +187,15 @@ class TarByPear extends BasicDriver
             if ($file['filename'] === 'pax_global_header') {
                 continue;
             }
+            // skip directories
+            if ($file['typeflag'] == '5')
+                continue;
             $information->files[] = $file['filename'];
             $information->uncompressedFilesSize += $file['size'];
             $this->pearFilesIndex[$file['filename']] = $i;
         }
 
-        $information->uncompressedFilesSize = filesize($this->archiveFileName);
+        $information->compressedFilesSize = filesize($this->archiveFileName);
         $this->pearCompressionRatio = $information->uncompressedFilesSize != 0
             ? ceil($information->compressedFilesSize / $information->uncompressedFilesSize)
             : 1;
