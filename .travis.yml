@@ -2,6 +2,7 @@ language: php
 
 env:
   - TASK_TESTS_COVERAGE=0
+  - LZMA_EXTENSION=https://github.com/codemasher/php-ext-xz
 
 matrix:
   fast_finish: true
@@ -13,6 +14,9 @@ matrix:
       env: TASK_TESTS_COVERAGE=1
     - php: 7.0
     - php: 5.6
+      env: LZMA_EXTENSION=https://github.com/payden/php-xz
+    - php: 5.5
+      env: LZMA_EXTENSION=https://github.com/payden/php-xz
 
 install:
   - |
@@ -22,8 +26,8 @@ install:
     fi
   - sudo apt-get install p7zip-full
 
-  # install php-lzma2. fails on php 7.x
-  - git clone https://github.com/payden/php-xz /tmp/xz
+  # install php-xz
+  - git clone $LZMA_EXTENSION /tmp/xz
   - cd /tmp/xz && phpize && ./configure && make && sudo make install && cd -
   - echo "extension=xz.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 

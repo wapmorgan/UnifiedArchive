@@ -88,8 +88,7 @@ class CamApplication {
             $install = $driverClass::getInstallationInstruction();
             $formats = $driverClass::getSupportedFormats();
             echo ($i+1).'. '.$driverClass . " - ".$description.PHP_EOL
-                .'installation: '.$install.PHP_EOL
-                . 'formats: '.implode(', ', $formats) . PHP_EOL;
+                .'- '.$install.PHP_EOL . PHP_EOL;
         }
     }
 
