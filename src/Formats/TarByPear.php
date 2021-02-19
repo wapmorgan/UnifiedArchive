@@ -94,10 +94,11 @@ class TarByPear extends BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int
      * @throws ArchiveCreationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         $compression = null;
         switch (strtolower(pathinfo($archiveFileName, PATHINFO_EXTENSION))) {
@@ -188,7 +189,7 @@ class TarByPear extends BasicDriver
                 continue;
             }
             // skip directories
-            if ($file['typeflag'] == '5')
+            if ($file['typeflag'] == '5' || substr($file['filename'], -1) === '/')
                 continue;
             $information->files[] = $file['filename'];
             $information->uncompressedFilesSize += $file['size'];

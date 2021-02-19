@@ -239,7 +239,7 @@ class CamApplication {
                 echo 'File '.$file.' IS NOT PRESENT'.PHP_EOL;
                 exit(-1);
             }
-            $info = $archive->getFileData($file);
+//            $info = $archive->getFileData($file);
 //            echo 'File content: '.$file.' (size is '.implode('', $this->formatSize($info->uncompressedSize, 1)).')'.PHP_EOL;
             echo $archive->getFileContent($file);
         }
@@ -331,6 +331,7 @@ class CamApplication {
      */
     public function create($args)
     {
+        $password = isset($args['--password']) ? $args['--password'] : null;
         if (file_exists($args['ARCHIVE'])) {
             if (is_dir($args['ARCHIVE']))
                 echo $args['ARCHIVE'].' is a directory!'.PHP_EOL;
@@ -338,7 +339,7 @@ class CamApplication {
                 echo 'File '.$args['ARCHIVE'].' already exists!'.PHP_EOL;
             }
         } else {
-            $archived_files = UnifiedArchive::archiveFiles($args['FILES_ON_DISK'], $args['ARCHIVE']);
+            $archived_files = UnifiedArchive::archiveFiles($args['FILES_ON_DISK'], $args['ARCHIVE'], BasicDriver::COMPRESSION_AVERAGE, $password);
             if ($archived_files === false)
                 echo 'Error'.PHP_EOL;
             else

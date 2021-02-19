@@ -139,14 +139,6 @@ class AlchemyZippy extends BasicDriver
     }
 
     /**
-     * @return false
-     */
-    public static function canUsePassword()
-    {
-        return false;
-    }
-
-    /**
      * @inheritDoc
      */
     public function __construct($archiveFileName, $format, $password = null)

@@ -3,9 +3,9 @@ Here is a list of available drivers with description in selection priority.
 | Driver       | Memory-effective streaming            | appending | updating | encrypt | creation | type | formats   |
 |--------------|-------------------------------------- |-----------|----------|---------|----------|-----------|------|
 | Zip          | ✔                                     | ✔         | ✔        | ✔    | ✔          | extension | zip |
-| Rar          | ✔                                     |           |          | ✔    |           | extension   | rar |
+| Rar          | ✔                                     |           |          |      |           | extension   | rar |
 | TarByPhar    |                                       | ✔         | ✔        |     | ✔           | extensions | tar, tar-gz, tar-bz2 |
-| TarByPear    |                                       |           |          |     | ✔          | library + extensions | tar, tar-gz, tar-bz2, tar-Z, tar-xz |
+| TarByPear    |                                       | ✔         |          |     | ✔          | library + extensions | tar, tar-gz, tar-bz2, tar-Z, tar-xz |
 | SevenZip     |                                       | ✔         | ✔        | ✔    | ✔          | library + program | zip, rar, tar, iso, uefi, ... |
 | AlchemyZippy |                                       | ✔         | ✔        |     | ✔          | library + programs | zip, tar, tar-gz, tar-bz2 |
 | Gzip         | ✔                                     |           |          |     | ✔            | extension | gz |
@@ -28,7 +28,7 @@ Install TarByPear, AlchemyZippy libraries.
 - Type: php-extension (`zip`)
 - Formats: zip
 - All functions available
-- Can open archives with passwords.
+- Can open and create archives with passwords.
 
 ## Rar
 - Type: php-extension (`rar`)
@@ -42,7 +42,7 @@ Install TarByPear, AlchemyZippy libraries.
 - Has a bug [#71966](https://bugs.php.net/bug.php?id=71966&thanks=10) in `ext-phar` ([related issue](https://github.com/wapmorgan/UnifiedArchive/issues/12)) - an archive will `./` in paths cannot be opened.
 
 ## TarByPear
-- Type: library ([`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar)) and optionally php-extensions (`zlib`, `bzip2`)
+- Type: library ([`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar)) and optionally php-extensions (`zlib`, `bzip2`, `xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz))
 - Formats: tar, tar.gz, tar.bz2, tar.xz, tar.Z
 - Works with binary data in php-land (= eats a lot of memory for big archives).
 - Not available: updating.
@@ -51,7 +51,7 @@ Install TarByPear, AlchemyZippy libraries.
 - Type: library ([`gemorroj/archive7z`](https://packagist.org/packages/gemorroj/archive7z)) and console program p7zip ([`7z`](http://p7zip.sourceforge.net/))
 - Formats: 7z, XZ, BZIP2, GZIP, TAR, ZIP, WIM, AR, ARJ, CAB, CHM, CPIO, CramFS, DMG, EXT, FAT, GPT, HFS, IHEX, ISO, LZH, LZMA, MBR, MSI, NSIS, NTFS, QCOW2, RAR, RPM, SquashFS, UDF, UEFI, VDI, VHD, VMDK, WIM, XAR and Z
 - Works via command line (= should be available `proc_*` functions).
-- Can open archives with passwords.
+- Can open and create archives with passwords (only ZIP format).
 
 ## AlchemyZippy
 - Type: library ([`alchemy/zippy`](https://packagist.org/packages/alchemy/zippy)) and console programs:

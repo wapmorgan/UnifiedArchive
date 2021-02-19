@@ -235,7 +235,7 @@ class Formats
      */
     public static function canEncrypt($format)
     {
-        return static::checkFormatSupport($format, 'canUsePassword');
+        return static::checkFormatSupport($format, 'canEncrypt');
     }
 
     /**

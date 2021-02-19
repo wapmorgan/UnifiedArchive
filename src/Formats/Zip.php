@@ -248,10 +248,11 @@ class Zip extends BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int
      * @throws ArchiveCreationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => ZipArchive::CM_STORE,
@@ -268,6 +269,7 @@ class Zip extends BasicDriver
             throw new ArchiveCreationException('ZipArchive error: '.$result);
 
         $can_set_compression_level = method_exists($zip, 'setCompressionName');
+        $can_encrypt = method_exists($zip, 'setEncryptionName');
 
         foreach ($files as $localName => $fileName) {
             if ($fileName === null) {
@@ -278,6 +280,9 @@ class Zip extends BasicDriver
                     throw new ArchiveCreationException('Could not archive file "'.$fileName.'": '.$zip->getStatusString(), $zip->status);
                 if ($can_set_compression_level) {
                     $zip->setCompressionName($localName, $compressionLevelMap[$compressionLevel]);
+                }
+                if ($password !== null) {
+                    $zip->setEncryptionName($localName, ZipArchive::EM_AES_256, $password);
                 }
             }
         }
@@ -324,7 +329,7 @@ class Zip extends BasicDriver
     /**
      * @return bool
      */
-    public static function canUsePassword()
+    public static function canEncrypt()
     {
         return true;
     }

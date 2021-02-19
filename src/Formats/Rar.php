@@ -212,23 +212,4 @@ class Rar extends BasicDriver
     {
         throw new UnsupportedOperationException();
     }
-
-    /**
-     * @param array $files
-     * @param string $archiveFileName
-     * @param int $compressionLevel
-     * @throws UnsupportedOperationException
-     */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return bool
-     */
-    public static function canUsePassword()
-    {
-        return true;
-    }
 }

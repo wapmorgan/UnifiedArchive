@@ -266,16 +266,4 @@ class Iso extends BasicDriver
     {
         throw new UnsupportedOperationException();
     }
-
-    /**
-     * @param array $files
-     * @param string $archiveFileName
-     * @param int $compressionLevel
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
-    {
-        throw new UnsupportedOperationException();
-    }
 }

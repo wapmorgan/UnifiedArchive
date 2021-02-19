@@ -28,10 +28,12 @@ class SevenZip extends BasicDriver
     {
         return [
             Formats::SEVEN_ZIP,
+            Formats::ZIP,
             Formats::RAR,
             Formats::TAR,
-            Formats::TAR_GZIP,
-            Formats::TAR_BZIP,
+            // disabled
+//            Formats::TAR_GZIP,
+//            Formats::TAR_BZIP,
             Formats::CAB,
             Formats::ISO,
             Formats::ARJ,
@@ -58,10 +60,11 @@ class SevenZip extends BasicDriver
 
         switch ($format) {
             case Formats::SEVEN_ZIP:
+            case Formats::ZIP:
             case Formats::RAR:
             case Formats::TAR:
-            case Formats::TAR_GZIP:
-            case Formats::TAR_BZIP:
+//            case Formats::TAR_GZIP:
+//            case Formats::TAR_BZIP:
             case Formats::CAB:
             case Formats::ISO:
             case Formats::ARJ:
@@ -301,10 +304,11 @@ class SevenZip extends BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int
      * @throws ArchiveCreationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => 0,
@@ -316,6 +320,8 @@ class SevenZip extends BasicDriver
 
         try {
             $seven_zip = new Archive7z($archiveFileName);
+            if ($password !== null)
+                $seven_zip->setPassword($password);
             $seven_zip->setCompressionLevel($compressionLevelMap[$compressionLevel]);
             foreach ($files as $localName => $filename) {
                 if ($filename !== null) {
@@ -366,7 +372,7 @@ class SevenZip extends BasicDriver
     /**
      * @return bool
      */
-    public static function canUsePassword()
+    public static function canEncrypt()
     {
         return true;
     }

@@ -36,7 +36,7 @@ USAGE: cam (-l|--list)  ARCHIVE
        cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
        cam (-a|--add)     ARCHIVE FILES_ON_DISK...
        cam (-A|--add-from-stdin) ARCHIVE FILE_IN_ARCHIVE
-       cam (-c|--create)  ARCHIVE FILES_ON_DISK...
+       cam (-c|--create) [--password=PASSWORD] ARCHIVE FILES_ON_DISK...
        cam (-f|--formats)
        cam (-D|--drivers)
 
@@ -60,7 +60,7 @@ ACTIONS:
 
 OPTIONS:
     --password=PASSWORD
-        Password for decompression
+        Password for decompression or compression
 
     --replace=all|ask|none|time|size
         Set how should be resolved cases in that extracting files already exist.

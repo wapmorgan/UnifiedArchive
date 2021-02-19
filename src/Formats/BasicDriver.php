@@ -82,7 +82,7 @@ abstract class BasicDriver
     /**
      * @return false
      */
-    public static function canUsePassword()
+    public static function canEncrypt()
     {
         return false;
     }
@@ -91,10 +91,11 @@ abstract class BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int Number of archived files
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         throw new UnsupportedOperationException();
     }

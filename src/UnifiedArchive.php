@@ -463,7 +463,7 @@ class UnifiedArchive
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
+    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
     {
         if (file_exists($archiveName))
             throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
@@ -473,10 +473,13 @@ class UnifiedArchive
         if (!Formats::canCreate($info['type']))
             throw new UnsupportedArchiveException('Unsupported archive type: '.$info['type'].' of archive '.$archiveName);
 
+        if ($password !== null && !Formats::canEncrypt($info['type']))
+            throw new UnsupportedOperationException('Archive type '.$info['type'].' can not be encrypted');
+
         /** @var BasicDriver $handler_class */
         $driver = Formats::getFormatDriver($info['type'], true);
 
-        return $driver::createArchive($info['files'], $archiveName, $compressionLevel);
+        return $driver::createArchive($info['files'], $archiveName, $compressionLevel, $password);
     }
 
     /**

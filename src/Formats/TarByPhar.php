@@ -261,7 +261,15 @@ class TarByPhar extends BasicDriver
         return true;
     }
 
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    /**
+     * @param array $files
+     * @param string $archiveFileName
+     * @param int $compressionLevel
+     * @param null $password
+     * @return int
+     * @throws ArchiveCreationException
+     */
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         if (preg_match('~^(.+)\.(tar\.(gz|bz2))$~i', $archiveFileName, $match)) {
             $ext = $match[2];
