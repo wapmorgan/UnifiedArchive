@@ -47,12 +47,14 @@ class Zip extends BasicDriver
 
     public static function getDescription()
     {
-        return 'adapter for ext-zip';
+        return 'adapter for ext-zip'.(extension_loaded('zip') && defined('\ZipArchive::LIBZIP_VERSION') ? ' ('. ZipArchive::LIBZIP_VERSION.')' : null);
     }
 
     public static function getInstallationInstruction()
     {
-        return 'install `zip` extension';
+        return !extension_loaded('zip')
+            ? 'install `zip` extension'
+            : null;
     }
 
     /**
@@ -272,7 +274,7 @@ class Zip extends BasicDriver
         $can_encrypt = method_exists($zip, 'setEncryptionName');
 
         if ($password !== null && !$can_encrypt) {
-            throw new ArchiveCreationException('Encryption is not supported');
+            throw new ArchiveCreationException('Encryption is not supported on current platform');
         }
 
         foreach ($files as $localName => $fileName) {

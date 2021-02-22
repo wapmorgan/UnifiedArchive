@@ -97,9 +97,14 @@ class TarByPear extends BasicDriver
      * @param null $password
      * @return int
      * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
+        if ($password !== null) {
+            throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
+        }
+
         $compression = null;
         switch (strtolower(pathinfo($archiveFileName, PATHINFO_EXTENSION))) {
             case 'gz':

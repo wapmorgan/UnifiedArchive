@@ -42,7 +42,9 @@ class Bzip extends OneFileDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `bzip2` extension';
+        return !extension_loaded('bz2')
+            ? 'install `bz2` extension'
+            : null;
     }
 
     /**

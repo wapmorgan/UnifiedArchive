@@ -12,6 +12,7 @@ use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class TarByPhar extends BasicDriver
@@ -40,7 +41,7 @@ class TarByPhar extends BasicDriver
             Formats::TAR,
             Formats::TAR_GZIP,
             Formats::TAR_BZIP,
-            Formats::ZIP,
+//            Formats::ZIP,
         ];
     }
 
@@ -53,7 +54,7 @@ class TarByPhar extends BasicDriver
         $availability = class_exists('\PharData');
         switch ($format) {
             case Formats::TAR:
-            case Formats::ZIP:
+//            case Formats::ZIP:
                 return $availability;
             case Formats::TAR_GZIP:
                 return $availability && extension_loaded('zlib');
@@ -270,9 +271,14 @@ class TarByPhar extends BasicDriver
      * @param null $password
      * @return int
      * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
+        if ($password !== null) {
+            throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
+        }
+
         if (preg_match('~^(.+)\.(tar\.(gz|bz2))$~i', $archiveFileName, $match)) {
             $ext = $match[2];
             $basename = $match[1];
@@ -295,7 +301,6 @@ class TarByPhar extends BasicDriver
                         throw new ArchiveCreationException('Error when adding file '.$localName.' to archive');
                     }
                 }
-                echo 'Added '.$localName.PHP_EOL;
             }
         } catch (Exception $e) {
             throw new ArchiveCreationException('Error when creating archive: '.$e->getMessage(), $e->getCode(), $e);

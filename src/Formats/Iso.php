@@ -58,7 +58,9 @@ class Iso extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install library `phpclasses/php-iso-file`';
+        return !class_exists('\CISOFile')
+            ? 'install library `phpclasses/php-iso-file`'
+            : null;
     }
 
     /**

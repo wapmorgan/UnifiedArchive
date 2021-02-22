@@ -48,7 +48,9 @@ class Lzma extends OneFileDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `xz` extension';
+        return !extension_loaded('xz')
+            ? 'install `xz` extension'
+            : null;
     }
 
     /**

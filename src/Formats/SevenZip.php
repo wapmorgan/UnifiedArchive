@@ -86,7 +86,10 @@ class SevenZip extends BasicDriver
      */
     public static function getDescription()
     {
-        return 'php-library and console program';
+        return 'php-library and console program'
+            .(class_exists('\Archive7z\Archive7z') && ($version = Archive7z::getBinaryVersion()) !== false
+                ? ' ('.$version.')'
+                : null);
     }
 
     /**
@@ -94,7 +97,13 @@ class SevenZip extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install library `gemorroj/archive7z` and console program p7zip (7z)';
+        if (!class_exists('\Archive7z\Archive7z'))
+            return 'install library `gemorroj/archive7z` and console program p7zip (7za)';
+
+        if (Archive7z::getBinaryVersion() === false)
+            return 'install console program p7zip (7za)';
+
+        return null;
     }
 
     /**
@@ -375,6 +384,7 @@ class SevenZip extends BasicDriver
     /**
      * @param $format
      * @return bool
+     * @throws \Archive7z\Exception
      */
     public static function canDeleteFiles($format)
     {
@@ -388,6 +398,6 @@ class SevenZip extends BasicDriver
      */
     public static function canEncrypt($format)
     {
-        return ($format === Formats::ZIP && self::canRenameFiles());
+        return in_array($format, [Formats::ZIP, Formats::SEVEN_ZIP]) && self::canRenameFiles();
     }
 }

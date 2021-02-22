@@ -157,6 +157,9 @@ abstract class OneFileDriver extends BasicDriver
         if (empty($files)) {
             throw new EmptyFileListException();
         }
+        if ($password !== null) {
+            throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
+        }
 
         $filename = array_shift($files);
 

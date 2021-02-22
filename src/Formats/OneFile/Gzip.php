@@ -35,7 +35,7 @@ class Gzip extends OneFileDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-zlib';
+        return 'adapter for ext-zlib'.(defined('ZLIB_VERSION') ? ' ('.ZLIB_VERSION.')' : null);
     }
 
     /**
@@ -43,7 +43,9 @@ class Gzip extends OneFileDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `zlib` extension';
+        return !extension_loaded('zlib')
+            ? 'install `zlib` extension'
+            : null;
     }
 
     /**

@@ -50,7 +50,9 @@ class Rar extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `rar` extension';
+        return !extension_loaded('rar')
+            ? 'install `rar` extension'
+            : null;
     }
 
     /**

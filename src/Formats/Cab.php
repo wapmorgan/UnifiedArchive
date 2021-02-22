@@ -50,7 +50,9 @@ class Cab extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install library `wapmorgan/cab-archive`';
+        return !class_exists('\CabArchive')
+            ? 'install library `wapmorgan/cab-archive`'
+            : null;
     }
 
     /**
