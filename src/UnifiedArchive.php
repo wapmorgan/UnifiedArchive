@@ -350,7 +350,7 @@ class UnifiedArchive
             throw new InvalidArgumentException($file.' is not a valid file to add in archive');
 
         return ($inArchiveName !== null
-                ? $this->addFiles([$file => $inArchiveName])
+                ? $this->addFiles([$inArchiveName => $file])
                 : $this->addFiles([$file])) === 1;
     }
 
@@ -384,7 +384,7 @@ class UnifiedArchive
             throw new InvalidArgumentException($directory.' is not a valid directory to add in archive');
 
         return ($inArchivePath !== null
-                ? $this->addFiles([$directory => $inArchivePath])
+                ? $this->addFiles([$inArchivePath => $directory])
                 : $this->addFiles([$inArchivePath])) > 0;
     }
 
@@ -576,8 +576,6 @@ class UnifiedArchive
             else if (is_file($nodes))
                 $files[basename($nodes)] = $nodes;
         }
-
-        var_dump($files);
 
         return $files;
     }
