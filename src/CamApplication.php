@@ -87,9 +87,11 @@ class CamApplication {
         foreach (Formats::$drivers as $i => $driverClass) {
             $description = $driverClass::getDescription();
             $install = $driverClass::getInstallationInstruction();
+            if (!empty($install))
+                $install = '- '.$install.PHP_EOL;
             $formats = $driverClass::getSupportedFormats();
-            echo ($i+1).'. '.$driverClass . " - ".$description.PHP_EOL
-                .'- '.$install.PHP_EOL . PHP_EOL;
+            echo ($i+1).'. '.$driverClass.' - '. (!empty($install) ? 'not installed' : 'installed') . ' - '.$description.PHP_EOL
+                .$install.PHP_EOL;
         }
     }
 
