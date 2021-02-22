@@ -1,7 +1,19 @@
 # Change Log
 ### 1.1.2 - Feb **, 2021
 
-Renamed methods:
+**Fixed:**
+- Fixed `PharByPear` driver for _tar.xz_ support.
+- Disabled _tar.gz, tar.bzip2_ support in `SevenZip` driver as it isn't supported properly.
+
+**New features**:
+- Added `Formats::canStream()` to check if an archive can be streamed.
+- Added ability to create archives, encrypted with password.
+
+**Methods renamed:**
+- `UnifiedArchive->getFileResource` -> `UnifiedArchive->getFileStream`.
+
+Old methods exist, but marked as deprecated.
+
 
 ### 1.1.1 - Feb 13, 2021
 Cleaned package.

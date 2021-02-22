@@ -5,6 +5,7 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
 1. `Formats` keeps information about formats support and specific format functions.
 - [`Formats::detectArchiveFormat`](#Formats--detectArchiveFormat)
 - [`Formats::canOpen`](#Formats--canOpen)
+- [`Formats::canStream`](#Formats--canStream)
 - [`Formats::canCreate`](#Formats--canCreate)
 - [`Formats::canAppend`](#Formats--canAppend)
 - [`Formats::canUpdate`](#Formats--canUpdate)
@@ -64,6 +65,13 @@ by call to one of  `UnifiedArchive` methods.
   Returns `true` if given archive can be opened and `false` otherwise.
   ./vendor/bin/cam --formats`_
   Returns `true` if given archive can be opened and `false` otherwise.
+
+- <span id="Formats--canStream"></span>
+    ```php
+    Formats::canStream(string $format): boolean
+    ```
+
+  Tests if a specified archive can be streamed.
 
 - <span id="Formats--canCreate"></span>
     ```php
