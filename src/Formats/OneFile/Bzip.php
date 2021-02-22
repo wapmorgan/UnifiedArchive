@@ -69,7 +69,7 @@ class Bzip extends OneFileDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName = null)
+    public function getFileStream($fileName = null)
     {
         return bzopen($this->fileName, 'r');
     }

@@ -146,12 +146,9 @@ class Cab extends BasicDriver
      * @return bool|resource|string
      * @throws Exception
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
-        $resource = fopen('php://temp', 'r+');
-        fwrite($resource, $this->cab->getFileContent($fileName));
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($this->cab->getFileContent($fileName));
     }
 
     /**

@@ -56,6 +56,14 @@ class Rar extends BasicDriver
     /**
      * @inheritDoc
      */
+    public static function canStream($format)
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function __construct($archiveFileName, $format, $password = null)
     {
         \RarException::setUsingExceptions(true);
@@ -150,7 +158,7 @@ class Rar extends BasicDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         $entry = $this->rar->getEntry($fileName);
         if ($entry->isDirectory()) return false;

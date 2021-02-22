@@ -188,14 +188,10 @@ class SevenZip extends BasicDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
-        $resource = fopen('php://temp', 'r+');
         $entry = $this->sevenZip->getEntry($fileName);
-
-        fwrite($resource, $entry->getContent());
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($entry->getContent());
     }
 
     /**
@@ -343,8 +339,17 @@ class SevenZip extends BasicDriver
      */
     public static function canCreateArchive($format)
     {
-        if ($format === Formats::RAR) return false;
-        return static::canAddFiles($format);
+        if (in_array($format, [
+            Formats::SEVEN_ZIP,
+            Formats::BZIP,
+            Formats::GZIP,
+            Formats::TAR,
+            Formats::LZMA,
+            Formats::ZIP]
+        ))
+            return self::canRenameFiles();
+
+        return false;
     }
 
     /**
@@ -354,7 +359,15 @@ class SevenZip extends BasicDriver
      */
     public static function canAddFiles($format)
     {
-        if ($format === Formats::RAR) return false;
+        return self::canCreateArchive($format);
+    }
+
+    /**
+     * @return bool
+     * @throws \Archive7z\Exception
+     */
+    protected static function canRenameFiles()
+    {
         $version = Archive7z::getBinaryVersion();
         return $version !== false && version_compare('9.30', $version, '<=');
     }
@@ -365,15 +378,16 @@ class SevenZip extends BasicDriver
      */
     public static function canDeleteFiles($format)
     {
-        if ($format === Formats::RAR) return false;
-        return true;
+        return self::canCreateArchive($format);
     }
 
     /**
+     * @param $format
      * @return bool
+     * @throws \Archive7z\Exception
      */
-    public static function canEncrypt()
+    public static function canEncrypt($format)
     {
-        return true;
+        return ($format === Formats::ZIP && self::canRenameFiles());
     }
 }

@@ -195,6 +195,17 @@ class Formats
     }
 
     /**
+     * Checks whether specified archive can be streamed
+     *
+     * @param string $format One of predefined archive types (class constants)
+     * @return bool
+     */
+    public static function canStream($format)
+    {
+        return static::checkFormatSupport($format, 'canStream');
+    }
+
+    /**
      * Checks whether specified archive can be created
      *
      * @param string $format One of predefined archive types (class constants)
@@ -288,6 +299,7 @@ class Formats
         foreach (static::$availableFormats as $format => $formatDrivers) {
             $result[$format] = [
                 'open' => static::canOpen($format),
+                'stream' => static::canStream($format),
                 'create' => static::canCreate($format),
                 'append' => static::canAppend($format),
                 'update' => static::canUpdate($format),

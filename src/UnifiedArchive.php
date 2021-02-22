@@ -243,13 +243,13 @@ class UnifiedArchive
      * @return resource
      * @throws NonExistentArchiveFileException
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         if (!in_array($fileName, $this->files, true)) {
             throw new NonExistentArchiveFileException('File ' . $fileName . ' does not exist in archive');
         }
 
-        return $this->archive->getFileResource($fileName);
+        return $this->archive->getFileStream($fileName);
     }
 
     /**
@@ -388,11 +388,17 @@ class UnifiedArchive
                 : $this->addFiles([$inArchivePath])) > 0;
     }
 
+    /**
+     * @return string
+     */
     public function getDriverType()
     {
         return get_class($this->archive);
     }
 
+    /**
+     * @return BasicDriver
+     */
     public function getDriver()
     {
         return $this->archive;
@@ -548,9 +554,9 @@ class UnifiedArchive
 
         // passed an extended list
         if (is_array($nodes)) {
-            foreach ($nodes as $source => $destination) {
-                if (is_numeric($source))
-                    $source = $destination;
+            foreach ($nodes as $destination => $source) {
+                if (is_numeric($destination))
+                    $destination = $source;
 
                 $destination = rtrim($destination, '/\\*');
 
@@ -570,6 +576,8 @@ class UnifiedArchive
             else if (is_file($nodes))
                 $files[basename($nodes)] = $nodes;
         }
+
+        var_dump($files);
 
         return $files;
     }
@@ -656,5 +664,18 @@ class UnifiedArchive
     public static function detectArchiveType($fileName, $contentCheck = true)
     {
         return Formats::detectArchiveFormat($fileName, $contentCheck);
+    }
+
+    /**
+     * Returns a resource for reading file from archive
+     *
+     * @deprecated See {{UnifiedArchive::getFileStream}}
+     * @param string $fileName File name in archive
+     * @return resource
+     * @throws NonExistentArchiveFileException
+     */
+    public function getFileResource($fileName)
+    {
+        return $this->getFileStream($fileName);
     }
 }

@@ -215,10 +215,10 @@ class AlchemyZippy extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         $member = $this->getMember($fileName);
-        return $member->getResource();
+        return self::wrapStringInStream((string)$member);
     }
 
     /**

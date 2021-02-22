@@ -28,7 +28,7 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
     - [`UnifiedArchive->getFileNames`](#UnifiedArchive--getFileNames)
     - [`UnifiedArchive->isFileExists`](#UnifiedArchive--isFileExists)
     - [`UnifiedArchive->getFileData`](#UnifiedArchive--getFileData)
-    - [`UnifiedArchive->getFileResource`](#UnifiedArchive--getFileResource)
+    - [`UnifiedArchive->getFileStream`](#UnifiedArchive--getFileStream)
     - [`UnifiedArchive->getFileContent`](#UnifiedArchive--getFileContent)
     - [`UnifiedArchive->extractFiles`](#UnifiedArchive--extractFiles)
   - Updating an archive:
@@ -251,9 +251,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
      described [later in the document](#archiveentry).
     If file is not in archive, `NonExistentArchiveFileException` is thrown.
 
-- <span id="UnifiedArchive--getFileResource"></span>
+- <span id="UnifiedArchive--getFileStream"></span>
     ```php
-    UnifiedArchive::getFileResource(string $fileName): resource
+    UnifiedArchive::getFileStream(string $fileName): resource
     ```
 
     Returns a resource of in-archive file that can be used to get it's content (by `fread()` and so on).

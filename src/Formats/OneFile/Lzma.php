@@ -75,7 +75,7 @@ class Lzma extends OneFileDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName = null)
+    public function getFileStream($fileName = null)
     {
         return xzopen($this->fileName, 'r');
     }

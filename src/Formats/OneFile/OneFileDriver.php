@@ -183,7 +183,18 @@ abstract class OneFileDriver extends BasicDriver
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function canCreateArchive($format)
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function canStream($format)
     {
         return true;
     }

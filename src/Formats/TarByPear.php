@@ -266,15 +266,12 @@ class TarByPear extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
-        $resource = fopen('php://temp', 'r+');
         if (!isset($this->pearFilesIndex[$fileName]))
             throw new NonExistentArchiveFileException('File '.$fileName.' is not found in archive files list');
 
-        fwrite($resource, $this->tar->extractInString($fileName));
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($this->tar->extractInString($fileName));
     }
 
     /**

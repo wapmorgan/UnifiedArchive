@@ -5,14 +5,13 @@ use Exception;
 use FilesystemIterator;
 use Phar;
 use PharData;
+use PharFileInfo;
 use RecursiveIteratorIterator;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class TarByPhar extends BasicDriver
@@ -41,6 +40,7 @@ class TarByPhar extends BasicDriver
             Formats::TAR,
             Formats::TAR_GZIP,
             Formats::TAR_BZIP,
+            Formats::ZIP,
         ];
     }
 
@@ -53,6 +53,7 @@ class TarByPhar extends BasicDriver
         $availability = class_exists('\PharData');
         switch ($format) {
             case Formats::TAR:
+            case Formats::ZIP:
                 return $availability;
             case Formats::TAR_GZIP:
                 return $availability && extension_loaded('zlib');
@@ -101,6 +102,10 @@ class TarByPhar extends BasicDriver
     {
         $information = new ArchiveInformation();
         $stream_path_length = strlen('phar://'.$this->archiveFileName.'/');
+        /**
+         * @var string $i
+         * @var PharFileInfo $file
+         */
         foreach (new RecursiveIteratorIterator($this->tar) as $i => $file) {
             $information->files[] = substr($file->getPathname(), $stream_path_length);
             $information->compressedFilesSize += $file->getCompressedSize();
@@ -159,12 +164,9 @@ class TarByPhar extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
-        $resource = fopen('php://temp', 'r+');
-        fwrite($resource, $this->tar->offsetGet($fileName)->getContent());
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($this->tar->offsetGet($fileName)->getContent());
     }
 
     /**
@@ -293,6 +295,7 @@ class TarByPhar extends BasicDriver
                         throw new ArchiveCreationException('Error when adding file '.$localName.' to archive');
                     }
                 }
+                echo 'Added '.$localName.PHP_EOL;
             }
         } catch (Exception $e) {
             throw new ArchiveCreationException('Error when creating archive: '.$e->getMessage(), $e->getCode(), $e);

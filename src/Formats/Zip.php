@@ -157,11 +157,10 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @param string $fileName
-     *
-     * @return bool|resource|string
+     * @param $fileName
+     * @return false|resource
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         return $this->zip->getStream($fileName);
     }
@@ -251,6 +250,7 @@ class Zip extends BasicDriver
      * @param null $password
      * @return int
      * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
     public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
@@ -271,6 +271,10 @@ class Zip extends BasicDriver
         $can_set_compression_level = method_exists($zip, 'setCompressionName');
         $can_encrypt = method_exists($zip, 'setEncryptionName');
 
+        if ($password !== null && !$can_encrypt) {
+            throw new ArchiveCreationException('Encryption is not supported');
+        }
+
         foreach ($files as $localName => $fileName) {
             if ($fileName === null) {
                 if ($zip->addEmptyDir($localName) === false)
@@ -281,7 +285,7 @@ class Zip extends BasicDriver
                 if ($can_set_compression_level) {
                     $zip->setCompressionName($localName, $compressionLevelMap[$compressionLevel]);
                 }
-                if ($password !== null) {
+                if ($password !== null && $can_encrypt) {
                     $zip->setEncryptionName($localName, ZipArchive::EM_AES_256, $password);
                 }
             }
@@ -300,8 +304,7 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @param $format
-     * @return bool
+     * @inheritDoc
      */
     public static function canCreateArchive($format)
     {
@@ -309,8 +312,7 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @param $format
-     * @return bool
+     * @inheritDoc
      */
     public static function canAddFiles($format)
     {
@@ -318,8 +320,7 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @param $format
-     * @return bool
+     * @inheritDoc
      */
     public static function canDeleteFiles($format)
     {
@@ -327,9 +328,17 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
-    public static function canEncrypt()
+    public static function canEncrypt($format)
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function canStream($format)
     {
         return true;
     }

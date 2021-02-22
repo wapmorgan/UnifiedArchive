@@ -189,13 +189,10 @@ class Iso extends BasicDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         $data = $this->prepareForFileExtracting($fileName);
-        $resource = fopen('php://temp', 'r+');
-        fwrite($resource, $this->iso->Read($data['size']));
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($this->iso->Read($data['size']));
     }
 
     /**

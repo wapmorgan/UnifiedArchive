@@ -30,10 +30,11 @@ class CamApplication {
      */
     public function checkFormats()
     {
-        echo "format\topen\tcreate\tappend\tupdate\tencrypt\tdrivers".PHP_EOL;
+        echo "format\topen\tstream\tcreate\tappend\tupdate\tencrypt\tdrivers".PHP_EOL;
         foreach(Formats::getFormatsReport() as $format => $config) {
             echo $format."\t"
                 .($config['open'] ? '+' : '-')."\t"
+                .($config['stream'] ? '+' : '-')."\t"
                 .($config['create'] ? '+' : '-')."\t"
                 .($config['append'] ? '+' : '-')."\t"
                 .($config['update'] ? '+' : '-')."\t"
@@ -339,11 +340,40 @@ class CamApplication {
                 echo 'File '.$args['ARCHIVE'].' already exists!'.PHP_EOL;
             }
         } else {
-            $archived_files = UnifiedArchive::archiveFiles($args['FILES_ON_DISK'], $args['ARCHIVE'], BasicDriver::COMPRESSION_AVERAGE, $password);
+            $files = [];
+            $is_absolute = $args['--path'] === 'absolute';
+
+            foreach ($args['FILES_ON_DISK'] as $i => $file) {
+                $file = realpath($file);
+                if ($is_absolute) {
+                    $files[] = $file;
+                } else {
+                    $files[basename($file)] = $file;
+                }
+            }
+
+            $archived_files = UnifiedArchive::archiveFiles($files, $args['ARCHIVE'], BasicDriver::COMPRESSION_AVERAGE, $password);
             if ($archived_files === false)
                 echo 'Error'.PHP_EOL;
             else
                 echo 'Created archive ' . $args['ARCHIVE'] . ' with ' . $archived_files . ' file(s) of total size ' . implode('', $this->formatSize(filesize($args['ARCHIVE']))) . PHP_EOL;
         }
+    }
+
+    public function createFake($args)
+    {
+        $files = [];
+        $is_absolute = $args['--path'] === 'absolute';
+
+        foreach ($args['FILES_ON_DISK'] as $i => $file) {
+            $file = realpath($file);
+            if ($is_absolute) {
+                $files[] = $file;
+            } else {
+                $files[basename($file)] = $file;
+            }
+        }
+
+        var_dump(UnifiedArchive::prepareForArchiving($files, $args['ARCHIVE']));
     }
 }

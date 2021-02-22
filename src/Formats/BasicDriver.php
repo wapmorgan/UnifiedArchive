@@ -80,9 +80,19 @@ abstract class BasicDriver
     }
 
     /**
+     * @param $format
      * @return false
      */
-    public static function canEncrypt()
+    public static function canEncrypt($format)
+    {
+        return false;
+    }
+
+    /**
+     * @param $format
+     * @return false
+     */
+    public static function canStream($format)
     {
         return false;
     }
@@ -143,9 +153,21 @@ abstract class BasicDriver
 
     /**
      * @param string $fileName
-     * @return bool|resource|string
+     * @return resource
      */
-    abstract public function getFileResource($fileName);
+    abstract public function getFileStream($fileName);
+
+    /**
+     * @param $string
+     * @return resource
+     */
+    public static function wrapStringInStream($string)
+    {
+        $resource = fopen('php://temp', 'r+');
+        fwrite($resource, $string);
+        rewind($resource);
+        return $resource;
+    }
 
     /**
      * @param string $outputFolder

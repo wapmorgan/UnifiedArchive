@@ -95,7 +95,7 @@ class Gzip extends OneFileDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName = null)
+    public function getFileStream($fileName = null)
     {
         return gzopen($this->fileName, 'rb');
     }

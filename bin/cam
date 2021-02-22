@@ -34,9 +34,10 @@ USAGE: cam (-l|--list)  ARCHIVE
        cam (-p|--print) [--password=PASSWORD] ARCHIVE FILES_IN_ARCHIVE...
        cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
        cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
-       cam (-a|--add)     ARCHIVE FILES_ON_DISK...
+       cam (-a|--add) [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
        cam (-A|--add-from-stdin) ARCHIVE FILE_IN_ARCHIVE
-       cam (-c|--create) [--password=PASSWORD] ARCHIVE FILES_ON_DISK...
+       cam (-c|--create) [--password=PASSWORD] [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
+       cam (-C|--create-fake) [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
        cam (-f|--formats)
        cam (-D|--drivers)
 
@@ -59,25 +60,25 @@ ACTIONS:
       -D(--drivers) List all drivers with installation information
 
 OPTIONS:
-    --password=PASSWORD
-        Password for decompression or compression
+    --password=PASSWORD    Password for decompression or compression
 
-    --replace=all|ask|none|time|size
-        Set how should be resolved cases in that extracting files already exist.
+    --replace=(all|ask|none|time|size)    Set how should be resolved cases in that extracting files already exist. [default:all]
             all - replaces all files
             ask - ask for manual resolution on every case
             none - preserve all existing on disk files
             time - selects file with later timestamp
             size - selects file with bigger size
 
-    --flat=[file,path]
-        Removes all hierarchy and stores all files in one directory. With path option file name will be prepended with in-archive path (all "/" replaced by "-").
+    --path=[relative|absolute]  Method of path processing [default: relative]
+        Used for archive creation and appending.
+            If "relative" used, then "cam -c archive.zip /home/user/abc /home/user/folder/" will create an archive with 
+            "abc" and "folder" members in archive. If "absolute" is used, then members in archive will have absolute paths
+            (/home/user/abc and /home/user/folder).
 
     --exclude FILES...
         or --exclude /PATTERN/. Excludes one or few files, directories by exact in-archive path or by regular expression pattern.
 
-    --output=DIRECTORY
-        Set output directory in that all files will be extracted.
+    --output=DIRECTORY    Set output directory in that all files will be extracted.
 DOC;
 
 $args = Docopt::handle($doc, ['version' => UnifiedArchive::VERSION]);
@@ -93,6 +94,7 @@ $actions = [
     'a:add' => 'add',
     'A:add-from-stdin' => 'addFromStdin',
     'c:create' => 'create',
+    'C:create-fake' => 'createFake',
     'f:formats' => 'checkFormats',
     'D:drivers' => 'checkDrivers',
 ];
