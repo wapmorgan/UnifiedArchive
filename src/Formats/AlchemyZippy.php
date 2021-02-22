@@ -1,13 +1,16 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Formats;
 
+use Alchemy\Zippy\Archive\Member;
 use Alchemy\Zippy\Exception\NoAdapterOnPlatformException;
 use Alchemy\Zippy\Zippy;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class AlchemyZippy extends BasicDriver
@@ -38,6 +41,11 @@ class AlchemyZippy extends BasicDriver
     protected $format;
 
     /**
+     * @var Member[]
+     */
+    protected $members;
+
+    /**
      * @return mixed|void
      */
     public static function getSupportedFormats()
@@ -54,8 +62,7 @@ class AlchemyZippy extends BasicDriver
     {
         if (!class_exists('\Alchemy\Zippy\Zippy'))
             static::$zippy = false;
-
-        if (static::$zippy === null)
+        else if (static::$zippy === null)
             static::$zippy = Zippy::load();
     }
 
@@ -92,7 +99,10 @@ class AlchemyZippy extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install library `alchemy/zippy` and console programs (tar, zip)';
+        self::init();
+        return static::$zippy === false
+            ? 'install library `alchemy/zippy` and console programs (tar, zip)'
+            : null;
     }
 
     /**
@@ -116,7 +126,7 @@ class AlchemyZippy extends BasicDriver
      */
     public static function canCreateArchive($format)
     {
-        return false;
+        return true;
     }
 
     /**
@@ -125,7 +135,7 @@ class AlchemyZippy extends BasicDriver
      */
     public static function canAddFiles($format)
     {
-        return false;
+        return true;
     }
 
     /**
@@ -134,7 +144,30 @@ class AlchemyZippy extends BasicDriver
      */
     public static function canDeleteFiles($format)
     {
-        return false;
+        return true;
+    }
+
+    /**
+     * @param array $files
+     * @param string $archiveFileName
+     * @param int $compressionLevel
+     * @param null $password
+     * @return int
+     * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
+     */
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    {
+        if ($password !== null) {
+            throw new UnsupportedOperationException('AlchemyZippy could not encrypt an archive');
+        }
+
+        try {
+            $archive = static::$zippy->create($archiveFileName, $files);
+        } catch (Exception $e) {
+            throw new ArchiveCreationException('Could not create archive: '.$e->getMessage(), $e->getCode(), $e);
+        }
+        return count($files);
     }
 
     /**
@@ -160,6 +193,7 @@ class AlchemyZippy extends BasicDriver
                 continue;
 
             $this->files[] = $information->files[] = str_replace('\\', '/', $member->getLocation());
+            $this->members[str_replace('\\', '/', $member->getLocation())] = $member;
             $information->compressedFilesSize += (int)$member->getSize();
             $information->uncompressedFilesSize += (int)$member->getSize();
         }
@@ -184,13 +218,15 @@ class AlchemyZippy extends BasicDriver
 
     protected function getMember($fileName)
     {
-        foreach ($this->archive->getMembers() as $member) {
-            if ($member->isDir())
-                continue;
-            if ($member->getLocation() === $fileName)
-                return $member;
-        }
-        return null;
+        return $this->members[$fileName];
+
+//        foreach ($this->archive->getMembers() as $member) {
+//            if ($member->isDir())
+//                continue;
+//            if ($member->getLocation() === $fileName)
+//                return $member;
+//        }
+//        return null;
     }
 
     /**

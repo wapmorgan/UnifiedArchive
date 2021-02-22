@@ -61,6 +61,10 @@ Install TarByPear, AlchemyZippy libraries.
 - Works via command line (= should be available `proc_*` functions).
 - All functions
 
+**If you install SevenZip and AlchemyZippy**:
+1. You should specify symfony/console version before installation to any **3.x.x version**: `composer require symfony/process:~3.4`, because they require different `symfony/process` versions.
+2. Install archive7z version 4.0.0: `composer require gemorroj/archive7z:~4.0`
+
 ## Cab
 - Type: library ([`wapmorgan/cab-archive`](https://packagist.org/packages/wapmorgan/cab-archive))
 - Formats: cab
