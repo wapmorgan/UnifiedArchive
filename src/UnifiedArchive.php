@@ -84,11 +84,13 @@ class UnifiedArchive
      * @param string $fileName Archive filename
      * @param string $format Archive type
      * @param string|null $password
-     * @throws UnsupportedOperationException
      */
     public function __construct($fileName, $format, $password = null)
     {
         $driver = Formats::getFormatDriver($format);
+        if ($driver === false) {
+            throw new \RuntimeException('Driver for '.$format.' ('.$fileName.') is not found');
+        }
 
         $this->format = $format;
         $this->archiveSize = filesize($fileName);
