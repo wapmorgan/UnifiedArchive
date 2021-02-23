@@ -1,19 +1,22 @@
 # Change Log
 ### 1.1.2 - Feb **, 2021
 
-**Fixed:**
-- Fixed `PharByPear` driver for _tar.xz_ support.
-- Disabled _tar.gz, tar.bzip2_ support in `SevenZip` driver as it isn't supported properly.
-
 **New features**:
 - Added `Formats::canStream()` to check if an archive can be streamed.
-- Added ability to create archives, encrypted with password.
+- Added ability to create archives, encrypted with password (only *zip* (`Zip`, `SevenZip`) and *7z* (`SevenZip`)) - added nullable `$password` argument to:
+    - `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)`
+    - `UnifiedArchive::archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)`
+    - `UnifiedArchive::archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)`
+
+**Fixed:**
+- Fixed `TarByPear` driver: _tar.xz_ support and folders detection.
+- Fixed `SevenZip` driver: disabled _tar.gz, tar.bzip2_ support as it isn't supported properly and described which formats driver can create, append, modify and encrypt.
+- Fixed `Zip` driver:
 
 **Methods renamed:**
 - `UnifiedArchive->getFileResource` -> `UnifiedArchive->getFileStream`.
 
 Old methods exist, but marked as deprecated.
-
 
 ### 1.1.1 - Feb 13, 2021
 Cleaned package.
@@ -22,9 +25,9 @@ Cleaned package.
 **New features**:
 - Added ability to open archives encrypted with password - added `$password` argument to `UnifiedArchive::open($fileName, $password = null)`. Works only with: zip, rar, 7z.   
 - Added ability to adjust compression level for new archives - added `$compressionLevel` argument (with default `BasicDriver::COMPRESSION_AVERAGE` level) to:
-    - `UnifiedArchive->archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
-    - `UnifiedArchive->archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
-    - `UnifiedArchive->archiveDirectory($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive::archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
+    - `UnifiedArchive::archiveDirectory($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)`
   Works only with: zip, gzip.
 - Added ability to append the archive with a file from string - added `addFileFromString` method:
   `UnifiedArchive->addFileFromString(string $inArchiveName, string $content)`.

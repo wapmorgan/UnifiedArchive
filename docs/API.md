@@ -123,12 +123,12 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive::archiveDirectory"></span>
     ```php
-    UnifiedArchive::archiveDirectory(string $directory, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): boolean
+    UnifiedArchive::archiveDirectory(string $directory, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): boolean
     ```
 
     Creates an archive with all content from given directory and saves archive to `$archiveName` (format is
     resolved by extension). All files have relative path in the archive. By `$compressionLevel` you can adjust
-    compression level for files. If case of success, `true` is returned.
+    compression level for files. By `$password` you can set password for an archive. If case of success, `true` is returned.
 
     Available values for compression:
     - `BasicFormat::COMPRESSION_NONE`
@@ -145,11 +145,11 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>
     ```php
-    UnifiedArchive::archiveFile(string $file, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): boolean
+    UnifiedArchive::archiveFile(string $file, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): boolean
     ```
 
     Creates an archive with file `$file` and saves archive to `$archiveName` (format is
-    resolved by extension). File will has only relative name in the archive.
+    resolved by extension). File will have only relative name in the archive.
     If case of success, `true` is returned.
 
     Throws:
@@ -160,12 +160,12 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive--archiveFiles"></span>
     ```php
-    UnifiedArchive::archiveFiles(array $files, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): int
+    UnifiedArchive::archiveFiles(array $files, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): int
     ```
 
     Creates an archive with given `$files` list. `$files` is an array of files or directories.
     If file/directory passed with numeric key (e.g `['file', 'directory']`), then file/directory will have it's full
-    path in archive. If file/directory is a key (e.g `['file1' => 'in_archive_path']`), then file/directory will have
+    path in an archive. If file/directory is a key (e.g `['in_archive_path' => 'file1']`), then file/directory will have
     path as it's value.
     In case of success, number of stored files will be returned.
 
@@ -348,8 +348,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
     Packs given `$files` into archive. `$files` is an array of files or directories.
     If file/directory passed with numeric key (e.g `['file', 'directory']`), then file/directory will have it's full
-    path in archive. If file/directory is a key (e.g `['file1' => 'in_archive_path']`), then file/directory will have
-    path as it's value.
+    path in archive. If file/directory is a key (e.g `['in_archive_path' => 'file1']`), then file/directory will have
+    path as it's key.
     If any error occurred (such as file already exists, files list is empty, ...), an `\Exception` is throwing.
     In case of success, number of packed files will be returned.
 

@@ -8,9 +8,9 @@ listing, reading, extracting and creation + built-in console archive manager.
 [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Latest Unstable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/unstable)](https://packagist.org/packages/wapmorgan/unified-archive)
 
-Tests & Quality: [![Build status](https://travis-ci.org/wapmorgan/UnifiedArchive.svg?branch=0.1.x)](https://travis-ci.org/wapmorgan/UnifiedArchive)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/quality-score.png?b=0.1.x)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
-[![Code Coverage](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/coverage.png?b=0.1.x)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
+Tests & Quality: [![Build status](https://travis-ci.org/wapmorgan/UnifiedArchive.svg?branch=master)](https://travis-ci.org/wapmorgan/UnifiedArchive)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
+[![Code Coverage](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
 
 ## Goal
 If on your site/service there is a possibility of usage archives of many types, and you would
@@ -22,12 +22,11 @@ like to work with them unified, you can use this library.
 - Getting information about uncompressed size of archive contents
 - Listing archive content
 - Getting details (\[un\]compressed size, date of modification) of every archived file
+- Reading archived file content as stream (zip, rar, gz, bz2, xz)
 - Extracting archived file content as is or on a disk
-- Reading archived file content as stream (zip, rar)
-- Adding files to archive
+- Appending an archive with new files
 - Removing files from archive
-- Creating new archives with files/directories
-- Adjust compression level (zip, gzip)
+- Creating new archives with files/directories, adjust compression level (zip, gzip), set passwords (7z, zip)
 
 ## Quick start
 ```sh
