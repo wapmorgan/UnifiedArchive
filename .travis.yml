@@ -6,16 +6,17 @@ env:
 matrix:
   fast_finish: true
   include:
-#    - php: 7.4
+    - php: 8.0
+    - php: 7.4
     - php: 7.3
     - php: 7.2
     - php: 7.1
-      env: TASK_TESTS_COVERAGE=1
+      env: TASK_TESTS_COVERAGE=1 XZ_EXT_REPO=https://github.com/codemasher/php-ext-xz
     - php: 7.0
     - php: 5.6
-      env: XZ_EXT_REPO=https://github.com/payden/php-xz
+      env: TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/payden/php-xz
     - php: 5.5
-      env: XZ_EXT_REPO=https://github.com/payden/php-xz
+      env: TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/payden/php-xz
 
 install:
   - |
