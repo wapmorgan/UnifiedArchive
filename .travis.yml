@@ -1,8 +1,7 @@
 language: php
 
 env:
-  - TASK_TESTS_COVERAGE=0
-  - XZ_EXT_REPO=https://github.com/codemasher/php-ext-xz
+  - TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/codemasher/php-ext-xz
 
 matrix:
   fast_finish: true
