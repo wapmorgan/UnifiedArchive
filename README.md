@@ -1,6 +1,8 @@
-UnifiedArchive - an archive manager with a unified way of working with all popular archive formats (zip # 7z # 
-rar # gz # bz2 # xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # ...) for PHP with ability for
-listing, reading, extracting and creation + built-in console archive manager.
+*UnifiedArchive* - an archive manager with a unified way for different formats. 
+Supports all basic (listing, reading, extracting and creation) and specific features (compression level, password-protection). 
+Bundled with console program for working with archives.
+
+Supported formats (depends on installed drivers): zip, 7z, rar, one-file(gz, bz2, xz), tar (tar.gz, tar.bz2, tar.x, tar.Z), and a lot of others. 
 
 [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive)
