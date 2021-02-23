@@ -236,26 +236,6 @@ class Iso extends BasicDriver
     }
 
     /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function deleteFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function addFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @param $inArchiveName
      * @param $content
      * @return void

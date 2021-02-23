@@ -465,6 +465,7 @@ class UnifiedArchive
      *
      * @param string $archiveName File name of archive. Type of archive will be determined by it's name.
      * @param int $compressionLevel Level of compression
+     * @param null $password
      * @return int Count of stored files is returned.
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
@@ -494,17 +495,18 @@ class UnifiedArchive
      * @param string $file
      * @param string $archiveName
      * @param int $compressionLevel Level of compression
+     * @param null $password
      * @return bool
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
+    public static function archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
     {
         if (!is_file($file)) {
             throw new InvalidArgumentException($file . ' is not a valid file to archive');
         }
 
-        return static::archiveFiles($file, $archiveName, $compressionLevel) === 1;
+        return static::archiveFiles($file, $archiveName, $compressionLevel, $password) === 1;
     }
 
     /**
@@ -513,16 +515,17 @@ class UnifiedArchive
      * @param string $directory
      * @param string $archiveName
      * @param int $compressionLevel Level of compression
+     * @param null $password
      * @return bool
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
+    public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
     {
         if (!is_dir($directory) || !is_readable($directory))
             throw new InvalidArgumentException($directory.' is not a valid directory to archive');
 
-        return static::archiveFiles($directory, $archiveName) > 0;
+        return static::archiveFiles($directory, $archiveName, $compressionLevel, $password) > 0;
     }
 
     /**

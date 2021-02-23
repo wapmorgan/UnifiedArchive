@@ -190,7 +190,10 @@ abstract class BasicDriver
      * @throws UnsupportedOperationException
      * @throws ArchiveModificationException
      */
-    abstract public function deleteFiles(array $files);
+    public function deleteFiles(array $files)
+    {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @param array $files
@@ -198,7 +201,10 @@ abstract class BasicDriver
      * @throws UnsupportedOperationException
      * @throws ArchiveModificationException
      */
-    abstract public function addFiles(array $files);
+    public function addFiles(array $files)
+    {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @param string $inArchiveName

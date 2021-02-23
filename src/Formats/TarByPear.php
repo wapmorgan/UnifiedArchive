@@ -308,14 +308,6 @@ class TarByPear extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function deleteFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function addFiles(array $files)
     {
         $added = 0;

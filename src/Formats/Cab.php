@@ -189,26 +189,6 @@ class Cab extends BasicDriver
     }
 
     /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function deleteFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function addFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @param string $inArchiveName
      * @param string $content
      * @return bool|void
