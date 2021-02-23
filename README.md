@@ -16,6 +16,13 @@ Tests & Quality: [![Build status](https://travis-ci.org/wapmorgan/UnifiedArchive
 If on your site/service there is a possibility of usage archives of many types, and you would
 like to work with them unified, you can use this library.
 
+UnifiedArchive can utilize to handle as many formats as possible:
+* ZipArchive, RarArchive, PharData
+* Pear/Tar
+* 7zip cli program via Gemorroj/Archive7z
+* zip, tar cli programs via Alchemy/Zippy
+* ext-zlib, ext-bz2, ext-xz
+
 ## Functions & Features
 - Opening an archive with automatic format detection
 - Opening archives encrypted with password (zip, rar, 7z)
