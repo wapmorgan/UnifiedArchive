@@ -1,8 +1,9 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats\OneFile;
+namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
 use Exception;
 use wapmorgan\UnifiedArchive\Formats;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 
 class Gzip extends OneFileDriver
 {

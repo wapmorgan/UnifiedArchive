@@ -2,7 +2,7 @@
 namespace wapmorgan\UnifiedArchive;
 
 use Exception;
-use wapmorgan\UnifiedArchive\Formats\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class CamApplication {
@@ -39,59 +39,33 @@ class CamApplication {
                 .($config['append'] ? '+' : '-')."\t"
                 .($config['update'] ? '+' : '-')."\t"
                 .($config['encrypt'] ? '+' : '-')."\t"
-                .implode(', ', $config['drivers']).PHP_EOL;
+                .implode(', ', array_map(function($val) { return substr($val, strrpos($val, '\\') + 1); }, $config['drivers'])).PHP_EOL;
         }
-
-//        $types = [
-//            '.zip' => [UnifiedArchive::canOpenType(UnifiedArchive::ZIP), 'install "zip" extension'],
-//            '.rar' => [UnifiedArchive::canOpenType(UnifiedArchive::RAR), 'install "rar" extension'],
-//            '.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::GZIP), 'install "zlib" extension'],
-//            '.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::BZIP), 'install "bz2" extension'],
-//            '.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::LZMA), 'install "xz" extension'],
-//            '.7z' => [UnifiedArchive::canOpenType(UnifiedArchive::SEVEN_ZIP), 'install "gemorroj/archive7z" package'],
-//            '.iso' => [UnifiedArchive::canOpenType(UnifiedArchive::ISO), 'install "phpclasses/php-iso-file" package'],
-//            '.cab' => [UnifiedArchive::canOpenType(UnifiedArchive::CAB), 'install "wapmorgan/cab-archive" package'],
-//
-//            '.tar' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR), 'install "phar" extension or "pear/archive_tar" package'],
-//            '.tar.gz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_GZIP), 'install "phar" extension or "pear/archive_tar" package and "zlib" extension'],
-//            '.tar.bz2' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_BZIP), 'install "phar" extension or "pear/archive_tar" package and "bz2" extension'],
-//            '.tar.xz' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZMA), 'install "pear/archive_tar" package and "xz" extension'],
-//            '.tar.Z' => [UnifiedArchive::canOpenType(UnifiedArchive::TAR_LZW), 'install "pear/archive_tar" package and "compress" system utility'],
-//        ];
-
-//        $installed = $not_installed = [];
-//
-//        foreach ($types as $extension => $configuration) {
-//            if ($configuration[0]) {
-//                $installed[] = $extension;
-//            } else {
-//                $not_installed[$extension] = $configuration[1];
-//            }
-//        }
-//
-//        if (!empty($installed)) {
-//            echo 'Supported archive types: '.implode(', ', $installed).PHP_EOL;
-//        }
-//
-//        if (!empty($not_installed)) {
-//            echo 'Not supported archive types:'.PHP_EOL;
-//            array_walk($not_installed, function ($instruction, $extension) {
-//                echo '- '.$extension.': '.$instruction.PHP_EOL;
-//            });
-//        }
     }
 
     public function checkDrivers()
     {
+        $notInstalled = [];
+
         /** @var BasicDriver $driverClass */
-        foreach (Formats::$drivers as $i => $driverClass) {
+        $i = 1;
+        foreach (Formats::$drivers as $driverClass) {
             $description = $driverClass::getDescription();
             $install = $driverClass::getInstallationInstruction();
-            if (!empty($install))
-                $install = '- '.$install.PHP_EOL;
-            $formats = $driverClass::getSupportedFormats();
-            echo ($i+1).'. '.$driverClass.' - '. (!empty($install) ? 'not installed' : 'installed') . ' - '.$description.PHP_EOL
-                .$install.PHP_EOL;
+            if (!empty($install)) {
+                $notInstalled[] = [$driverClass, $description, $install];
+            } else {
+                echo ($i++) . '. ' . $driverClass . ' - ' . $description . PHP_EOL;
+            }
+        }
+
+        if (!empty($notInstalled)) {
+            echo PHP_EOL.'Not installed:'.PHP_EOL;
+            $i = 1;
+            foreach ($notInstalled as $data) {
+                echo ($i++) . '. ' . $data[0] . ' - ' . $data[1] . PHP_EOL
+                    . '- ' . $data[2] . PHP_EOL.PHP_EOL;
+            }
         }
     }
 

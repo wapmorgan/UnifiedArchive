@@ -45,6 +45,8 @@ class ArchivingTest extends PhpUnitTestCase
     {
         if (!Formats::canOpen($archiveType))
             $this->markTestSkipped($archiveType.' is not supported with current system configuration');
+        if (!Formats::canAppend($archiveType) || !Formats::canUpdate($archiveType))
+            $this->markTestSkipped($archiveType.' is not supported with current system configuration');
 
         $this->cleanWorkDir();
 

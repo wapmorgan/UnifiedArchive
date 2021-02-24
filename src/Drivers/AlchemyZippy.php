@@ -1,5 +1,5 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Alchemy\Zippy\Archive\Member;
 use Alchemy\Zippy\Exception\NoAdapterOnPlatformException;
@@ -12,6 +12,7 @@ use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 
 class AlchemyZippy extends BasicDriver
 {

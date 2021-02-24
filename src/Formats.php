@@ -3,24 +3,24 @@ namespace wapmorgan\UnifiedArchive;
 
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\Formats\AlchemyZippy;
-use wapmorgan\UnifiedArchive\Formats\Cab;
-use wapmorgan\UnifiedArchive\Formats\Iso;
-use wapmorgan\UnifiedArchive\Formats\OneFile\Gzip;
-use wapmorgan\UnifiedArchive\Formats\OneFile\Lzma;
-use wapmorgan\UnifiedArchive\Formats\OneFile\Bzip;
-use wapmorgan\UnifiedArchive\Formats\Rar;
-use wapmorgan\UnifiedArchive\Formats\SevenZip;
+use wapmorgan\UnifiedArchive\Drivers\AlchemyZippy;
+use wapmorgan\UnifiedArchive\Drivers\Cab;
+use wapmorgan\UnifiedArchive\Drivers\Iso;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\Gzip;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\Lzma;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\Bzip;
+use wapmorgan\UnifiedArchive\Drivers\Rar;
+use wapmorgan\UnifiedArchive\Drivers\SevenZip;
 use wapmorgan\UnifiedArchive\Formats\Tar;
-use wapmorgan\UnifiedArchive\Formats\TarByPear;
-use wapmorgan\UnifiedArchive\Formats\TarByPhar;
-use wapmorgan\UnifiedArchive\Formats\Zip;
+use wapmorgan\UnifiedArchive\Drivers\TarByPear;
+use wapmorgan\UnifiedArchive\Drivers\TarByPhar;
+use wapmorgan\UnifiedArchive\Drivers\Zip;
 
 class Formats
 {
     // archived and compressed
     const ZIP = 'zip';
-    const SEVEN_ZIP = '7zip';
+    const SEVEN_ZIP = '7z';
     const RAR = 'rar';
     const CAB = 'cab';
     const TAR = 'tar';
@@ -31,9 +31,9 @@ class Formats
     const ARJ = 'arj';
 
     // compressed
-    const GZIP = 'gzip';
-    const BZIP = 'bzip2';
-    const LZMA = 'lzma2';
+    const GZIP = 'gz';
+    const BZIP = 'bz2';
+    const LZMA = 'xz';
 
     // non-usual archives
     const UEFI = 'uefi';

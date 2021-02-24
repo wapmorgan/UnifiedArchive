@@ -1,5 +1,21 @@
 # Change Log
-### 1.1.2 - Feb **, 2021
+### 1.2.0 - Feb **, 2021
+
+**BC-breaking changes**:
+- Changed format of `$files` in `archiveFiles()` and `addFiles()` to:
+```php
+[
+    '/var/www/log.txt',
+    'log2.txt' => '/var/www/log2.txt',
+    '/var/www/site',
+    'site2' => '/var/www/site2',
+]
+```
+will create an archive with contents:
+- /log2.txt
+- /site2/
+- /var/www/log.txt
+- /var/www/site/
 
 **New features**:
 - Added `Formats::canStream()` to check if an archive can be streamed.

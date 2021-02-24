@@ -10,14 +10,14 @@ use wapmorgan\UnifiedArchive\Exceptions\FileAlreadyExistsException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\Formats\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 
 /**
  * Class which represents archive in one of supported formats.
  */
 class UnifiedArchive
 {
-    const VERSION = '1.1.0';
+    const VERSION = '1.2.0';
 
     /** @var string Type of current archive */
     protected $format;
