@@ -105,7 +105,7 @@ class ReadingTest extends PhpUnitTestCase
         foreach ($flatten_list as $filename => $content) {
 
             // test file existence
-            $this->assertTrue($archive->isFileExists($filename), 'File '.$filename.' should be in archive');
+            $this->assertTrue($archive->hasFile($filename), 'File '.$filename.' should be in archive');
 
             // test ArchiveEntry
             $file_data = $archive->getFileData($filename);

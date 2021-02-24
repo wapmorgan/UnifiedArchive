@@ -18,6 +18,8 @@ class ArchiveEntry
     public $modificationTime;
     /** @var bool */
     public $isCompressed;
+    /** @var string Comment */
+    public $comment;
 
     /**
      * @var string Path of archive entry
@@ -33,8 +35,9 @@ class ArchiveEntry
      * @param $uncompressedSize
      * @param $modificationTime
      * @param $isCompressed
+     * @param null $comment
      */
-    public function __construct($path, $compressedSize, $uncompressedSize, $modificationTime, $isCompressed = null)
+    public function __construct($path, $compressedSize, $uncompressedSize, $modificationTime, $isCompressed = null, $comment = null)
     {
         $this->path = $path;
         $this->compressedSize = $compressedSize;
@@ -43,5 +46,6 @@ class ArchiveEntry
         if ($isCompressed === null)
             $isCompressed = $uncompressedSize !== $compressedSize;
         $this->isCompressed = $isCompressed;
+        $this->comment = $comment;
     }
 }

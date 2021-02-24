@@ -110,6 +110,14 @@ class Rar extends BasicDriver
     }
 
     /**
+     * @return string|null
+     */
+    public function getComment()
+    {
+        return $this->rar->getComment();
+    }
+
+    /**
      * @return array
      */
     public function getFileNames()

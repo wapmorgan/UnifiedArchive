@@ -216,11 +216,19 @@ abstract class BasicDriver
     abstract public function addFileFromString($inArchiveName, $content);
 
     /**
-     * @throws UnsupportedOperationException
-     * @return PclzipZipInterface
+     * @return string|null
      */
-    public function getPclZip()
+    public function getComment()
     {
-        throw new UnsupportedOperationException('Format '.get_class($this).' does not support PclZip-interface');
+        return null;
+    }
+
+    /**
+     * @param string|null $comment
+     * @return null
+     */
+    public function setComment($comment)
+    {
+        return null;
     }
 }

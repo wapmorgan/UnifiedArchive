@@ -2,7 +2,6 @@
 namespace wapmorgan\UnifiedArchive;
 
 use RecursiveIteratorIterator;
-use ZipArchive;
 
 if (!defined('PCLZIP_ERR_NO_ERROR')) {
     // ----- Constants
@@ -95,16 +94,16 @@ class PclzipZipInterface
     const AVERAGE_ZIP_COMPRESSION_RATIO = 2;
 
     /**
-     * @var ZipArchive
+     * @var UnifiedArchive
      */
     private $archive;
 
     /**
      * PclzipZipInterface constructor.
      *
-     * @param ZipArchive $archive
+     * @param UnifiedArchive $archive
      */
-    public function __construct(ZipArchive $archive)
+    public function __construct(UnifiedArchive $archive)
     {
         $this->archive = $archive;
     }
@@ -140,82 +139,37 @@ class PclzipZipInterface
     {
         if (is_array($content)) $paths_list = $content;
         else $paths_list = explode(',', $content);
-        $report = array();
 
-        $options = func_get_args();
-        array_shift($options);
-
-        // parse options
-        if (isset($options[0]) && is_string($options[0])) {
-            $options[PCLZIP_OPT_ADD_PATH] = $options[0];
-            if (isset($options[1]) && is_string($options[1])) {
-                $options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
-            }
-        } else {
-            $options = array_combine(
-                array_filter($options, function ($v) {return (bool) $v&2;}),
-                array_filter($options, function ($v) {return (bool) ($v-1)&2;})
-            );
-        }
+        $options = $this->makeOptionsFromArguments(func_get_args());
 
         // filters initiation
-        $filters = array();
-        if (isset($options[PCLZIP_OPT_REMOVE_PATH])
-            && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
-            $filters[] = function (&$key, &$value) use ($options) {
-                $key = str_replace($key, null, $key); };
-        if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
-            $filters[] = function (&$key, &$value) { $key = basename($key); };
-        if (isset($options[PCLZIP_OPT_ADD_PATH]))
-            $filters[] = function (&$key, &$value) use ($options) {
-                $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.
-                    ltrim($key, '/');
-            };
+        $filters = $this->createFilters($options);
+        list($preAddCallback, $postAddCallback) = $this->extractCallbacks($options, PCLZIP_CB_PRE_ADD, PCLZIP_CB_POST_ADD);
 
-        if (isset($options[PCLZIP_CB_PRE_ADD])
-            && is_callable($options[PCLZIP_CB_PRE_ADD]))
-            $preAddCallback = $options[PCLZIP_CB_PRE_ADD];
-        else $preAddCallback = function () { return 1; };
-
-        if (isset($options[PCLZIP_CB_POST_ADD])
-            && is_callable($options[PCLZIP_CB_POST_ADD]))
-            $postAddCallback = $options[PCLZIP_CB_POST_ADD];
-        else $postAddCallback = function () { return 1; };
-
-        if (isset($options[PCLZIP_OPT_COMMENT]))
-            $this->archive->setArchiveComment($options[PCLZIP_OPT_COMMENT]);
+        if (!empty($comment = $this->buildComment($options, null)))
+            $this->archive->setComment($comment);
 
         // scan filesystem for files list
-        $files_list = array();
-        foreach ($content as $file_to_add) {
-            $report[] = $this->addSnippet($file_to_add, $filters,
-                $preAddCallback, $postAddCallback);
-
-            // additional dir contents
-            if (is_dir($file_to_add)) {
-                $directory_contents = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator(
-                        $file_to_add, \RecursiveDirectoryIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::SELF_FIRST);
-                foreach ($directory_contents as $file_to_add) {
-                    $report[] = $this->addSnippet($file_to_add, $filters,
-                        $preAddCallback, $postAddCallback);
-                }
-            }
-        }
-        // ...
-        return $report;
+        return $this->addSnippets($paths_list, $filters, $preAddCallback, $postAddCallback);
     }
 
-    private function addSnippet($file_to_add, array $filters, $preAddCallback,
-        $postAddCallback)
+    /**
+     * @param string $fileToAdd
+     * @param array $filters
+     * @param callable|null $preAddCallback
+     * @param callable|null $postAddCallback
+     * @return object
+     */
+    private function addSnippet($fileToAdd, array $filters, callable $preAddCallback, callable $postAddCallback)
     {
-        if (is_file($file_to_add) || is_dir($file_to_add)) {
+        if (is_file($fileToAdd) || is_dir($fileToAdd)) {
             // apply filters to a file
-            $localname = $file_to_add;
-            $filename = $file_to_add;
+            $localname = $fileToAdd;
+            $filename = $fileToAdd;
+
             foreach ($filters as $filter)
                 call_user_func($filter, $localname, $filename);
+
             $file_header = $this->createFileHeader($localname, $filename);
             if (call_user_func($preAddCallback, $file_header) == 1) {
                 //
@@ -223,11 +177,16 @@ class PclzipZipInterface
                 //
                 if (strlen(basename($file_header->stored_filename)) > 255)
                     $file_header->status = 'filename_too_long';
-                if (is_file($filename))
-                    $this->archive->addFile($file_header->filename,
-                        $file_header->stored_filename);
-                else if (is_dir($filename))
-                    $this->archive->addEmptyDir($file_header->stored_filename);
+                if (is_file($filename)) {
+                    $this->archive->addFiles([
+                        $file_header->stored_filename => $file_header->filename,
+                    ]);
+                } else if (is_dir($filename)) {
+//                    $this->archive->addEmptyDir($file_header->stored_filename);
+                }
+
+                call_user_func($postAddCallback, $file_header);
+
             } else {
                 //
                 // File was skipped
@@ -241,24 +200,25 @@ class PclzipZipInterface
 
     /**
      * Lists archive content
+     * @throws Exceptions\NonExistentArchiveFileException
      */
     public function listContent()
     {
-        $filesList = array();
-        $numFiles = $this->archive->numFiles;
-        for ($i = 0; $i < $numFiles; $i++) {
-            $statIndex = $this->archive->statIndex($i);
+        $filesList = [];
+
+        foreach ($this->archive->getFileNames() as $i => $fileName) {
+            $fileData = $this->archive->getFileData($fileName);
+
             $filesList[] = (object) array(
-                'filename' => $statIndex['name'],
-                'stored_filename' => $statIndex['name'],
-                'size' => $statIndex['size'],
-                'compressed_size' => $statIndex['comp_size'],
-                'mtime' => $statIndex,
-                'comment' => ($comment = $this->archive->getCommentIndex
-                    ($statIndex['index']) !== false) ? $comment : null,
-                'folder' => in_array(substr($statIndex['name'], -1),
-                    array('/', '\\')),
-                'index' => $statIndex['index'],
+                'filename' => $fileData->path,
+                'stored_filename' => $fileData->path,
+                'size' => $fileData->uncompressedSize,
+                'compressed_size' => $fileData->compressedSize,
+                'mtime' => $fileData->modificationTime,
+                'comment' => $fileData->comment,
+                'folder' => false/*in_array(substr($statIndex['name'], -1),
+                    array('/', '\\'))*/,
+                'index' => $i,
                 'status' => 'ok',
             );
         }
@@ -284,10 +244,7 @@ class PclzipZipInterface
                 $options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
             }
         } else {
-            $options = array_combine(
-                array_filter($options, function ($v) {return (bool) $v&2;}),
-                array_filter($options, function ($v) {return (bool) ($v-1)&2;})
-            );
+            $options = $this->makeKeyValueArrayFromList($options);
         }
 
         // filters initiation
@@ -295,86 +252,9 @@ class PclzipZipInterface
             $extractPath = rtrim($options[PCLZIP_OPT_PATH], '/');
         else $extractPath = rtrim(getcwd(), '/');
 
-        $filters = array();
-        if (isset($options[PCLZIP_OPT_REMOVE_PATH])
-            && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
-            $filters[] = function (&$key, &$value) use ($options) {
-                $key = str_replace($key, null, $key);
-            };
-        if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
-            $filters[] = function (&$key, &$value) { $key = basename($key); };
-        if (isset($options[PCLZIP_OPT_ADD_PATH]))
-            $filters[] = function (&$key, &$value) use ($options) {
-                $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.
-                    ltrim($key, '/');
-            };
-
-        if (isset($options[PCLZIP_CB_PRE_EXTRACT])
-            && is_callable($options[PCLZIP_CB_PRE_EXTRACT]))
-            $preExtractCallback = $options[PCLZIP_CB_PRE_EXTRACT];
-        else $preExtractCallback = function () { return 1; };
-
-        if (isset($options[PCLZIP_CB_POST_EXTRACT])
-            && is_callable($options[PCLZIP_CB_POST_EXTRACT]))
-            $postExtractCallback = $options[PCLZIP_CB_POST_EXTRACT];
-        else $postExtractCallback = function () { return 1; };
-
-        // exact matching
-        if (isset($options[PCLZIP_OPT_BY_NAME]))
-            $selectFilter = function ($key, $value) use ($options) {
-                $allowedNames = is_array($options[PCLZIP_OPT_BY_NAME])
-                    ? $options[PCLZIP_OPT_BY_NAME]
-                    : explode(',', $options[PCLZIP_OPT_BY_NAME]);
-                foreach ($allowedNames as $name) {
-                    // select directory with nested files
-                    if (in_array(substr($name, -1), array('/', '\\'))) {
-                        if (strncasecmp($name, $key, strlen($name)) === 0) {
-                            // that's a file inside a dir or that dir
-                            return self::SELECT_FILTER_PASS;
-                        }
-                    } else {
-                        // select exact name only
-                        if (strcasecmp($name, $key) === 0) {
-                            // that's a file with this name
-                            return self::SELECT_FILTER_PASS;
-                        }
-                    }
-                }
-
-                // that file is not in allowed list
-                return self::SELECT_FILTER_REFUSE;
-            };
-        // <ereg> rule
-        else if (isset($options[PCLZIP_OPT_BY_EREG]) && function_exists('ereg'))
-            $selectFilter = function ($key, $value) use ($options) {
-                return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false)
-                    ? self::SELECT_FILTER_PASS
-                    : self::SELECT_FILTER_REFUSE;
-            };
-        // <preg_match> rule
-        else if (isset($options[PCLZIP_OPT_BY_PREG]))
-            $selectFilter = function ($key, $value) use ($options) {
-                return preg_match($options[PCLZIP_OPT_BY_PREG], $key)
-                    ? self::SELECT_FILTER_PASS
-                    : self::SELECT_FILTER_REFUSE;
-            };
-        // index rule
-        else if (isset($options[PCLZIP_OPT_BY_INDEX]))
-            $selectFilter = function ($key, $value, $index) use ($options) {
-                $allowedIndexes = array();
-                foreach ($options[PCLZIP_OPT_BY_INDEX] as $rule) {
-                    $parts = explode('-', $rule);
-                    if (count($parts) == 1) $allowedIndexes[] = $rule;
-                    else $allowedIndexes = array_merge(
-                        range($parts[0], $parts[1]), $allowedIndexes);
-                }
-
-                return in_array($index, $allowedIndexes) ? self::SELECT_FILTER_PASS
-                    : self::SELECT_FILTER_REFUSE;
-            };
-        // no rule
-        else
-            $selectFilter = function () { return self::SELECT_FILTER_PASS; };
+        $filters = $this->createFilters($options);
+        list($preExtractCallback, $postExtractCallback) = $this->extractCallbacks($options, PCLZIP_CB_PRE_EXTRACT, PCLZIP_CB_POST_EXTRACT);
+        $selectFilter = $this->createSelector($options);
 
         if (isset($options[PCLZIP_OPT_EXTRACT_AS_STRING]))
             $anotherOutputFormat = PCLZIP_OPT_EXTRACT_AS_STRING;
@@ -449,11 +329,11 @@ class PclzipZipInterface
             // return content
             if ($anotherOutputFormat == PCLZIP_OPT_EXTRACT_AS_STRING) {
                 $file_header->content
-                    = $this->archive->getFromName($file_header->stored_filename);
+                    = $this->archive->getFileContent($file_header->stored_filename);
             }
             // echo content
             else if ($anotherOutputFormat == PCLZIP_OPT_EXTRACT_IN_OUTPUT) {
-                echo $this->archive->getFromName($file_header->stored_filename);
+                echo $this->archive->getFileContent($file_header->stored_filename);
             }
             // extract content
             else if ($anotherOutputFormat === false) {
@@ -503,7 +383,7 @@ class PclzipZipInterface
                         }
                     }
                     // extraction
-                    if (copy("zip://".$this->archive->filename."#"
+                    if (copy('zip://'.$this->archive->filename."#"
                         .$file_header->stored_filename
                         , $file_header->filename)) {
                         // ok
@@ -535,13 +415,11 @@ class PclzipZipInterface
      */
     public function properties()
     {
-        return array(
-            'nb' => $this->archive->numFiles,
-            'comment' =>
-                (($comment = $this->archive->getArchiveComment() !== false)
-                    ? $comment : null),
+        return [
+            'nb' => $this->archive->countFiles(),
+            'comment' => $this->archive->getComment(),
             'status' => 'OK',
-        );
+        ];
     }
 
     /**
@@ -552,88 +430,17 @@ class PclzipZipInterface
     public function add($content)
     {
         if (is_array($content)) $paths_list = $content;
-        else $paths_list = array_map(explode(',', $content));
-        $report = array();
+        else $paths_list = explode(',', $content);
 
-        $options = func_get_args();
-        array_shift($options);
+        $options = $this->makeOptionsFromArguments(func_get_args());
+        $filters = $this->createFilters($options);
+        list($preAddCallback, $postAddCallback) = $this->extractCallbacks($options, PCLZIP_CB_PRE_ADD, PCLZIP_CB_POST_ADD);
 
-        // parse options
-        if (isset($options[0]) && is_string($options[0])) {
-            $options[PCLZIP_OPT_ADD_PATH] = $options[0];
-            if (isset($options[1]) && is_string($options[1])) {
-                $options[PCLZIP_OPT_REMOVE_PATH] = $options[1];
-            }
-        } else {
-            $options = array_combine(
-                array_filter($options, function ($v) {return (bool) $v&2;}),
-                array_filter($options, function ($v) {return (bool) ($v-1)&2;})
-            );
-        }
-
-        // filters initiation
-        $filters = array();
-        if (isset($options[PCLZIP_OPT_REMOVE_PATH])
-            && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
-            $filters[] = function (&$key, &$value) use ($options) {
-                $key = str_replace($key, null, $key);
-            };
-        if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
-            $filters[] = function (&$key, &$value) { $key = basename($key); };
-        if (isset($options[PCLZIP_OPT_ADD_PATH]))
-            $filters[] = function (&$key, &$value) use ($options) {
-                $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/').'/'.
-                    ltrim($key, '/');
-            };
-
-        if (isset($options[PCLZIP_CB_PRE_ADD])
-            && is_callable($options[PCLZIP_CB_PRE_ADD]))
-            $preAddCallback = $options[PCLZIP_CB_PRE_ADD];
-        else $preAddCallback = function () { return 1; };
-
-        if (isset($options[PCLZIP_CB_POST_ADD])
-            && is_callable($options[PCLZIP_CB_POST_ADD]))
-            $postAddCallback = $options[PCLZIP_CB_POST_ADD];
-        else $postAddCallback = function () { return 1; };
-
-        if (isset($options[PCLZIP_OPT_COMMENT]))
-            $this->archive->setArchiveComment($options[PCLZIP_OPT_COMMENT]);
-        if (isset($options[PCLZIP_OPT_ADD_COMMENT])) {
-            $comment =
-                ($comment = $this->archive->getArchiveComment() !== false)
-                    ? $comment : null;
-            $this->archive->setArchiveComment(
-                $comment . $options[PCLZIP_OPT_ADD_COMMENT]);
-        }
-        if (isset($options[PCLZIP_OPT_PREPEND_COMMENT])) {
-            $comment =
-                ($comment = $this->archive->getArchiveComment() !== false)
-                    ? $comment : null;
-            $this->archive->setArchiveComment(
-                $options[PCLZIP_OPT_PREPEND_COMMENT] . $comment);
-        }
-
+        if (!empty($comment = $this->buildComment($options, $this->archive->getComment())))
+            $this->archive->setComment($comment);
 
         // scan filesystem for files list
-        $files_list = array();
-        foreach ($content as $file_to_add) {
-            $report[] = $this->addSnippet($file_to_add, $filters,
-                $preAddCallback, $postAddCallback);
-
-            // additional dir contents
-            if (is_dir($file_to_add)) {
-                $directory_contents = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator(
-                        $file_to_add, \RecursiveDirectoryIterator::SKIP_DOTS),
-                    RecursiveIteratorIterator::SELF_FIRST);
-                foreach ($directory_contents as $file_to_add) {
-                    $report[] = $this->addSnippet($file_to_add, $filters,
-                        $preAddCallback, $postAddCallback);
-                }
-            }
-        }
-        // ...
-        return $report;
+        return $this->addSnippets($paths_list, $filters, $preAddCallback, $postAddCallback);
     }
 
     /**
@@ -643,78 +450,17 @@ class PclzipZipInterface
      */
     public function delete()
     {
-        $report = array();
-        $options = func_get_args();
-        $options = array_combine(
-            array_filter($options, function ($v) {return (bool) $v&2;}),
-            array_filter($options, function ($v) {return (bool) ($v-1)&2;})
-        );
+        $options = $this->makeKeyValueArrayFromList(func_get_args());
+        $selectFilter = $this->createSelector($options);
 
-        // exact matching
-        if (isset($options[PCLZIP_OPT_BY_NAME]))
-            $selectFilter = function ($key, $value) use ($options) {
-                $allowedNames = is_array($options[PCLZIP_OPT_BY_NAME])
-                    ? $options[PCLZIP_OPT_BY_NAME]
-                    : explode(',', $options[PCLZIP_OPT_BY_NAME]);
-                foreach ($allowedNames as $name) {
-                    // select directory with nested files
-                    if (in_array(substr($name, -1), array('/', '\\'))) {
-                        if (strncasecmp($name, $key, strlen($name)) === 0) {
-                            // that's a file inside a dir or that dir
-                            return self::SELECT_FILTER_PASS;
-                        }
-                    } else {
-                        // select exact name only
-                        if (strcasecmp($name, $key) === 0) {
-                            // that's a file with this name
-                            return self::SELECT_FILTER_PASS;
-                        }
-                    }
-                }
-
-                // that file is not in allowed list
-                return self::SELECT_FILTER_REFUSE;
-            };
-        // <ereg> rule
-        else if (isset($options[PCLZIP_OPT_BY_EREG]) && function_exists('ereg'))
-            $selectFilter = function ($key, $value) use ($options) {
-                return (ereg($options[PCLZIP_OPT_BY_EREG], $key) !== false)
-                    ? self::SELECT_FILTER_PASS
-                    : self::SELECT_FILTER_REFUSE;
-            };
-        // <preg_match> rule
-        else if (isset($options[PCLZIP_OPT_BY_PREG]))
-            $selectFilter = function ($key, $value) use ($options) {
-                return preg_match($options[PCLZIP_OPT_BY_PREG], $key)
-                    ? self::SELECT_FILTER_PASS
-                    : self::SELECT_FILTER_REFUSE;
-            };
-        // index rule
-        else if (isset($options[PCLZIP_OPT_BY_INDEX]))
-            $selectFilter = function ($key, $value, $index) use ($options) {
-                $allowedIndexes = array();
-                foreach ($options[PCLZIP_OPT_BY_INDEX] as $rule) {
-                    $parts = explode('-', $rule);
-                    if (count($parts) == 1) $allowedIndexes[] = $rule;
-                    else $allowedIndexes = array_merge(
-                        range($parts[0], $parts[1]), $allowedIndexes);
-                }
-
-                return in_array($index, $allowedIndexes)
-                    ? self::SELECT_FILTER_PASS
-                    : self::SELECT_FILTER_REFUSE;
-            };
-        // no rule
-        else
-            $selectFilter = function () { return self::SELECT_FILTER_PASS; };
-
+        $report = [];
         foreach ($this->listContent() as $file_header) {
             // select by select rule
             if (call_user_func($selectFilter, $file_header->stored_filename,
                     $file_header->filename, $file_header->index)
                 === self::SELECT_FILTER_REFUSE) {
                 // delete file from archive
-                if ($this->archive->deleteName($file_header->stored_filename)) {
+                if ($this->archive->deleteFiles($file_header->stored_filename)) {
                     // ok
                     continue;
                 }
@@ -798,9 +544,242 @@ class PclzipZipInterface
 
     /**
      * Duplicates archive
+     * @param $clone_filename
+     * @return int
      */
     public function duplicate($clone_filename)
     {
         return copy($this->archive->filename, $clone_filename) ? 1 : 0;
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    public function createFilters(array $options)
+    {
+        $filters = array();
+        if (isset($options[PCLZIP_OPT_REMOVE_PATH])
+            && !isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
+            $filters[] = function (&$key, &$value) use ($options) {
+                $key = str_replace($key, null, $key);
+            };
+        if (isset($options[PCLZIP_OPT_REMOVE_ALL_PATH]))
+            $filters[] = function (&$key, &$value) {
+                $key = basename($key);
+            };
+        if (isset($options[PCLZIP_OPT_ADD_PATH]))
+            $filters[] = function (&$key, &$value) use ($options) {
+                $key = rtrim($options[PCLZIP_OPT_ADD_PATH], '/') . '/' .
+                    ltrim($key, '/');
+            };
+        return $filters;
+    }
+
+    /**
+     * @param array $options
+     * @param string $preCallbackConst
+     * @param string $postCallbackConst
+     * @return callable[]|\Closure[]
+     */
+    private function extractCallbacks(array $options, $preCallbackConst, $postCallbackConst)
+    {
+        $preCallback = $postCallback = function () { return true; };
+
+        if (isset($options[$preCallbackConst]) && is_callable($options[$preCallbackConst]))
+            $preCallback = $options[$preCallbackConst];
+
+        if (isset($options[$postCallbackConst]) && is_callable($options[$postCallbackConst]))
+            $postCallback = $options[$postCallbackConst];
+
+        return [$preCallback, $postCallback];
+    }
+
+    /**
+     * @param array $options
+     * @return array
+     */
+    private function makeKeyValueArrayFromList(array $options)
+    {
+        return array_combine(
+            array_filter($options, function ($v) {return (bool) $v&2;}),
+            array_filter($options, function ($v) {return (bool) ($v-1)&2;})
+        );
+    }
+
+    /**
+     * @param array $pathsList
+     * @param array $filters
+     * @param callable $preAddCallback
+     * @param callable $postAddCallback
+     * @return array
+     */
+    public function addSnippets(array $pathsList, array $filters, callable $preAddCallback, callable $postAddCallback)
+    {
+        $report = [];
+
+        foreach ($pathsList as $file_to_add) {
+            $report[] = $this->addSnippet($file_to_add, $filters,
+                $preAddCallback, $postAddCallback);
+
+            // additional dir contents
+            if (is_dir($file_to_add)) {
+                $directory_contents = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator(
+                        $file_to_add, \RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::SELF_FIRST);
+                foreach ($directory_contents as $file_to_add) {
+                    $report[] = $this->addSnippet($file_to_add, $filters,
+                        $preAddCallback, $postAddCallback);
+                }
+            }
+        }
+        return $report;
+    }
+
+    /**
+     * @param array $indexes
+     * @return \Closure
+     */
+    protected function createByIndexSelector(array $indexes)
+    {
+        $allowedIndexes = array();
+        foreach ($indexes as $rule) {
+            $parts = explode('-', $rule);
+            if (count($parts) == 1) $allowedIndexes[] = $rule;
+            else $allowedIndexes = array_merge(
+                range($parts[0], $parts[1]), $allowedIndexes);
+        }
+
+        return function ($key, $value, $index) use ($allowedIndexes) {
+            return in_array($index, $allowedIndexes)
+                ? self::SELECT_FILTER_PASS
+                : self::SELECT_FILTER_REFUSE;
+        };
+    }
+
+    /**
+     * @param string|array $names
+     * @return \Closure
+     */
+    protected function createByNameSelector($names)
+    {
+        $allowedNames = is_array($names)
+            ? $names
+            : explode(',', $names);
+
+        return function ($key, $value) use ($allowedNames) {
+            foreach ($allowedNames as $name) {
+                // select directory with nested files
+                if (in_array(substr($name, -1), ['/', '\\'])) {
+                    if (strncasecmp($name, $key, strlen($name)) === 0) {
+                        // that's a file inside a dir or that dir
+                        return self::SELECT_FILTER_PASS;
+                    }
+                } else {
+                    // select exact name only
+                    if (strcasecmp($name, $key) === 0) {
+                        // that's a file with this name
+                        return self::SELECT_FILTER_PASS;
+                    }
+                }
+            }
+
+            // that file is not in allowed list
+            return self::SELECT_FILTER_REFUSE;
+        };
+    }
+
+    /**
+     * @param string $regex
+     * @return \Closure
+     */
+    protected function createByEregSelector($regex)
+    {
+        return function ($key, $value) use ($regex) {
+            return (ereg($regex, $key) !== false)
+                ? self::SELECT_FILTER_PASS
+                : self::SELECT_FILTER_REFUSE;
+        };
+    }
+
+    /**
+     * @param $regex
+     * @return \Closure
+     */
+    protected function createByPregSelector($regex)
+    {
+        return function ($key, $value) use ($regex) {
+            return preg_match($regex, $key)
+                ? self::SELECT_FILTER_PASS
+                : self::SELECT_FILTER_REFUSE;
+        };
+    }
+
+    /**
+     * @param array $options
+     * @return callable
+     */
+    protected function createSelector(array $options)
+    {
+        // exact matching
+        if (isset($options[PCLZIP_OPT_BY_NAME]))
+            $selectFilter = $this->createByNameSelector($options[PCLZIP_OPT_BY_NAME]);
+        // <ereg> rule
+        else if (isset($options[PCLZIP_OPT_BY_EREG]) && function_exists('ereg'))
+            $selectFilter = $this->createByEregSelector($options[PCLZIP_OPT_BY_EREG]);
+        // <preg_match> rule
+        else if (isset($options[PCLZIP_OPT_BY_PREG]))
+            $selectFilter = $this->createByPregSelector($options[PCLZIP_OPT_BY_PREG]);
+        // index rule
+        else if (isset($options[PCLZIP_OPT_BY_INDEX]))
+            $selectFilter = $this->createByIndexSelector($options[PCLZIP_OPT_BY_INDEX]);
+        // no rule
+        else
+            $selectFilter = function () {
+                return self::SELECT_FILTER_PASS;
+            };
+        return $selectFilter;
+    }
+
+    /**
+     * @param array $args
+     * @return array
+     */
+    protected function makeOptionsFromArguments(array $args)
+    {
+        array_shift($args);
+
+        // parse options
+        if (isset($args[0]) && is_string($args[0])) {
+            $options = [
+                PCLZIP_OPT_ADD_PATH => $args[0]
+            ];
+
+            if (isset($args[1]) && is_string($args[1])) {
+                $options[PCLZIP_OPT_REMOVE_PATH] = $args[1];
+            }
+        } else {
+            $options = $this->makeKeyValueArrayFromList($args);
+        }
+        return $options;
+    }
+
+    /**
+     * @param array $options
+     * @param string|null $currentComment
+     * @return mixed|string|null
+     */
+    protected function buildComment(array $options, $currentComment)
+    {
+        $comment = null;
+        if (isset($options[PCLZIP_OPT_COMMENT]))
+            $comment = $options[PCLZIP_OPT_COMMENT];
+        else if (isset($options[PCLZIP_OPT_ADD_COMMENT])) {;
+            $comment = $currentComment . $options[PCLZIP_OPT_ADD_COMMENT];
+        } else if (isset($options[PCLZIP_OPT_PREPEND_COMMENT])) {
+            $comment = $options[PCLZIP_OPT_PREPEND_COMMENT] . $currentComment;
+        }
+        return $comment;
     }
 }

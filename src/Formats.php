@@ -64,10 +64,25 @@ class Formats
     ];
 
     /** @var array<string, array<string>> List of all available types with their drivers */
-    static protected $availableFormats;
+    protected static $availableFormats;
 
     /** @var array List of all drivers with formats and support-state */
-    static protected $formatsSupport;
+    protected static $formatsSupport;
+
+    protected static $mimeTypes = [
+        'application/zip' => Formats::ZIP,
+        'application/x-7z-compressed' => Formats::SEVEN_ZIP,
+        'application/x-rar' => Formats::RAR,
+        'application/zlib' => Formats::GZIP,
+        'application/gzip'  => Formats::GZIP,
+        'application/x-gzip' => Formats::GZIP,
+        'application/x-bzip2' => Formats::BZIP,
+        'application/x-lzma' => Formats::LZMA,
+        'application/x-iso9660-image' => Formats::ISO,
+        'application/vnd.ms-cab-compressed' => Formats::CAB,
+        'application/x-tar' => Formats::TAR,
+        'application/x-gtar' => Formats::TAR_GZIP,
+    ];
 
     /**
      * Detect archive type by its filename or content
@@ -143,30 +158,8 @@ class Formats
         // by file content
         if ($contentCheck) {
             $mime_type = mime_content_type($fileName);
-            switch ($mime_type) {
-                case 'application/zip':
-                    return Formats::ZIP;
-                case 'application/x-7z-compressed':
-                    return Formats::SEVEN_ZIP;
-                case 'application/x-rar':
-                    return Formats::RAR;
-                case 'application/zlib':
-                case 'application/gzip':
-                case 'application/x-gzip':
-                    return Formats::GZIP;
-                case 'application/x-bzip2':
-                    return Formats::BZIP;
-                case 'application/x-lzma':
-                    return Formats::LZMA;
-                case 'application/x-iso9660-image':
-                    return Formats::ISO;
-                case 'application/vnd.ms-cab-compressed':
-                    return Formats::CAB;
-                case 'application/x-tar':
-                    return Formats::TAR;
-                case 'application/x-gtar':
-                    return Formats::TAR_GZIP;
-            }
+            if (isset(static::$mimeTypes[$mime_type]))
+                return static::$mimeTypes[$mime_type];
         }
 
         return false;
@@ -289,6 +282,15 @@ class Formats
                 return $driver;
         }
         return false;
+    }
+
+    /**
+     * @param $format
+     * @return false|int|string
+     */
+    public static function getFormatMimeType($format)
+    {
+        return array_search($format, static::$mimeTypes, true);
     }
 
     public static function getFormatsReport()

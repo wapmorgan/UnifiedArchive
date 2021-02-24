@@ -163,7 +163,7 @@ class CamApplication {
     public function info($args)
     {
         $archive = $this->open($args['ARCHIVE']);
-        echo 'Archive              type: '.$archive->getArchiveFormat().PHP_EOL;
+        echo 'Archive              type: '.$archive->getFormat().PHP_EOL;
         echo 'Archive           changed: '.$this->formatDate(filemtime($args['ARCHIVE'])).PHP_EOL;
         echo 'Archive          contains: '.$archive->countFiles().' file'.($archive->countFiles() > 1 ? 's' : null).PHP_EOL;
         echo 'Archive   compressed size: '.implode(' ', $this->formatSize($archive->countCompressedFilesSize(), 2)).PHP_EOL;
@@ -212,7 +212,7 @@ class CamApplication {
     {
         $archive = $this->open($args['ARCHIVE'], isset($args['--password']) ? $args['--password'] : null);
         foreach ($args['FILES_IN_ARCHIVE'] as $file) {
-            if (!$archive->isFileExists($file)) {
+            if (!$archive->hasFile($file)) {
                 echo 'File '.$file.' IS NOT PRESENT'.PHP_EOL;
                 exit(-1);
             }

@@ -108,6 +108,23 @@ class Zip extends BasicDriver
     }
 
     /**
+     * @return false|string|null
+     */
+    public function getComment()
+    {
+        return $this->zip->getArchiveComment();
+    }
+
+    /**
+     * @param string|null $comment
+     * @return bool|null
+     */
+    public function setComment($comment)
+    {
+        return $this->zip->setArchiveComment($comment);
+    }
+
+    /**
      * @return array
      */
     public function getFileNames()
@@ -142,7 +159,7 @@ class Zip extends BasicDriver
     {
         $stat = $this->zip->statName($fileName);
         return new ArchiveEntry($fileName, $stat['comp_size'], $stat['size'], $stat['mtime'],
-            $stat['comp_method'] != 0);
+            $stat['comp_method'] != 0, $this->zip->getCommentName($fileName));
     }
 
     /**
@@ -247,6 +264,16 @@ class Zip extends BasicDriver
     }
 
     /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        return $this->zip->addFromString($inArchiveName, $content);
+    }
+
+    /**
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
@@ -299,14 +326,6 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @return PclzipZipInterface
-     */
-    public function getPclZip()
-    {
-        return new PclzipZipInterface($this->zip);
-    }
-
-    /**
      * @inheritDoc
      */
     public static function canCreateArchive($format)
@@ -344,15 +363,5 @@ class Zip extends BasicDriver
     public static function canStream($format)
     {
         return true;
-    }
-
-    /**
-     * @param string $inArchiveName
-     * @param string $content
-     * @return bool
-     */
-    public function addFileFromString($inArchiveName, $content)
-    {
-        return $this->zip->addFromString($inArchiveName, $content);
     }
 }
