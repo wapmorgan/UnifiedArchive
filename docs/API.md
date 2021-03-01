@@ -258,21 +258,21 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     ```php
     UnifiedArchive::countFiles(): int
     ```
-    Returns number of files stored in archive.
+    Returns number of files stored in an archive.
 
 ## Archive content
 
 - <span id="UnifiedArchive--getFileNames"></span>
     ```php
-    UnifiedArchive::getFileNames(): string[]
+    UnifiedArchive::getFileNames(?string $filter = null): string[]
     ```
-    Returns full list of files stored in archive.
+    Returns full list of files stored in an archive. If `$filter` is passed, will return only matched by `fnmatch()` files. 
 
-- <span id="UnifiedArchive--isFileExists"></span>
+- <span id="UnifiedArchive--hasFile"></span>
     ```php
-    UnifiedArchive::isFileExists(string $fileName): boolean
+    UnifiedArchive::hasFile(string $fileName): boolean
     ```
-    Checks whether file is presented in archive.
+    Checks whether file is presented in an archive.
 
 - <span id="UnifiedArchive--getFileData"></span>
     ```php
