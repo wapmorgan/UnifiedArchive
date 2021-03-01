@@ -275,12 +275,13 @@ class Formats
             throw new UnsupportedArchiveException('Unsupported archive type: '.$format.' of archive ');
 
         if (!$createAbility)
-            return current(static::$formatsSupport[$format]);
+            return static::$formatsSupport[$format][0];
 
         foreach (static::$formatsSupport[$format] as $driver) {
             if ($driver::canCreateArchive($format))
                 return $driver;
         }
+
         return false;
     }
 
