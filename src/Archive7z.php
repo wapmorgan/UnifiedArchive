@@ -35,6 +35,15 @@ class Archive7z extends \Archive7z\Archive7z
         return $version['version'];
     }
 
+    /**
+     * Hack to test if package is >=5.0.0.
+     * setChangeSystemLocale() method was in 4.0.0 and then was removed.
+     */
+    public static function supportsAllFormats()
+    {
+        return !(method_exists(__CLASS__, 'setChangeSystemLocale'));
+    }
+
 //    public static function getSupportedFormats()
 //    {
 //

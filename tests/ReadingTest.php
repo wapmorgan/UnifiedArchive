@@ -112,14 +112,15 @@ class ReadingTest extends PhpUnitTestCase
             $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data, 'Could not find '
                 .$filename);
 
-            $this->assertAttributeEquals($filename, 'path', $file_data, 'Path should be '.$filename);
+            $this->assertEquals($filename, $file_data->path, 'Path should be '.$filename);
             $this->assertTrue(is_numeric($file_data->compressedSize), 'Compressed size of '
                 .$filename.' should be int');
-            $this->assertAttributeEquals(strlen($content), 'uncompressedSize', $file_data, 'Uncompressed size of '
+            $this->assertEquals(strlen($content), $file_data->uncompressedSize, 'Uncompressed size of '
                 .$filename.' should be '.strlen($content).', but it is '.$file_data->uncompressedSize);
-            $this->assertAttributeEquals($file_data->compressedSize !== $file_data->uncompressedSize, 'isCompressed',
-                $file_data, 'Is compressed of '
-                .$filename.' should be '.($file_data->compressedSize !== $file_data->uncompressedSize));
+            $this->assertEquals(
+                $file_data->compressedSize !== $file_data->uncompressedSize,
+                $file_data->isCompressed,
+                'Is compressed of '.$filename.' should be '.($file_data->compressedSize !== $file_data->uncompressedSize));
 
             // test content
             $this->assertEquals($content, $archive->getFileContent($filename), 'getFileContent() should return content of file that should be equal to real file content');

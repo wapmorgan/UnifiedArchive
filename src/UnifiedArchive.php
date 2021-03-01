@@ -16,7 +16,7 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
  */
 class UnifiedArchive
 {
-    const VERSION = '1.2.0';
+    const VERSION = '1.1.3';
 
     /** @var string Type of current archive */
     protected $format;
@@ -38,6 +38,7 @@ class UnifiedArchive
 
     /** @var int Total size of archive file */
     protected $archiveSize;
+
     /**
      * @var null
      */
@@ -594,8 +595,15 @@ class UnifiedArchive
         // passed an extended list
         if (is_array($nodes)) {
             foreach ($nodes as $destination => $source) {
+                // new format
                 if (is_numeric($destination))
                     $destination = $source;
+                else {
+                    // old format
+                    if (!file_exists($source)) {
+                        list($destination, $source) = [$source, $destination];
+                    }
+                }
 
                 $destination = rtrim($destination, '/\\*');
 

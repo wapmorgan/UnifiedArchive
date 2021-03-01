@@ -1,20 +1,20 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Drivers\AlchemyZippy;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Cab;
 use wapmorgan\UnifiedArchive\Drivers\Iso;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\Bzip;
 use wapmorgan\UnifiedArchive\Drivers\OneFile\Gzip;
 use wapmorgan\UnifiedArchive\Drivers\OneFile\Lzma;
-use wapmorgan\UnifiedArchive\Drivers\OneFile\Bzip;
 use wapmorgan\UnifiedArchive\Drivers\Rar;
 use wapmorgan\UnifiedArchive\Drivers\SevenZip;
-use wapmorgan\UnifiedArchive\Formats\Tar;
 use wapmorgan\UnifiedArchive\Drivers\TarByPear;
 use wapmorgan\UnifiedArchive\Drivers\TarByPhar;
 use wapmorgan\UnifiedArchive\Drivers\Zip;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
+use wapmorgan\UnifiedArchive\Formats\Tar;
 
 class Formats
 {
@@ -177,6 +177,7 @@ class Formats
 
         if (!isset(static::$formatsSupport[$format])) {
             static::$formatsSupport[$format] = [];
+            /** @var BasicDriver $format_driver */
             foreach (static::$availableFormats[$format] as $format_driver) {
                 if ($format_driver::checkFormatSupport($format))
                 {
@@ -249,7 +250,6 @@ class Formats
      */
     protected static function checkFormatSupport($format, $function)
     {
-
         static::retrieveAllFormats();
         if (!static::canOpen($format))
             return false;
@@ -275,12 +275,13 @@ class Formats
             throw new UnsupportedArchiveException('Unsupported archive type: '.$format.' of archive ');
 
         if (!$createAbility)
-            return current(static::$formatsSupport[$format]);
+            return static::$formatsSupport[$format][0];
 
         foreach (static::$formatsSupport[$format] as $driver) {
             if ($driver::canCreateArchive($format))
                 return $driver;
         }
+
         return false;
     }
 
@@ -293,6 +294,9 @@ class Formats
         return array_search($format, static::$mimeTypes, true);
     }
 
+    /**
+     * @return array
+     */
     public static function getFormatsReport()
     {
         static::retrieveAllFormats();

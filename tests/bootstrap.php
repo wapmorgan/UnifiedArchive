@@ -64,6 +64,13 @@ class PhpUnitTestCase extends TestCase
                 $output[$prefix.$name] = $value;
         }
     }
+
+    protected function assertValueIsInteger($actual)
+    {
+        if (method_exists($this, 'assertIsInt'))
+            return $this->assertIsInt($actual);
+        return $this->assertInternalType('integer', $actual);
+    }
 }
 
 PhpUnitTestCase::$archives = [

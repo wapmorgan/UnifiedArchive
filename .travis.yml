@@ -15,8 +15,6 @@ matrix:
     - php: 7.0
     - php: 5.6
       env: TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/payden/php-xz
-    - php: 5.5
-      env: TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/payden/php-xz
 
 install:
   - |
@@ -52,6 +50,8 @@ install:
 
 script:
   # PHP tests
+  - ./bin/cam -f
+  - ./bin/cam -D
   - vendor/bin/phpunit --verbose $PHPUNIT_FLAGS
 
 after_script:

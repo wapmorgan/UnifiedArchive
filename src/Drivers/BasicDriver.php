@@ -19,21 +19,20 @@ abstract class BasicDriver
     const COMPRESSION_MAXIMUM = 4;
 
     /**
-     * @return mixed
-     * @throws UnsupportedOperationException
+     * @return array
      */
     public static function getSupportedFormats()
     {
-        throw new UnsupportedOperationException();
+        return [];
     }
 
     /**
      * @param $format
-     * @throws UnsupportedOperationException
+     * @return bool
      */
     public static function checkFormatSupport($format)
     {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     /**

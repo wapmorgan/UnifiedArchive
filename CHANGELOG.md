@@ -1,38 +1,45 @@
 # Change Log
-### 1.2.0 - Feb **, 2021
 
-**BC-breaking changes**:
-- Changed format of `$files` in `archiveFiles()` and `addFiles()` to:
+### 1.1.3 - Mar **, 2021
+
+**Changed format of `$files` in `archiveFiles()` and `addFiles()`**
 ```php
 [
-    '/var/www/log.txt',
-    'log2.txt' => '/var/www/log2.txt',
-    '/var/www/site',
-    'site2' => '/var/www/site2',
+    '/var/www/log.txt',                // will be "/var/www/log.txt"
+    './log2.txt' => '/var/www/log2.txt', // will be "/log2.txt"
+    '/var/www/site',                   // will be "/var/www/site"
+    './site2' => '/var/www/site2',       // will be "/site2"
 ]
 ```
-will create an archive with contents:
-- /log2.txt
-- /site2/
-- /var/www/log.txt
-- /var/www/site/
+
+Old format also works, but there can be a bad case. If you have */var/www/log2.txt* and *log2.txt* (in current directory) and pass following:
+```php
+[
+'/var/www/log2.txt' => 'log2.txt',
+]
+```
+it will archive *log2.txt* as */var/www/log2.txt* in an archive.  
 
 **New features**:
-- Added `Formats::canStream()` to check if an archive can be streamed.
+- Added `Formats::canStream()` to check if an archive files can be streamed.
+- Added `UnifiedArchive->getMimeType()` to get mime type of an archive.
+- Added `UnifiedArchive->getComment()` to get comment of an archive. Available only in `Zip` and `Rar` drivers, others return `null`.
 - Added ability to create archives, encrypted with password (only *zip* (`Zip`, `SevenZip`) and *7z* (`SevenZip`)) - added nullable `$password` argument to:
     - `UnifiedArchive::archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)`
     - `UnifiedArchive::archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)`
     - `UnifiedArchive::archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)`
+- Added filter in `UnifiedArcihve->getFileNames()`. If works as `fnmatch()` does.
 
 **Fixed:**
-- Fixed `TarByPear` driver: _tar.xz_ support and folders detection.
 - Fixed `SevenZip` driver: disabled _tar.gz, tar.bzip2_ support as it isn't supported properly and described which formats driver can create, append, modify and encrypt.
-- Fixed `Zip` driver:
 
 **Methods renamed:**
-- `UnifiedArchive->getFileResource` -> `UnifiedArchive->getFileStream`.
+- `UnifiedArchive->getFileResource` -> `UnifiedArchive->getFileStream`. `getFileResource` exist, but marked as deprecated.
+- `UnifiedArchive->isFileExists` -> `UnifiedArchive->hasFile`. `isFileExists` exist, but marked as deprecated.
 
-Old methods exist, but marked as deprecated.
+### 1.1.2 - Mar 1, 2021
+Fixed calculation of tar's uncompressed size opened via `TarByPear` driver.
+Fixed working with *tar.xz* archives.
 
 ### 1.1.1 - Feb 13, 2021
 Cleaned package.

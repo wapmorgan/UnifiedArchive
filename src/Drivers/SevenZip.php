@@ -57,6 +57,12 @@ class SevenZip extends BasicDriver
     public static function checkFormatSupport($format)
     {
         $available = class_exists('\Archive7z\Archive7z') && Archive7z::getBinaryVersion() !== false;
+        if (!$available)
+            return false;
+
+        // in 4.0.0 version it was supporting only 7z
+        if (!Archive7z::supportsAllFormats())
+            return $format === Formats::SEVEN_ZIP;
 
         switch ($format) {
             case Formats::SEVEN_ZIP:
