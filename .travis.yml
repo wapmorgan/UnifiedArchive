@@ -52,6 +52,8 @@ install:
 
 script:
   # PHP tests
+  - ./bin/cam -f
+  - ./bin/cam -D
   - vendor/bin/phpunit --verbose $PHPUNIT_FLAGS
 
 after_script:
