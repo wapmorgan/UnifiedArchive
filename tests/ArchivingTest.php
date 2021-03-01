@@ -27,7 +27,7 @@ class ArchivingTest extends PhpUnitTestCase
         $test_archive_filename = WORK_DIR.'/'.$archiveFileName;
 
         $result = UnifiedArchive::archiveFiles(FIXTURES_DIR, $test_archive_filename);
-        $this->assertInternalType('integer', $result);
+        $this->assertValueIsInteger($result);
         $this->assertEquals(5, $result);
 
         unlink($test_archive_filename);
