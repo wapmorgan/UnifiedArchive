@@ -1,22 +1,22 @@
 language: php
 
 env:
-  - TASK_TESTS_COVERAGE=0
-  - LZMA_EXTENSION=https://github.com/codemasher/php-ext-xz
+  - TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/codemasher/php-ext-xz
 
 matrix:
   fast_finish: true
   include:
-#    - php: 7.4
+    - php: 8.0
+    - php: 7.4
     - php: 7.3
     - php: 7.2
     - php: 7.1
-      env: TASK_TESTS_COVERAGE=1
+      env: TASK_TESTS_COVERAGE=1 XZ_EXT_REPO=https://github.com/codemasher/php-ext-xz
     - php: 7.0
     - php: 5.6
-      env: LZMA_EXTENSION=https://github.com/payden/php-xz
+      env: TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/payden/php-xz
     - php: 5.5
-      env: LZMA_EXTENSION=https://github.com/payden/php-xz
+      env: TASK_TESTS_COVERAGE=0 XZ_EXT_REPO=https://github.com/payden/php-xz
 
 install:
   - |
@@ -27,7 +27,7 @@ install:
   - sudo apt-get install p7zip-full
 
   # install php-xz
-  - git clone $LZMA_EXTENSION /tmp/xz
+  - git clone $XZ_EXT_REPO /tmp/xz
   - cd /tmp/xz && phpize && ./configure && make && sudo make install && cd -
   - echo "extension=xz.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 

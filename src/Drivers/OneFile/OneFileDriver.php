@@ -1,14 +1,13 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats\OneFile;
+namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
-use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\Formats\BasicDriver;
 
 abstract class OneFileDriver extends BasicDriver
 {
@@ -121,16 +120,6 @@ abstract class OneFileDriver extends BasicDriver
     }
 
     /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function addFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @param string $inArchiveName
      * @param string $content
      * @return bool|void
@@ -145,16 +134,20 @@ abstract class OneFileDriver extends BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE) {
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null) {
         if (count($files) > 1) {
             throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not archive few files');
         }
         if (empty($files)) {
             throw new EmptyFileListException();
+        }
+        if ($password !== null) {
+            throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
         }
 
         $filename = array_shift($files);
@@ -182,7 +175,18 @@ abstract class OneFileDriver extends BasicDriver
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @inheritDoc
+     */
     public static function canCreateArchive($format)
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function canStream($format)
     {
         return true;
     }

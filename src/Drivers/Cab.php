@@ -1,10 +1,11 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Drivers;
 
 use CabArchive;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
@@ -50,7 +51,9 @@ class Cab extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install library `wapmorgan/cab-archive`';
+        return !class_exists('\CabArchive')
+            ? 'install library `wapmorgan/cab-archive`'
+            : null;
     }
 
     /**
@@ -146,12 +149,9 @@ class Cab extends BasicDriver
      * @return bool|resource|string
      * @throws Exception
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
-        $resource = fopen('php://temp', 'r+');
-        fwrite($resource, $this->cab->getFileContent($fileName));
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($this->cab->getFileContent($fileName));
     }
 
     /**
@@ -190,44 +190,12 @@ class Cab extends BasicDriver
     }
 
     /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function deleteFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function addFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @param string $inArchiveName
      * @param string $content
      * @return bool|void
      * @throws UnsupportedOperationException
      */
     public function addFileFromString($inArchiveName, $content)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param array $files
-     * @param string $archiveFileName
-     * @param int $compressionLevel
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
     {
         throw new UnsupportedOperationException();
     }

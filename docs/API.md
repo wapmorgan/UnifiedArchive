@@ -2,46 +2,20 @@ This file describes all UnifiedArchive API.
 
 UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArchive` namespace:
 
-1. `Formats` keeps information about formats support and specific format functions.
+1. [`Formats`](#Formats) keeps information about formats support and specific format functions.
+2. [`UnifiedArchive`](#UnifiedArchive) - represents an archive and provides related functions.
+3. [`ArchiveEntry`](#ArchiveEntry) - represents information about a specific file from archive. This object can be obtained
+   by call to one of  `UnifiedArchive` methods.
+
+# Formats
 - [`Formats::detectArchiveFormat`](#Formats--detectArchiveFormat)
 - [`Formats::canOpen`](#Formats--canOpen)
+- [`Formats::canStream`](#Formats--canStream)
 - [`Formats::canCreate`](#Formats--canCreate)
 - [`Formats::canAppend`](#Formats--canAppend)
 - [`Formats::canUpdate`](#Formats--canUpdate)
 - [`Formats::canEncrypt`](#Formats--canEncrypt)
-
-2. `UnifiedArchive` - represents an archive and provides related functions.
-  - Making an archive:
-    - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
-    - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
-    - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
-  - Opening an archive
-    - [`UnifiedArchive::canOpen`](#UnifiedArchive--canOpen)
-    - [`UnifiedArchive::open`](#UnifiedArchive--open)
-  - Archive information:
-    - [`UnifiedArchive->getArchiveType`](#UnifiedArchive--getArchiveType)
-    - [`UnifiedArchive->getArchiveSize`](#UnifiedArchive--getArchiveSize)
-    - [`UnifiedArchive->countCompressedFilesSize`](#UnifiedArchive--countCompressedFilesSize)
-    - [`UnifiedArchive->countUncompressedFilesSize`](#UnifiedArchive--countUncompressedFilesSize)
-    - [`UnifiedArchive->countFiles`](#UnifiedArchive--countFiles)
-  - Extracting an archive:
-    - [`UnifiedArchive->getFileNames`](#UnifiedArchive--getFileNames)
-    - [`UnifiedArchive->isFileExists`](#UnifiedArchive--isFileExists)
-    - [`UnifiedArchive->getFileData`](#UnifiedArchive--getFileData)
-    - [`UnifiedArchive->getFileResource`](#UnifiedArchive--getFileResource)
-    - [`UnifiedArchive->getFileContent`](#UnifiedArchive--getFileContent)
-    - [`UnifiedArchive->extractFiles`](#UnifiedArchive--extractFiles)
-  - Updating an archive:
-    - [`UnifiedArchive->addDirectory`](#UnifiedArchive--addDirectory)
-    - [`UnifiedArchive->addFile`](#UnifiedArchive--addFile)
-    - [`UnifiedArchive->addFileFromString`](#UnifiedArchive--addFileFromString)
-    - [`UnifiedArchive->addFiles`](#UnifiedArchive--addFiles)
-    - [`UnifiedArchive->deleteFiles`](#UnifiedArchive--deleteFiles)
-
-3. [`ArchiveEntry`](#ArchiveEntry) - represents information about a specific file from archive. This object can be obtained
-by call to one of  `UnifiedArchive` methods.
-
-## Formats
+- [`Formats::getFormatMimeType`](#Formats--getFormatMimeType)
 
 - <span id="Formats--detectArchiveFormat"></span>
     ```php
@@ -64,6 +38,13 @@ by call to one of  `UnifiedArchive` methods.
   Returns `true` if given archive can be opened and `false` otherwise.
   ./vendor/bin/cam --formats`_
   Returns `true` if given archive can be opened and `false` otherwise.
+
+- <span id="Formats--canStream"></span>
+    ```php
+    Formats::canStream(string $format): boolean
+    ```
+
+  Tests if a specified archive can be streamed.
 
 - <span id="Formats--canCreate"></span>
     ```php
@@ -93,34 +74,78 @@ by call to one of  `UnifiedArchive` methods.
 
   Tests if an archive format can be encrypted or opened with encryption by any driver with new files with current system and php configuration.
 
+- <span id="Formats--getFormatMimeType"></span>
+    ```php
+    Formats::getFormatMimeType(string $format): string|false
+    ```
 
-### Formats formats constants
+  Returns mime type for passed format. Returns `false` if not found.
+
+
+### Formats list
 - `Formats::ZIP`
 - `Formats::SEVEN_ZIP`
 - `Formats::RAR`
-- `Formats::GZIP`
-- `Formats::BZIP`
-- `Formats::LZMA`
-- `Formats::ISO`
 - `Formats::CAB`
 - `Formats::TAR`
 - `Formats::TAR_GZIP`
 - `Formats::TAR_BZIP`
 - `Formats::TAR_LZMA`
 - `Formats::TAR_LZW`
+- `Formats::ARJ`
+- `Formats::GZIP`
+- `Formats::BZIP`
+- `Formats::LZMA`
+- `Formats::UEFI`
+- `Formats::GPT`
+- `Formats::MBR`
+- `Formats::MSI`
+- `Formats::ISO`
+- `Formats::DMG`
+- `Formats::UDF`
+- `Formats::RPM`
+- `Formats::DEB`
 
-## UnifiedArchive
+# UnifiedArchive
 
-### Archive creation
+- Making an archive:
+  - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
+  - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
+  - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
+- Opening an archive
+  - [`UnifiedArchive::canOpen`](#UnifiedArchive--canOpen)
+  - [`UnifiedArchive::open`](#UnifiedArchive--open)
+  - [`UnifiedArchive->getPclZipInterface`](#UnifiedArchive--getPclZipInterface)
+- Archive information:
+  - [`UnifiedArchive->getArchiveType`](#UnifiedArchive--getArchiveType)
+  - [`UnifiedArchive->getArchiveSize`](#UnifiedArchive--getArchiveSize)
+  - [`UnifiedArchive->countCompressedFilesSize`](#UnifiedArchive--countCompressedFilesSize)
+  - [`UnifiedArchive->countUncompressedFilesSize`](#UnifiedArchive--countUncompressedFilesSize)
+  - [`UnifiedArchive->countFiles`](#UnifiedArchive--countFiles)
+- Extracting an archive:
+  - [`UnifiedArchive->getFileNames`](#UnifiedArchive--getFileNames)
+  - [`UnifiedArchive->isFileExists`](#UnifiedArchive--isFileExists)
+  - [`UnifiedArchive->getFileData`](#UnifiedArchive--getFileData)
+  - [`UnifiedArchive->getFileStream`](#UnifiedArchive--getFileStream)
+  - [`UnifiedArchive->getFileContent`](#UnifiedArchive--getFileContent)
+  - [`UnifiedArchive->extractFiles`](#UnifiedArchive--extractFiles)
+- Updating an archive:
+  - [`UnifiedArchive->addDirectory`](#UnifiedArchive--addDirectory)
+  - [`UnifiedArchive->addFile`](#UnifiedArchive--addFile)
+  - [`UnifiedArchive->addFileFromString`](#UnifiedArchive--addFileFromString)
+  - [`UnifiedArchive->addFiles`](#UnifiedArchive--addFiles)
+  - [`UnifiedArchive->deleteFiles`](#UnifiedArchive--deleteFiles)
+
+## Archive creation
 
 - <span id="UnifiedArchive::archiveDirectory"></span>
     ```php
-    UnifiedArchive::archiveDirectory(string $directory, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): boolean
+    UnifiedArchive::archiveDirectory(string $directory, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): boolean
     ```
 
     Creates an archive with all content from given directory and saves archive to `$archiveName` (format is
     resolved by extension). All files have relative path in the archive. By `$compressionLevel` you can adjust
-    compression level for files. If case of success, `true` is returned.
+    compression level for files. By `$password` you can set password for an archive. If case of success, `true` is returned.
 
     Available values for compression:
     - `BasicFormat::COMPRESSION_NONE`
@@ -137,11 +162,11 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>
     ```php
-    UnifiedArchive::archiveFile(string $file, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): boolean
+    UnifiedArchive::archiveFile(string $file, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): boolean
     ```
 
     Creates an archive with file `$file` and saves archive to `$archiveName` (format is
-    resolved by extension). File will has only relative name in the archive.
+    resolved by extension). File will have only relative name in the archive.
     If case of success, `true` is returned.
 
     Throws:
@@ -152,12 +177,12 @@ by call to one of  `UnifiedArchive` methods.
 
 - <span id="UnifiedArchive--archiveFiles"></span>
     ```php
-    UnifiedArchive::archiveFiles(array $files, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE): int
+    UnifiedArchive::archiveFiles(array $files, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): int
     ```
 
     Creates an archive with given `$files` list. `$files` is an array of files or directories.
     If file/directory passed with numeric key (e.g `['file', 'directory']`), then file/directory will have it's full
-    path in archive. If file/directory is a key (e.g `['file1' => 'in_archive_path']`), then file/directory will have
+    path in an archive. If file/directory is a key (e.g `['in_archive_path' => 'file1']`), then file/directory will have
     path as it's value.
     In case of success, number of stored files will be returned.
 
@@ -167,7 +192,7 @@ by call to one of  `UnifiedArchive` methods.
     - `EmptyFileListException`
     - `ArchiveCreationException`
 
-### Archive opening
+## Archive opening
 
 - <span id="UnifiedArchive--canOpen"></span>
     ```php
@@ -190,7 +215,14 @@ by call to one of  `UnifiedArchive` methods.
     If you provide `$password`, it will be used to open encrypted archive.
     In case you provide password for an archive that don't support it, an `UnsupportedOperationException` will be throwed.
 
-#### Archive information
+- <span id="UnifiedArchive--getPclZipInterface"></span>
+    ```php
+    UnifiedArchive::getPclZipInterface(): PclzipZipInterface
+    ```
+
+    Returns a `PclzipZipInterface` handler for an archive. It provides all PclZip functions in PclZip-like interface for an archive.
+
+## Archive information
 
 All following methods is intended to be called to `UnifiedArchive` instance.
 
@@ -228,7 +260,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     ```
     Returns number of files stored in archive.
 
-#### Archive content
+## Archive content
 
 - <span id="UnifiedArchive--getFileNames"></span>
     ```php
@@ -251,9 +283,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
      described [later in the document](#archiveentry).
     If file is not in archive, `NonExistentArchiveFileException` is thrown.
 
-- <span id="UnifiedArchive--getFileResource"></span>
+- <span id="UnifiedArchive--getFileStream"></span>
     ```php
-    UnifiedArchive::getFileResource(string $fileName): resource
+    UnifiedArchive::getFileStream(string $fileName): resource
     ```
 
     Returns a resource of in-archive file that can be used to get it's content (by `fread()` and so on).
@@ -293,7 +325,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     - `EmptyFileListException`
     - `ArchiveExtractionException`
 
-#### Archive modification
+## Archive modification
 
 - <span id="UnifiedArchive--addDirectory"></span>
     ```php
@@ -340,8 +372,8 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
     Packs given `$files` into archive. `$files` is an array of files or directories.
     If file/directory passed with numeric key (e.g `['file', 'directory']`), then file/directory will have it's full
-    path in archive. If file/directory is a key (e.g `['file1' => 'in_archive_path']`), then file/directory will have
-    path as it's value.
+    path in archive. If file/directory is a key (e.g `['in_archive_path' => 'file1']`), then file/directory will have
+    path as it's key.
     If any error occurred (such as file already exists, files list is empty, ...), an `\Exception` is throwing.
     In case of success, number of packed files will be returned.
 
@@ -364,7 +396,7 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     - `UnsupportedOperationException`
     - `ArchiveModificationException`
 
-## ArchiveEntry
+# ArchiveEntry
 
 The class represents a file from archive as result of a call to `UnifiedArchive::getFileData(string $fileName)`.
 It contains fields with file information:

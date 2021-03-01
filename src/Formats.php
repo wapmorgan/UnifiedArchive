@@ -1,26 +1,26 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+use wapmorgan\UnifiedArchive\Drivers\AlchemyZippy;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Cab;
+use wapmorgan\UnifiedArchive\Drivers\Iso;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\Bzip;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\Gzip;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\Lzma;
+use wapmorgan\UnifiedArchive\Drivers\Rar;
+use wapmorgan\UnifiedArchive\Drivers\SevenZip;
+use wapmorgan\UnifiedArchive\Drivers\TarByPear;
+use wapmorgan\UnifiedArchive\Drivers\TarByPhar;
+use wapmorgan\UnifiedArchive\Drivers\Zip;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\Formats\AlchemyZippy;
-use wapmorgan\UnifiedArchive\Formats\Cab;
-use wapmorgan\UnifiedArchive\Formats\Iso;
-use wapmorgan\UnifiedArchive\Formats\OneFile\Gzip;
-use wapmorgan\UnifiedArchive\Formats\OneFile\Lzma;
-use wapmorgan\UnifiedArchive\Formats\OneFile\Bzip;
-use wapmorgan\UnifiedArchive\Formats\Rar;
-use wapmorgan\UnifiedArchive\Formats\SevenZip;
 use wapmorgan\UnifiedArchive\Formats\Tar;
-use wapmorgan\UnifiedArchive\Formats\TarByPear;
-use wapmorgan\UnifiedArchive\Formats\TarByPhar;
-use wapmorgan\UnifiedArchive\Formats\Zip;
 
 class Formats
 {
     // archived and compressed
     const ZIP = 'zip';
-    const SEVEN_ZIP = '7zip';
+    const SEVEN_ZIP = '7z';
     const RAR = 'rar';
     const CAB = 'cab';
     const TAR = 'tar';
@@ -31,9 +31,9 @@ class Formats
     const ARJ = 'arj';
 
     // compressed
-    const GZIP = 'gzip';
-    const BZIP = 'bzip2';
-    const LZMA = 'lzma2';
+    const GZIP = 'gz';
+    const BZIP = 'bz2';
+    const LZMA = 'xz';
 
     // non-usual archives
     const UEFI = 'uefi';
@@ -64,10 +64,25 @@ class Formats
     ];
 
     /** @var array<string, array<string>> List of all available types with their drivers */
-    static protected $availableFormats;
+    protected static $availableFormats;
 
     /** @var array List of all drivers with formats and support-state */
-    static protected $formatsSupport;
+    protected static $formatsSupport;
+
+    protected static $mimeTypes = [
+        'application/zip' => Formats::ZIP,
+        'application/x-7z-compressed' => Formats::SEVEN_ZIP,
+        'application/x-rar' => Formats::RAR,
+        'application/zlib' => Formats::GZIP,
+        'application/gzip'  => Formats::GZIP,
+        'application/x-gzip' => Formats::GZIP,
+        'application/x-bzip2' => Formats::BZIP,
+        'application/x-lzma' => Formats::LZMA,
+        'application/x-iso9660-image' => Formats::ISO,
+        'application/vnd.ms-cab-compressed' => Formats::CAB,
+        'application/x-tar' => Formats::TAR,
+        'application/x-gtar' => Formats::TAR_GZIP,
+    ];
 
     /**
      * Detect archive type by its filename or content
@@ -143,30 +158,8 @@ class Formats
         // by file content
         if ($contentCheck) {
             $mime_type = mime_content_type($fileName);
-            switch ($mime_type) {
-                case 'application/zip':
-                    return Formats::ZIP;
-                case 'application/x-7z-compressed':
-                    return Formats::SEVEN_ZIP;
-                case 'application/x-rar':
-                    return Formats::RAR;
-                case 'application/zlib':
-                case 'application/gzip':
-                case 'application/x-gzip':
-                    return Formats::GZIP;
-                case 'application/x-bzip2':
-                    return Formats::BZIP;
-                case 'application/x-lzma':
-                    return Formats::LZMA;
-                case 'application/x-iso9660-image':
-                    return Formats::ISO;
-                case 'application/vnd.ms-cab-compressed':
-                    return Formats::CAB;
-                case 'application/x-tar':
-                    return Formats::TAR;
-                case 'application/x-gtar':
-                    return Formats::TAR_GZIP;
-            }
+            if (isset(static::$mimeTypes[$mime_type]))
+                return static::$mimeTypes[$mime_type];
         }
 
         return false;
@@ -184,6 +177,7 @@ class Formats
 
         if (!isset(static::$formatsSupport[$format])) {
             static::$formatsSupport[$format] = [];
+            /** @var BasicDriver $format_driver */
             foreach (static::$availableFormats[$format] as $format_driver) {
                 if ($format_driver::checkFormatSupport($format))
                 {
@@ -192,6 +186,17 @@ class Formats
             }
         }
         return !empty(static::$formatsSupport[$format]);
+    }
+
+    /**
+     * Checks whether specified archive can be streamed
+     *
+     * @param string $format One of predefined archive types (class constants)
+     * @return bool
+     */
+    public static function canStream($format)
+    {
+        return static::checkFormatSupport($format, 'canStream');
     }
 
     /**
@@ -235,7 +240,7 @@ class Formats
      */
     public static function canEncrypt($format)
     {
-        return static::checkFormatSupport($format, 'canUsePassword');
+        return static::checkFormatSupport($format, 'canEncrypt');
     }
 
     /**
@@ -245,7 +250,6 @@ class Formats
      */
     protected static function checkFormatSupport($format, $function)
     {
-
         static::retrieveAllFormats();
         if (!static::canOpen($format))
             return false;
@@ -280,6 +284,18 @@ class Formats
         return false;
     }
 
+    /**
+     * @param $format
+     * @return false|int|string
+     */
+    public static function getFormatMimeType($format)
+    {
+        return array_search($format, static::$mimeTypes, true);
+    }
+
+    /**
+     * @return array
+     */
     public static function getFormatsReport()
     {
         static::retrieveAllFormats();
@@ -288,6 +304,7 @@ class Formats
         foreach (static::$availableFormats as $format => $formatDrivers) {
             $result[$format] = [
                 'open' => static::canOpen($format),
+                'stream' => static::canStream($format),
                 'create' => static::canCreate($format),
                 'append' => static::canAppend($format),
                 'update' => static::canUpdate($format),

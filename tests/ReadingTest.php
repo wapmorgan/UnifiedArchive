@@ -105,7 +105,7 @@ class ReadingTest extends PhpUnitTestCase
         foreach ($flatten_list as $filename => $content) {
 
             // test file existence
-            $this->assertTrue($archive->isFileExists($filename), 'File '.$filename.' should be in archive');
+            $this->assertTrue($archive->hasFile($filename), 'File '.$filename.' should be in archive');
 
             // test ArchiveEntry
             $file_data = $archive->getFileData($filename);
@@ -123,7 +123,7 @@ class ReadingTest extends PhpUnitTestCase
 
             // test content
             $this->assertEquals($content, $archive->getFileContent($filename), 'getFileContent() should return content of file that should be equal to real file content');
-            $this->assertEquals($content, stream_get_contents($archive->getFileResource($filename)), 'getFileResource() should return stream with content of file that should be equal to real file content');
+            $this->assertEquals($content, stream_get_contents($archive->getFileStream($filename)), 'getFileStream() should return stream with content of file that should be equal to real file content');
 
         }
 

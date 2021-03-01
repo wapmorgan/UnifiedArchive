@@ -1,5 +1,5 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Drivers;
 
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
@@ -19,21 +19,20 @@ abstract class BasicDriver
     const COMPRESSION_MAXIMUM = 4;
 
     /**
-     * @return mixed
-     * @throws UnsupportedOperationException
+     * @return array
      */
     public static function getSupportedFormats()
     {
-        throw new UnsupportedOperationException();
+        return [];
     }
 
     /**
      * @param $format
-     * @throws UnsupportedOperationException
+     * @return bool
      */
     public static function checkFormatSupport($format)
     {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     /**
@@ -80,9 +79,19 @@ abstract class BasicDriver
     }
 
     /**
+     * @param $format
      * @return false
      */
-    public static function canUsePassword()
+    public static function canEncrypt($format)
+    {
+        return false;
+    }
+
+    /**
+     * @param $format
+     * @return false
+     */
+    public static function canStream($format)
     {
         return false;
     }
@@ -91,10 +100,11 @@ abstract class BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int Number of archived files
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         throw new UnsupportedOperationException();
     }
@@ -142,9 +152,21 @@ abstract class BasicDriver
 
     /**
      * @param string $fileName
-     * @return bool|resource|string
+     * @return resource
      */
-    abstract public function getFileResource($fileName);
+    abstract public function getFileStream($fileName);
+
+    /**
+     * @param $string
+     * @return resource
+     */
+    public static function wrapStringInStream($string)
+    {
+        $resource = fopen('php://temp', 'r+');
+        fwrite($resource, $string);
+        rewind($resource);
+        return $resource;
+    }
 
     /**
      * @param string $outputFolder
@@ -167,7 +189,10 @@ abstract class BasicDriver
      * @throws UnsupportedOperationException
      * @throws ArchiveModificationException
      */
-    abstract public function deleteFiles(array $files);
+    public function deleteFiles(array $files)
+    {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @param array $files
@@ -175,7 +200,10 @@ abstract class BasicDriver
      * @throws UnsupportedOperationException
      * @throws ArchiveModificationException
      */
-    abstract public function addFiles(array $files);
+    public function addFiles(array $files)
+    {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @param string $inArchiveName
@@ -187,11 +215,19 @@ abstract class BasicDriver
     abstract public function addFileFromString($inArchiveName, $content);
 
     /**
-     * @throws UnsupportedOperationException
-     * @return PclzipZipInterface
+     * @return string|null
      */
-    public function getPclZip()
+    public function getComment()
     {
-        throw new UnsupportedOperationException('Format '.get_class($this).' does not support PclZip-interface');
+        return null;
+    }
+
+    /**
+     * @param string|null $comment
+     * @return null
+     */
+    public function setComment($comment)
+    {
+        return null;
     }
 }

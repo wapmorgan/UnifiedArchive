@@ -45,6 +45,8 @@ class ArchivingTest extends PhpUnitTestCase
     {
         if (!Formats::canOpen($archiveType))
             $this->markTestSkipped($archiveType.' is not supported with current system configuration');
+        if (!Formats::canAppend($archiveType) || !Formats::canUpdate($archiveType))
+            $this->markTestSkipped($archiveType.' is not supported with current system configuration');
 
         $this->cleanWorkDir();
 
@@ -56,7 +58,7 @@ class ArchivingTest extends PhpUnitTestCase
         // adding file
         if (Formats::canAppend($archiveType)) {
             $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
-            $this->assertTrue($archive->isFileExists(basename(__FILE__)));
+            $this->assertTrue($archive->hasFile(basename(__FILE__)));
             $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
         } else {
             $this->markTestSkipped($archiveType.' does not support adding files to archive');
@@ -65,7 +67,7 @@ class ArchivingTest extends PhpUnitTestCase
         // removing file
         if (Formats::canUpdate($archiveType)) {
             $this->assertEquals(1, $archive->deleteFiles(basename(__FILE__)));
-            $this->assertFalse($archive->isFileExists(basename(__FILE__)));
+            $this->assertFalse($archive->hasFile(basename(__FILE__)));
         } else {
             $this->markTestSkipped($archiveType.' does not support deleting files from archive');
         }

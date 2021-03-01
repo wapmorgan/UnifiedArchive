@@ -1,9 +1,10 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -47,12 +48,14 @@ class Zip extends BasicDriver
 
     public static function getDescription()
     {
-        return 'adapter for ext-zip';
+        return 'adapter for ext-zip'.(extension_loaded('zip') && defined('\ZipArchive::LIBZIP_VERSION') ? ' ('. ZipArchive::LIBZIP_VERSION.')' : null);
     }
 
     public static function getInstallationInstruction()
     {
-        return 'install `zip` extension';
+        return !extension_loaded('zip')
+            ? 'install `zip` extension'
+            : null;
     }
 
     /**
@@ -105,6 +108,23 @@ class Zip extends BasicDriver
     }
 
     /**
+     * @return false|string|null
+     */
+    public function getComment()
+    {
+        return $this->zip->getArchiveComment();
+    }
+
+    /**
+     * @param string|null $comment
+     * @return bool|null
+     */
+    public function setComment($comment)
+    {
+        return $this->zip->setArchiveComment($comment);
+    }
+
+    /**
      * @return array
      */
     public function getFileNames()
@@ -139,7 +159,7 @@ class Zip extends BasicDriver
     {
         $stat = $this->zip->statName($fileName);
         return new ArchiveEntry($fileName, $stat['comp_size'], $stat['size'], $stat['mtime'],
-            $stat['comp_method'] != 0);
+            $stat['comp_method'] != 0, $this->zip->getCommentName($fileName));
     }
 
     /**
@@ -157,11 +177,10 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @param string $fileName
-     *
-     * @return bool|resource|string
+     * @param $fileName
+     * @return false|resource
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         return $this->zip->getStream($fileName);
     }
@@ -245,13 +264,25 @@ class Zip extends BasicDriver
     }
 
     /**
+     * @param string $inArchiveName
+     * @param string $content
+     * @return bool
+     */
+    public function addFileFromString($inArchiveName, $content)
+    {
+        return $this->zip->addFromString($inArchiveName, $content);
+    }
+
+    /**
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int
      * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => ZipArchive::CM_STORE,
@@ -268,6 +299,11 @@ class Zip extends BasicDriver
             throw new ArchiveCreationException('ZipArchive error: '.$result);
 
         $can_set_compression_level = method_exists($zip, 'setCompressionName');
+        $can_encrypt = method_exists($zip, 'setEncryptionName');
+
+        if ($password !== null && !$can_encrypt) {
+            throw new ArchiveCreationException('Encryption is not supported on current platform');
+        }
 
         foreach ($files as $localName => $fileName) {
             if ($fileName === null) {
@@ -279,6 +315,9 @@ class Zip extends BasicDriver
                 if ($can_set_compression_level) {
                     $zip->setCompressionName($localName, $compressionLevelMap[$compressionLevel]);
                 }
+                if ($password !== null && $can_encrypt) {
+                    $zip->setEncryptionName($localName, ZipArchive::EM_AES_256, $password);
+                }
             }
         }
         $zip->close();
@@ -287,16 +326,7 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @return PclzipZipInterface
-     */
-    public function getPclZip()
-    {
-        return new PclzipZipInterface($this->zip);
-    }
-
-    /**
-     * @param $format
-     * @return bool
+     * @inheritDoc
      */
     public static function canCreateArchive($format)
     {
@@ -304,8 +334,7 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @param $format
-     * @return bool
+     * @inheritDoc
      */
     public static function canAddFiles($format)
     {
@@ -313,8 +342,7 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @param $format
-     * @return bool
+     * @inheritDoc
      */
     public static function canDeleteFiles($format)
     {
@@ -322,20 +350,18 @@ class Zip extends BasicDriver
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
-    public static function canUsePassword()
+    public static function canEncrypt($format)
     {
         return true;
     }
 
     /**
-     * @param string $inArchiveName
-     * @param string $content
-     * @return bool
+     * @inheritDoc
      */
-    public function addFileFromString($inArchiveName, $content)
+    public static function canStream($format)
     {
-        return $this->zip->addFromString($inArchiveName, $content);
+        return true;
     }
 }

@@ -1,9 +1,10 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Archive_Tar;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -94,11 +95,17 @@ class TarByPear extends BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int
      * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
+        if ($password !== null) {
+            throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
+        }
+
         $compression = null;
         switch (strtolower(pathinfo($archiveFileName, PATHINFO_EXTENSION))) {
             case 'gz':
@@ -188,7 +195,7 @@ class TarByPear extends BasicDriver
                 continue;
             }
             // skip directories
-            if ($file['typeflag'] == '5')
+            if ($file['typeflag'] == '5' || substr($file['filename'], -1) === '/')
                 continue;
             $information->files[] = $file['filename'];
             $information->uncompressedFilesSize += $file['size'];
@@ -265,15 +272,12 @@ class TarByPear extends BasicDriver
     /**
      * @inheritDoc
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
-        $resource = fopen('php://temp', 'r+');
         if (!isset($this->pearFilesIndex[$fileName]))
             throw new NonExistentArchiveFileException('File '.$fileName.' is not found in archive files list');
 
-        fwrite($resource, $this->tar->extractInString($fileName));
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($this->tar->extractInString($fileName));
     }
 
     /**
@@ -300,14 +304,6 @@ class TarByPear extends BasicDriver
         }
 
         return 1;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function deleteFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
     }
 
     /**

@@ -6,7 +6,7 @@ use Symfony\Component\Process\Process;
 class Archive7z extends \Archive7z\Archive7z
 {
     /**
-     * @throws \Archive7z\Exception
+     * @return false|string
      */
     public static function getBinaryVersion()
     {
@@ -29,7 +29,7 @@ class Archive7z extends \Archive7z\Archive7z
 
         $process = new Process([str_replace('\\', '/', $binary)]);
         $result = $process->mustRun()->getOutput();
-        if (!preg_match('~7-Zip (\[[\d]+\] )?(?<version>\d+\.\d+)~i', $result, $version))
+        if (!preg_match('~7-Zip (\([a-z]\) )?(\[[\d]+\] )?(?<version>\d+\.\d+)~i', $result, $version))
             return false;
 
         return $version['version'];

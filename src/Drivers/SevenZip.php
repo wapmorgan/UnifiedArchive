@@ -1,14 +1,14 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Exception;
 use wapmorgan\UnifiedArchive\Archive7z;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class SevenZip extends BasicDriver
@@ -28,10 +28,12 @@ class SevenZip extends BasicDriver
     {
         return [
             Formats::SEVEN_ZIP,
+            Formats::ZIP,
             Formats::RAR,
             Formats::TAR,
-            Formats::TAR_GZIP,
-            Formats::TAR_BZIP,
+            // disabled
+//            Formats::TAR_GZIP,
+//            Formats::TAR_BZIP,
             Formats::CAB,
             Formats::ISO,
             Formats::ARJ,
@@ -58,10 +60,11 @@ class SevenZip extends BasicDriver
 
         switch ($format) {
             case Formats::SEVEN_ZIP:
+            case Formats::ZIP:
             case Formats::RAR:
             case Formats::TAR:
-            case Formats::TAR_GZIP:
-            case Formats::TAR_BZIP:
+//            case Formats::TAR_GZIP:
+//            case Formats::TAR_BZIP:
             case Formats::CAB:
             case Formats::ISO:
             case Formats::ARJ:
@@ -83,7 +86,10 @@ class SevenZip extends BasicDriver
      */
     public static function getDescription()
     {
-        return 'php-library and console program';
+        return 'php-library and console program'
+            .(class_exists('\Archive7z\Archive7z') && ($version = Archive7z::getBinaryVersion()) !== false
+                ? ' ('.$version.')'
+                : null);
     }
 
     /**
@@ -91,7 +97,13 @@ class SevenZip extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install library `gemorroj/archive7z` and console program p7zip (7z)';
+        if (!class_exists('\Archive7z\Archive7z'))
+            return 'install library `gemorroj/archive7z` and console program p7zip (7za)';
+
+        if (Archive7z::getBinaryVersion() === false)
+            return 'install console program p7zip (7za)';
+
+        return null;
     }
 
     /**
@@ -185,14 +197,10 @@ class SevenZip extends BasicDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
-        $resource = fopen('php://temp', 'r+');
         $entry = $this->sevenZip->getEntry($fileName);
-
-        fwrite($resource, $entry->getContent());
-        rewind($resource);
-        return $resource;
+        return self::wrapStringInStream($entry->getContent());
     }
 
     /**
@@ -301,10 +309,11 @@ class SevenZip extends BasicDriver
      * @param array $files
      * @param string $archiveFileName
      * @param int $compressionLevel
+     * @param null $password
      * @return int
      * @throws ArchiveCreationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
+    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => 0,
@@ -316,6 +325,8 @@ class SevenZip extends BasicDriver
 
         try {
             $seven_zip = new Archive7z($archiveFileName);
+            if ($password !== null)
+                $seven_zip->setPassword($password);
             $seven_zip->setCompressionLevel($compressionLevelMap[$compressionLevel]);
             foreach ($files as $localName => $filename) {
                 if ($filename !== null) {
@@ -337,8 +348,17 @@ class SevenZip extends BasicDriver
      */
     public static function canCreateArchive($format)
     {
-        if ($format === Formats::RAR) return false;
-        return static::canAddFiles($format);
+        if (in_array($format, [
+            Formats::SEVEN_ZIP,
+            Formats::BZIP,
+            Formats::GZIP,
+            Formats::TAR,
+            Formats::LZMA,
+            Formats::ZIP]
+        ))
+            return self::canRenameFiles();
+
+        return false;
     }
 
     /**
@@ -348,7 +368,15 @@ class SevenZip extends BasicDriver
      */
     public static function canAddFiles($format)
     {
-        if ($format === Formats::RAR) return false;
+        return self::canCreateArchive($format);
+    }
+
+    /**
+     * @return bool
+     * @throws \Archive7z\Exception
+     */
+    protected static function canRenameFiles()
+    {
         $version = Archive7z::getBinaryVersion();
         return $version !== false && version_compare('9.30', $version, '<=');
     }
@@ -356,18 +384,20 @@ class SevenZip extends BasicDriver
     /**
      * @param $format
      * @return bool
+     * @throws \Archive7z\Exception
      */
     public static function canDeleteFiles($format)
     {
-        if ($format === Formats::RAR) return false;
-        return true;
+        return self::canCreateArchive($format);
     }
 
     /**
+     * @param $format
      * @return bool
+     * @throws \Archive7z\Exception
      */
-    public static function canUsePassword()
+    public static function canEncrypt($format)
     {
-        return true;
+        return in_array($format, [Formats::ZIP, Formats::SEVEN_ZIP]) && self::canRenameFiles();
     }
 }

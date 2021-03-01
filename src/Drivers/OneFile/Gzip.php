@@ -1,8 +1,9 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats\OneFile;
+namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
 use Exception;
 use wapmorgan\UnifiedArchive\Formats;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 
 class Gzip extends OneFileDriver
 {
@@ -35,7 +36,7 @@ class Gzip extends OneFileDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-zlib';
+        return 'adapter for ext-zlib'.(defined('ZLIB_VERSION') ? ' ('.ZLIB_VERSION.')' : null);
     }
 
     /**
@@ -43,7 +44,9 @@ class Gzip extends OneFileDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `zlib` extension';
+        return !extension_loaded('zlib')
+            ? 'install `zlib` extension'
+            : null;
     }
 
     /**
@@ -95,7 +98,7 @@ class Gzip extends OneFileDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName = null)
+    public function getFileStream($fileName = null)
     {
         return gzopen($this->fileName, 'rb');
     }

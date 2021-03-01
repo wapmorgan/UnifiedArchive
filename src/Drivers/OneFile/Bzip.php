@@ -1,17 +1,12 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats\OneFile;
+namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
 use wapmorgan\UnifiedArchive\Formats;
+use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 
-/**
- * Class Lzma
- *
- * @package wapmorgan\UnifiedArchive\Formats
- * @requires ext-lzma2
- */
-class Lzma extends OneFileDriver
+class Bzip extends OneFileDriver
 {
-    const FORMAT_SUFFIX =  'xz';
+    const FORMAT_SUFFIX =  'bz2';
 
     /**
      * @return array
@@ -19,7 +14,7 @@ class Lzma extends OneFileDriver
     public static function getSupportedFormats()
     {
         return [
-            Formats::LZMA,
+            Formats::BZIP,
         ];
     }
 
@@ -30,8 +25,8 @@ class Lzma extends OneFileDriver
     public static function checkFormatSupport($format)
     {
         switch ($format) {
-            case Formats::LZMA:
-                return extension_loaded('xz');
+            case Formats::BZIP:
+                return extension_loaded('bz2');
         }
     }
 
@@ -40,7 +35,7 @@ class Lzma extends OneFileDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-xz';
+        return 'adapter for ext-bzip2';
     }
 
     /**
@@ -48,7 +43,9 @@ class Lzma extends OneFileDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `xz` extension';
+        return !extension_loaded('bz2')
+            ? 'install `bz2` extension'
+            : null;
     }
 
     /**
@@ -67,7 +64,7 @@ class Lzma extends OneFileDriver
      */
     public function getFileContent($fileName = null)
     {
-        return stream_get_contents(xzopen($this->fileName, 'r'));
+        return bzdecompress(file_get_contents($this->fileName));
     }
 
     /**
@@ -75,22 +72,27 @@ class Lzma extends OneFileDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName = null)
+    public function getFileStream($fileName = null)
     {
-        return xzopen($this->fileName, 'r');
+        return bzopen($this->fileName, 'r');
     }
 
     /**
-     * @param $data
-     * @param $compressionLevel
+     * @param string $data
+     * @param int $compressionLevel
      * @return mixed|string
      */
     protected static function compressData($data, $compressionLevel)
     {
-        $fp = xzopen('php://temp', 'w');
-        xzwrite($fp, $data);
-        $data = stream_get_contents($fp);
-        xzclose($fp);
-        return $data;
+        static $compressionLevelMap = [
+            self::COMPRESSION_NONE => 1,
+            self::COMPRESSION_WEAK => 2,
+            self::COMPRESSION_AVERAGE => 4,
+            self::COMPRESSION_STRONG => 7,
+            self::COMPRESSION_MAXIMUM => 9,
+        ];
+        // it seems not working at all
+        $work_factor = ($compressionLevelMap[$compressionLevel] * 28);
+        return bzcompress($data, $compressionLevelMap[$compressionLevel], $work_factor);
     }
 }

@@ -1,6 +1,8 @@
-UnifiedArchive - an archive manager with a unified way of working with all popular archive formats (zip # 7z # 
-rar # gz # bz2 # xz # cab # tar # tar.gz # tar.bz2 # tar.x # tar.Z # ...) for PHP with ability for
-listing, reading, extracting and creation + built-in console archive manager.
+*UnifiedArchive* - an archive manager with a unified way for different formats. 
+Supports all basic (listing, reading, extracting and creation) and specific features (compression level, password-protection). 
+Bundled with console program for working with archives.
+
+Supported formats (depends on installed drivers): zip, 7z, rar, one-file(gz, bz2, xz), tar (tar.gz, tar.bz2, tar.x, tar.Z), and a lot of others. 
 
 [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive)
@@ -8,13 +10,20 @@ listing, reading, extracting and creation + built-in console archive manager.
 [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Latest Unstable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/unstable)](https://packagist.org/packages/wapmorgan/unified-archive)
 
-Tests & Quality: [![Build status](https://travis-ci.org/wapmorgan/UnifiedArchive.svg?branch=0.1.x)](https://travis-ci.org/wapmorgan/UnifiedArchive)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/quality-score.png?b=0.1.x)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
-[![Code Coverage](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/coverage.png?b=0.1.x)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
+Tests & Quality: [![Build status](https://travis-ci.org/wapmorgan/UnifiedArchive.svg?branch=master)](https://travis-ci.org/wapmorgan/UnifiedArchive)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
+[![Code Coverage](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=0.1.x)
 
 ## Goal
 If on your site/service there is a possibility of usage archives of many types, and you would
 like to work with them unified, you can use this library.
+
+UnifiedArchive can utilize to handle as many formats as possible:
+* ZipArchive, RarArchive, PharData
+* Pear/Tar
+* 7zip cli program via Gemorroj/Archive7z
+* zip, tar cli programs via Alchemy/Zippy
+* ext-zlib, ext-bz2, ext-xz
 
 ## Functions & Features
 - Opening an archive with automatic format detection
@@ -22,12 +31,11 @@ like to work with them unified, you can use this library.
 - Getting information about uncompressed size of archive contents
 - Listing archive content
 - Getting details (\[un\]compressed size, date of modification) of every archived file
+- Reading archived file content as stream (zip, rar, gz, bz2, xz)
 - Extracting archived file content as is or on a disk
-- Reading archived file content as stream (zip, rar)
-- Adding files to archive
+- Appending an archive with new files
 - Removing files from archive
-- Creating new archives with files/directories
-- Adjust compression level (zip, gzip)
+- Creating new archives with files/directories, adjust compression level (zip, gzip), set passwords (7z, zip)
 
 ## Quick start
 ```sh

@@ -2,7 +2,7 @@
 namespace wapmorgan\UnifiedArchive;
 
 use InvalidArgumentException;
-use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
@@ -10,14 +10,13 @@ use wapmorgan\UnifiedArchive\Exceptions\FileAlreadyExistsException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\Formats\BasicDriver;
 
 /**
  * Class which represents archive in one of supported formats.
  */
 class UnifiedArchive
 {
-    const VERSION = '1.1.2';
+    const VERSION = '1.1.3';
 
     /** @var string Type of current archive */
     protected $format;
@@ -39,6 +38,7 @@ class UnifiedArchive
 
     /** @var int Total size of archive file */
     protected $archiveSize;
+
     /**
      * @var null
      */
@@ -84,11 +84,13 @@ class UnifiedArchive
      * @param string $fileName Archive filename
      * @param string $format Archive type
      * @param string|null $password
-     * @throws UnsupportedOperationException
      */
     public function __construct($fileName, $format, $password = null)
     {
         $driver = Formats::getFormatDriver($format);
+        if ($driver === false) {
+            throw new \RuntimeException('Driver for '.$format.' ('.$fileName.') is not found');
+        }
 
         $this->format = $format;
         $this->archiveSize = filesize($fileName);
@@ -124,11 +126,73 @@ class UnifiedArchive
      * interface.
      *
      * @return PclzipZipInterface Returns an instance of a class implementing PclZipOriginalInterface
-     * @throws UnsupportedOperationException
      */
     public function getPclZipInterface()
     {
-        return $this->archive->getPclZip();
+        return new PclzipZipInterface($this);
+    }
+
+    /**
+     * @return string
+     */
+    public function getDriverType()
+    {
+        return get_class($this->archive);
+    }
+
+    /**
+     * @return BasicDriver
+     */
+    public function getDriver()
+    {
+        return $this->archive;
+    }
+
+    /**
+     * Returns size of archive file in bytes
+     *
+     * @return int
+     */
+    public function getSize()
+    {
+        return $this->archiveSize;
+    }
+
+    /**
+     * Returns type of archive
+     *
+     * @return string One of Format class constants
+     */
+    public function getFormat()
+    {
+        return $this->format;
+    }
+
+    /**
+     * Returns mime type of archive
+     *
+     * @return string Mime Type
+     */
+    public function getMimeType()
+    {
+        return Formats::getFormatMimeType($this->format);
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getComment()
+    {
+        return $this->archive->getComment();
+    }
+
+    /**
+     * @param string|null $comment
+     * @return string|null
+     */
+    public function setComment($comment)
+    {
+        return $this->archive->setComment($comment);
     }
 
     /**
@@ -152,26 +216,6 @@ class UnifiedArchive
     }
 
     /**
-     * Returns size of archive file in bytes
-     *
-     * @return int
-     */
-    public function getArchiveSize()
-    {
-        return $this->archiveSize;
-    }
-
-    /**
-     * Returns type of archive
-     *
-     * @return string One of class constants
-     */
-    public function getArchiveFormat()
-    {
-        return $this->format;
-    }
-
-    /**
      * Counts cumulative size of all compressed data (in bytes)
      *
      * @return int
@@ -182,26 +226,35 @@ class UnifiedArchive
     }
 
     /**
-     * Returns list of files, excluding folders.
-     *
-     * Paths is present in unix-style (with forward slash - /).
-     *
-     * @return array List of files
-     */
-    public function getFileNames()
-    {
-        return array_values($this->files);
-    }
-
-    /**
      * Checks that file exists in archive
      *
      * @param string $fileName File name in archive
      * @return bool
      */
-    public function isFileExists($fileName)
+    public function hasFile($fileName)
     {
         return in_array($fileName, $this->files, true);
+    }
+
+    /**
+     * Returns list of files, excluding folders.
+     *
+     * Paths is present in unix-style (with forward slash - /).
+     *
+     * @param string|null $filter
+     * @return array List of files
+     */
+    public function getFileNames($filter = null)
+    {
+        if ($filter === null)
+            return $this->files;
+
+        $result = [];
+        foreach ($this->files as $file) {
+            if (fnmatch($filter, $file))
+                $result[] = $file;
+        }
+        return $result;
     }
 
     /**
@@ -243,13 +296,13 @@ class UnifiedArchive
      * @return resource
      * @throws NonExistentArchiveFileException
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         if (!in_array($fileName, $this->files, true)) {
             throw new NonExistentArchiveFileException('File ' . $fileName . ' does not exist in archive');
         }
 
-        return $this->archive->getFileResource($fileName);
+        return $this->archive->getFileStream($fileName);
     }
 
     /**
@@ -350,7 +403,7 @@ class UnifiedArchive
             throw new InvalidArgumentException($file.' is not a valid file to add in archive');
 
         return ($inArchiveName !== null
-                ? $this->addFiles([$file => $inArchiveName])
+                ? $this->addFiles([$inArchiveName => $file])
                 : $this->addFiles([$file])) === 1;
     }
 
@@ -384,18 +437,8 @@ class UnifiedArchive
             throw new InvalidArgumentException($directory.' is not a valid directory to add in archive');
 
         return ($inArchivePath !== null
-                ? $this->addFiles([$directory => $inArchivePath])
+                ? $this->addFiles([$inArchivePath => $directory])
                 : $this->addFiles([$inArchivePath])) > 0;
-    }
-
-    public function getDriverType()
-    {
-        return get_class($this->archive);
-    }
-
-    public function getDriver()
-    {
-        return $this->archive;
     }
 
     /**
@@ -459,11 +502,12 @@ class UnifiedArchive
      *
      * @param string $archiveName File name of archive. Type of archive will be determined by it's name.
      * @param int $compressionLevel Level of compression
+     * @param null $password
      * @return int Count of stored files is returned.
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
+    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
     {
         if (file_exists($archiveName))
             throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
@@ -473,10 +517,13 @@ class UnifiedArchive
         if (!Formats::canCreate($info['type']))
             throw new UnsupportedArchiveException('Unsupported archive type: '.$info['type'].' of archive '.$archiveName);
 
+        if ($password !== null && !Formats::canEncrypt($info['type']))
+            throw new UnsupportedOperationException('Archive type '.$info['type'].' can not be encrypted');
+
         /** @var BasicDriver $handler_class */
         $driver = Formats::getFormatDriver($info['type'], true);
 
-        return $driver::createArchive($info['files'], $archiveName, $compressionLevel);
+        return $driver::createArchive($info['files'], $archiveName, $compressionLevel, $password);
     }
 
     /**
@@ -485,17 +532,18 @@ class UnifiedArchive
      * @param string $file
      * @param string $archiveName
      * @param int $compressionLevel Level of compression
+     * @param null $password
      * @return bool
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
+    public static function archiveFile($file, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
     {
         if (!is_file($file)) {
             throw new InvalidArgumentException($file . ' is not a valid file to archive');
         }
 
-        return static::archiveFiles($file, $archiveName, $compressionLevel) === 1;
+        return static::archiveFiles($file, $archiveName, $compressionLevel, $password) === 1;
     }
 
     /**
@@ -504,16 +552,17 @@ class UnifiedArchive
      * @param string $directory
      * @param string $archiveName
      * @param int $compressionLevel Level of compression
+     * @param null $password
      * @return bool
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE)
+    public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
     {
         if (!is_dir($directory) || !is_readable($directory))
             throw new InvalidArgumentException($directory.' is not a valid directory to archive');
 
-        return static::archiveFiles($directory, $archiveName) > 0;
+        return static::archiveFiles($directory, $archiveName, $compressionLevel, $password) > 0;
     }
 
     /**
@@ -545,9 +594,16 @@ class UnifiedArchive
 
         // passed an extended list
         if (is_array($nodes)) {
-            foreach ($nodes as $source => $destination) {
-                if (is_numeric($source))
-                    $source = $destination;
+            foreach ($nodes as $destination => $source) {
+                // new format
+                if (is_numeric($destination))
+                    $destination = $source;
+                else {
+                    // old format
+                    if (!file_exists($source)) {
+                        list($destination, $source) = [$source, $destination];
+                    }
+                }
 
                 $destination = rtrim($destination, '/\\*');
 
@@ -639,7 +695,7 @@ class UnifiedArchive
      */
     public function getArchiveType()
     {
-        return $this->getArchiveFormat();
+        return $this->getFormat();
     }
 
     /**
@@ -653,5 +709,52 @@ class UnifiedArchive
     public static function detectArchiveType($fileName, $contentCheck = true)
     {
         return Formats::detectArchiveFormat($fileName, $contentCheck);
+    }
+
+    /**
+     * Returns a resource for reading file from archive
+     *
+     * @deprecated See {{UnifiedArchive::getFileStream}}
+     * @param string $fileName File name in archive
+     * @return resource
+     * @throws NonExistentArchiveFileException
+     */
+    public function getFileResource($fileName)
+    {
+        return $this->getFileStream($fileName);
+    }
+
+    /**
+     * Returns type of archive
+     *
+     * @deprecated See {{UnifiedArchive::getFormat}}
+     * @return string One of class constants
+     */
+    public function getArchiveFormat()
+    {
+        return $this->getFormat();
+    }
+
+    /**
+     * Checks that file exists in archive
+     *
+     * @deprecated See {{UnifiedArchive::hasFile}}
+     * @param string $fileName File name in archive
+     * @return bool
+     */
+    public function isFileExists($fileName)
+    {
+        return $this->hasFile($fileName);
+    }
+
+    /**
+     * Returns size of archive file in bytes
+     *
+     * @deprecated See {{UnifiedArchive::getSize}}
+     * @return int
+     */
+    public function getArchiveSize()
+    {
+        return $this->getSize();
     }
 }

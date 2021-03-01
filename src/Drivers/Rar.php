@@ -1,9 +1,10 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Formats;
+namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
@@ -50,7 +51,17 @@ class Rar extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `rar` extension';
+        return !extension_loaded('rar')
+            ? 'install `rar` extension'
+            : null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function canStream($format)
+    {
+        return true;
     }
 
     /**
@@ -96,6 +107,14 @@ class Rar extends BasicDriver
             $information->uncompressedFilesSize += $entry->getUnpackedSize();
         }
         return $information;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getComment()
+    {
+        return $this->rar->getComment();
     }
 
     /**
@@ -150,7 +169,7 @@ class Rar extends BasicDriver
      *
      * @return bool|resource|string
      */
-    public function getFileResource($fileName)
+    public function getFileStream($fileName)
     {
         $entry = $this->rar->getEntry($fileName);
         if ($entry->isDirectory()) return false;
@@ -185,24 +204,6 @@ class Rar extends BasicDriver
     }
 
     /**
-     * @param array $files
-     * @throws UnsupportedOperationException
-     */
-    public function deleteFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param array $files
-     * @throws UnsupportedOperationException
-     */
-    public function addFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @param string $inArchiveName
      * @param string $content
      * @return bool|void
@@ -211,24 +212,5 @@ class Rar extends BasicDriver
     public function addFileFromString($inArchiveName, $content)
     {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param array $files
-     * @param string $archiveFileName
-     * @param int $compressionLevel
-     * @throws UnsupportedOperationException
-     */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return bool
-     */
-    public static function canUsePassword()
-    {
-        return true;
     }
 }
