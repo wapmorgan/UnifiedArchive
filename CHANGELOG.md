@@ -1,4 +1,12 @@
 # Change Log
+
+### 1.1.2 - Mar 1, 2021
+Fixed calculation of tar's uncompressed size opened via `TarByPear` driver.
+Fixed working with *tar.xz* archives.
+
+### 1.1.1 - Feb 13, 2021
+Cleaned package.
+
 ### 1.1.0 - Feb 13, 2021
 **New features**:
 - Added ability to open archives encrypted with password - added `$password` argument to `UnifiedArchive::open($fileName, $password = null)`. Works only with: zip, rar, 7z.   

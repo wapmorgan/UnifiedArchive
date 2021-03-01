@@ -17,7 +17,7 @@ use wapmorgan\UnifiedArchive\Formats\BasicDriver;
  */
 class UnifiedArchive
 {
-    const VERSION = '1.1.0';
+    const VERSION = '1.1.2';
 
     /** @var string Type of current archive */
     protected $format;
