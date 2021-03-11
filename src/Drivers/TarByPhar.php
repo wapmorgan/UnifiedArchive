@@ -287,7 +287,32 @@ class TarByPhar extends BasicDriver
             $ext = pathinfo($archiveFileName, PATHINFO_EXTENSION);
             $basename = dirname($archiveFileName).'/'.basename($archiveFileName, '.'.$ext);
         }
-        $tar = new PharData($basename.'.tar', 0, null, Phar::TAR);
+
+        $compression = null;
+        switch ($ext) {
+            case 'tar.gz':
+            case 'tgz':
+                $compression = Phar::GZ;
+                break;
+            case 'tar.bz2':
+            case 'tbz2':
+                $compression = Phar::BZ2;
+                break;
+        }
+
+        $destination_file = $basename.'.tar';
+        // if compression used and there is .tar archive with that's name,
+        // use temp file
+        if ($compression !== null && file_exists($basename.'.tar')) {
+            $temp_basename = tempnam(sys_get_temp_dir(), 'tar-archive');
+            unlink($temp_basename);
+            $destination_file = $temp_basename.'.tar';
+        }
+
+        $tar = new PharData(
+            $destination_file,
+            0, null, Phar::TAR
+        );
 
         try {
             foreach ($files as $localName => $filename) {
@@ -307,17 +332,25 @@ class TarByPhar extends BasicDriver
             throw new ArchiveCreationException('Error when creating archive: '.$e->getMessage(), $e->getCode(), $e);
         }
 
-        switch (strtolower(pathinfo($archiveFileName, PATHINFO_EXTENSION))) {
-            case 'gz':
-            case 'tgz':
+        switch ($compression) {
+            case Phar::GZ:
                 $tar->compress(Phar::GZ, $ext);
                 break;
-            case 'bz2':
-            case 'tbz2':
+            case Phar::BZ2:
                 $tar->compress(Phar::BZ2, $ext);
                 break;
         }
         $tar = null;
+
+        // if compression used and original .tar file exist, clean it
+        if ($compression !== null && file_exists($destination_file)) {
+            unlink($destination_file);
+        }
+
+        // it temp file was used, rename it to destination archive name
+        if (isset($temp_basename)) {
+            rename($temp_basename.'.'.$ext, $archiveFileName);
+        }
 
         return count($files);
     }
