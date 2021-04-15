@@ -50,13 +50,14 @@ pecl install rar
 More information about formats support in [formats page](docs/Drivers.md).
 
 Use it in code:
+
 ```php
 $archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.zip'); // archive.rar, archive.tar.bz2
-$extracted_size = $archive->countUncompressedFilesSize();
-$files_list = $archive->getFileNames();
 
-echo 'Files list: '.array_map(function ($file) { return '- '.$file."\n"; }, $files_list).PHP_EOL;
-echo 'Total size after extraction: '.$extracted_size.' byte(s)';
+echo 'Files list: '.array_map(static function ($file) {
+    return '- '.$file."\n";
+     }, $archive->getFileNames()).PHP_EOL;
+echo 'Total size after extraction: '.$archive->getOriginalSize().' byte(s)';
 ```
 
 ## Built-in console archive manager

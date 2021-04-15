@@ -8,120 +8,39 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
    by call to one of  `UnifiedArchive` methods.
 
 # Formats
-- [`Formats::detectArchiveFormat`](#Formats--detectArchiveFormat)
-- [`Formats::canOpen`](#Formats--canOpen)
-- [`Formats::canStream`](#Formats--canStream)
-- [`Formats::canCreate`](#Formats--canCreate)
-- [`Formats::canAppend`](#Formats--canAppend)
-- [`Formats::canUpdate`](#Formats--canUpdate)
-- [`Formats::canEncrypt`](#Formats--canEncrypt)
-- [`Formats::getFormatMimeType`](#Formats--getFormatMimeType)
 
-- <span id="Formats--detectArchiveFormat"></span>
-    ```php
-    Formats::detectArchiveFormat(string $archiveFileName, bool $contentCheck = true): string|false
-    ```
-  
-    Detects a format of given archive `$archiveFileName`. Checks file name and file content (if `$contentCheck = true`).
-    Returns one of `Formats` constant or `false` if format is not detected.
+`$format` should be one of `Formats` constants (such as `Formats::ZIP` and so on).
+Full list of constants provided in the [appendix of this document](#formats-list).
+_If you want to enabled specific format support, you need to install an additional program or php extension. List of
+extensions that should be installed can be obtained by executing built-in `cam` with `--formats` flag:
+`./vendor/bin/cam --formats`_
 
-- <span id="Formats--canOpen"></span>
-    ```php
-    Formats::canOpen(string $format): boolean
-    ```
+All methods are static.
 
-  Tests if an archive format can be opened by any driver with current system and php configuration.
-  `$format` should be one of `Formats` constants (such as `Formats::ZIP` and so on).
-  Full list of constants provided in the [appendix of this document](#formats-formats-constants).
-  _If you want to enabled specific format support, you need to install an additional program or php extension. List of
-  extensions that should be installed can be obtained by executing built-in `cam` with `--formats` flag: `
-  Returns `true` if given archive can be opened and `false` otherwise.
-  ./vendor/bin/cam --formats`_
-  Returns `true` if given archive can be opened and `false` otherwise.
-
-- <span id="Formats--canStream"></span>
-    ```php
-    Formats::canStream(string $format): boolean
-    ```
-
-  Tests if a specified archive can be streamed.
-
-- <span id="Formats--canCreate"></span>
-    ```php
-    Formats::canCreate(string $format): boolean
-    ```
-
-  Tests if an archive format can be created by any driver with current system and php configuration.
-
-- <span id="Formats--canAppend"></span>
-    ```php
-    Formats::canAppend(string $format): boolean
-    ```
-
-  Tests if an archive format can be appended by any driver with new files with current system and php configuration.
-
-- <span id="Formats--canUpdate"></span>
-    ```php
-    Formats::canUpdate(string $format): boolean
-    ```
-
-  Tests if an archive format can be updated by any driver with new files with current system and php configuration.
-
-- <span id="Formats--canEncrypt"></span>
-    ```php
-    Formats::canEncrypt(string $format): boolean
-    ```
-
-  Tests if an archive format can be encrypted or opened with encryption by any driver with new files with current system and php configuration.
-
-- <span id="Formats--getFormatMimeType"></span>
-    ```php
-    Formats::getFormatMimeType(string $format): string|false
-    ```
-
-  Returns mime type for passed format. Returns `false` if not found.
-
-
-### Formats list
-- `Formats::ZIP`
-- `Formats::SEVEN_ZIP`
-- `Formats::RAR`
-- `Formats::CAB`
-- `Formats::TAR`
-- `Formats::TAR_GZIP`
-- `Formats::TAR_BZIP`
-- `Formats::TAR_LZMA`
-- `Formats::TAR_LZW`
-- `Formats::ARJ`
-- `Formats::GZIP`
-- `Formats::BZIP`
-- `Formats::LZMA`
-- `Formats::UEFI`
-- `Formats::GPT`
-- `Formats::MBR`
-- `Formats::MSI`
-- `Formats::ISO`
-- `Formats::DMG`
-- `Formats::UDF`
-- `Formats::RPM`
-- `Formats::DEB`
+| Method                         | Arguments                                            | Result           | Description                                                                                                                                                                                  |
+|--------------------------------|------------------------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Formats::detectArchiveFormat` | `string $archiveFileName, bool $contentCheck = true` | `string/false` | Detects a format of given archive `$archiveFileName`. Checks file name and file content (if `$contentCheck = true`). Returns one of `Formats` constant or `false` if format is not detected. |
+| `Formats::canOpen`             | `string $format`                                     | `boolean`        | Tests if an archive format can be opened by any driver with current system and php configuration.                                                                                            |
+| `Formats::canStream`           | `string $format`                                     | `boolean`        | Tests if a specified archive can be streamed (getFileStream).                                                                                                                                |
+| `Formats::canCreate`           | `string $format`                                     | `boolean`        | Tests if an archive format can be created by any driver with current system and php configuration.                                                                                           |
+| `Formats::canAppend`           | `string $format`                                     | `boolean`        | Tests if an archive format can be appended (addFiles).                                                                                                                                       |
+| `Formats::canUpdate`           | `string $format`                                     | `boolean`        | Tests if an archive format can be updated (deleteFiles).                                                                                                                                     |
+| `Formats::canEncrypt`          | `string $format`                                     | `boolean`        | Tests if an archive format can be encrypted or opened with encryption by any driver with new files.                                                                                          |
+| `Formats::getFormatMimeType`   | `string $format`                                     | `string/false` | Returns mime type for passed format. Returns `false` if not found.                                                                                                                           |
 
 # UnifiedArchive
 
-- Making an archive:
-  - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
-  - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
-  - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
 - Opening an archive
   - [`UnifiedArchive::canOpen`](#UnifiedArchive--canOpen)
   - [`UnifiedArchive::open`](#UnifiedArchive--open)
   - [`UnifiedArchive->getPclZipInterface`](#UnifiedArchive--getPclZipInterface)
 - Archive information:
-  - [`UnifiedArchive->getArchiveType`](#UnifiedArchive--getArchiveType)
-  - [`UnifiedArchive->getArchiveSize`](#UnifiedArchive--getArchiveSize)
-  - [`UnifiedArchive->countCompressedFilesSize`](#UnifiedArchive--countCompressedFilesSize)
-  - [`UnifiedArchive->countUncompressedFilesSize`](#UnifiedArchive--countUncompressedFilesSize)
-  - [`UnifiedArchive->countFiles`](#UnifiedArchive--countFiles)
+  - UnifiedArchive->getFormat
+  - UnifiedArchive->getSize
+  - UnifiedArchive->getCompressedSize
+  - UnifiedArchive->getOriginalSize
+  - UnifiedArchive->countFiles
+  - UnifiedArchive->getComment
 - Extracting an archive:
   - [`UnifiedArchive->getFileNames`](#UnifiedArchive--getFileNames)
   - [`UnifiedArchive->isFileExists`](#UnifiedArchive--isFileExists)
@@ -135,62 +54,10 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
   - [`UnifiedArchive->addFileFromString`](#UnifiedArchive--addFileFromString)
   - [`UnifiedArchive->addFiles`](#UnifiedArchive--addFiles)
   - [`UnifiedArchive->deleteFiles`](#UnifiedArchive--deleteFiles)
-
-## Archive creation
-
-- <span id="UnifiedArchive::archiveDirectory"></span>
-    ```php
-    UnifiedArchive::archiveDirectory(string $directory, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): boolean
-    ```
-
-    Creates an archive with all content from given directory and saves archive to `$archiveName` (format is
-    resolved by extension). All files have relative path in the archive. By `$compressionLevel` you can adjust
-    compression level for files. By `$password` you can set password for an archive. If case of success, `true` is returned.
-
-    Available values for compression:
-    - `BasicFormat::COMPRESSION_NONE`
-    - `BasicFormat::COMPRESSION_WEAK`
-    - `BasicFormat::COMPRESSION_AVERAGE`
-    - `BasicFormat::COMPRESSION_STRONG`
-    - `BasicFormat::COMPRESSION_MAXIMUM`
-
-    Throws:
-    - `UnsupportedOperationException`
-    - `FileAlreadyExistsException`
-    - `EmptyFileListException`
-    - `ArchiveCreationException`
-
-- <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>
-    ```php
-    UnifiedArchive::archiveFile(string $file, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): boolean
-    ```
-
-    Creates an archive with file `$file` and saves archive to `$archiveName` (format is
-    resolved by extension). File will have only relative name in the archive.
-    If case of success, `true` is returned.
-
-    Throws:
-    - `UnsupportedOperationException`
-    - `FileAlreadyExistsException`
-    - `EmptyFileListException`
-    - `ArchiveCreationException`
-
-- <span id="UnifiedArchive--archiveFiles"></span>
-    ```php
-    UnifiedArchive::archiveFiles(array $files, string $archiveName, int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE, ?string $password = null): int
-    ```
-
-    Creates an archive with given `$files` list. `$files` is an array of files or directories.
-    If file/directory passed with numeric key (e.g `['file', 'directory']`), then file/directory will have it's full
-    path in an archive. If file/directory is a key (e.g `['in_archive_path' => 'file1']`), then file/directory will have
-    path as it's value.
-    In case of success, number of stored files will be returned.
-
-    Throws:
-    - `UnsupportedOperationException`
-    - `FileAlreadyExistsException`
-    - `EmptyFileListException`
-    - `ArchiveCreationException`
+- Making an archive:
+  - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
+  - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
+  - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
 
 ## Archive opening
 
@@ -207,13 +74,16 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
 
 - <span id="UnifiedArchive--open"></span>
     ```php
-    UnifiedArchive::open(string $fileName, ?string $password = null): UnifiedArchive|null
+    UnifiedArchive::open(
+        string $fileName,
+        ?string $password = null
+    ): UnifiedArchive|null
     ```
 
     Opens an archive and returns instance of `UnifiedArchive`.
     In case of failure (format is not supported), `null` is returned.
     If you provide `$password`, it will be used to open encrypted archive.
-    In case you provide password for an archive that don't support it, an `UnsupportedOperationException` will be throwed.
+    In case you provide password for an archive that don't support it, an `UnsupportedOperationException` will be thrown.
 
 - <span id="UnifiedArchive--getPclZipInterface"></span>
     ```php
@@ -226,39 +96,15 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
 
 All following methods is intended to be called to `UnifiedArchive` instance.
 
-- <span id="UnifiedArchive--getArchiveFormat"></span>
-    ```php
-    UnifiedArchive::getArchiveFormat(): string
-    ```
-
-    Returns format of archive as one of `Formats` [constants](#formats-formats-constants).
-
-- <span id="UnifiedArchive--getArchiveSize"></span>
-    ```php
-    UnifiedArchive::getArchiveSize(): int
-    ```
-    Returns size of archive file in bytes.
-- <span id="UnifiedArchive--countCompressedFilesSize"></span>
-    ```php
-    UnifiedArchive::countCompressedFilesSize(): int
-    ```
-
-    Returns size of all stored files in archive with archive compression in bytes.
-    This can be used to measure efficiency of format compression.
-
-- <span id="UnifiedArchive--countUncompressedFilesSize"></span>
-    ```php
-    UnifiedArchive::countUncompressedFilesSize(): int
-    ```
-
-    Returns size of all stored files in archive without compression in bytes.
-    This can be used to measure size that extracted files will use.
-
-- <span id="UnifiedArchive--countFiles"></span>
-    ```php
-    UnifiedArchive::countFiles(): int
-    ```
-    Returns number of files stored in an archive.
+| Method                                | Result         | Description                                                                                                                                  |
+|---------------------------------------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `UnifiedArchive::getFormat()`         | `string`       | Returns format of archive as one of `Formats` constants.                                                                                     |
+| `UnifiedArchive::getMimeType()`       | `string/false` | Returns mime type of archive.                                                                                                                |
+| `UnifiedArchive::getSize()`           | `int`          | Returns size of archive file in bytes.                                                                                                       |
+| `UnifiedArchive::getCompressedSize()` | `int`          | Returns size of all stored files in archive with archive compression in bytes. This can be used to measure efficiency of format compression. |
+| `UnifiedArchive::getOriginalSize()`   | `int`          | Returns size of all stored files in archive without compression in bytes. This can be used to measure size that extracted files will use.    |
+| `UnifiedArchive::countFiles()`        | `int`          | Returns number of files stored in an archive.                                                                                                |
+| `UnifiedArchive::getComment()`        | `?string`      | Returns comment of archive or null (if not supported nor present).                                                                           |
 
 ## Archive content
 
@@ -313,7 +159,11 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--extractFiles"></span>
     ```php
-    UnifiedArchive::extractFiles(string $outputFolder, array $files, boolean $expandFilesList = false): int|false
+    UnifiedArchive::extractFiles(
+        string $outputFolder,
+        array $files,
+        boolean $expandFilesList = false
+    ): int|false
     ```
 
     Extracts given files or directories to output folder. If directories is passed, you need to use
@@ -329,7 +179,10 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--addDirectory"></span>
     ```php
-    UnifiedArchive::addDirectory(string $directory, string $inArchivePath = null): boolean
+    UnifiedArchive::addDirectory(
+        string $directory,
+        string $inArchivePath = null
+    ): boolean
     ```
 
     Packs all nested files from `$directory` in archive. If in-archive path is not specified, all contents will be
@@ -343,7 +196,10 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--addFile"></span>
     ```php
-    UnifiedArchive::addFile(string $file, string $inArchiveName = null): boolean
+    UnifiedArchive::addFile(
+        string $file,
+        string $inArchiveName = null
+    ): boolean
     ```
 
     Packs file in an archive. If in-archive path is not specified, file will have it's original path.
@@ -357,7 +213,10 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--addFileFromString"></span>
     ```php
-    UnifiedArchive::addFileFromString(string $inArchiveName, string $content): boolean
+    UnifiedArchive::addFileFromString(
+        string $inArchiveName,
+        string $content
+    ): boolean
     ```
 
     Packs file in an archive. If case of success, `true` is returned.
@@ -384,7 +243,10 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 - <span id="UnifiedArchive--deleteFiles"></span>
     ```php
-    UnifiedArchive::deleteFiles(string|array $fileOrFiles, $expandFilesList = false): int|false
+    UnifiedArchive::deleteFiles(
+        string|array $fileOrFiles,
+        $expandFilesList = false
+    ): int|false
     ```
 
     Deletes passed `$fileOrFiles` from archive. `$fileOrFiles` is a string with file/directory name or an array
@@ -395,6 +257,77 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     - `EmptyFileListException`
     - `UnsupportedOperationException`
     - `ArchiveModificationException`
+
+## Making an archive
+
+- <span id="UnifiedArchive::archiveDirectory"></span>
+    ```php
+    UnifiedArchive::archiveDirectory(
+        string $directory,
+        string $archiveName,
+        int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE,
+        ?string $password = null
+    ): boolean
+    ```
+
+  Creates an archive with all content from given directory and saves archive to `$archiveName` (format is
+  resolved by extension). All files have relative path in the archive. By `$compressionLevel` you can adjust
+  compression level for files. By `$password` you can set password for an archive. If case of success, `true` is returned.
+
+  Available values for compression:
+  - `BasicFormat::COMPRESSION_NONE`
+  - `BasicFormat::COMPRESSION_WEAK`
+  - `BasicFormat::COMPRESSION_AVERAGE`
+  - `BasicFormat::COMPRESSION_STRONG`
+  - `BasicFormat::COMPRESSION_MAXIMUM`
+
+  Throws:
+  - `UnsupportedOperationException`
+  - `FileAlreadyExistsException`
+  - `EmptyFileListException`
+  - `ArchiveCreationException`
+
+- <span id="UnifiedArchive--archiveFile"></span><span id="UnifiedArchive--archiveFile"></span>
+    ```php
+    UnifiedArchive::archiveFile(
+        string $file,
+        string $archiveName,
+        int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE,
+        ?string $password = null
+    ): boolean
+    ```
+
+  Creates an archive with file `$file` and saves archive to `$archiveName` (format is
+  resolved by extension). File will have only relative name in the archive.
+  If case of success, `true` is returned.
+
+  Throws:
+  - `UnsupportedOperationException`
+  - `FileAlreadyExistsException`
+  - `EmptyFileListException`
+  - `ArchiveCreationException`
+
+- <span id="UnifiedArchive--archiveFiles"></span>
+    ```php
+    UnifiedArchive::archiveFiles(
+        array $files,
+        string $archiveName,
+        int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE,
+        ?string $password = null
+    ): int
+    ```
+
+  Creates an archive with given `$files` list. `$files` is an array of files or directories.
+  If file/directory passed with numeric key (e.g `['file', 'directory']`), then file/directory will have it's full
+  path in an archive. If file/directory is a key (e.g `['in_archive_path' => 'file1']`), then file/directory will have
+  path as it's value.
+  In case of success, number of stored files will be returned.
+
+  Throws:
+  - `UnsupportedOperationException`
+  - `FileAlreadyExistsException`
+  - `EmptyFileListException`
+  - `ArchiveCreationException`
 
 # ArchiveEntry
 
@@ -407,3 +340,27 @@ It contains fields with file information:
 - `integer $compressedSize` - size of the file with compression in bytes.
 - `integer $uncompressedSize` - size of the file without compression in bytes.
 since the beginning of an era of Unix).
+
+### Formats list
+- `Formats::ZIP`
+- `Formats::SEVEN_ZIP`
+- `Formats::RAR`
+- `Formats::CAB`
+- `Formats::TAR`
+- `Formats::TAR_GZIP`
+- `Formats::TAR_BZIP`
+- `Formats::TAR_LZMA`
+- `Formats::TAR_LZW`
+- `Formats::ARJ`
+- `Formats::GZIP`
+- `Formats::BZIP`
+- `Formats::LZMA`
+- `Formats::UEFI`
+- `Formats::GPT`
+- `Formats::MBR`
+- `Formats::MSI`
+- `Formats::ISO`
+- `Formats::DMG`
+- `Formats::UDF`
+- `Formats::RPM`
+- `Formats::DEB`

@@ -171,7 +171,7 @@ class UnifiedArchive
     /**
      * Returns mime type of archive
      *
-     * @return string Mime Type
+     * @return string|false Mime Type
      */
     public function getMimeType()
     {
@@ -206,21 +206,19 @@ class UnifiedArchive
     }
 
     /**
-     * Counts cumulative size of all uncompressed data (bytes)
-     *
+     * * Counts cumulative size of all uncompressed data (bytes)
      * @return int
      */
-    public function countUncompressedFilesSize()
+    public function getOriginalSize()
     {
         return $this->uncompressedFilesSize;
     }
 
     /**
      * Counts cumulative size of all compressed data (in bytes)
-     *
      * @return int
      */
-    public function countCompressedFilesSize()
+    public function getCompressedSize()
     {
         return $this->compressedFilesSize;
     }
@@ -756,5 +754,27 @@ class UnifiedArchive
     public function getArchiveSize()
     {
         return $this->getSize();
+    }
+
+    /**
+     * Counts cumulative size of all compressed data (in bytes)
+     *
+     * @deprecated See {{UnifiedArchive::getCompressedSize}}
+     * @return int
+     */
+    public function countCompressedFilesSize()
+    {
+        return $this->getCompressedSize();
+    }
+
+    /**
+     * Counts cumulative size of all uncompressed data (bytes)
+     *
+     * @deprecated See {{UnifiedArchive::getOriginalSize}}
+     * @return int
+     */
+    public function countUncompressedFilesSize()
+    {
+        return $this->getOriginalSize();
     }
 }

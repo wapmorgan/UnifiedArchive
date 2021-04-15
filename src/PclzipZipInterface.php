@@ -345,7 +345,7 @@ class PclzipZipInterface
                     // if dir doesn't exist
                     if (!is_dir($file_header->filename)) {
                         // try to create folder
-                        if (!mkdir($file_header)) {
+                        if (!mkdir($file_header->filename)) {
                             $file_header->status = 'path_creation_fail';
                             continue;
                         }
@@ -376,11 +376,9 @@ class PclzipZipInterface
                     }
                     $directory = dirname($file_header->filename);
                     // check if running process can not create extraction folder
-                    if (!is_dir($directory)) {
-                        if (!mkdir($directory)) {
+                    if (!is_dir($directory) && !mkdir($directory)) {
                             $file_header->status = 'path_creation_fail';
                             continue;
-                        }
                     }
                     // extraction
                     if (copy('zip://'.$this->archive->filename."#"
@@ -487,7 +485,7 @@ class PclzipZipInterface
     {
         // filename
         if (is_string($a)) {
-            if ($a = UnifiedArchive::open($a) !== null) {
+            if (($a = UnifiedArchive::open($a)) !== null) {
                 // ok
             } else {
                 // // unsupported type of archive
@@ -628,8 +626,8 @@ class PclzipZipInterface
                     new \RecursiveDirectoryIterator(
                         $file_to_add, \RecursiveDirectoryIterator::SKIP_DOTS),
                     RecursiveIteratorIterator::SELF_FIRST);
-                foreach ($directory_contents as $file_to_add) {
-                    $report[] = $this->addSnippet($file_to_add, $filters,
+                foreach ($directory_contents as $indir_file_to_add) {
+                    $report[] = $this->addSnippet($indir_file_to_add, $filters,
                         $preAddCallback, $postAddCallback);
                 }
             }

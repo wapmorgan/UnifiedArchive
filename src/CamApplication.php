@@ -199,7 +199,7 @@ class CamApplication {
                 else $extracted += $result;
             }
             if (!empty($errored)) echo 'Errored: '.implode(', ', $errored).PHP_EOL;
-            if ($extracted > 0) echo 'Exctracted '.$extracted.' file(s) to '.$output.PHP_EOL;
+            if ($extracted > 0) echo 'Extracted '.$extracted.' file(s) to '.$output.PHP_EOL;
         }
     }
 
