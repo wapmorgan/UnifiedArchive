@@ -26,38 +26,50 @@ UnifiedArchive can utilize to handle as many formats as possible:
 * ext-zlib, ext-bz2, ext-xz
 
 ## Functions & Features
-- Opening an archive with automatic format detection
-- Opening archives encrypted with password (zip, rar, 7z)
-- Getting information about uncompressed size of archive contents
-- Listing archive content
-- Getting details (\[un\]compressed size, date of modification) of every archived file
-- Reading archived file content as stream (zip, rar, gz, bz2, xz)
-- Extracting archived file content as is or on a disk
-- Appending an archive with new files
-- Removing files from archive
-- Creating new archives with files/directories, adjust compression level (zip, gzip), set passwords (7z, zip)
+- Open an archive with automatic format detection (more 20 formats)
+- Open archives encrypted with password (zip, rar, 7z)
+- List archive content, calculate original size of archive, read (zip, rar) & set (zip) archive comment
+- Get details (original size, date of modification) of every archived file. Read archived file content as stream (zip, rar, gz, bz2, xz). Extract archived file content as is or on a disk
+- Extract all archive content
+- Append an archive with new files or directories
+- Remove files from archive
+- Creat new archives with files/directories
+- Adjust compression level (zip, gzip, 7zip) for new archives
+- Set passwords (7z, zip) for new archives
 
 ## Quick start
 ```sh
 composer require wapmorgan/unified-archive
-# install libraries for support: tar.gz, tar.bz2, zip
+# install php libraries for support: tar.gz, tar.bz2, zip
 composer require pear/archive_tar alchemy/zippy
-# or if you can, install p7zip package in your OS and SevenZip driver for support a lot of formats (tar.*, zip, rar)
-composer require gemorroj/archive7z
-# to work with rar natively
+# if you can, install `p7zip` package in OS and `SevenZip` driver
+sudo apt-get install p7zip-full && composer require gemorroj/archive7z
+# install ext-rar for native work
 pecl install rar
+
+# Check supported formats
+./vendor/bin/cam --formats
 ```
 More information about formats support in [formats page](docs/Drivers.md).
 
 Use it in code:
-
 ```php
+# Extraction
 $archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.zip'); // archive.rar, archive.tar.bz2
 
-echo 'Files list: '.array_map(static function ($file) {
-    return '- '.$file."\n";
-     }, $archive->getFileNames()).PHP_EOL;
-echo 'Total size after extraction: '.$archive->getOriginalSize().' byte(s)';
+if ($archive !== null) {
+    $output_dir = '/var/www/extracted';
+    if (disk_free_space($output_dir) > $archive->getOriginalSize()) {
+        $archive->extractFiles($output_dir);
+        echo 'Extracted files list: '.implode(', ', $archive->getFileNames()).PHP_EOL;
+    }
+}
+
+# Archiving
+\wapmorgan\UnifiedArchive\UnifiedArchive::archiveFiles([
+    'README.md' => '/default/path/to/README.md',
+    'content' => '/folder/with/content/',
+], 'archive.zip', \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_MAXIMUM);
 ```
 
 ## Built-in console archive manager

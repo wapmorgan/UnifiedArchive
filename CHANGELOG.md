@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.1.3 - Mar **, 2021
+### 1.1.3 - Apr **, 2021
 
 **Changed format of `$files` in `archiveFiles()` and `addFiles()`**
 ```php

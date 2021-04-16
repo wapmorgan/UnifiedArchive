@@ -1,18 +1,18 @@
-Here is a list of available drivers with description in selection priority.
+Here is a list of available drivers with their differences.
 
-| Driver       | Memory-effective streaming            | appending | updating | encrypt | creation | type | formats   |
-|--------------|-------------------------------------- |-----------|----------|---------|----------|-----------|------|
-| Zip          | ✔                                     | ✔         | ✔        | ✔    | ✔          | extension | zip |
-| Rar          | ✔                                     |           |          |      |           | extension   | rar |
-| TarByPhar    |                                       | ✔         | ✔        |     | ✔           | extensions | tar, tar-gz, tar-bz2 |
-| TarByPear    |                                       | ✔         |          |     | ✔          | library + extensions | tar, tar-gz, tar-bz2, tar-Z, tar-xz |
-| SevenZip     |                                       | ✔         | ✔        | ✔    | ✔          | library + program | zip, rar, tar, iso, uefi, ... |
-| AlchemyZippy |                                       | ✔         | ✔        |     | ✔          | library + programs | zip, tar, tar-gz, tar-bz2 |
-| Gzip         | ✔                                     |           |          |     | ✔            | extension | gz |
-| Bzip2        | ✔                                     |           |          |     | ✔            | extension | bz2 |
-| Lzma2        | ✔                                     |           |          |     | ✔            | extension | xz |
-| Iso          |                                       |           |          |     |            | library | iso |
-| Cab          |                                       |           |          |     |            | library | cab |
+|           Driver          | Zip       | Rar       | TarByPhar            | TarByPear                           | SevenZip                      | AlchemyZippy              | Gzip      | Bzip2     | Lzma2     | Iso     | Cab     |
+|:-------------------------:|-----------|-----------|----------------------|-------------------------------------|-------------------------------|---------------------------|-----------|-----------|-----------|---------|---------|
+|            type           | extension | extension | few extensions       | library + few extensions            | library + OS utility          | library + OS utilities    | extension | extension | extension | library | library |
+| Open with password        | ✔         | ✔         |                      |                                     | ✔                             |                           |           |           |           |         |         |
+| Get comment               | ✔         | ✔         |                      |                                     |                               |                           |           |           |           |         |         |
+| Update comment            | ✔         |           |                      |                                     |                               |                           |           |           |           |         |         |
+|        Stream files       | ✔         | ✔         |                      |                                     |                               |                           | ✔         | ✔         | ✔         |         |         |
+|         Add files         | ✔         |           | ✔                    | ✔                                   | ✔                             | ✔                         |           |           |           |         |         |
+|        Delete files       | ✔         |           | ✔                    |                                     | ✔                             | ✔                         |           |           |           |         |         |
+|           Create          | ✔         |           | ✔                    | ✔                                   | ✔                             | ✔                         | ✔         | ✔         | ✔         |         |         |
+| Specify compression level | ✔         |           |                      |                                     | ✔                             |                           | ✔         | ✔         |           |         |         |
+| Encrypt with password     | ✔         |           |                      |                                     | ✔                             |                           |           |           |           |         |         |
+|          formats          | zip       | rar       | tar, tar-gz, tar-bz2 | tar, tar-gz, tar-bz2, tar-Z, tar-xz | 7z, zip, rar, tar, iso,  ...  | zip, tar, tar-gz, tar-bz2 | gz        | bz2       | xz        | iso     | cab     |
 
 Example for `zip` with two drivers support: If on your system both `Zip` and `AlchemyZippy` driver available, the first will be used for `zip` file.
 
@@ -45,13 +45,14 @@ Install TarByPear, AlchemyZippy libraries.
 - Type: library ([`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar)) and optionally php-extensions (`zlib`, `bzip2`, `xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz))
 - Formats: tar, tar.gz, tar.bz2, tar.xz, tar.Z
 - Works with binary data in php-land (= eats a lot of memory for big archives).
-- Not available: updating.
+- Not available: updating archive (deleteFiles).
 
 ## SevenZip
 - Type: library ([`gemorroj/archive7z`](https://packagist.org/packages/gemorroj/archive7z)) and console program p7zip ([`7z`](http://p7zip.sourceforge.net/))
 - Formats: 7z, XZ, BZIP2, GZIP, TAR, ZIP, WIM, AR, ARJ, CAB, CHM, CPIO, CramFS, DMG, EXT, FAT, GPT, HFS, IHEX, ISO, LZH, LZMA, MBR, MSI, NSIS, NTFS, QCOW2, RAR, RPM, SquashFS, UDF, UEFI, VDI, VHD, VMDK, WIM, XAR and Z
 - Works via command line (= should be available `proc_*` functions).
 - Can open and create archives with passwords (only ZIP format).
+- Can adjust new archives compression level.
 
 ## AlchemyZippy
 - Type: library ([`alchemy/zippy`](https://packagist.org/packages/alchemy/zippy)) and console programs:
