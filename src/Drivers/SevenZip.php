@@ -304,7 +304,6 @@ class SevenZip extends BasicDriver
             throw new ArchiveModificationException('Could not create temporarily file');
 
         file_put_contents($tmp_file, $content);
-        unset($content);
         $this->sevenZip->addEntry($tmp_file, true);
         $this->sevenZip->renameEntry($tmp_file, $inArchiveName);
         unlink($tmp_file);

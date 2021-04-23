@@ -77,7 +77,9 @@ class TarByPhar extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install `phar` extension and optionally php-extensions (zlib, bzip2)';
+        return !extension_loaded('phar')
+            ? 'install `phar` extension and optionally php-extensions (zlib, bzip2)'
+            : null;
     }
 
     /**
