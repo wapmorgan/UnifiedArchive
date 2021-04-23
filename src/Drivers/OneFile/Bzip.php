@@ -91,8 +91,10 @@ class Bzip extends OneFileDriver
             self::COMPRESSION_STRONG => 7,
             self::COMPRESSION_MAXIMUM => 9,
         ];
+        static $work_factor_multiplier = 27;
+
         // it seems not working at all
-        $work_factor = ($compressionLevelMap[$compressionLevel] * 28);
+        $work_factor = ($compressionLevelMap[$compressionLevel] * $work_factor_multiplier);
         return bzcompress($data, $compressionLevelMap[$compressionLevel], $work_factor);
     }
 }

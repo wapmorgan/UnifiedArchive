@@ -55,12 +55,12 @@ class Formats
         Gzip::class,
         Bzip::class,
         Lzma::class,
-        Iso::class,
-        Cab::class,
         TarByPhar::class,
         SevenZip::class,
         AlchemyZippy::class,
         TarByPear::class,
+        Iso::class,
+        Cab::class,
     ];
 
     /** @var array<string, array<string>> List of all available types with their drivers */
@@ -324,7 +324,7 @@ class Formats
     {
         if (static::$availableFormats === null) {
             static::$availableFormats = [];
-            foreach (Formats::$drivers as $handlerClass)
+            foreach (static::$drivers as $handlerClass)
             {
                 $handler_formats = $handlerClass::getSupportedFormats();
                 foreach ($handler_formats as $handler_format)

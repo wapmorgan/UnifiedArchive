@@ -276,18 +276,19 @@ class Zip extends BasicDriver
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => ZipArchive::CM_STORE,
-            self::COMPRESSION_WEAK => ZipArchive::CM_SHRINK,
-            self::COMPRESSION_AVERAGE => ZipArchive::CM_IMPLODE,
+            self::COMPRESSION_WEAK => ZipArchive::CM_DEFLATE,
+            self::COMPRESSION_AVERAGE => ZipArchive::CM_DEFLATE,
             self::COMPRESSION_STRONG => ZipArchive::CM_DEFLATE,
             self::COMPRESSION_MAXIMUM => ZipArchive::CM_DEFLATE64,
         ];
@@ -299,7 +300,7 @@ class Zip extends BasicDriver
             throw new ArchiveCreationException('ZipArchive error: '.$result);
 
         $can_set_compression_level = method_exists($zip, 'setCompressionName');
-        $can_encrypt = method_exists($zip, 'setEncryptionName');
+        $can_encrypt = static::canEncrypt(Formats::ZIP);
 
         if ($password !== null && !$can_encrypt) {
             throw new ArchiveCreationException('Encryption is not supported on current platform');
@@ -354,7 +355,7 @@ class Zip extends BasicDriver
      */
     public static function canEncrypt($format)
     {
-        return true;
+        return method_exists('\ZipArchive', 'setEncryptionName');
     }
 
     /**

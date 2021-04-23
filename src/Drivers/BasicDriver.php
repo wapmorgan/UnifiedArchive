@@ -99,12 +99,13 @@ abstract class BasicDriver
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param string $archiveFormat
      * @param int $compressionLevel
      * @param null $password
      * @return int Number of archived files
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         throw new UnsupportedOperationException();
     }

@@ -270,13 +270,14 @@ class TarByPhar extends BasicDriver
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         if ($password !== null) {
             throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');

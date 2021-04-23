@@ -24,19 +24,25 @@ if (!init_composer($paths)) die('Run `composer install` firstly.'.PHP_EOL);
 if (!class_exists('\Docopt')) die('Install docopt firsly. Run `composer require docopt/docopt ~1.0`.'.PHP_EOL);
 
 $version = UnifiedArchive::VERSION;
+$no_compression_level = \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_NONE;
+$common_compression_level = \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_AVERAGE;
+$maximum_compression_level = \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_MAXIMUM;
+
 $doc = <<<DOC
 Universal console archive manager for Windows/Linux (part of UnifiedArchive $version).
 
-USAGE: cam (-l|--list)  ARCHIVE
-       cam (-t|--table) ARCHIVE
+USAGE: cam (-l|--list)  ARCHIVE [FILTER]
+       cam (-t|--table) ARCHIVE [FILTER]
        cam (-i|--info)  ARCHIVE
-       cam (-e|--extract) [--password=PASSWORD] [--output=DIR] [--replace=(all|ask|none|time|size)] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
+       cam (-e|--extract) [--password=PASSWORD] [--output=DIR] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
        cam (-p|--print) [--password=PASSWORD] ARCHIVE FILES_IN_ARCHIVE...
        cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
        cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
        cam (-a|--add) [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
        cam (-A|--add-from-stdin) ARCHIVE FILE_IN_ARCHIVE
-       cam (-c|--create) [--password=PASSWORD] [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
+       cam (-c|--create)
+            [--compressionLevel=LEVEL] [--password=PASSWORD]
+            [--comment=COMMENT] [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
        cam (-C|--create-fake) [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
        cam (-f|--formats)
        cam (-D|--drivers)
@@ -60,14 +66,10 @@ ACTIONS:
       -D(--drivers) List all drivers with installation information
 
 OPTIONS:
-    --password=PASSWORD    Password for decompression or compression
-
-    --replace=(all|ask|none|time|size)    Set how should be resolved cases in that extracting files already exist. [default:all]
-            all - replaces all files
-            ask - ask for manual resolution on every case
-            none - preserve all existing on disk files
-            time - selects file with later timestamp
-            size - selects file with bigger size
+    --password=PASSWORD      Password for decompression or compression (if supported by driver & format).
+    --compressionLevel=LEVEL Compression level (if supported by driver & format). Values from $no_compression_level (no compression) to $maximum_compression_level (maximum compression) [default:$common_compression_level]
+    --output=DIRECTORY       Set output directory in that all files will be extracted. [default:./]
+    --comment=COMMENT        Set comment for an archive (if supported)
 
     --path=[relative|absolute]  Method of path processing [default: relative]
         Used for archive creation and appending.
@@ -77,8 +79,6 @@ OPTIONS:
 
     --exclude FILES...
         or --exclude /PATTERN/. Excludes one or few files, directories by exact in-archive path or by regular expression pattern.
-
-    --output=DIRECTORY    Set output directory in that all files will be extracted.
 DOC;
 
 $args = Docopt::handle($doc, ['version' => UnifiedArchive::VERSION]);

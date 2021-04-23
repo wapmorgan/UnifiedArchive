@@ -57,21 +57,22 @@ class TarByPear extends BasicDriver
     public static function checkFormatSupport($format)
     {
         $availability = class_exists('\Archive_Tar');
+        if (!$availability) return false;
         switch ($format) {
             case Formats::TAR:
-                return $availability;
+                return true;
 
             case Formats::TAR_GZIP:
-                return $availability && extension_loaded('zlib');
+                return extension_loaded('zlib');
 
             case Formats::TAR_BZIP:
-                return $availability && extension_loaded('bz2');
+                return extension_loaded('bz2');
 
             case Formats::TAR_LZMA:
-                return $availability && extension_loaded('xz');
+                return extension_loaded('xz');
 
             case Formats::TAR_LZW:
-                return $availability && LzwStreamWrapper::isBinaryAvailable();
+                return LzwStreamWrapper::isBinaryAvailable();
         }
     }
 
@@ -88,19 +89,22 @@ class TarByPear extends BasicDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install library `pear/archive_tar` and optionally php-extensions (zlib, bzip2)';
+        return !class_exists('\Archive_Tar')
+            ? 'install library `pear/archive_tar` and optionally php-extensions (zlib, bzip2)'
+            : null;
     }
 
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         if ($password !== null) {
             throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
@@ -255,7 +259,7 @@ class TarByPear extends BasicDriver
 
         return new ArchiveEntry($fileName, $data['size'] / $this->pearCompressionRatio,
             $data['size'], $data['mtime'], in_array(strtolower(pathinfo($this->archiveFileName,
-                PATHINFO_EXTENSION)), ['gz', 'bz2', 'xz', 'Z']));
+                PATHINFO_EXTENSION)), ['gz', 'bz2', 'xz', 'z']));
     }
 
     /**

@@ -76,8 +76,9 @@ class CamApplication {
      */
     public function listArray($args)
     {
+        $filter = isset($args['FILTER']) ? $args['FILTER'] : null;
         $archive = $this->open($args['ARCHIVE']);
-        foreach ($archive->getFileNames() as $file) {
+        foreach ($archive->getFileNames($filter) as $file) {
             echo $file.PHP_EOL;
         }
     }
@@ -90,24 +91,27 @@ class CamApplication {
     public function table($args)
     {
         $archive = $this->open($args['ARCHIVE']);
+        $filter = isset($args['FILTER']) ? $args['FILTER'] : null;
 
-        echo sprintf('%51s | %4s | %-18s'.PHP_EOL, 'File name', 'Size', 'Date');
-        echo str_repeat('-', 80).PHP_EOL;
-        foreach ($archive->getFileNames() as $file) {
+        $width = $this->getTerminalWidth();
+        $name_width = $width - 44;
+
+        echo sprintf('%'.$name_width.'s | %8s | %8s | %-18s'.PHP_EOL, 'File name', '#Size', 'Size', 'Date');
+        echo str_repeat('-', $width).PHP_EOL;
+        foreach ($archive->getFileNames($filter) as $file) {
             $info = $archive->getFileData($file);
-            $size = $this->formatSize($info->uncompressedSize);
-            $file_name = strlen($file) > 51 ? substr($file, 0, 49).'..' : $file;
-            echo sprintf('%-51s | %1.1f%s | %18s'.PHP_EOL,
+            $file_name = strlen($file) > $name_width ? substr($file, 0, $name_width-2).'..' : $file;
+            echo sprintf('%-'.$name_width.'s | %8s | %8s | %18s'.PHP_EOL,
                 $file_name,
-                $size[0],
-                $size[1],
+                implode(null, $this->formatSize($info->compressedSize, 3)),
+                implode(null, $this->formatSize($info->uncompressedSize, 3)),
                 $this->formatDate($info->modificationTime)
                 );
         }
-        $size = $this->formatSize($archive->countUncompressedFilesSize());
-        $packed_size = $this->formatSize($archive->countCompressedFilesSize());
-        echo str_repeat('-', 80).PHP_EOL;
-        echo sprintf('%51s | %1.1f%s | %1.1f%s'.PHP_EOL, 'Total '.$archive->countFiles().' file(s)', $size[0], $size[1], $packed_size[0], $packed_size[1]);
+        $size = $this->formatSize($archive->getOriginalSize());
+        $packed_size = $this->formatSize($archive->getCompressedSize());
+        echo str_repeat('-', $width).PHP_EOL;
+        echo sprintf('%'.$name_width.'s | %8s | %8s'.PHP_EOL, 'Total '.$archive->countFiles().' file(s)', $packed_size[0].$packed_size[1], $size[0].$size[1]);
 
     }
 
@@ -116,7 +120,7 @@ class CamApplication {
      * @param int $precision
      * @return array
      */
-    public function formatSize($bytes, $precision = 1)
+    public function formatSize($bytes, $precision = 2)
     {
         $units = ['b', 'k', 'm', 'g', 't'];
 
@@ -166,9 +170,11 @@ class CamApplication {
         echo 'Archive              type: '.$archive->getFormat().PHP_EOL;
         echo 'Archive           changed: '.$this->formatDate(filemtime($args['ARCHIVE'])).PHP_EOL;
         echo 'Archive          contains: '.$archive->countFiles().' file'.($archive->countFiles() > 1 ? 's' : null).PHP_EOL;
-        echo 'Archive   compressed size: '.implode(' ', $this->formatSize($archive->countCompressedFilesSize(), 2)).PHP_EOL;
-        echo 'Archive uncompressed size: '.implode(' ', $this->formatSize($archive->countUncompressedFilesSize(), 2)).PHP_EOL;
-        echo 'Archive compression ratio: '.round($archive->countUncompressedFilesSize() / $archive->countCompressedFilesSize(), 6).'/1 ('.floor($archive->countCompressedFilesSize() / $archive->countUncompressedFilesSize() * 100).'%)'.PHP_EOL;
+        echo 'Archive   compressed size: '.implode(' ', $this->formatSize($archive->getCompressedSize(), 2)).PHP_EOL;
+        echo 'Archive uncompressed size: '.implode(' ', $this->formatSize($archive->getOriginalSize(), 2)).PHP_EOL;
+        echo 'Archive compression ratio: '.round($archive->getOriginalSize() / $archive->getCompressedSize(), 6).'/1 ('.floor($archive->getCompressedSize() / $archive->getOriginalSize() * 100).'%)'.PHP_EOL;
+        if (($comment = $archive->getComment()) !== null)
+            echo 'Archive           comment: '.$comment.PHP_EOL;
     }
 
     /**
@@ -241,6 +247,9 @@ class CamApplication {
             echo 'Uncompressed size: '.implode('', $this->formatSize($info->uncompressedSize, 2)).PHP_EOL;
             echo 'Is compressed    : '.($info->isCompressed ? 'yes' : 'no').PHP_EOL;
             echo 'Date modification: '.$this->formatDate($info->modificationTime).PHP_EOL;
+            $comment = $info->comment;
+            if ($comment !== null)
+                echo 'Comment: '.$comment.PHP_EOL;
         }
     }
 
@@ -309,6 +318,8 @@ class CamApplication {
     public function create($args)
     {
         $password = isset($args['--password']) ? $args['--password'] : null;
+        $compression_level = isset($args['--compressionLevel']) ? $args['--compressionLevel'] : BasicDriver::COMPRESSION_AVERAGE;
+
         if (file_exists($args['ARCHIVE'])) {
             if (is_dir($args['ARCHIVE']))
                 echo $args['ARCHIVE'].' is a directory!'.PHP_EOL;
@@ -328,11 +339,16 @@ class CamApplication {
                 }
             }
 
-            $archived_files = UnifiedArchive::archiveFiles($files, $args['ARCHIVE'], BasicDriver::COMPRESSION_AVERAGE, $password);
+            $archived_files = UnifiedArchive::archiveFiles($files, $args['ARCHIVE'], $compression_level, $password);
             if ($archived_files === false)
                 echo 'Error'.PHP_EOL;
-            else
+            else {
+                if (isset($args['--comment'])) {
+                    $archive = UnifiedArchive::open($args['ARCHIVE']);
+                    $archive->setComment($args['--comment']);
+                }
                 echo 'Created archive ' . $args['ARCHIVE'] . ' with ' . $archived_files . ' file(s) of total size ' . implode('', $this->formatSize(filesize($args['ARCHIVE']))) . PHP_EOL;
+            }
         }
     }
 
@@ -351,5 +367,24 @@ class CamApplication {
         }
 
         var_dump(UnifiedArchive::prepareForArchiving($files, $args['ARCHIVE']));
+    }
+
+    protected function getTerminalWidth()
+    {
+        if (is_numeric($columns = trim(getenv('COLUMNS')))) {
+            return $columns;
+        }
+
+        if (function_exists('shell_exec')) {
+            // try for bash
+            if (is_numeric($bash_width = trim(shell_exec('tput cols'))))
+                return $bash_width;
+
+            // try for windows
+            if (!empty($win_width_val = trim(shell_exec('mode con'))) && preg_match('~columns: (\d+)~i', $win_width_val, $win_width))
+                return $win_width[1];
+        }
+
+        return 80;
     }
 }

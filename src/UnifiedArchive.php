@@ -55,7 +55,7 @@ class UnifiedArchive
     public static function open($fileName, $password = null)
     {
         if (!file_exists($fileName) || !is_readable($fileName)) {
-            throw new InvalidArgumentException('Could not open file: ' . $fileName);
+            throw new InvalidArgumentException('Could not open file: ' . $fileName.' is not readable');
         }
 
         $format = Formats::detectArchiveFormat($fileName);
@@ -518,10 +518,10 @@ class UnifiedArchive
         if ($password !== null && !Formats::canEncrypt($info['type']))
             throw new UnsupportedOperationException('Archive type '.$info['type'].' can not be encrypted');
 
-        /** @var BasicDriver $handler_class */
+        /** @var BasicDriver $driver */
         $driver = Formats::getFormatDriver($info['type'], true);
 
-        return $driver::createArchive($info['files'], $archiveName, $compressionLevel, $password);
+        return $driver::createArchive($info['files'], $archiveName, $compressionLevel, $compressionLevel, $password);
     }
 
     /**

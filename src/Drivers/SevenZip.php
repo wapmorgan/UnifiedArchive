@@ -9,6 +9,7 @@ use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class SevenZip extends BasicDriver
@@ -313,12 +314,14 @@ class SevenZip extends BasicDriver
     /**
      * @param array $files
      * @param string $archiveFileName
+     * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
      * @return int
      * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
     {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => 0,
@@ -327,6 +330,10 @@ class SevenZip extends BasicDriver
             self::COMPRESSION_STRONG => 7,
             self::COMPRESSION_MAXIMUM => 9,
         ];
+
+        if ($password !== null && !static::canEncrypt($archiveFormat)) {
+            throw new UnsupportedOperationException('SevenZip could not encrypt an archive of '.$archiveFormat.' format');
+        }
 
         try {
             $seven_zip = new Archive7z($archiveFileName);
