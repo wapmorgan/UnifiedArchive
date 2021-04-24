@@ -10,7 +10,7 @@ Supported formats (depends on installed drivers): zip, 7z, rar, one-file(gz, bz2
 [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Latest Unstable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/unstable)](https://packagist.org/packages/wapmorgan/unified-archive)
 
-Tests & Quality: [![Build status](https://travis-ci.org/wapmorgan/UnifiedArchive.svg?branch=master)](https://travis-ci.org/wapmorgan/UnifiedArchive)
+Tests & Quality: [![Build status](https://travis-ci.com/wapmorgan/UnifiedArchive.svg?branch=master)](https://travis-ci.com/github/wapmorgan/UnifiedArchive)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=master)
 
