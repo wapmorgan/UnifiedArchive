@@ -1,7 +1,10 @@
 <?php
 namespace wapmorgan\UnifiedArchive;
 
+use ArrayAccess;
+use Countable;
 use InvalidArgumentException;
+use Iterator;
 use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -14,7 +17,7 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 /**
  * Class which represents archive in one of supported formats.
  */
-class UnifiedArchive
+class UnifiedArchive implements ArrayAccess, Iterator, Countable
 {
     const VERSION = '1.1.3';
 
@@ -26,6 +29,11 @@ class UnifiedArchive
 
     /** @var array List of files in current archive */
     protected $files;
+
+    /**
+     * @var int
+     */
+    protected $filesIterator = 0;
 
     /** @var int Number of files in archive */
     protected $filesQuantity;
@@ -50,7 +58,6 @@ class UnifiedArchive
      * @param string $fileName Archive filename
      * @param null $password
      * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
-     * @throws UnsupportedOperationException
      */
     public static function open($fileName, $password = null)
     {
@@ -776,5 +783,80 @@ class UnifiedArchive
     public function countUncompressedFilesSize()
     {
         return $this->getOriginalSize();
+    }
+
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists($offset)
+    {
+        return $this->hasFile($offset);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return mixed|string
+     * @throws NonExistentArchiveFileException
+     */
+    public function offsetGet($offset)
+    {
+        return $this->getFileData($offset);
+    }
+
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     * @return bool|void
+     * @throws ArchiveModificationException
+     * @throws UnsupportedOperationException
+     */
+    public function offsetSet($offset, $value)
+    {
+        return $this->addFileFromString($offset, $value);
+    }
+
+    /**
+     * @param mixed $offset
+     * @return bool|int|void
+     * @throws ArchiveModificationException
+     * @throws UnsupportedOperationException
+     */
+    public function offsetUnset($offset)
+    {
+        return $this->deleteFiles($offset);
+    }
+
+    public function key()
+    {
+        return $this->files[$this->filesIterator];
+    }
+
+    /**
+     * @throws NonExistentArchiveFileException
+     */
+    public function current()
+    {
+        return $this->getFileData($this->files[$this->filesIterator]);
+    }
+
+    public function next()
+    {
+        $this->filesIterator++;
+    }
+
+    public function valid()
+    {
+        return $this->filesIterator < $this->filesQuantity;
+    }
+
+    public function rewind()
+    {
+        $this->filesIterator = 0;
+    }
+
+    public function count()
+    {
+        return $this->filesQuantity;
     }
 }

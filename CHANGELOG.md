@@ -30,6 +30,15 @@ it will archive *log2.txt* as */var/www/log2.txt* in an archive (new behaviour).
 - Added `UnifiedArchive->getComment()` to get comment of an archive. Available only in `Zip` and `Rar` drivers, others return `null`.
 - Added `UnifiedArchive->setComment(?string $comment)` to set comment. Available only in `Zip`.
 - Added filter in `UnifiedArcihve->getFileNames()`. If works as `fnmatch()` does.
+- Added ability to iterate over archive and access files data as array:
+```php
+$a = \wapmorgan\UnifiedArchive\UnifiedArchive::open('tests/archives/fixtures.7z');
+foreach ($a as $file => $data) {
+    echo $file.PHP_EOL;
+ }
+
+$file_data = $a['filename'];
+```
 
 **Fixed:**
 - Fixed `SevenZip` driver: disabled _tar.gz, tar.bzip2_ support as it isn't supported properly and described which formats driver can create, append, modify and encrypt.

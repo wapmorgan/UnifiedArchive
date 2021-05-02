@@ -22,13 +22,6 @@ class ArchiveEntry
     public $comment;
 
     /**
-     * @var string Path of archive entry
-     * @deprecated 0.1.0
-     * @see $path property
-     */
-    public $filename;
-
-    /**
      * ArchiveEntry constructor.
      * @param $path
      * @param $compressedSize
