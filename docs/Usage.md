@@ -6,17 +6,14 @@
 
 ## Reading and extraction
 1. Import `UnifiedArchive`
-
-    ```php
-    require 'vendor/autoload.php';
-    use \wapmorgan\UnifiedArchive\UnifiedArchive;
-    ```
-
 2. At the beginning, try to open the file with automatic detection of a format
 by name. In case of successful recognition an `UnifiedArchive` object will be
 returned. In case of failure - _null_ will be returned.
 
     ```php
+    require 'vendor/autoload.php';
+    use \wapmorgan\UnifiedArchive\UnifiedArchive;
+
     $archive = UnifiedArchive::open('filename.rar');
     // or
     $archive = UnifiedArchive::open('filename.zip');
@@ -44,36 +41,30 @@ returned. In case of failure - _null_ will be returned.
     $archive = UnifiedArchive::open('filename.iso');
     ```
 
-3. Further, read the list of files of archive.
+3. Read the list of files of archive or check that specific file is in archive.
 
-    ```php
-    $files_list = $archive->getFileNames(); // array with files list
+   ```php
+   $files_list = $archive->getFileNames(); // array with files list
    // ['file', 'file2', 'file3', ...]
-    ```
 
-4. Further, check that specific file is in archive.
-
-    ```php
-    if ($archive->hasFile('README.md')) {
+   if ($archive->hasFile('README.md')) {
        // some operations
-    }
-    ```
+   }
+   ```
 
-5. To get common information about specific file use `getFileData()` method.
-This method returns [an `ArchiveEntry` instance](API.md#ArchiveEntry)
+4. To get common information about specific file use `getFileData()` method.
+This method returns [an `ArchiveEntry` instance](API.md#ArchiveEntry). 
+To get raw file contents use `getFileContent()` method
 
-    ```php
-    $file_data = $archive->getFileData('README.md')); // ArchiveEntry with file information
-    ```
+   ```php
+   // file meta
+   $file_data = $archive->getFileData('README.md')); // ArchiveEntry with file information
 
-6. To get raw file contents use `getFileContent()` method
+   // raw file content
+   $file_content = $archive->getFileContent('README.md')); // string
+   ```
 
-    ```php
-    $file_content = $archive->getFileContent('README.md')); // string
-    // raw file content
-    ```
-
-7. Further, you can unpack all archive or specific files on a disk. The `extractFiles()` method is intended to it.
+5. Further, you can unpack all archive or specific files on a disk. The `extractFiles()` method is intended to it.
 
     ```php
     $archive->extractFiles(string $outputFolder, string|array $archiveFiles);
@@ -155,9 +146,9 @@ Also, there is extended syntax for `addFiles()` and `archiveFiles()`:
 
 ```php
 UnifiedArchive::archiveFiles([
-          '/var/www/site/abc.log' => 'abc.log',   // stored as 'abc.log'
+          'abc.log' => '/var/www/site/abc.log',   // stored as 'abc.log'
           '/var/www/site/abc.log',                // stored as '/var/www/site/abc.log'
-          '/var/www/site/runtime/logs' => 'logs', // directory content stored in 'logs' dir
+          'logs' => '/var/www/site/runtime/logs', // directory content stored in 'logs' dir
           '/var/www/site/runtime/logs',           // stored as '/var/www/site/runtime/logs'
     ], 'archive.zip');
 ```
