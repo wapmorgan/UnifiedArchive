@@ -43,7 +43,7 @@ All methods are static.
   - UnifiedArchive->getComment
 - Extracting an archive:
   - [`UnifiedArchive->getFileNames`](#UnifiedArchive--getFileNames)
-  - [`UnifiedArchive->isFileExists`](#UnifiedArchive--isFileExists)
+  - [`UnifiedArchive->hasFile`](#UnifiedArchive--hasFile)
   - [`UnifiedArchive->getFileData`](#UnifiedArchive--getFileData)
   - [`UnifiedArchive->getFileStream`](#UnifiedArchive--getFileStream)
   - [`UnifiedArchive->getFileContent`](#UnifiedArchive--getFileContent)

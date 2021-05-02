@@ -54,7 +54,7 @@ returned. In case of failure - _null_ will be returned.
 4. Further, check that specific file is in archive.
 
     ```php
-    if ($archive->isFileExists('README.md')) {
+    if ($archive->hasFile('README.md')) {
        // some operations
     }
     ```

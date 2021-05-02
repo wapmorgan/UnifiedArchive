@@ -22,7 +22,7 @@ it will archive *log2.txt* as */var/www/log2.txt* in an archive.
 
 **New features**:
 - Added `Formats::canStream()` to check if an archive files can be streamed.
-- Added `UnifiedArchive->getMimeType()` to get mime type of an archive.
+- Added `UnifiedArchive->getMimeType()` to get mime type of archive.
 - Added `UnifiedArchive->getComment()` to get comment of an archive. Available only in `Zip` and `Rar` drivers, others return `null`.
 - Added `UnifiedArchive->setComment(?string $comment)` to set comment. Available only in `Zip`.
 - Added ability to create archives, encrypted with password (only *zip* (`Zip`, `SevenZip`) and *7z* (`SevenZip`)) - added nullable `$password` argument to:
