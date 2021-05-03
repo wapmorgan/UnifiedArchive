@@ -30,7 +30,7 @@ class SevenZip extends BasicDriver
         return [
             Formats::SEVEN_ZIP,
             Formats::ZIP,
-            Formats::RAR,
+//            Formats::RAR,
             Formats::TAR,
             // disabled
 //            Formats::TAR_GZIP,
