@@ -789,6 +789,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param mixed $offset
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return $this->hasFile($offset);
@@ -799,6 +800,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @return mixed|string
      * @throws NonExistentArchiveFileException
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->getFileData($offset);
@@ -811,6 +813,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws ArchiveModificationException
      * @throws UnsupportedOperationException
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         return $this->addFileFromString($offset, $value);
@@ -822,11 +825,13 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws ArchiveModificationException
      * @throws UnsupportedOperationException
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         return $this->deleteFiles($offset);
     }
 
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->files[$this->filesIterator];
@@ -835,26 +840,31 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * @throws NonExistentArchiveFileException
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         return $this->getFileData($this->files[$this->filesIterator]);
     }
 
+    #[\ReturnTypeWillChange]
     public function next()
     {
         $this->filesIterator++;
     }
 
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return $this->filesIterator < $this->filesQuantity;
     }
 
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->filesIterator = 0;
     }
 
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return $this->filesQuantity;
