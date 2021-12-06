@@ -2,7 +2,8 @@ Here is a list of available drivers with their differences.
 
 |           Driver          | Zip       | Rar       | TarByPhar            | TarByPear                           | SevenZip                      | AlchemyZippy              | Gzip      | Bzip2     | Lzma2     | Iso     | Cab     |
 |:-------------------------:|-----------|-----------|----------------------|-------------------------------------|-------------------------------|---------------------------|-----------|-----------|-----------|---------|---------|
-|            type           | extension | extension | few extensions       | library + few extensions            | library + OS utility          | library + OS utilities    | extension | extension | extension | library | library |
+|          formats          | zip       | rar       | tar, tar-gz, tar-bz2 | tar, tar-gz, tar-bz2, tar-Z, tar-xz | 7z, zip, rar, tar, iso,  ...  | zip, tar, tar-gz, tar-bz2 | gz        | bz2       | xz        | iso     | cab     |
+|            type           | **extension** | **extension** | **extensions**       | _library_ + **extensions**            | **library + OS utility**          | **library + OS utilities**    | **extension** | **extension** | **extension** | **library** | **library** |
 | Open with password        | ✔         | ✔         |                      |                                     | ✔                             |                           |           |           |           |         |         |
 | Get comment               | ✔         | ✔         |                      |                                     |                               |                           |           |           |           |         |         |
 | Update comment            | ✔         |           |                      |                                     |                               |                           |           |           |           |         |         |
@@ -12,7 +13,6 @@ Here is a list of available drivers with their differences.
 |           Create          | ✔         |           | ✔                    | ✔                                   | ✔                             | ✔                         | ✔         | ✔         | ✔         |         |         |
 | Specify compression level | ✔         |           |                      |                                     | ✔                             |                           | ✔         | ✔         |           |         |         |
 | Encrypt with password     | ✔         |           |                      |                                     | ✔                             |                           |           |           |           |         |         |
-|          formats          | zip       | rar       | tar, tar-gz, tar-bz2 | tar, tar-gz, tar-bz2, tar-Z, tar-xz | 7z, zip, rar, tar, iso,  ...  | zip, tar, tar-gz, tar-bz2 | gz        | bz2       | xz        | iso     | cab     |
 
 Example for `zip` with two drivers support: If on your system both `Zip` and `AlchemyZippy` driver available, the first will be used for `zip` file.
 
