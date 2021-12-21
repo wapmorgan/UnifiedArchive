@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.1.4 - Dec 21, 2021
+Disabled `rar` for SevenZip driver.
+
 ### 1.1.3 - May 2, 2021
 
 **Changed format of `$files` in `archiveFiles()` and `addFiles()`**
