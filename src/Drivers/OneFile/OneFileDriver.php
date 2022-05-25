@@ -30,7 +30,7 @@ abstract class OneFileDriver extends BasicDriver
             throw new UnsupportedOperationException(self::FORMAT_SUFFIX.' archive does not support password!');
 
         $this->fileName = $archiveFileName;
-        $this->inArchiveFileName = basename($archiveFileName, '.'.self::FORMAT_SUFFIX);
+        $this->inArchiveFileName = basename($archiveFileName, '.'.static::FORMAT_SUFFIX);
     }
 
     /**
