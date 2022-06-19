@@ -117,7 +117,6 @@ class Gzip extends OneFileDriver
             self::COMPRESSION_STRONG => 7,
             self::COMPRESSION_MAXIMUM => 9,
         ];
-        var_dump($compressionLevelMap[$compressionLevel]);
         return gzencode($data, $compressionLevelMap[$compressionLevel]);
     }
 }
