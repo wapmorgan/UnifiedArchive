@@ -47,8 +47,12 @@ sudo apt-get install p7zip-full && composer require gemorroj/archive7z
 # install ext-rar for native work
 pecl install rar
 
-# Check supported formats
-./vendor/bin/cam --formats
+# Check supported formats and drivers
+./vendor/bin/cam system:formats
+./vendor/bin/cam system:drivers
+
+# or get detailed information about support "tar.gz" format
+./vendor/bin/cam system:format tgz
 ```
 More information about formats support in [formats page](docs/Drivers.md).
 
@@ -74,10 +78,10 @@ if ($archive !== null) {
 
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate archives.
-It supports all formats that UnifiedArchive does and can be used to manipulate
-archives without other software. To show help, launch it:
+It supports all formats and all operations on them that UnifiedArchive does, so it can be used to manipulate
+archives without other system software. To show help, launch it:
 ```
-./vendor/bin/cam --help
+./vendor/bin/cam list
 ```
 
 ## Details
