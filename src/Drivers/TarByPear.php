@@ -35,6 +35,8 @@ class TarByPear extends BasicDriver
      */
     protected $pearFilesIndex;
 
+    protected $pureFilesNumber;
+
     /**
      * @return array
      */
@@ -209,6 +211,7 @@ class TarByPear extends BasicDriver
     {
         $information = new ArchiveInformation();
         $this->pearFilesIndex = [];
+        $this->pureFilesNumber = 0;
 
         foreach ($this->tar->listContent() as $i => $file) {
             // BUG workaround: http://pear.php.net/bugs/bug.php?id=20275
@@ -221,6 +224,7 @@ class TarByPear extends BasicDriver
             $information->files[] = $file['filename'];
             $information->uncompressedFilesSize += $file['size'];
             $this->pearFilesIndex[$file['filename']] = $i;
+            $this->pureFilesNumber++;
         }
 
         $information->compressedFilesSize = filesize($this->archiveFileName);
@@ -324,7 +328,7 @@ class TarByPear extends BasicDriver
             throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
         }
 
-        return 1;
+        return $this->pureFilesNumber;
     }
 
     /**

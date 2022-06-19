@@ -146,7 +146,7 @@ class ArchivingTest extends PhpUnitTestCase
         return [
             ['onefile.gz', Formats::GZIP],
             ['onefile.bz2', Formats::BZIP],
-            ['onefile.xz', Formats::LZMA]
+//            ['onefile.xz', Formats::LZMA]
         ];
     }
 }

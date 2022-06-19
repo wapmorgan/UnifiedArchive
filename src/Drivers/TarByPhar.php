@@ -18,6 +18,8 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class TarByPhar extends BasicDriver
 {
+    public static $disabled = false;
+
     /**
      * @var false|string
      */
@@ -54,6 +56,9 @@ class TarByPhar extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
+        if (static::$disabled) {
+            return false;
+        }
         $availability = class_exists('\PharData');
         switch ($format) {
             case Formats::TAR:
