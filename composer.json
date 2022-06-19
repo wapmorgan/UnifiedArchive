@@ -15,8 +15,8 @@
 		"ext-fileinfo": "*"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "~4.8|~9.5.2",
-		"docopt/docopt": "~1.0"
+		"phpunit/phpunit": "~4.8|9.5.16",
+		"symfony/console": "~v3.4.47|~v4.4.42"
 	},
 	"replace": {
 		"wapmorgan/cam": "1.0.2"

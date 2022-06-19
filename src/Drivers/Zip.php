@@ -279,12 +279,19 @@ class Zip extends BasicDriver
      * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
+     * @param $fileProgressCallable
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
-    {
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    ) {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => ZipArchive::CM_STORE,
             self::COMPRESSION_WEAK => ZipArchive::CM_DEFLATE,
@@ -306,6 +313,13 @@ class Zip extends BasicDriver
             throw new ArchiveCreationException('Encryption is not supported on current platform');
         }
 
+        if ($fileProgressCallable !== null && !is_callable($fileProgressCallable)) {
+            throw new ArchiveCreationException('File progress callable is not callable');
+        }
+
+        $current_file = 0;
+        $total_files = count($files);
+
         foreach ($files as $localName => $fileName) {
             if ($fileName === null) {
                 if ($zip->addEmptyDir($localName) === false)
@@ -319,6 +333,9 @@ class Zip extends BasicDriver
                 if ($password !== null && $can_encrypt) {
                     $zip->setEncryptionName($localName, ZipArchive::EM_AES_256, $password);
                 }
+            }
+            if ($fileProgressCallable !== null) {
+                call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $fileName, $localName]);
             }
         }
         $zip->close();

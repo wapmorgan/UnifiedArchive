@@ -102,11 +102,18 @@ abstract class BasicDriver
      * @param string $archiveFormat
      * @param int $compressionLevel
      * @param null $password
+     * @param $fileProgressCallable
      * @return int Number of archived files
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
-    {
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    ) {
         throw new UnsupportedOperationException();
     }
 

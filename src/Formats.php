@@ -317,6 +317,12 @@ class Formats
         return $result;
     }
 
+    public static function getAllPossibleSupportedFormats()
+    {
+        static::retrieveAllFormats();
+        return static::$availableFormats;
+    }
+
     /**
      * Tests system configuration
      */

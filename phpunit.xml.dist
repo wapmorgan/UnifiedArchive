@@ -5,4 +5,15 @@
       <directory>tests</directory>
     </testsuite>
   </testsuites>
+
+  <coverage>
+    <include>
+      <directory suffix=".php">src/Drivers</directory>
+    </include>
+    <exclude>
+      <directory suffix=".php">src/Commands</directory>
+      <directory suffix=".php">src/Exceptions</directory>
+      <file>src/autoload.php</file>
+    </exclude>
+  </coverage>
 </phpunit>

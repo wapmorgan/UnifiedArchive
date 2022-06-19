@@ -1,6 +1,23 @@
 #!/usr/bin/env php
 <?php
-use wapmorgan\UnifiedArchive\CamApplication;
+
+use wapmorgan\UnifiedArchive\Commands\AddFileCommand;
+use wapmorgan\UnifiedArchive\Commands\CommentCommand;
+use wapmorgan\UnifiedArchive\Commands\CreateCommand;
+use wapmorgan\UnifiedArchive\Commands\DeleteFileCommand;
+use wapmorgan\UnifiedArchive\Commands\DetailsCommand;
+use wapmorgan\UnifiedArchive\Commands\DriversCommand;
+use wapmorgan\UnifiedArchive\Commands\ExtractArchiveCommand;
+use wapmorgan\UnifiedArchive\Commands\ExtractFileCommand;
+use wapmorgan\UnifiedArchive\Commands\ExtractFilesCommand;
+use wapmorgan\UnifiedArchive\Commands\FoldersCommand;
+use wapmorgan\UnifiedArchive\Commands\FormatCommand;
+use wapmorgan\UnifiedArchive\Commands\FormatsCommand;
+use wapmorgan\UnifiedArchive\Commands\InfoCommand;
+use wapmorgan\UnifiedArchive\Commands\ListCommand;
+use wapmorgan\UnifiedArchive\Commands\PrintCommand;
+use wapmorgan\UnifiedArchive\Commands\TableCommand;
+use wapmorgan\UnifiedArchive\Commands\TypesCommand;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 $paths = [
@@ -21,88 +38,30 @@ function init_composer(array $paths) {
 	return false;
 }
 if (!init_composer($paths)) die('Run `composer install` firstly.'.PHP_EOL);
-if (!class_exists('\Docopt')) die('Install docopt firsly. Run `composer require docopt/docopt ~1.0`.'.PHP_EOL);
+if (!class_exists('\Symfony\Component\Console\Application')) die('Run `composer require symfony/console:^4` firstly.'.PHP_EOL);
 
-$version = UnifiedArchive::VERSION;
-$no_compression_level = \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_NONE;
-$common_compression_level = \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_AVERAGE;
-$maximum_compression_level = \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_MAXIMUM;
+$application = new \Symfony\Component\Console\Application('Universal console archive manager for Windows/Linux (part of UnifiedArchive)', UnifiedArchive::VERSION);
 
-$doc = <<<DOC
-Universal console archive manager for Windows/Linux (part of UnifiedArchive $version).
+$application->add(new DriversCommand());
+$application->add(new FormatsCommand());
+$application->add(new FormatCommand());
 
-USAGE: cam (-l|--list)  ARCHIVE [FILTER]
-       cam (-t|--table) ARCHIVE [FILTER]
-       cam (-i|--info)  ARCHIVE
-       cam (-e|--extract) [--password=PASSWORD] [--output=DIR] [--exclude=PATTERN] ARCHIVE [FILES_IN_ARCHIVE...]
-       cam (-p|--print) [--password=PASSWORD] ARCHIVE FILES_IN_ARCHIVE...
-       cam (-d|--details) ARCHIVE FILES_IN_ARCHIVE...
-       cam (-x|--delete)  ARCHIVE FILES_IN_ARCHIVE...
-       cam (-a|--add) [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
-       cam (-A|--add-from-stdin) ARCHIVE FILE_IN_ARCHIVE
-       cam (-c|--create)
-            [--compressionLevel=LEVEL] [--password=PASSWORD]
-            [--comment=COMMENT] [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
-       cam (-C|--create-fake) [--path=(relative|absolute)] ARCHIVE FILES_ON_DISK...
-       cam (-f|--formats)
-       cam (-D|--drivers)
+$application->add(new CreateCommand());
 
-ACTIONS:
-      -l(--list)    List files in archive
-      -t(--table)   List files as table in archive
-      -i(--info)    Summary about archive
+$application->add(new InfoCommand());
+$application->add(new CommentCommand());
+$application->add(new ExtractArchiveCommand());
 
-      -e(--extract) Extract from archive
+$application->add(new ExtractFilesCommand());
+$application->add(new ListCommand());
+$application->add(new TableCommand());
+$application->add(new TypesCommand());
+$application->add(new FoldersCommand());
 
-      -p(--print)   Extract archive file content on terminal
-      -d(--details) Details about file in archive
-      -x(--delete)  Delete files from archive
+$application->add(new AddFileCommand());
+$application->add(new DeleteFileCommand());
+$application->add(new DetailsCommand());
+$application->add(new ExtractFileCommand());
+$application->add(new PrintCommand());
 
-      -a(--add)     Pack files to archive
-      -A(--add-from-stdin) Add file from STDIN
-      -c(--create)  Create new archive
-
-      -f(--formats) List all formats with support state
-      -D(--drivers) List all drivers with installation information
-
-OPTIONS:
-    --password=PASSWORD      Password for decompression or compression (if supported by driver & format).
-    --compressionLevel=LEVEL Compression level (if supported by driver & format). Values from $no_compression_level (no compression) to $maximum_compression_level (maximum compression) [default:$common_compression_level]
-    --output=DIRECTORY       Set output directory in that all files will be extracted. [default:./]
-    --comment=COMMENT        Set comment for an archive (if supported)
-
-    --path=[relative|absolute]  Method of path processing [default: relative]
-        Used for archive creation and appending.
-            If "relative" used, then "cam -c archive.zip /home/user/abc /home/user/folder/" will create an archive with 
-            "abc" and "folder" members in archive. If "absolute" is used, then members in archive will have absolute paths
-            (/home/user/abc and /home/user/folder).
-
-    --exclude FILES...
-        or --exclude /PATTERN/. Excludes one or few files, directories by exact in-archive path or by regular expression pattern.
-DOC;
-
-$args = Docopt::handle($doc, ['version' => UnifiedArchive::VERSION]);
-
-$actions = [
-    'l:list' => 'listArray',
-    't:table' => 'table',
-    'i:info' => 'info',
-    'e:extract' => 'extract',
-    'p:print' => 'printFile',
-    'd:details' => 'details',
-    'x:delete' => 'delete',
-    'a:add' => 'add',
-    'A:add-from-stdin' => 'addFromStdin',
-    'c:create' => 'create',
-    'C:create-fake' => 'createFake',
-    'f:formats' => 'checkFormats',
-    'D:drivers' => 'checkDrivers',
-];
-
-foreach ($actions as $arg => $v) {
-  $arg = explode(':', $arg);
-    if ($args['-'.$arg[0]] === true || $args['--'.$arg[1]] === true) {
-        $application = new CamApplication();
-        call_user_func([$application, $v], $args);
-    }
-}
+$application->run();

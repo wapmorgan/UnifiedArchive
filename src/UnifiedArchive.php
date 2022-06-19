@@ -19,7 +19,7 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
  */
 class UnifiedArchive implements ArrayAccess, Iterator, Countable
 {
-    const VERSION = '1.1.3';
+    const VERSION = '1.1.5';
 
     /** @var string Type of current archive */
     protected $format;
@@ -320,7 +320,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws EmptyFileListException
      * @throws ArchiveExtractionException
      */
-    public function extractFiles($outputFolder, $files = null, $expandFilesList = false)
+    public function extractFiles($outputFolder, &$files = null, $expandFilesList = false)
     {
         if ($files !== null) {
             if (is_string($files)) {
@@ -449,7 +449,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Prepare files list for archiving
      *
-     * @param string $fileOrFiles File of list of files. See [[archiveFiles]] for details.
+     * @param string|array $fileOrFiles File of list of files. See [[archiveFiles]] for details.
      * @param string $archiveName File name of archive. See [[archiveFiles]] for details.
      * @return array An array containing entries:
      * - totalSize (int) - size in bytes for all files
@@ -507,12 +507,19 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      *
      * @param string $archiveName File name of archive. Type of archive will be determined by it's name.
      * @param int $compressionLevel Level of compression
-     * @param null $password
+     * @param string|null $password
+     * @param callable|null $fileProgressCallable
      * @return int Count of stored files is returned.
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFiles($fileOrFiles, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
+    public static function archiveFiles(
+        $fileOrFiles,
+        $archiveName,
+        $compressionLevel = BasicDriver::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+ )
     {
         if (file_exists($archiveName))
             throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
@@ -528,7 +535,14 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         /** @var BasicDriver $driver */
         $driver = Formats::getFormatDriver($info['type'], true);
 
-        return $driver::createArchive($info['files'], $archiveName, $compressionLevel, $compressionLevel, $password);
+        return $driver::createArchive(
+            $info['files'],
+            $archiveName,
+            $compressionLevel,
+            $compressionLevel,
+            $password,
+            $fileProgressCallable
+        );
     }
 
     /**
@@ -605,19 +619,34 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
                     $destination = $source;
                 else {
                     // old format
-                    if (!file_exists($source)) {
+                    if (is_string($source) && !file_exists($source)) {
                         list($destination, $source) = [$source, $destination];
                     }
                 }
 
                 $destination = rtrim($destination, '/\\*');
 
-                // if is directory
-                if (is_dir($source))
-                    static::importFilesFromDir(rtrim($source, '/\\*').'/*',
-                        !empty($destination) ? $destination.'/' : null, true, $files);
-                else if (is_file($source))
+                // few sources for directories
+                if (is_array($source)) {
+                    foreach ($source as $sourceItem) {
+                        static::importFilesFromDir(
+                            rtrim($sourceItem, '/\\*') . '/*',
+                            !empty($destination) ? $destination . '/' : null,
+                            true,
+                            $files
+                        );
+                    }
+                } else if (is_dir($source)) {
+                    // one source for directories
+                    static::importFilesFromDir(
+                        rtrim($source, '/\\*') . '/*',
+                        !empty($destination) ? $destination . '/' : null,
+                        true,
+                        $files
+                    );
+                } else if (is_file($source)) {
                     $files[$destination] = $source;
+                }
             }
 
         } else if (is_string($nodes)) { // passed one file or directory

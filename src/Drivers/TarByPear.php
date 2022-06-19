@@ -100,14 +100,26 @@ class TarByPear extends BasicDriver
      * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
+     * @param $fileProgressCallable
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    )
     {
         if ($password !== null) {
             throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
+        }
+
+        if ($fileProgressCallable !== null && !is_callable($fileProgressCallable)) {
+            throw new ArchiveCreationException('File progress callable is not callable');
         }
 
         $compression = null;
@@ -133,7 +145,9 @@ class TarByPear extends BasicDriver
         else
             $tar = new Archive_Tar($archiveFileName, $compression);
 
-        foreach ($files  as $localName => $filename) {
+        $current_file = 0;
+        $total_files = count($files);
+        foreach ($files as $localName => $filename) {
             $remove_dir = dirname($filename);
             $add_dir = dirname($localName);
 
@@ -143,6 +157,9 @@ class TarByPear extends BasicDriver
             } else {
                 if ($tar->addModify($filename, $add_dir, $remove_dir) === false)
                     throw new ArchiveCreationException('Error when adding file '.$filename.' to archive');
+            }
+            if ($fileProgressCallable !== null) {
+                call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $filename, $localName]);
             }
         }
         $tar = null;

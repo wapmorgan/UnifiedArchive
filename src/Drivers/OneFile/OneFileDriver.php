@@ -136,11 +136,19 @@ abstract class OneFileDriver extends BasicDriver
      * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
+     * @param $fileProgressCallable
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null) {
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    ) {
         if (count($files) > 1) {
             throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not archive few files');
         }

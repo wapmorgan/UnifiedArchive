@@ -154,11 +154,19 @@ class AlchemyZippy extends BasicDriver
      * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
+     * @param $fileProgressCallable
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    )
     {
         if ($password !== null) {
             throw new UnsupportedOperationException('AlchemyZippy could not encrypt an archive');

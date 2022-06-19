@@ -317,11 +317,19 @@ class SevenZip extends BasicDriver
      * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
+     * @param $fileProgressCallable
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    )
     {
         static $compressionLevelMap = [
             self::COMPRESSION_NONE => 0,
@@ -335,7 +343,14 @@ class SevenZip extends BasicDriver
             throw new UnsupportedOperationException('SevenZip could not encrypt an archive of '.$archiveFormat.' format');
         }
 
+        if ($fileProgressCallable !== null && !is_callable($fileProgressCallable)) {
+            throw new ArchiveCreationException('File progress callable is not callable');
+        }
+
         try {
+            $current_file = 0;
+            $total_files = count($files);
+
             $seven_zip = new Archive7z($archiveFileName);
             if ($password !== null)
                 $seven_zip->setPassword($password);
@@ -344,6 +359,9 @@ class SevenZip extends BasicDriver
                 if ($filename !== null) {
                     $seven_zip->addEntry($filename, true);
                     $seven_zip->renameEntry($filename, $localName);
+                }
+                if ($fileProgressCallable !== null) {
+                    call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $filename, $localName]);
                 }
             }
             unset($seven_zip);

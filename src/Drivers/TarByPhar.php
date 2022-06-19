@@ -273,14 +273,26 @@ class TarByPhar extends BasicDriver
      * @param int $archiveFormat
      * @param int $compressionLevel
      * @param null $password
+     * @param $fileProgressCallable
      * @return int
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */
-    public static function createArchive(array $files, $archiveFileName, $archiveFormat, $compressionLevel = self::COMPRESSION_AVERAGE, $password = null)
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    )
     {
         if ($password !== null) {
             throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
+        }
+
+        if ($fileProgressCallable !== null && !is_callable($fileProgressCallable)) {
+            throw new ArchiveCreationException('File progress callable is not callable');
         }
 
         if (preg_match('~^(.+)\.(tar\.(gz|bz2))$~i', $archiveFileName, $match)) {
@@ -318,6 +330,9 @@ class TarByPhar extends BasicDriver
         );
 
         try {
+            $current_file = 0;
+            $total_files = count($files);
+
             foreach ($files as $localName => $filename) {
                 if (is_null($filename)) {
                     if (!in_array($localName, ['/', ''], true)) {
@@ -329,6 +344,9 @@ class TarByPhar extends BasicDriver
                     if ($tar->addFile($filename, $localName) === false) {
                         throw new ArchiveCreationException('Error when adding file '.$localName.' to archive');
                     }
+                }
+                if ($fileProgressCallable !== null) {
+                    call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $filename, $localName]);
                 }
             }
         } catch (Exception $e) {
