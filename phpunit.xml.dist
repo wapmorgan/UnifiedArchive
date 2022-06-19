@@ -8,7 +8,7 @@
 
   <coverage>
     <include>
-      <directory suffix=".php">src/Drivers</directory>
+      <directory suffix=".php">src</directory>
     </include>
     <exclude>
       <directory suffix=".php">src/Commands</directory>
