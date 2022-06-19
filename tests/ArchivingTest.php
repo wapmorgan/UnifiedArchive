@@ -1,5 +1,6 @@
 <?php
 
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\Formats\OneFile\OneFile\OneFile\OneFile\SevenZip;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
@@ -29,6 +30,33 @@ class ArchivingTest extends PhpUnitTestCase
         $result = UnifiedArchive::archiveFiles(FIXTURES_DIR, $test_archive_filename);
         $this->assertValueIsInteger($result);
         $this->assertEquals(5, $result);
+
+        unlink($test_archive_filename);
+    }
+
+    /**
+     * @dataProvider updatableOneFileArchiveTypes
+     *
+     * @param string $archiveFileName
+     * @param string $archiveType
+     *
+     * @throws \Exception
+     */
+    public function testCreateOneFile($archiveFileName, $archiveType)
+    {
+        if (!Formats::canOpen($archiveType))
+            $this->markTestSkipped($archiveType.' is not supported with current system configuration');
+
+        if (!Formats::canCreate($archiveType))
+            $this->markTestSkipped($archiveType.' does not support archiving');
+
+        $this->cleanWorkDir();
+
+        $test_archive_filename = WORK_DIR.'/'.$archiveFileName;
+
+        $result = UnifiedArchive::archiveFiles(FIXTURES_DIR . '/doc', $test_archive_filename);
+        $this->assertValueIsInteger($result);
+        $this->assertEquals(1, $result);
 
         unlink($test_archive_filename);
     }
@@ -77,6 +105,26 @@ class ArchivingTest extends PhpUnitTestCase
     }
 
     /**
+     * @dataProvider updatableOneFileArchiveTypes
+     *
+     * @param string $archiveFileName
+     * @param string $archiveType
+     *
+     * @throws \Exception
+     */
+    public function testModifyOneFile($archiveFileName, $archiveType)
+    {
+        if (!Formats::canOpen($archiveType))
+            $this->markTestSkipped($archiveType.' is not supported with current system configuration');
+
+        $full_filename = self::getArchivePath($archiveFileName);
+        $archive = UnifiedArchive::open($full_filename);
+
+        $this->expectException(UnsupportedOperationException::class);
+        $archive->deleteFiles('onefile');
+    }
+
+    /**
      * @return array
      * @throws \Archive7z\Exception
      */
@@ -86,6 +134,19 @@ class ArchivingTest extends PhpUnitTestCase
             ['fixtures.zip', Formats::ZIP],
             ['fixtures.tar', Formats::TAR],
             ['fixtures.7z', Formats::SEVEN_ZIP]
+        ];
+    }
+
+    /**
+     * @return array
+     * @throws \Archive7z\Exception
+     */
+    public function updatableOneFileArchiveTypes()
+    {
+        return [
+            ['onefile.gz', Formats::GZIP],
+            ['onefile.bz2', Formats::BZIP],
+            ['onefile.xz', Formats::LZMA]
         ];
     }
 }

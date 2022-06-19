@@ -132,11 +132,11 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Returns an instance of class implementing PclZipOriginalInterface
      * interface.
      *
-     * @return PclzipZipInterface Returns an instance of a class implementing PclZipOriginalInterface
+     * @return PclZipInterface Returns an instance of a class implementing PclZip-like interface
      */
     public function getPclZipInterface()
     {
-        return new PclzipZipInterface($this);
+        return new PclZipInterface($this);
     }
 
     /**

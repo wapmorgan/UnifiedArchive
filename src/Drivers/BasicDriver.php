@@ -3,12 +3,9 @@ namespace wapmorgan\UnifiedArchive\Drivers;
 
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\PclzipZipInterface;
 
 abstract class BasicDriver
 {

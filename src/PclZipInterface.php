@@ -86,7 +86,7 @@ if (!defined('PCLZIP_ERR_NO_ERROR')) {
     define('PCLZIP_CB_POST_ADD', 78004);
 }
 
-class PclzipZipInterface
+class PclZipInterface
 {
     const SELECT_FILTER_PASS = 1;
     const SELECT_FILTER_REFUSE = 0;
@@ -209,7 +209,7 @@ class PclzipZipInterface
         foreach ($this->archive->getFileNames() as $i => $fileName) {
             $fileData = $this->archive->getFileData($fileName);
 
-            $filesList[] = (object) array(
+            $filesList[] = [
                 'filename' => $fileData->path,
                 'stored_filename' => $fileData->path,
                 'size' => $fileData->uncompressedSize,
@@ -220,7 +220,7 @@ class PclzipZipInterface
                     array('/', '\\'))*/,
                 'index' => $i,
                 'status' => 'ok',
-            );
+            ];
         }
 
         return $filesList;
@@ -235,7 +235,7 @@ class PclzipZipInterface
     public function extract()
     {
         $options = func_get_args();
-        array_shift($options);
+        //array_shift($options);
 
         // parse options
         if (isset($options[0]) && is_string($options[0])) {
@@ -272,6 +272,7 @@ class PclzipZipInterface
 
         $report = array();
         foreach ($this->listContent() as $file_header) {
+            $file_header = (object)$file_header;
             // add file information to report
             $report[] = $file_header;
             // refuse by select rule
@@ -294,8 +295,8 @@ class PclzipZipInterface
             // so I decided to do it here too
             //
             if ($anotherOutputFormat === false) {
-                $file_header->filename = realpath($extractPath.'/'.
-                    $file_header->filename);
+                $file_header->filename = realpath($extractPath).'/'.
+                    $file_header->filename;
                 //
                 // check for path correlation with restricted path
                 //
@@ -358,11 +359,7 @@ class PclzipZipInterface
                         $file_header->status = 'already_a_directory';
                         continue;
                     }
-                    // check if file path is not writable
-                    if (!is_writable($file_header->filename)) {
-                        $file_header->status = 'write_protected';
-                        continue;
-                    }
+
                     // check if file exists and it's newer
                     if (is_file($file_header->filename)) {
                         if (filemtime($file_header->filename)
@@ -379,11 +376,14 @@ class PclzipZipInterface
                     if (!is_dir($directory) && !mkdir($directory)) {
                             $file_header->status = 'path_creation_fail';
                             continue;
+                    } else if (!is_writable($directory)) {
+                        // check if file path is not writable
+                        $file_header->status = 'write_protected';
+                        continue;
                     }
                     // extraction
-                    if (copy('zip://'.$this->archive->filename."#"
-                        .$file_header->stored_filename
-                        , $file_header->filename)) {
+                    $stream = $this->archive->getFileStream($file_header->stored_filename);
+                    if (file_put_contents($file_header->filename, $stream)) {
                         // ok
                     }
                     // extraction fails
@@ -403,6 +403,10 @@ class PclzipZipInterface
                 // skip & stop extraction
                 break;
             }
+        }
+
+        foreach ($report as $i => $reportItem) {
+            $report[$i] = (array)$reportItem;
         }
 
         return $report;
@@ -453,6 +457,7 @@ class PclzipZipInterface
 
         $report = [];
         foreach ($this->listContent() as $file_header) {
+            $file_header = (object)$file_header;
             // select by select rule
             if (call_user_func($selectFilter, $file_header->stored_filename,
                     $file_header->filename, $file_header->index)
@@ -469,6 +474,10 @@ class PclzipZipInterface
             }
             // unselected file add in report
             $report[] = $file_header;
+        }
+
+        foreach ($report as $i => $reportItem) {
+            $report[$i] = (array)$reportItem;
         }
 
         return $report;
@@ -599,10 +608,10 @@ class PclzipZipInterface
      */
     private function makeKeyValueArrayFromList(array $options)
     {
-        return array_combine(
-            array_filter($options, function ($v) {return (bool) $v&2;}),
-            array_filter($options, function ($v) {return (bool) ($v-1)&2;})
-        );
+        $keys = array_filter($options, function ($v) {return ($v%2) == 0;}, ARRAY_FILTER_USE_KEY);
+        $values = array_filter($options, function ($v) {return ($v%2) == 1;}, ARRAY_FILTER_USE_KEY);
+        if (count($values) < count($keys)) $values[] = true;
+        return array_combine($keys, $values);
     }
 
     /**

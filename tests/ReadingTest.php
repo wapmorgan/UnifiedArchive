@@ -169,13 +169,73 @@ class ReadingTest extends PhpUnitTestCase
         }
 
         $temp_file = $this->prepareTempFolder('uatest');
-        if ($archiveFilename === 'fixtures.tar') {
-            var_dump($archive->getFileNames());
-        }
+
         $this->assertEquals(count($expected_files), $archive->extractFiles($temp_file), 'For archive ' . $archiveFilename);
         foreach ($flatten_list as $filename => $content) {
             $this->assertFileEquals(FIXTURES_DIR . '/' . $filename, $temp_file . '/' . $filename);
         }
+        $this->removeTempFolder($temp_file);
+
+//        $this->assertInternalType('boolean', $archive->canAddFiles());
+//        $this->assertInternalType('boolean', $archive->canDeleteFiles());
+    }
+
+    /**
+     * @depends      testCountFiles
+     * @dataProvider getFixtures
+     * @throws \Exception
+     */
+    public function testPclZipInterface($md5hash, $archiveFilename, $remoteUrl)
+    {
+        $full_filename = self::getArchivePath($archiveFilename);
+
+        if (!UnifiedArchive::canOpen($full_filename))
+            $this->markTestSkipped(Formats::detectArchiveFormat($full_filename) .' is not supported with current system configuration');
+
+        $archive = UnifiedArchive::open($full_filename);
+        $pclzip = $archive->getPclZipInterface();
+        $flatten_list = [];
+        $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
+
+        $expected_files = array_keys($flatten_list);
+        sort($expected_files);
+        $files = $pclzip->listContent();
+        $file_names = array_column($files, 'stored_filename');
+        sort($file_names);
+//        if ($expected_files != $actual_files) {
+//            throw new Exception(json_encode([$expected_files, $actual_files, $archive->getDriverType()]));
+//        }
+        $this->assertEquals($expected_files, $file_names, 'Files set is not identical');
+
+        $this->assertEquals(
+            array_sum(array_map('strlen', $flatten_list)),
+            array_sum(array_column($files, 'size')),
+            'Uncompressed size of archive should be equal to real files size'
+        );
+
+        foreach ($flatten_list as $filename => $content) {
+            // test ArchiveEntry
+            $file_data = $archive->getFileData($filename);
+            $this->assertInstanceOf('wapmorgan\\UnifiedArchive\\ArchiveEntry', $file_data, 'Could not find '
+                                                                             .$filename);
+            $file_data = $pclzip->extract(PCLZIP_OPT_BY_NAME, $filename, PCLZIP_OPT_EXTRACT_AS_STRING);
+            // test content
+            $this->assertEquals($content, $file_data[0]['content'], 'extract() should return content of file that should be equal to real file content');
+
+            ob_start();
+            $pclzip->extract(PCLZIP_OPT_BY_NAME, $filename, PCLZIP_OPT_EXTRACT_IN_OUTPUT);
+            $buffer = ob_get_contents();
+            ob_end_clean();
+            $this->assertEquals($content, $buffer, 'extract() should print content of file that should be equal to real file content');
+        }
+
+        $temp_file = $this->prepareTempFolder('uatest');
+        $pclzip->extract($temp_file);
+//        $this->assertEquals(count($expected_files), , 'For archive ' . $archiveFilename);
+        foreach ($flatten_list as $filename => $content) {
+            $this->assertFileEquals(FIXTURES_DIR . '/' . $filename, $temp_file . '/' . $filename);
+        }
+        $this->removeTempFolder($temp_file);
 
 //        $this->assertInternalType('boolean', $archive->canAddFiles());
 //        $this->assertInternalType('boolean', $archive->canDeleteFiles());
