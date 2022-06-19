@@ -105,10 +105,11 @@ class SevenZip extends BasicDriver
     public static function getInstallationInstruction()
     {
         if (!class_exists('\Archive7z\Archive7z'))
-            return 'install library `gemorroj/archive7z` and console program p7zip (7za)';
+            return 'install library [gemorroj/archive7z]: `composer require gemorroj/archive7z`' . "\n"
+                . ' and console program p7zip [7za]: `apt install p7zip-full` - depends on OS';
 
         if (Archive7z::getBinaryVersion() === false)
-            return 'install console program p7zip (7za)';
+            return 'install console program p7zip [7za]: `apt install p7zip-full` - depends on OS';
 
         return null;
     }

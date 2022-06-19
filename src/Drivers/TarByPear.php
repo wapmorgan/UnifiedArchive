@@ -90,7 +90,7 @@ class TarByPear extends BasicDriver
     public static function getInstallationInstruction()
     {
         return !class_exists('\Archive_Tar')
-            ? 'install library `pear/archive_tar` and optionally php-extensions (zlib, bzip2)'
+            ? 'install library [pear/archive_tar]: `composer require pear/archive_tar`' . "\n"  . ' and optionally php-extensions (zlib, bzip2)'
             : null;
     }
 

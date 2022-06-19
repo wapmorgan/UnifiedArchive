@@ -102,7 +102,7 @@ class AlchemyZippy extends BasicDriver
     {
         self::init();
         return static::$zippy === false
-            ? 'install library `alchemy/zippy` and console programs (tar, zip)'
+            ? 'install library [alchemy/zippy]: `composer require alchemy/zippy`' . "\n"  . ' and console programs (tar, zip): `apt install tar zip` - depends on OS'
             : null;
     }
 

@@ -52,7 +52,7 @@ class Rar extends BasicDriver
     public static function getInstallationInstruction()
     {
         return !extension_loaded('rar')
-            ? 'install `rar` extension'
+            ? 'install [rar] extension.' . "\n" . 'Can be installed with pecl: `pecl install rar`'
             : null;
     }
 

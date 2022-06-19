@@ -50,7 +50,7 @@ class Lzma extends OneFileDriver
     public static function getInstallationInstruction()
     {
         return !extension_loaded('xz')
-            ? 'install `xz` extension'
+            ? 'install [xz] extension' . "\n" . 'For 5.x: https://github.com/payden/php-xz' . "\n" . 'For 7.x: https://github.com/codemasher/php-ext-xz'
             : null;
     }
 
