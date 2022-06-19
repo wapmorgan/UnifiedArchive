@@ -17,6 +17,11 @@ class PhpUnitTestCase extends TestCase
     static public $archives;
 
     /**
+     * @var array<string format, array<string md5_hash, string filename, string remote_file>>
+     */
+    static public $oneFileArchives;
+
+    /**
      * @var array List of directories/files and content stored in archive
      */
     static public $fixtureContents;
@@ -27,6 +32,14 @@ class PhpUnitTestCase extends TestCase
     public function getFixtures()
     {
         return self::$archives;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOneFileFixtures()
+    {
+        return self::$oneFileArchives;
     }
 
     /**
@@ -71,6 +84,23 @@ class PhpUnitTestCase extends TestCase
             return $this->assertIsInt($actual);
         return $this->assertInternalType('integer', $actual);
     }
+
+    protected function prepareTempFolder($prefix)
+    {
+        $temp_file = tempnam(sys_get_temp_dir(), $prefix);
+        unlink($temp_file);
+        mkdir($temp_file, 0777);
+        return $temp_file . '/';
+    }
+
+    protected function removeTempFolder($path) {
+
+        $files = glob($path . '/*');
+        foreach ($files as $file) {
+            is_dir($file) ? $this->removeTempFolder($file) : unlink($file);
+        }
+        return rmdir($path);
+    }
 }
 
 PhpUnitTestCase::$archives = [
@@ -81,6 +111,10 @@ PhpUnitTestCase::$archives = [
     Formats::TAR_GZIP => ['fdc239490189e7bf6239a26067424d42', 'fixtures.tar.gz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.gz'],
     Formats::TAR_LZMA => ['80caf9ba1488c55ca279958abd6fce18', 'fixtures.tar.xz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.xz'],
     Formats::ZIP => ['69dcdf13d2a8b7630e2f54fa5ab97d5a', 'fixtures.zip', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.zip'],
+];
+PhpUnitTestCase::$oneFileArchives = [
+    Formats::GZIP => ['4ab7e4e61bc74dfd151487e94e58ccf8', 'onefile.gz', ''],
+    Formats::BZIP => ['f3295b2a5afded3e4b42c583aa0bde6a', 'onefile.bz2', ''],
 ];
 
 PhpUnitTestCase::$fixtureContents = [
@@ -128,7 +162,7 @@ foreach ([ARCHIVES_DIR, WORK_DIR] as $dir) {
     }
 }
 
-foreach (PhpUnitTestCase::$archives as $fixture) {
+foreach (array_merge(PhpUnitTestCase::$archives, PhpUnitTestCase::$oneFileArchives) as $fixture) {
     $fixture_file = PhpUnitTestCase::getArchivePath($fixture[1]);
     if (!file_exists($fixture_file)) {
         downloadFixture($fixture[2], $fixture_file, $fixture[0]);

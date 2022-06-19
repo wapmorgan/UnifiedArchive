@@ -24,6 +24,8 @@ class Zip extends BasicDriver
     /** @var ZipArchive */
     protected $zip;
 
+    protected $pureFilesNumber;
+
     /**
      * @return array
      */
@@ -95,11 +97,13 @@ class Zip extends BasicDriver
     public function getArchiveInformation()
     {
         $information = new ArchiveInformation();
+        $this->pureFilesNumber = 0;
         for ($i = 0; $i < $this->zip->numFiles; $i++) {
             $file = $this->zip->statIndex($i);
             // skip directories
             if (in_array(substr($file['name'], -1), ['/', '\\'], true))
                 continue;
+            $this->pureFilesNumber++;
             $information->files[$i] = $file['name'];
             $information->compressedFilesSize += $file['comp_size'];
             $information->uncompressedFilesSize += $file['size'];
@@ -209,7 +213,7 @@ class Zip extends BasicDriver
         if ($this->zip->extractTo($outputFolder) === false)
             throw new ArchiveExtractionException($this->zip->getStatusString(), $this->zip->status);
 
-        return $this->zip->numFiles;
+        return $this->pureFilesNumber;
     }
 
     /**

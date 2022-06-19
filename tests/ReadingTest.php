@@ -27,7 +27,19 @@ class ReadingTest extends PhpUnitTestCase
     }
 
     /**
+     * @return array
+     */
+    public function oneFileArchiveTypes()
+    {
+        return [
+            ['onefile.gz', Formats::GZIP],
+            ['onefile.bz2', Formats::BZIP],
+        ];
+    }
+
+    /**
      * @dataProvider archiveTypes
+     * @dataProvider oneFileArchiveTypes
      */
     public function testDetectArchiveType($filename, $type)
     {
@@ -36,6 +48,7 @@ class ReadingTest extends PhpUnitTestCase
 
     /**
      * @dataProvider getFixtures
+     * @dataProvider getOneFileFixtures
      * @return bool
      * @throws \Exception
      */
@@ -74,6 +87,34 @@ class ReadingTest extends PhpUnitTestCase
     }
 
     /**
+     * @depends testOpen
+     * @dataProvider getOneFileFixtures
+     * @throws Exception
+     */
+    public function testOneFileArchives($md5hash, $filename, $remoteUrl)
+    {
+        $full_filename = self::getArchivePath($filename);
+
+        if (!UnifiedArchive::canOpen($full_filename))
+            $this->markTestSkipped(Formats::detectArchiveFormat($full_filename) .' is not supported with current system configuration');
+
+        $archive = UnifiedArchive::open($full_filename);
+        if (1 != $archive->countFiles()) {
+            throw new Exception(json_encode([$archive->getFileNames(), $archive->getDriverType()]));
+        }
+
+        $temp_file = $this->prepareTempFolder('uatest');
+
+        $this->assertEquals('Doc', $archive->getFileContent('onefile'), 'Invalid files count for '.$filename);
+        $this->assertEquals('Doc', stream_get_contents($archive->getFileStream('onefile')), 'Invalid files count for '.$filename);
+        $this->assertEquals(1, $archive->extractFiles($temp_file.'/'));
+        $this->assertFileExists($temp_file);
+        $this->assertFileEquals(FIXTURES_DIR . '/doc', $temp_file.$archive->getFileNames()[0]);
+        unlink($temp_file.'/'.$archive->getFileNames()[0]);
+        rmdir($temp_file);
+    }
+
+    /**
      * @depends      testCountFiles
      * @dataProvider getFixtures
      * @throws \Exception
@@ -90,7 +131,7 @@ class ReadingTest extends PhpUnitTestCase
         $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
 
         // test uncompressed archive size calculation
-        $this->assertEquals(array_sum(array_map('strlen', $flatten_list)), $archive->countUncompressedFilesSize(),
+        $this->assertEquals(array_sum(array_map('strlen', $flatten_list)), $archive->getOriginalSize(),
         'Uncompressed size of archive should be equal to real files size');
 
         $expected_files = array_keys($flatten_list);
@@ -125,7 +166,15 @@ class ReadingTest extends PhpUnitTestCase
             // test content
             $this->assertEquals($content, $archive->getFileContent($filename), 'getFileContent() should return content of file that should be equal to real file content');
             $this->assertEquals($content, stream_get_contents($archive->getFileStream($filename)), 'getFileStream() should return stream with content of file that should be equal to real file content');
+        }
 
+        $temp_file = $this->prepareTempFolder('uatest');
+        if ($archiveFilename === 'fixtures.tar') {
+            var_dump($archive->getFileNames());
+        }
+        $this->assertEquals(count($expected_files), $archive->extractFiles($temp_file), 'For archive ' . $archiveFilename);
+        foreach ($flatten_list as $filename => $content) {
+            $this->assertFileEquals(FIXTURES_DIR . '/' . $filename, $temp_file . '/' . $filename);
         }
 
 //        $this->assertInternalType('boolean', $archive->canAddFiles());

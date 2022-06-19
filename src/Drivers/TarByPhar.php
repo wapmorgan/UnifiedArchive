@@ -28,6 +28,8 @@ class TarByPhar extends BasicDriver
      */
     protected $tar;
 
+    protected $pureFilesNumber;
+
     /**
      * @var int Flags for iterator
      */
@@ -115,6 +117,7 @@ class TarByPhar extends BasicDriver
             $information->compressedFilesSize += $file->getCompressedSize();
             $information->uncompressedFilesSize += filesize($file->getPathname());
         }
+        $this->pureFilesNumber = count($information->files);
         return $information;
     }
 
@@ -195,7 +198,7 @@ class TarByPhar extends BasicDriver
             throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
         }
 
-        return 1;
+        return $this->pureFilesNumber;
     }
 
     /**
