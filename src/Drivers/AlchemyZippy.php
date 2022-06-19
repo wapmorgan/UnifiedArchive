@@ -103,6 +103,9 @@ class AlchemyZippy extends BasicDriver
         self::init();
         return static::$zippy === false
             ? 'install library [alchemy/zippy]: `composer require alchemy/zippy`' . "\n"  . ' and console programs (tar, zip): `apt install tar zip` - depends on OS'
+            . "\n" . 'If you install SevenZip and AlchemyZippy:' . "\n" .
+'1. You should specify symfony/console version before installation to any **3.x.x version**: `composer require symfony/process:~3.4`, because they require different `symfony/process` versions.' . "\n" .
+'2. Install archive7z version 4.0.0: `composer require gemorroj/archive7z:~4.0`'
             : null;
     }
 
