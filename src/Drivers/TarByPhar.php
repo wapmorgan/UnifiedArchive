@@ -30,6 +30,11 @@ class TarByPhar extends BasicDriver
      */
     protected $tar;
 
+    /**
+     * @var float
+     */
+    protected $compressRatio;
+
     protected $pureFilesNumber;
 
     /**
@@ -113,15 +118,18 @@ class TarByPhar extends BasicDriver
     {
         $information = new ArchiveInformation();
         $stream_path_length = strlen('phar://'.$this->archiveFileName.'/');
+        $information->compressedFilesSize = filesize($this->archiveFileName);
         /**
          * @var string $i
          * @var PharFileInfo $file
          */
         foreach (new RecursiveIteratorIterator($this->tar) as $i => $file) {
             $information->files[] = substr($file->getPathname(), $stream_path_length);
-            $information->compressedFilesSize += $file->getCompressedSize();
-            $information->uncompressedFilesSize += filesize($file->getPathname());
+            $information->uncompressedFilesSize += $file->getSize();
         }
+        $this->compressRatio = $information->compressedFilesSize > 0
+            ? $information->uncompressedFilesSize / $information->compressedFilesSize
+            : 0;
         $this->pureFilesNumber = count($information->files);
         return $information;
     }
@@ -161,8 +169,12 @@ class TarByPhar extends BasicDriver
     {
         /** @var \PharFileInfo $entry_info */
         $entry_info = $this->tar->offsetGet($fileName);
-        return new ArchiveEntry($fileName, $entry_info->getSize(), filesize($entry_info->getPathname()),
-            0, $entry_info->isCompressed());
+        return new ArchiveEntry(
+            $fileName,
+            ($this->compressRatio > 0 ? $entry_info->getSize() / $this->compressRatio : 0), //$entry_info->getCompressedSize(),
+            $entry_info->getSize(),
+            $entry_info->getMTime(),
+            $entry_info->isCompressed());
     }
 
     /**
