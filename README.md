@@ -20,10 +20,9 @@ like to work with them unified, you can use this library.
 
 UnifiedArchive can utilize to handle as many formats as possible:
 * ZipArchive, RarArchive, PharData
-* Pear/Tar
-* 7zip cli program via Gemorroj/Archive7z
-* zip, tar cli programs via Alchemy/Zippy
 * ext-zlib, ext-bz2, ext-xz
+* `7za` cli program via Gemorroj/Archive7z
+* `zip`/`tar` cli programs via Alchemy/Zippy
 
 ## Functions & Features
 - Open an archive with automatic format detection (more 20 formats)
@@ -82,7 +81,11 @@ UnifiedArchive is distributed with a unified console program to manipulate archi
 It supports all formats and all operations on them that UnifiedArchive does, so it can be used to manipulate
 archives without other system software. To show help, launch it:
 ```
-./vendor/bin/cam list
+./vendor/bin/cam list # help
+./vendor/bin/cam archive:info archive.tar.gz # archive information
+./vendor/bin/cam files:list -l archive.tar.gz # files list (or files:table for table)
+./vendor/bin/cam archive:extract archive.tar.gz ./OUTPUT/ # extraction all archive
+./vendor/bin/cam archive:create --compression=maximum archive2.tar.gz ./OUTPUT/partners # archive creation from files
 ```
 
 ## Details
