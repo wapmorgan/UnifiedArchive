@@ -23,10 +23,12 @@ UnifiedArchive tries to utilize all them to handle as many formats as possible:
 * ext-zlib, ext-bz2, ext-xz
 * `7za` cli program via Gemorroj/Archive7z
 * `zip`/`tar` cli programs via Alchemy/Zippy
+* another libraries (cab, iso, ...)
 
 ## Functions & Features
 Main functions:
-- Open an archive with automatic format detection (more 20 formats). List archive content, calculate original size of archive
+- Open an archive with automatic format detection (more 20 formats).
+- List archive content, calculate original size of archive
 - Get details (original size, date of modification) of every archived file. Extract or stream archived file content
 - Extract all archive content. Append an archive with new files or directories. Remove files from archive
 - Create new archives with files/directories
@@ -35,8 +37,13 @@ Main functions:
 Specific functions:
 - Read (zip, rar) & set (zip) archive comment
 - [Open archives encrypted with password (zip, rar, 7z)](docs/API.md#UnifiedArchive--open)
-- [Adjust compression level (zip, gzip, 7zip)](docs/API.md#UnifiedArchive--archiveFiles) for new archives
 - Set passwords (7z, zip) for new archives
+- [Adjust compression level (zip, gzip, 7zip)](docs/API.md#UnifiedArchive--archiveFiles) for new archives
+
+1. [Usage with examples](docs/Usage.md).
+2. [Full API description](docs/API.md).
+3. [Drivers and their formats](docs/Drivers.md).
+4. [Changelog](CHANGELOG.md).
 
 ## Quick start
 ```sh
@@ -88,10 +95,3 @@ archives without other system software. To show help, launch it:
 ./vendor/bin/cam archive:extract archive.tar.gz ./OUTPUT/ # extraction all archive
 ./vendor/bin/cam archive:create --compression=maximum archive2.tar.gz ./OUTPUT/partners # archive creation from files
 ```
-
-## Details
-
-1. [Drivers and their formats](docs/Drivers.md).
-2. [Usage with examples](docs/Usage.md).
-3. [Full API description](docs/API.md).
-4. [Changelog](CHANGELOG.md).
