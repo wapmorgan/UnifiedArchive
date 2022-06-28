@@ -80,7 +80,7 @@ if ($archive !== null) {
 UnifiedArchive is distributed with a unified console program to manipulate archives.
 It supports all formats and all operations on them that UnifiedArchive does, so it can be used to manipulate
 archives without other system software. To show help, launch it:
-```
+```bash
 ./vendor/bin/cam list # help
 ./vendor/bin/cam archive:info archive.tar.gz # archive information
 ./vendor/bin/cam files:list -l archive.tar.gz # files list (or files:table for table)
