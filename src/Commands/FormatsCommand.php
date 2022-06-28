@@ -70,5 +70,7 @@ class FormatsCommand extends BaseCommand
             ]);
         }
         $table->render();
+
+        return 0;
     }
 }

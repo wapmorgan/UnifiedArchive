@@ -110,5 +110,6 @@ class TableCommand extends BaseArchiveCommand
 //        $table->setColumnWidth(3, 18);
         $table->render();
 
+        return 0;
     }
 }

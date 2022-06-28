@@ -63,5 +63,7 @@ class TypesCommand extends BaseArchiveCommand
         $table->setHeaders(['Extension', 'Total files', 'Total uncompressed size', 'Total compressed size', 'Total ratio', 'Latest modification datetime']);
         $table->setRows($extensions);
         $table->render();
+
+        return 0;
     }
 }

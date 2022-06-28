@@ -52,5 +52,7 @@ class DetailsCommand extends BaseFileCommand
                 $this->execute($input, $output);
             }
         }
+
+        return 0;
     }
 }

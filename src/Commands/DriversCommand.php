@@ -46,5 +46,7 @@ class DriversCommand extends BaseCommand
                 $output->writeln($formatter->formatSection($data[0], $data[2], 'comment'));
             }
         }
+
+        return 0;
     }
 }

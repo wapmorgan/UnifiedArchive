@@ -81,5 +81,7 @@ class AddFileCommand extends BaseArchiveCommand
                              . implode($this->formatSize($details->compressedSize))
                              . ')');
         }
+
+        return 0;
     }
 }

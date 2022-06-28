@@ -35,5 +35,7 @@ class InfoCommand extends BaseArchiveCommand
         $output->writeln("\t" . 'ratio: <info>' . round($archive->getOriginalSize() / $archive->getCompressedSize(), 6) . '/1 (' . floor($archive->getCompressedSize() / $archive->getOriginalSize() * 100) . '%</info>)');
         if (!empty($comment = $archive->getComment()))
             $output->writeln('Comment: <comment>' . $comment . '</comment>');
+
+        return 0;
     }
 }

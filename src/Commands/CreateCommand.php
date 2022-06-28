@@ -149,5 +149,7 @@ class CreateCommand extends BaseCommand
         $output->writeln('Created <info>' . $archive_file . '</info> with <comment>' . $archived_files . '</comment> file(s) ('
                          . implode($this->formatSize($archive->getOriginalSize())) . ') of total size '
                          . implode($this->formatSize(filesize($archive_file))));
+
+        return 0;
     }
 }

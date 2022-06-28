@@ -65,5 +65,7 @@ class FormatCommand extends BaseCommand
             }
         }
         $table->render();
+
+        return 0;
     }
 }

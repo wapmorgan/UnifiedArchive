@@ -37,5 +37,7 @@ class CommentCommand extends BaseArchiveCommand
         }
 
         $archive->setComment($comment);
+
+        return 0;
     }
 }

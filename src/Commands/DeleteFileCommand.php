@@ -34,5 +34,7 @@ class DeleteFileCommand extends BaseFileCommand
 
         $archive->deleteFiles($file);
         $output->writeln('<comment>- file "' . $file . '"</comment>');
+
+        return 0;
     }
 }

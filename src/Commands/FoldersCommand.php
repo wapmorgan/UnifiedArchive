@@ -77,5 +77,7 @@ class FoldersCommand extends BaseArchiveCommand
         }
         $table->setStyle('compact');
         $table->render();
+
+        return 0;
     }
 }

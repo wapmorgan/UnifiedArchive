@@ -37,5 +37,7 @@ class ExtractFileCommand extends BaseFileCommand
                 throw new \LogicException('File destination ' . $destination . ' exists');
             }
         }
+
+        return 0;
     }
 }

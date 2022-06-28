@@ -24,5 +24,7 @@ class PrintCommand extends BaseFileCommand
         /** @var $archive UnifiedArchive */
         list($archive, $file) = $this->getArchiveAndFile($input, $output);
         fpassthru($archive->getFileStream($file));
+
+        return 0;
     }
 }

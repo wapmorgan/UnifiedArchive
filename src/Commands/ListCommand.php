@@ -77,6 +77,8 @@ class ListCommand extends BaseArchiveCommand
                 $output->writeln($file);
             }
         }
+
+        return 0;
     }
 
     protected function formatDateShort($timestamp)
