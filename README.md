@@ -25,17 +25,18 @@ UnifiedArchive can utilize to handle as many formats as possible:
 * `zip`/`tar` cli programs via Alchemy/Zippy
 
 ## Functions & Features
+Main functions:
 - Open an archive with automatic format detection (more 20 formats)
-- [Open archives encrypted with password (zip, rar, 7z)](docs/API.md#UnifiedArchive--open)
 - List archive content, calculate original size of archive, read (zip, rar) & set (zip) archive comment
-- Get details (original size, date of modification) of every archived file. Read archived file content as stream (zip, rar, gz, bz2, xz). Extract archived file content as is or on a disk
-- Extract all archive content
-- Append an archive with new files or directories
-- Remove files from archive
+- Get details (original size, date of modification) of every archived file. Extract or stream archived file content
+- Extract all archive content. Append an archive with new files or directories. Remove files from archive
 - Creat new archives with files/directories
+- Fully implemented [PclZip-like interface for archives](docs/API.md#UnifiedArchive--getPclZipInterface). Easy transition from old PclZip.
+
+Specific functions:
+- [Open archives encrypted with password (zip, rar, 7z)](docs/API.md#UnifiedArchive--open)
 - [Adjust compression level (zip, gzip, 7zip)](docs/API.md#UnifiedArchive--archiveFiles) for new archives
 - Set passwords (7z, zip) for new archives
-- Fully implemented [PclZip-like interface for archives](docs/API.md#UnifiedArchive--getPclZipInterface). Easy transition from old PclZip.
 
 ## Quick start
 ```sh
