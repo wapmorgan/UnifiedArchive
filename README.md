@@ -48,18 +48,14 @@ Specific functions:
 ## Quick start
 ```sh
 composer require wapmorgan/unified-archive
-# install php libraries for support: tar.gz, tar.bz2, zip
-composer require pear/archive_tar alchemy/zippy
-# if you can, install `p7zip` package in OS and `SevenZip` driver
-sudo apt-get install p7zip-full && composer require gemorroj/archive7z
-# install ext-rar for native work
-pecl install rar
-
 # Check supported formats and drivers
 ./vendor/bin/cam system:formats
 ./vendor/bin/cam system:drivers
 
-# or get detailed information about support "tar.gz" format
+# if needed, install extensions, cli tools and php libraries
+# to enable support of other formats
+
+# also you can get detailed information about drivers and theris abilities of, for example, "tar.gz" format
 ./vendor/bin/cam system:format tgz
 ```
 More information about formats support in [formats page](docs/Drivers.md).

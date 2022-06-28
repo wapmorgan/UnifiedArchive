@@ -19,7 +19,8 @@
 		"symfony/console": "~v3.4.47|~v4.4.42|~5.4|~6.1"
 	},
 	"replace": {
-		"wapmorgan/cam": "1.0.2"
+		"wapmorgan/cam": "1.0.2",
+		"pclzip/pclzip": "2.8.2"
 	},
 	"suggest": {
 		"ext-zip": "ZIP support",
@@ -28,7 +29,7 @@
 		"ext-zlib": "GZ and TAR.GZ (GZIP) support",
 		"ext-bz2": "BZ2 and TAR.BZ2 (BZIP2) support",
 		"ext-xz": "XZ and TAR.XZ (LZMA) support",
-		"gemorroj/archive7z": "7ZIP (and a lot of formats) support via console program",
+		"gemorroj/archive7z": "7ZIP (and a lot of other formats) support via console program",
 		"alchemy/zippy": "ZIP, TAR, GZIP, BZIP2 support (with combinations) via console programs",
 		"bin-ncompress": "TAR.Z support via console program",
 		"pear/archive_tar": "another TAR support (plain php)",
