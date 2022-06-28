@@ -171,7 +171,7 @@ class TarByPhar extends BasicDriver
         $entry_info = $this->tar->offsetGet($fileName);
         return new ArchiveEntry(
             $fileName,
-            ($this->compressRatio > 0 ? $entry_info->getSize() / $this->compressRatio : 0), //$entry_info->getCompressedSize(),
+            ($this->compressRatio > 0 ? floor($entry_info->getSize() / $this->compressRatio) : 0), //$entry_info->getCompressedSize(),
             $entry_info->getSize(),
             $entry_info->getMTime(),
             $entry_info->isCompressed());
@@ -190,7 +190,7 @@ class TarByPhar extends BasicDriver
      */
     public function getFileStream($fileName)
     {
-        return self::wrapStringInStream($this->tar->offsetGet($fileName)->getContent());
+        return fopen('phar://'.$this->archiveFileName . '/' . $fileName, 'rb');
     }
 
     /**
@@ -283,6 +283,15 @@ class TarByPhar extends BasicDriver
      * @return bool
      */
     public static function canDeleteFiles($format)
+    {
+        return true;
+    }
+
+    /**
+     * @param $format
+     * @return bool
+     */
+    public static function canStream($format)
     {
         return true;
     }
