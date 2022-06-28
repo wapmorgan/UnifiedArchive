@@ -160,8 +160,16 @@ class Zip extends BasicDriver
     public function getFileData($fileName)
     {
         $stat = $this->zip->statName($fileName);
-        return new ArchiveEntry($fileName, $stat['comp_size'], $stat['size'], $stat['mtime'],
-            $stat['comp_method'] != 0, $this->zip->getCommentName($fileName));
+
+        return new ArchiveEntry(
+            $fileName,
+            $stat['comp_size'],
+            $stat['size'],
+            $stat['mtime'],
+            $stat['comp_method'] != 0,
+            $this->zip->getCommentName($fileName),
+            strtoupper(dechex($stat['crc'] < 0 ? sprintf('%u', $stat['crc']) : $stat['crc']))
+        );
     }
 
     /**

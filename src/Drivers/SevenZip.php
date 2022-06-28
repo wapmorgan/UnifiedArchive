@@ -188,8 +188,15 @@ class SevenZip extends BasicDriver
     public function getFileData($fileName)
     {
         $entry = $this->sevenZip->getEntry($fileName);
-        return new ArchiveEntry($fileName, $entry->getPackedSize(), $entry->getSize(),
-            strtotime($entry->getModified()));
+        return new ArchiveEntry(
+            $fileName,
+            $entry->getPackedSize(),
+            $entry->getSize(),
+            strtotime($entry->getModified()),
+            $entry->getSize() !== $entry->getPackedSize(),
+            $entry->getComment(),
+            $entry->getCrc()
+        );
     }
 
     /**

@@ -21,10 +21,14 @@ class TableCommand extends BaseArchiveCommand
             ->addArgument('filter', InputArgument::OPTIONAL, 'Files filter (as for fnmatch). If no * passed in filter, it will be added at the end of filter')
             ->addOption('human-readable-size', null, InputOption::VALUE_NONE, 'Use human-readable size')
             ->addOption('detect-mimetype', null, InputOption::VALUE_NONE, 'Detect mimetype for entries by its raw content')
-            ->addOption('sort', 's', InputOption::VALUE_REQUIRED, 'Sort files in table by one of fields: filename, size, xsize, ratio, date, mimetype. By default is stored')
+            ->addOption('sort', 's', InputOption::VALUE_REQUIRED, 'Sort files in table by one of fields: filename/size/xsize/ratio/date/mimetype/crc/comment. By default is stored')
             ->addOption('sort-desc', null, InputOption::VALUE_NONE, 'Set sort order to desc. By default it is asc')
         ;
     }
+
+    /**
+     * @throws \wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $archive = $this->getArchive($input, $output);
@@ -34,9 +38,17 @@ class TableCommand extends BaseArchiveCommand
         $sort = $input->getOption('sort');
         $sort_desc = $input->getOption('sort-desc');
 
-        $headers = ['Filename', 'Size', 'xSize', 'Ratio', 'Date'];
+        $headers = [
+            'Filename',
+            'Size',
+            'xSize',
+            'Ratio',
+            'Date',
+//            'Crc',
+            'Comment'
+        ];
         if ($detect_mimetype) {
-            $headers[] = 'Mimetype';
+            array_splice($headers, 4, 0, ['Mimetype']);
         }
 
         $sort_field = array_search($sort, array_map('strtolower', $headers));
@@ -47,7 +59,6 @@ class TableCommand extends BaseArchiveCommand
 
         $table = new Table($output);
         $table->setHeaders($headers);
-        $uncomp_size_length = $comp_size_length = 0;
 
         $rows = [];
 
@@ -69,10 +80,15 @@ class TableCommand extends BaseArchiveCommand
                 $details->uncompressedSize > 0
                     ? round($details->compressedSize / $details->uncompressedSize, 1)
                     : '-',
-                $this->formatDate($details->modificationTime)];
+                $this->formatDate($details->modificationTime),
+//                $details->crc32,
+                $details->comment,
+            ];
             if ($detect_mimetype) {
                 // @todo May be a bug in future. Need to review
-                $row[] = $this->getMimeTypeByStream($archive->getFileStream($file));
+                array_splice($row, 4, 0, [
+                    $this->getMimeTypeByStream($archive->getFileStream($file))
+                ]);
             }
             $rows[] = $row;
 //            $table->setRow($i, $row);

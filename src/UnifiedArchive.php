@@ -447,6 +447,31 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     }
 
     /**
+     * @param string|null $filter
+     * @return true|string[]
+     * @throws NonExistentArchiveFileException
+     */
+    public function test($filter = null)
+    {
+        $hash_exists = function_exists('hash_update_stream') && in_array('crc32b', hash_algos(), true);
+        $failed = [];
+        foreach ($this->getFileNames($filter) as $fileName) {
+            if ($hash_exists) {
+                $ctx = hash_init('crc32b');
+                hash_update_stream($ctx, $this->getFileStream($fileName));
+                $actual_hash = hash_final($ctx);
+            } else {
+                $actual_hash = dechex(crc32($this->getFileContent($fileName)));
+            }
+            $expected_hash = strtolower($this->getFileData($fileName)->crc32);
+            if ($expected_hash !== $actual_hash) {
+                $failed[] = $fileName;
+            }
+        }
+        return !empty($failed) ? $failed : true;
+    }
+
+    /**
      * Prepare files list for archiving
      *
      * @param string|array $fileOrFiles File of list of files. See [[archiveFiles]] for details.

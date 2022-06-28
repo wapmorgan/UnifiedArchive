@@ -5,6 +5,7 @@ use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 abstract class BasicDriver
@@ -152,6 +153,7 @@ abstract class BasicDriver
     /**
      * @param string $fileName
      * @return string|false
+     * @throws NonExistentArchiveFileException
      */
     abstract public function getFileContent($fileName);
 

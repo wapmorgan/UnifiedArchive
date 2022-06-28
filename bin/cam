@@ -17,6 +17,7 @@ use wapmorgan\UnifiedArchive\Commands\InfoCommand;
 use wapmorgan\UnifiedArchive\Commands\ListCommand;
 use wapmorgan\UnifiedArchive\Commands\PrintCommand;
 use wapmorgan\UnifiedArchive\Commands\TableCommand;
+use wapmorgan\UnifiedArchive\Commands\TestCommand;
 use wapmorgan\UnifiedArchive\Commands\TypesCommand;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
@@ -57,6 +58,7 @@ $application->add(new ListCommand());
 $application->add(new TableCommand());
 $application->add(new TypesCommand());
 $application->add(new FoldersCommand());
+$application->add(new TestCommand());
 
 $application->add(new AddFileCommand());
 $application->add(new DeleteFileCommand());
