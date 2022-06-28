@@ -126,16 +126,16 @@ class CreateCommand extends BaseCommand
         $progressBar->start();
         $archived_files = UnifiedArchive::archiveFiles($files_list, $archive_file, $compression, $password, function ($currentFile, $totalFiles, $fsFilename, $archiveFilename)
             use ($progressBar) {
-            $progressBar->advance();
             if ($fsFilename === null) {
                 $progressBar->setMessage('Creating ' . $archiveFilename);
             } else {
                 $progressBar->setMessage($fsFilename);
             }
+            $progressBar->advance();
         });
         $progressBar->finish();
         $progressBar->clear();
-        $output->writeln(null);
+        $output->writeln('');
 
         if (!$archived_files) {
             throw new \RuntimeException('archiveFiles result is false');

@@ -473,7 +473,9 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
 
         $totalSize = 0;
         foreach ($files_list as $fn) {
-            $totalSize += filesize($fn);
+            if ($fn !== null) {
+                $totalSize += filesize($fn);
+            }
         }
 
         return [
