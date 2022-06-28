@@ -86,6 +86,10 @@ if (!defined('PCLZIP_ERR_NO_ERROR')) {
     define('PCLZIP_CB_POST_ADD', 78004);
 }
 
+/**
+ * @link https://web.archive.org/web/20190228165954/http://www.phpconcept.net/pclzip/user-guide/18
+ * @link https://web.archive.org/web/20190216075605/http://www.phpconcept.net/pclzip/user-guide/5
+ */
 class PclZipInterface
 {
     const SELECT_FILTER_PASS = 1;
