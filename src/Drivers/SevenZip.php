@@ -9,6 +9,7 @@ use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
+use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
@@ -21,6 +22,8 @@ class SevenZip extends BasicDriver
      * @var string
      */
     protected $format;
+
+    protected const COMMENT_FILE = 'descript.ion';
 
     /**
      * @return array
@@ -193,10 +196,14 @@ class SevenZip extends BasicDriver
      * @param string $fileName
      *
      * @return string|false
+     * @throws NonExistentArchiveFileException
      */
     public function getFileContent($fileName)
     {
         $entry = $this->sevenZip->getEntry($fileName);
+        if ($entry === null) {
+            throw new NonExistentArchiveFileException('File ' . $fileName . ' does not exist');
+        }
         return $entry->getContent();
     }
 
@@ -430,5 +437,34 @@ class SevenZip extends BasicDriver
     public static function canEncrypt($format)
     {
         return in_array($format, [Formats::ZIP, Formats::SEVEN_ZIP]) && self::canRenameFiles();
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getComment()
+    {
+        if ($this->format !== Formats::SEVEN_ZIP) {
+            return parent::getComment();
+        }
+        try {
+            return $this->getFileContent(static::COMMENT_FILE);
+        } catch (NonExistentArchiveFileException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param string|null $comment
+     * @return null
+     * @throws ArchiveModificationException
+     * @throws \Archive7z\Exception
+     */
+    public function setComment($comment)
+    {
+        if ($this->format !== Formats::SEVEN_ZIP) {
+            return null;
+        }
+        $this->addFileFromString(static::COMMENT_FILE, $comment);
     }
 }
