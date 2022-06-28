@@ -1,18 +1,22 @@
 # Change Log
 
 ### 1.1.5 - Jun 28, 2022
-Reimplemented `cam` (console utility) - now it's on symfony/console and supports all features.
-Added more detailed installation instructions (`./vendor/bin/cam system:drivers`) of specific drivers: AlchemyZippy, Cab, Iso, Lzma, Rar, SevenZip, TarByPear.
-Added ability to track progress of archive creation - new argument `?callable $fileProgressCallable` of `UnifiedArchive::archiveFiles()`.
-Added ability to **pass few directories to be placed in one in-archive directory** in archiving/appending (`addFiles()`/`archiveFiles()`)
-```php
-[
-    '' => ['./folder1', './folder2'],
-    'README.md' => './subfolder/README.md'
-] # Archive will have all folder1, folder2 contents in the root and README.md
-```
-Fixed `extract()` and `listContent()` and their result of **PclZip** interface (`UnifiedArchive::getPclZipInterface()`) to correspond to original library (object => array).
-Added tests on archiving, extraction and for PclZip-interface.
+
+**New features**:
+- Reimplemented `cam` (console utility) - now it's on symfony/console and supports all features and more functions (folders, types) of UA.
+- Added more detailed installation instructions (`./vendor/bin/cam system:drivers`) of specific drivers: AlchemyZippy, Cab, Iso, Lzma, Rar, SevenZip, TarByPear.
+- Added ability to track progress of archive creation - new argument `?callable $fileProgressCallable` of `UnifiedArchive::archiveFiles()`.
+- Added ability to **pass few directories to be placed in one in-archive directory** in archiving/appending (`addFiles()`/`archiveFiles()`)
+    ```php
+    [
+        '' => ['./folder1', './folder2'],
+        'README.md' => './subfolder/README.md'
+    ] # Archive will have all folder1, folder2 contents in the root and README.md
+    ```
+
+**Fixed**:
+- Fixed `extract()` and `listContent()` and their result of **PclZip** interface (`UnifiedArchive::getPclZipInterface()`) to correspond to original library (object => array).
+- Added tests on archiving, extraction and for PclZip-interface.
 
 **Format changes**:
 - Fixed counting of extracted files when extracting the whole archive in `TarByPear, TarByPhar, Zip`.
