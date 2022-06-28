@@ -18,7 +18,7 @@ Tests & Quality: [![Build status](https://travis-ci.com/wapmorgan/UnifiedArchive
 If on your site/service there is a possibility of usage archives of many types, and you would
 like to work with them unified, you can use this library.
 
-UnifiedArchive can utilize to handle as many formats as possible:
+UnifiedArchive tries to utilize all them to handle as many formats as possible:
 * ZipArchive, RarArchive, PharData
 * ext-zlib, ext-bz2, ext-xz
 * `7za` cli program via Gemorroj/Archive7z
@@ -26,14 +26,14 @@ UnifiedArchive can utilize to handle as many formats as possible:
 
 ## Functions & Features
 Main functions:
-- Open an archive with automatic format detection (more 20 formats)
-- List archive content, calculate original size of archive, read (zip, rar) & set (zip) archive comment
+- Open an archive with automatic format detection (more 20 formats). List archive content, calculate original size of archive
 - Get details (original size, date of modification) of every archived file. Extract or stream archived file content
 - Extract all archive content. Append an archive with new files or directories. Remove files from archive
-- Creat new archives with files/directories
-- Fully implemented [PclZip-like interface for archives](docs/API.md#UnifiedArchive--getPclZipInterface). Easy transition from old PclZip.
+- Create new archives with files/directories
+- Fully implemented [PclZip-like interface for archives](docs/API.md#UnifiedArchive--getPclZipInterface) for all formats. Easy transition from old PclZip.
 
 Specific functions:
+- Read (zip, rar) & set (zip) archive comment
 - [Open archives encrypted with password (zip, rar, 7z)](docs/API.md#UnifiedArchive--open)
 - [Adjust compression level (zip, gzip, 7zip)](docs/API.md#UnifiedArchive--archiveFiles) for new archives
 - Set passwords (7z, zip) for new archives
