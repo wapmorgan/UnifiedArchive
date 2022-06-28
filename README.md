@@ -1,4 +1,4 @@
-*UnifiedArchive* - an archive manager with a unified way for different formats. 
+*UnifiedArchive* - an archive manager with a unified interface for different formats. 
 Supports all basic (listing, reading, extracting and creation) and specific features (compression level, password-protection). 
 Bundled with console program for working with archives.
 
