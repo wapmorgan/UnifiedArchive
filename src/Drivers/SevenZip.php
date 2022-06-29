@@ -23,7 +23,7 @@ class SevenZip extends BasicDriver
      */
     protected $format;
 
-    protected const COMMENT_FILE = 'descript.ion';
+    const COMMENT_FILE = 'descript.ion';
 
     /**
      * @return array
@@ -55,40 +55,53 @@ class SevenZip extends BasicDriver
 
     /**
      * @param string $format
-     * @return bool
+     * @return array
      * @throws \Archive7z\Exception
      */
     public static function checkFormatSupport($format)
     {
         $available = class_exists('\Archive7z\Archive7z') && Archive7z::getBinaryVersion() !== false;
-        if (!$available)
-            return false;
+        if (!$available) {
+            return [];
+        }
 
         // in 4.0.0 version it was supporting only 7z
-        if (!Archive7z::supportsAllFormats())
-            return $format === Formats::SEVEN_ZIP;
-
-        switch ($format) {
-            case Formats::SEVEN_ZIP:
-            case Formats::ZIP:
-            case Formats::RAR:
-            case Formats::TAR:
-//            case Formats::TAR_GZIP:
-//            case Formats::TAR_BZIP:
-            case Formats::CAB:
-            case Formats::ISO:
-            case Formats::ARJ:
-            case Formats::LZMA:
-            case Formats::UEFI:
-            case Formats::GPT:
-            case Formats::MBR:
-            case Formats::MSI:
-            case Formats::DMG:
-            case Formats::RPM:
-            case Formats::DEB:
-            case Formats::UDF:
-                return $available;
+        if (!Archive7z::supportsAllFormats() && $format !== Formats::SEVEN_ZIP) {
+            return [];
         }
+
+        $abilities = [
+            Formats::OPEN,
+            Formats::EXTRACT_CONTENT,
+        ];
+
+        if (static::canRenameFiles()) {
+            if (in_array($format, [Formats::SEVEN_ZIP, Formats::RAR, Formats::ZIP], true)) {
+                $abilities[] = Formats::OPEN_ENCRYPTED;
+            }
+
+            if (in_array($format, [Formats::ZIP, Formats::SEVEN_ZIP], true)) {
+                $abilities[] = Formats::CREATE_ENCRYPTED;
+            }
+
+            if (in_array($format, [Formats::SEVEN_ZIP,
+                Formats::BZIP,
+                Formats::GZIP,
+                Formats::TAR,
+                Formats::LZMA,
+                Formats::ZIP], true)) {
+                $abilities[] = Formats::CREATE;
+                $abilities[] = Formats::APPEND;
+                $abilities[] = Formats::DELETE;
+            }
+
+            if ($format === Formats::SEVEN_ZIP) {
+                $abilities[] = Formats::GET_COMMENT;
+                $abilities[] = Formats::SET_COMMENT;
+            }
+
+        }
+        return $abilities;
     }
 
     /**

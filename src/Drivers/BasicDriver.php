@@ -26,11 +26,11 @@ abstract class BasicDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
-        return false;
+        return [];
     }
 
     /**

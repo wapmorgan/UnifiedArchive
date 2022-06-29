@@ -21,13 +21,16 @@ class Gzip extends OneFileDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
+        if (!extension_loaded('zlib')) {
+            return [];
+        }
         switch ($format) {
             case Formats::GZIP:
-                return extension_loaded('zlib');
+                return [Formats::OPEN, Formats::EXTRACT_CONTENT, Formats::STREAM_CONTENT, Formats::CREATE];
         }
     }
 

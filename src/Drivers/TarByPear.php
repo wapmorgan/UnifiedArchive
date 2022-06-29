@@ -2,6 +2,7 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Archive_Tar;
+use Vtiful\Kernel\Format;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
@@ -53,28 +54,50 @@ class TarByPear extends BasicDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      * @throws \Exception
      */
     public static function checkFormatSupport($format)
     {
         $availability = class_exists('\Archive_Tar');
-        if (!$availability) return false;
+        if (!$availability) {
+            return [];
+        }
+
+        $abilities = [
+            Formats::OPEN,
+            Formats::EXTRACT_CONTENT,
+            Formats::APPEND,
+            Formats::CREATE,
+        ];
+
         switch ($format) {
             case Formats::TAR:
-                return true;
+                return $abilities;
 
             case Formats::TAR_GZIP:
-                return extension_loaded('zlib');
+                if (!extension_loaded('zlib')) {
+                    return [];
+                }
+                return $abilities;
 
             case Formats::TAR_BZIP:
-                return extension_loaded('bz2');
+                if (!extension_loaded('bz2')) {
+                    return [];
+                }
+                return $abilities;
 
             case Formats::TAR_LZMA:
-                return extension_loaded('xz');
+                if (!extension_loaded('xz')) {
+                    return [];
+                }
+                return $abilities;
 
             case Formats::TAR_LZW:
-                return LzwStreamWrapper::isBinaryAvailable();
+                if (!LzwStreamWrapper::isBinaryAvailable()) {
+                    return [];
+                }
+                return $abilities;
         }
     }
 

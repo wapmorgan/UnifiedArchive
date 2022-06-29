@@ -30,9 +30,12 @@ class Lzma extends OneFileDriver
      */
     public static function checkFormatSupport($format)
     {
+        if (!extension_loaded('xz')) {
+            return [];
+        }
         switch ($format) {
             case Formats::LZMA:
-                return extension_loaded('xz');
+                return [Formats::OPEN, Formats::EXTRACT_CONTENT, Formats::STREAM_CONTENT, Formats::CREATE];
         }
     }
 

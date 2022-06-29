@@ -28,13 +28,21 @@ class Rar extends BasicDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
+        if (!extension_loaded('rar')) {
+            return [];
+        }
         switch ($format) {
             case Formats::RAR:
-                return extension_loaded('rar');
+                return [
+                    Formats::OPEN,
+                    Formats::OPEN_ENCRYPTED,
+                    Formats::EXTRACT_CONTENT,
+                    Formats::STREAM_CONTENT,
+                ];
         }
     }
 
@@ -43,7 +51,7 @@ class Rar extends BasicDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-rar';
+        return 'adapter for ext-rar' . (extension_loaded('rar') ? ' (' . phpversion('rar') . ')' : null);
     }
 
     /**

@@ -69,21 +69,31 @@ class AlchemyZippy extends BasicDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
         static::init();
 
         if (static::$zippy === false)
-            return false;
+            return [];
 
         switch ($format) {
             case Formats::TAR_BZIP:
             case Formats::TAR:
             case Formats::TAR_GZIP:
             case Formats::ZIP:
-                return static::checkAdapterFor($format);
+                if (static::checkAdapterFor($format) === false) {
+                    return [];
+                }
+
+                return [
+                    Formats::OPEN,
+                    Formats::EXTRACT_CONTENT,
+                    Formats::APPEND,
+                    Formats::DELETE,
+                    Formats::CREATE,
+                ];
         }
     }
 

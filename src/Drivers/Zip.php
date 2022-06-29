@@ -36,14 +36,30 @@ class Zip extends BasicDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
-        switch ($format) {
-            case Formats::ZIP:
-                return extension_loaded('zip');
+        if (!extension_loaded('zip')) {
+            return [];
         }
+        $abilities = [
+            Formats::OPEN,
+            Formats::OPEN_ENCRYPTED,
+            Formats::GET_COMMENT,
+            Formats::EXTRACT_CONTENT,
+            Formats::STREAM_CONTENT,
+            Formats::APPEND,
+            Formats::DELETE,
+            Formats::SET_COMMENT,
+            Formats::CREATE,
+        ];
+
+        if (static::canEncrypt($format)) {
+            $abilities[] = Formats::CREATE_ENCRYPTED;
+        }
+
+        return $abilities;
     }
 
     public static function getDescription()

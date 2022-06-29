@@ -32,9 +32,24 @@ class Cab extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
+        if (!class_exists('\CabArchive')) {
+            return [];
+
+        }
+
         switch ($format) {
             case Formats::CAB:
-                return class_exists('\CabArchive');
+                $abilities = [
+                    Formats::OPEN,
+                ];
+
+                $parts = explode('.', PHP_VERSION);
+                // not supported on versions below 7.0.22, 7.1.8, 7.2.0
+                if ($parts[0] > 7 || $parts[1] >= 2 || (($parts[1] == 1 && $parts[2] >= 8) || ($parts[1] == 0 && $parts[2] >= 22))) {
+                    $abilities[] = Formats::EXTRACT_CONTENT;
+                }
+
+                return $abilities;
         }
     }
 

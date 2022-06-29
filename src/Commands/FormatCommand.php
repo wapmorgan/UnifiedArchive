@@ -30,7 +30,7 @@ class FormatCommand extends BaseCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $formats = Formats::getAllPossibleSupportedFormats();
+        $formats = Formats::getDeclaredDriverFormats();
         $format = $input->getArgument('format');
 
         if (empty($format) || !isset($formats[$format])) {
@@ -44,22 +44,21 @@ class FormatCommand extends BaseCommand
         $output->writeln('Format <info>' . $format . '</info> drivers support');
 
         $table = new Table($output);
-        $table->setHeaders(['driver', 'open', 'stream', 'create', 'append', 'update', 'encrypt']);
+        $table->setHeaders(['format', ...array_keys(self::$abilitiesLabels)]);
         /**
          * @var int $i
          * @var BasicDriver $driver
          */
         foreach ($formats[$format] as $i => $driver) {
             if ($driver::getInstallationInstruction() === null) {
-                $table->setRow($i, [
-                    $driver,
-                    '+',
-                    $driver::canStream($format) ? '+' : '',
-                    $driver::canCreateArchive($format) ? '+' : '',
-                    $driver::canAddFiles($format) ? '+' : '',
-                    $driver::canDeleteFiles($format) ? '+' : '',
-                    $driver::canEncrypt($format) ? '+' : '',
-                ]);
+                $abilities = $driver::checkFormatSupport($format);
+                $row = [$driver];
+
+                foreach (self::$abilitiesLabels as $possibleAbility) {
+                    $row[] = in_array($possibleAbility, $abilities, true) ? '+' : '';
+                }
+
+                $table->setRow($i, $row);
             } else {
                 $table->setRow($i, [$driver, new TableCell('<error>not installed</error>', ['colspan' => 6])]);
             }

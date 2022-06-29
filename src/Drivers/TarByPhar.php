@@ -7,6 +7,7 @@ use Phar;
 use PharData;
 use PharFileInfo;
 use RecursiveIteratorIterator;
+use Vtiful\Kernel\Format;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
@@ -51,28 +52,42 @@ class TarByPhar extends BasicDriver
             Formats::TAR,
             Formats::TAR_GZIP,
             Formats::TAR_BZIP,
-//            Formats::ZIP,
+            Formats::ZIP,
         ];
     }
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
-        if (static::$disabled) {
-            return false;
+        if (static::$disabled || !class_exists('\PharData')) {
+            return [];
         }
-        $availability = class_exists('\PharData');
+
+        $abilities = [
+            Formats::OPEN,
+            Formats::EXTRACT_CONTENT,
+            Formats::STREAM_CONTENT,
+            Formats::APPEND,
+            Formats::DELETE,
+            Formats::CREATE,
+        ];
+
         switch ($format) {
             case Formats::TAR:
-//            case Formats::ZIP:
-                return $availability;
+            case Formats::ZIP:
+                return $abilities;
+
             case Formats::TAR_GZIP:
-                return $availability && extension_loaded('zlib');
+                return extension_loaded('zlib')
+                    ? $abilities
+                    : [];
             case Formats::TAR_BZIP:
-                return $availability && extension_loaded('bz2');
+                return extension_loaded('bz2')
+                    ? $abilities
+                    : [];
         }
     }
 

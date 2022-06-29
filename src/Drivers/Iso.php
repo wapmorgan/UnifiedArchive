@@ -36,13 +36,20 @@ class Iso extends BasicDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
+        if (!class_exists('\CISOFile')) {
+            return [];
+        }
+
         switch ($format) {
             case Formats::ISO:
-                return class_exists('\CISOFile');
+                return [
+                    Formats::OPEN,
+                    Formats::EXTRACT_CONTENT,
+                ];
         }
     }
 

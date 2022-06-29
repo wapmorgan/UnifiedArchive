@@ -20,13 +20,17 @@ class Bzip extends OneFileDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
+        if (!extension_loaded('bz2')) {
+            return [];
+        }
+
         switch ($format) {
             case Formats::BZIP:
-                return extension_loaded('bz2');
+                return [Formats::OPEN, Formats::EXTRACT_CONTENT, Formats::STREAM_CONTENT, Formats::CREATE];
         }
     }
 

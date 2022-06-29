@@ -32,42 +32,58 @@ class FormatsCommand extends BaseCommand
         $driver = $input->getArgument('driver');
 
         if ($driver !== null) {
+            if (strpos($driver, '\\') === false) {
+                if (class_exists('\\wapmorgan\\UnifiedArchive\\Drivers\\' . $driver)) {
+                    $driver = '\\wapmorgan\\UnifiedArchive\\Drivers\\' . $driver;
+                } else if (class_exists('\\wapmorgan\\UnifiedArchive\\Drivers\\OneFile\\' . $driver)) {
+                    $driver = '\\wapmorgan\\UnifiedArchive\\Drivers\\OneFile\\' . $driver;
+                }
+            }
             if ($driver[0] !== '\\') {
                 $driver = '\\'.$driver;
             }
             if (!class_exists($driver) || !is_a($driver, BasicDriver::class, true)) {
                 throw new \InvalidArgumentException('Class "' . $driver . '" not found or not in BasicDriver children');
             }
-            $output->writeln('Supported format by <info>' . $driver . '</info>');
+            $output->writeln('Supported formats by <info>' . $driver . '</info>');
 
-            $table->setHeaders(['format', 'stream', 'create', 'append', 'update', 'encrypt']);
+            $table->setHeaders(['format', ...array_keys(self::$abilitiesLabels)]);
             foreach ($driver::getSupportedFormats() as $i => $format) {
-                $table->setRow($i, [
-                    $format,
-                    $driver::canStream($format) ? '+' : '',
-                    $driver::canCreateArchive($format) ? '+' : '',
-                    $driver::canAddFiles($format) ? '+' : '',
-                    $driver::canDeleteFiles($format) ? '+' : '',
-                    $driver::canEncrypt($format) ? '+' : '',
-                ]);
+                $abilities = $driver::checkFormatSupport($format);
+                $row = [$format];
+
+                foreach (self::$abilitiesLabels as $possibleAbility) {
+                    $row[] = in_array($possibleAbility, $abilities, true) ? '+' : '';
+                }
+
+                $table->setRow($i, $row);
             }
             $table->render();
             return 0;
         }
 
-        $table->setHeaders(['format', 'open', 'stream', 'create', 'append', 'update', 'encrypt', 'drivers']);
+        $headers = array_map(function ($v) { return substr($v, strrpos($v, '\\') + 1);}, Formats::$drivers);
+        array_unshift($headers, 'format');
+
+        $table->setHeaders($headers);
         $i = 0;
-        foreach (Formats::getFormatsReport() as $format => $config) {
-            $table->setRow($i++, [
-                $format,
-                $config['open'] ? '+' : '',
-                $config['stream'] ? '+' : '',
-                $config['create'] ? '+' : '',
-                $config['append'] ? '+' : '',
-                $config['update'] ? '+' : '',
-                $config['encrypt'] ? '+' : '',
-                new TableCell(implode("\n", $config['drivers']), ['rowspan' => count($config['drivers'])])
-            ]);
+        foreach (Formats::getSupportedDriverFormats() as $format => $formatSupportStatus) {
+            $row = [$format];
+            foreach (Formats::$drivers as $driverClass) {
+                if (isset($formatSupportStatus[$driverClass])) {
+                    $shortcuts = null;
+                    foreach (self::$abilitiesShortCuts as $ability => $abilitiesShortCut) {
+                        if (in_array($ability, $formatSupportStatus[$driverClass], true)) {
+                            $shortcuts .= $abilitiesShortCut;
+                        }
+                    }
+                    $row[] = $shortcuts;
+                } else {
+                    $row[] = '';
+                }
+            }
+
+            $table->setRow($i++, $row);
         }
         $table->render();
 
