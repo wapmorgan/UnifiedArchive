@@ -17,11 +17,9 @@ Here is a list of available drivers with their differences.
 Example for `zip` with two drivers support: If on your system both `Zip` and `AlchemyZippy` driver available, the first will be used for `zip` file.
 
 # Proposals for installation drivers
-## In docker/VDS case
-Install extensions (`zip, rar, phar, zlib, bzip2`), program (`p7zip`) and SevenZip driver.
+**In docker/on VDS:** Install extensions (`zip, rar, phar, zlib, bzip2`), program (`p7zip`) and SevenZip driver.
 
-## In common hosting case
-Install TarByPear, AlchemyZippy libraries.
+**In common hosting case:** Install TarByPear, AlchemyZippy libraries.
 
 # Details about drivers
 ## Zip
@@ -82,14 +80,8 @@ Install TarByPear, AlchemyZippy libraries.
 ## One-file formats
 These drivers support only compressed (not archived) data.
 
-### Bzip2
-- Type: php-extension (`bzip2`)
-- Formats: bz2
-
-### Gzip
-- Type: php-extension (`zlib`)
-- Formats: gz
-
-### Lzma2
-- Type: php-extension (`xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz))
-- Formats: xz
+| Compression | PHP extension                                                                                    | Formats        |
+|-------------|--------------------------------------------------------------------------------------------------|----------------|
+| bz2         | `bzip2`                                                                                          | .bz2, .tar.bz2 |
+| gzip        | `zlib`                                                                                           | .gz, .tar.gz   |
+| lzma        | `xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz) | .xz, .tar.xz   |

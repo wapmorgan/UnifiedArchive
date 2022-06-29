@@ -1,4 +1,4 @@
-*UnifiedArchive* - an archive manager with a unified interface for different formats. 
+*UnifiedArchive* - an archive manager with unified interface for different formats.
 Supports all basic (listing, reading, extracting and creation) and specific features (compression level, password-protection). 
 Bundled with console program for working with archives.
 
@@ -48,15 +48,17 @@ Specific functions:
 ## Quick start
 ```sh
 composer require wapmorgan/unified-archive
-# Check supported formats and drivers
+# Check supported formats with current configuration
 ./vendor/bin/cam system:formats
+# Install missing drivers by following instructions from
 ./vendor/bin/cam system:drivers
 
 # if needed, install extensions, cli tools and php libraries
 # to enable support of other formats
 
-# also you can get detailed information about drivers and theris abilities of, for example, "tar.gz" format
+# also you can get detailed information about format or driver
 ./vendor/bin/cam system:format tgz
+./vendor/bin/cam system:formats TarByPhar
 ```
 More information about formats support in [formats page](docs/Drivers.md).
 
