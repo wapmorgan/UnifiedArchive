@@ -400,36 +400,6 @@ class SevenZip extends BasicDriver
     }
 
     /**
-     * @param $format
-     * @return bool
-     * @throws \Archive7z\Exception
-     */
-    public static function canCreateArchive($format)
-    {
-        if (in_array($format, [
-            Formats::SEVEN_ZIP,
-            Formats::BZIP,
-            Formats::GZIP,
-            Formats::TAR,
-            Formats::LZMA,
-            Formats::ZIP]
-        ))
-            return self::canRenameFiles();
-
-        return false;
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     * @throws \Archive7z\Exception
-     */
-    public static function canAddFiles($format)
-    {
-        return self::canCreateArchive($format);
-    }
-
-    /**
      * @return bool
      * @throws \Archive7z\Exception
      */
@@ -437,16 +407,6 @@ class SevenZip extends BasicDriver
     {
         $version = Archive7z::getBinaryVersion();
         return $version !== false && version_compare('9.30', $version, '<=');
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     * @throws \Archive7z\Exception
-     */
-    public static function canDeleteFiles($format)
-    {
-        return self::canCreateArchive($format);
     }
 
     /**

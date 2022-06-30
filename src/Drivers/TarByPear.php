@@ -377,20 +377,6 @@ class TarByPear extends BasicDriver
         return $added;
     }
 
-    public static function canCreateArchive($format)
-    {
-        return true;
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     */
-    public static function canAddFiles($format)
-    {
-        return true;
-    }
-
     /**
      * @param string $inArchiveName
      * @param string $content

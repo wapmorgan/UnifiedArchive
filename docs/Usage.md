@@ -5,11 +5,8 @@
 - [Archiving](#archiving)
 
 ## Reading and extraction
-1. Import `UnifiedArchive`
-2. At the beginning, try to open the file with automatic detection of a format
-by name. In case of successful recognition an `UnifiedArchive` object will be
-returned. In case of failure - _null_ will be returned.
-
+1. Open the file with automatic detection of a format by name or content. In case of successful, an `UnifiedArchive`
+   object will be returned. In case of failure - _null_ will be returned.
     ```php
     require 'vendor/autoload.php';
     use \wapmorgan\UnifiedArchive\UnifiedArchive;
@@ -19,42 +16,21 @@ returned. In case of failure - _null_ will be returned.
     $archive = UnifiedArchive::open('filename.zip');
     // or
     $archive = UnifiedArchive::open('filename.7z');
-    // or
-    $archive = UnifiedArchive::open('filename.gz');
-    // or
-    $archive = UnifiedArchive::open('filename.bz2');
-    // or
-    $archive = UnifiedArchive::open('filename.xz');
-    // or
-    $archive = UnifiedArchive::open('filename.cab');
-    // or
-    $archive = UnifiedArchive::open('filename.tar');
-    // or
-    $archive = UnifiedArchive::open('filename.tar.gz');
-    // or
-    $archive = UnifiedArchive::open('filename.tar.bz2');
-    // or
-    $archive = UnifiedArchive::open('filename.tar.xz');
-    // or
-    $archive = UnifiedArchive::open('filename.tar.Z');
-    // or
-    $archive = UnifiedArchive::open('filename.iso');
     ```
 
-3. Read the list of files of archive or check that specific file is in archive.
+2. Read the list of files of archive or check that file is in archive.
 
    ```php
-   $files_list = $archive->getFileNames(); // array with files list
-   // ['file', 'file2', 'file3', ...]
+   $files_list = $archive->getFileNames(); // ['file', 'file2', 'file3', ...]
 
    if ($archive->hasFile('README.md')) {
        // some operations
    }
    ```
 
-4. To get common information about specific file use `getFileData()` method.
+3. To get common information about concrete file use `getFileData()` method.
 This method returns [an `ArchiveEntry` instance](API.md#ArchiveEntry). 
-To get raw file contents use `getFileContent()` method
+To get raw file contents use `getFileContent()` method, to get reading stream for file use `getFileStream()` method.
 
    ```php
    // file meta
@@ -62,15 +38,13 @@ To get raw file contents use `getFileContent()` method
 
    // raw file content
    $file_content = $archive->getFileContent('README.md')); // string
+
+   // pass stream to standard output
+   fpassthru($archive->getFileStream('README.md'));
    ```
 
-5. Further, you can unpack all archive or specific files on a disk. The `extractFiles()` method is intended to it.
+4. Unpack all archive or specific files on a disk - `extractFiles()`.
 
-    ```php
-    $archive->extractFiles(string $outputFolder, string|array $archiveFiles);
-    ```
-
-    _Example:_
     ```php
     // to unpack all contents of archive to "output" folder
     $archive->extractFiles(__DIR__.'/output');
@@ -79,18 +53,13 @@ To get raw file contents use `getFileContent()` method
     $archive->extractFiles(__DIR__.'/output', ['README.md', 'composer.json']);
 
     // to unpack the "src" catalog with all content from archive into the "sources" catalog on a disk
-    $archive->extractFiles(__DIR__.'/output', '/src/', true);
+    $archive->extractFiles(__DIR__.'/output', 'src/', true);
     ```
 
 ## Archive modification
-Only few archive formats support modification:
-- zip
-- 7z
-- tar (depends on low-level driver for tar - see Formats section for details)
+Only few archive formats support modification: (zip, 7z, tar) - it depends on low-level driver - see **Formats** page for details.
 
-For details go to [Formats support](../README.md#Formats-support) section.
-
-1. Deletion files from archive
+1. [Delete files](API.md#UnifiedArchive--deleteFiles) from archive
 
     ```php
     // Delete a single file
@@ -100,18 +69,16 @@ For details go to [Formats support](../README.md#Formats-support) section.
     $archive->deleteFiles(['README.md', 'MANIFEST.MF']);
 
     // Delete directory with full content
-    $archive->deleteFiles('/src/', true);
+    $archive->deleteFiles('src/', true);
     ```
 
     In case of success the number of successfully deleted files will be returned.
 
-    [Details](API.md#UnifiedArchive--deleteFiles).
-
-2. Addition files to archive
+2. [Add files](API.md#UnifiedArchive--addFiles) to archive
 
     ```php
     // Add a catalog with all contents with full paths
-    $archive->addFiles('/var/log');
+    $archive->addFiles('/var/log/');
 
     // To add one file (will be stored as one file "syslog")
     $archive->addFiles('/var/log/syslog');
@@ -120,29 +87,23 @@ For details go to [Formats support](../README.md#Formats-support) section.
     $archive->addFiles([$directory, $file, $file2, ...]);
     ```
 
-   [Details](API.md#UnifiedArchive--addFiles).
-
 ## Archiving
-Only few archive formats support modification:
-- zip
-- 7z
-- tar (with restrictions)
-
-For details go to [Formats support](#Formats-support) section.
+Only few archive formats support modification: zip, 7z, tar (with restrictions).
 
 To pack completely the catalog with all attached files and subdirectories in new archive:
 
 ```php
+# archive all folder content
 UnifiedArchive::archiveFiles('/var/log', 'Archive.zip');
 
-// To pack one file
+# archive one file
 UnifiedArchive::archiveFiles('/var/log/syslog', 'Archive.zip');
 
-// To pack some files or catalogs
+# archive few files / folders
 UnifiedArchive::archiveFiles([$directory, $file, $file2, ...], 'Archive.zip');
 ```
 
-Also, there is extended syntax for `addFiles()` and `archiveFiles()`:
+Also, there is [extended syntax](API.md#UnifiedArchive--archiveFiles) for `addFiles()` and `archiveFiles()`:
 
 ```php
 UnifiedArchive::archiveFiles([
@@ -150,7 +111,6 @@ UnifiedArchive::archiveFiles([
           '/var/www/site/abc.log',                // stored as '/var/www/site/abc.log'
           'logs' => '/var/www/site/runtime/logs', // directory content stored in 'logs' dir
           '/var/www/site/runtime/logs',           // stored as '/var/www/site/runtime/logs'
+          '' => ['/home/user1/docs', '/home/user2/docs'], // user1 and user2 docs stored in archive root
     ], 'archive.zip');
 ```
-
-[Details](API.md#UnifiedArchive--archiveFiles).

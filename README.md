@@ -15,10 +15,10 @@ Tests & Quality: [![Build status](https://travis-ci.com/wapmorgan/UnifiedArchive
 [![Code Coverage](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=master)
 
 ## Goal
-If on your site/service there is a possibility of usage archives of many types, and you would
-like to work with them unified, you can use this library.
+Main purpose of this library is to create unified frontend interface for different archive formats, that works in
+various system configurations via drivers.
 
-UnifiedArchive tries to utilize all them to handle as many formats as possible:
+UnifiedArchive tries to utilize different installed drivers to handle as many formats as possible:
 * ZipArchive, RarArchive, PharData
 * ext-zlib, ext-bz2, ext-xz
 * `7za` cli program via Gemorroj/Archive7z
@@ -46,47 +46,54 @@ Specific functions:
 4. [Changelog](CHANGELOG.md).
 
 ## Quick start
-```sh
+1. Installation and configuration
+```shell
+# 1. Install library
 composer require wapmorgan/unified-archive
-# Check supported formats with current configuration
+# Check supported formats with installed drivers
 ./vendor/bin/cam system:formats
-# Install missing drivers by following instructions from
+# Check supported functions for zip format
+./vendor/bin/cam system:format zip
+
+# 2. Install new driver
+# Read installation instructions from
 ./vendor/bin/cam system:drivers
+# install missing drivers, for example pear/archive_tar
+composer require pear/archive_tar
+# check out driver functions
+./vendor/bin/cam system:formats TarByPear
 
 # if needed, install extensions, cli tools and php libraries
 # to enable support of other formats
-
-# also you can get detailed information about format or driver
-./vendor/bin/cam system:format tgz
-./vendor/bin/cam system:formats TarByPhar
 ```
-More information about formats support in [formats page](docs/Drivers.md).
 
-Use it in code:
+2. Usage
 ```php
+use \wapmorgan\UnifiedArchive\UnifiedArchive;
+
 # Extraction
-$archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.zip'); // archive.rar, archive.tar.bz2
+$archive = UnifiedArchive::open('archive.zip'); // archive.rar, archive.tar.bz2
 
 if ($archive !== null) {
     $output_dir = '/var/www/extracted';
     if (disk_free_space($output_dir) > $archive->getOriginalSize()) {
-        $archive->extractFiles($output_dir);
-        echo 'Extracted files list: '.implode(', ', $archive->getFileNames()).PHP_EOL;
+        $extracted = $archive->extractFiles($output_dir);
+        echo 'Extracted files: ' . $extracted.PHP_EOL;
     }
 }
 
 # Archiving
-\wapmorgan\UnifiedArchive\UnifiedArchive::archiveFiles([
+UnifiedArchive::archiveFiles([
     'README.md' => '/default/path/to/README.md',
-    'content' => '/folder/with/content/',
-], 'archive.zip', \wapmorgan\UnifiedArchive\Drivers\BasicDriver::COMPRESSION_MAXIMUM);
+    '' => '/folder/with/content/',
+], 'archive.zip');
 ```
 
 ## Built-in console archive manager
 UnifiedArchive is distributed with a unified console program to manipulate archives.
 It supports all formats and all operations on them that UnifiedArchive does, so it can be used to manipulate
 archives without other system software. To show help, launch it:
-```bash
+```shell
 ./vendor/bin/cam list # help
 ./vendor/bin/cam archive:info archive.tar.gz # archive information
 ./vendor/bin/cam files:list -l archive.tar.gz # files list (or files:table for table)

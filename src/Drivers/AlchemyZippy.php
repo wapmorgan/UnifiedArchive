@@ -135,33 +135,6 @@ class AlchemyZippy extends BasicDriver
     }
 
     /**
-     * @param $format
-     * @return bool
-     */
-    public static function canCreateArchive($format)
-    {
-        return true;
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     */
-    public static function canAddFiles($format)
-    {
-        return true;
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     */
-    public static function canDeleteFiles($format)
-    {
-        return true;
-    }
-
-    /**
      * @param array $files
      * @param string $archiveFileName
      * @param int $archiveFormat

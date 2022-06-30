@@ -380,32 +380,8 @@ class Zip extends BasicDriver
     /**
      * @inheritDoc
      */
-    public static function canAddFiles($format)
-    {
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function canDeleteFiles($format)
-    {
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public static function canEncrypt($format)
     {
         return method_exists('\ZipArchive', 'setEncryptionName');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function canStream($format)
-    {
-        return true;
     }
 }

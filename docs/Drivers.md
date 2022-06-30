@@ -1,33 +1,34 @@
-Here is a list of available drivers with their differences.
 
-|           Driver          | Zip       | Rar       | TarByPhar            | TarByPear                           | SevenZip                      | AlchemyZippy              | Iso          | Cab     |
-|:-------------------------:|-----------|-----------|----------------------|-------------------------------------|-------------------------------|---------------------------|--------------|---------|
-|          formats          | zip       | rar       | tar, tar-gz, tar-bz2 | tar, tar-gz, tar-bz2, tar-Z, tar-xz | 7z, zip, rar, tar, iso,  ...  | zip, tar, tar-gz, tar-bz2 | iso          | cab     |
-|            type           | **extension** | **extension** | **extensions**       | _library_ + **extensions**            | **library + OS utility**          | **library + OS utilities**   |  **library** | **library** |
-| Open with password        | ✔         | ✔         |                      |                                     | ✔                             |                                    |              |
-| Get comment               | ✔         | ✔         |                      |                                     |                               |                                    |              |
-| Update comment            | ✔         |           |                      |                                     |                               |                                    |              |
-|        Stream files       | ✔         | ✔         |                      |                                     |                               |                                    |              |
-|         Add files         | ✔         |           | ✔                    | ✔                                   | ✔                             | ✔                                  |              |
-|        Delete files       | ✔         |           | ✔                    |                                     | ✔                             | ✔                                  |              |
-|           Create          | ✔         |           | ✔                    | ✔                                   | ✔                             | ✔                                  |              |
-| Specify compression level | ✔         |           |                      |                                     | ✔                             |                                    |              |
-| Encrypt with password     | ✔         |           |                      |                                     | ✔                             |                                    |              |
+Here is a list of available drivers types with their differences:
+1. PHP Extensions
+   1. PHP extensions for compression only
+2. Utilities + bridge
+3. Pure PHP
 
-Example for `zip` with two drivers support: If on your system both `Zip` and `AlchemyZippy` driver available, the first will be used for `zip` file.
+| Type | Pros | Cons                                                                                               | Useful for                                                              |
+|------|------|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| PHP Exteniosn | Fast, supports a lot of functions | Sometimes can not support specific functions (e.g. password-protection in zip on old php versions) | Use it when possible (when extensions installed)                        |
+| Utilities + bridge | Uses system utilities, so should be fast (and even faster PHP Extensions) | Do not support streaming                                                                           | Packing a lot of files / Unpacking the whole archives without streaming |
+| Pure PHP | Works without PHP Extensions or system utilities, can be installed via composer only | Uses a lot of memory, lack of speed                                                                | Fallback method                                                         |
+
+By default, UA goes top-down to select first available driver for passed archive. So, PHP Extension driver will be used (if available), then Utilities + bridge driver (if available), and then Pure PHP driver.
 
 # Proposals for installation drivers
-**In docker/on VDS:** Install extensions (`zip, rar, phar, zlib, bzip2`), program (`p7zip`) and SevenZip driver.
-
-**In common hosting case:** Install TarByPear, AlchemyZippy libraries.
+- **In docker/on VDS:**
+  - install extensions (`zip, rar, phar, zlib, bzip2`)
+  - install utility (`7za` - `p7zip-full` on ubuntu) and `SevenZip` driver
+- **In common hosting case:**
+  - install `TarByPear`, `NelexaZip`
+  - If installed `7za` utility - configure `SevenZip` driver
+  - Else if installed `tar` or `unzip` utilities - configure `AlchemyZippy` driver
 
 # Drivers
 ## PHP extensions
 
-| Driver | Formats                   | php extension | notes |
-|--------|---------------------------|---------------|-------|
-| Zip | zip, jar                  | `zip`         |       |
-| Rar | rar                       | `rar` | read-only mode |
+| Driver | Formats                   | php extension | notes                                                                                                                                                                                                        |
+|--------|---------------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Zip | zip, jar                  | `zip`         | supports password-protection since 7.2.0                                                                                                                                                                     |
+| Rar | rar                       | `rar` | read-only mode                                                                                                                                                                                               |
 | TarByPhar | zip, tar, tar.gz, tar.bz2 | `phar` | Has a bug [#71966](https://bugs.php.net/bug.php?id=71966&thanks=10) in `ext-phar` ([related issue](https://github.com/wapmorgan/UnifiedArchive/issues/12)) - an archive will `./` in paths cannot be opened. |
 
 ### PHP extensions for compression only
@@ -55,8 +56,9 @@ These drivers support only compressed (not archived) data.  They support opening
 
 Works with binary data in php-land (= eats a lot of memory for big archives).
 
-| Driver | Formats                             | library                                                                               | notes                                                                                                                   |
-|--------|-------------------------------------|---------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| TarByPear | tar, tar.gz, tar.bz2, tar.xz, tar.Z | [`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar) and optionally php-extensions (`zlib`, `bzip2`, `xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz) | dont support updating archive (deleteFiles)                                                                             |
-| Cab    | cab                                 | [`wapmorgan/cab-archive`](https://packagist.org/packages/wapmorgan/cab-archive) | Getting files content and extraction is supported only on PHP 7.0.22+, 7.1.8+, 7.2.0. Support only opening & extraction |
-| Iso    | iso                                 | [`phpclasses/php-iso-file`](https://packagist.org/packages/phpclasses/php-iso-file) | Support only opening & extraction                                                                                       |
+| Driver | Formats                             | library                                                                                                                                                                                                                     | notes                                                                                                                   |
+|--------|-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| NelexaZip | zip                                 | [`nelexa/zip`](https://packagist.org/packages/nelexa/zip) and optionally php-extensions (`bz2`, `fileinfo`, `iconv`, `openssl`) |                                                                              |
+| TarByPear | tar, tar.gz, tar.bz2, tar.xz, tar.Z | [`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar) and optionally php-extensions (`zlib`, `bzip2`, `xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz)      | dont support updating archive (deleteFiles)                                                                             |
+| Cab    | cab                                 | [`wapmorgan/cab-archive`](https://packagist.org/packages/wapmorgan/cab-archive)                                                                                                                                             | Getting files content and extraction is supported only on PHP 7.0.22+, 7.1.8+, 7.2.0. Support only opening & extraction |
+| Iso    | iso                                 | [`phpclasses/php-iso-file`](https://packagist.org/packages/phpclasses/php-iso-file)                                                                                                                                         | Support only opening & extraction                                                                                       |

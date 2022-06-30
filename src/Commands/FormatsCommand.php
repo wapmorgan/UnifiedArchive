@@ -87,6 +87,10 @@ class FormatsCommand extends BaseCommand
         }
         $table->render();
 
+        foreach (array_combine(array_values(self::$abilitiesShortCuts), array_keys(self::$abilitiesLabels)) as $shortCut => $label) {
+            $output->writeln('<info>' . $shortCut . '</info> - ' . $label);
+        }
+
         return 0;
     }
 }

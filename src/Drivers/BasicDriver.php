@@ -34,19 +34,13 @@ abstract class BasicDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
-    {
-        return [];
-    }
+    abstract public static function getSupportedFormats();
 
     /**
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
-    {
-        return [];
-    }
+    abstract public static function checkFormatSupport($format);
 
     /**
      * @return string

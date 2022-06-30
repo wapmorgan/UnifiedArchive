@@ -5,6 +5,7 @@ use wapmorgan\UnifiedArchive\Drivers\AlchemyZippy;
 use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Cab;
 use wapmorgan\UnifiedArchive\Drivers\Iso;
+use wapmorgan\UnifiedArchive\Drivers\NelexaZip;
 use wapmorgan\UnifiedArchive\Drivers\OneFile\Bzip;
 use wapmorgan\UnifiedArchive\Drivers\OneFile\Gzip;
 use wapmorgan\UnifiedArchive\Drivers\OneFile\Lzma;
@@ -58,6 +59,7 @@ class Formats
         TarByPhar::class,
         SevenZip::class,
         AlchemyZippy::class,
+        NelexaZip::class,
         TarByPear::class,
         Iso::class,
         Cab::class,
