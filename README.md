@@ -10,9 +10,17 @@ Supported formats (depends on installed drivers): zip, 7z, rar, one-file(gz, bz2
 [![License](https://poser.pugx.org/wapmorgan/unified-archive/license)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Latest Unstable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/unstable)](https://packagist.org/packages/wapmorgan/unified-archive)
 
-Tests & Quality: [![Build status](https://travis-ci.com/wapmorgan/UnifiedArchive.svg?branch=master)](https://travis-ci.com/github/wapmorgan/UnifiedArchive)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=master)
+Tests & Quality: [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/UnifiedArchive/?branch=master)
+
+1. [Goal](#goal)
+2. [Functions & Features](#functions--features)
+3. [Quick start](#quick-start)
+4. [Built-in console archive manager](#built-in-console-archive-manager)
+5. [Usage](docs/Usage.md)
+6. [Drivers & formats](docs/Drivers.md)
+7. [Full API description](docs/API.md)
+8. [Changelog](CHANGELOG.md)
 
 ## Goal
 Main purpose of this library is to create unified frontend interface for different archive formats, that works in
@@ -39,11 +47,6 @@ Specific functions:
 - [Open archives encrypted with password (zip, rar, 7z)](docs/API.md#UnifiedArchive--open)
 - Set passwords (7z, zip) for new archives
 - [Adjust compression level (zip, gzip, 7zip)](docs/API.md#UnifiedArchive--archiveFiles) for new archives
-
-1. [Usage with examples](docs/Usage.md).
-2. [Full API description](docs/API.md).
-3. [Drivers and their formats](docs/Drivers.md).
-4. [Changelog](CHANGELOG.md).
 
 ## Quick start
 1. Installation and configuration
