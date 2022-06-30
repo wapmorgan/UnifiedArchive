@@ -25,11 +25,11 @@ class ArchiveEntry
 
     /**
      * ArchiveEntry constructor.
-     * @param $path
-     * @param $compressedSize
-     * @param $uncompressedSize
-     * @param $modificationTime
-     * @param $isCompressed
+     * @param string $path
+     * @param int $compressedSize
+     * @param int $uncompressedSize
+     * @param int $modificationTime
+     * @param bool|null $isCompressed
      * @param string|null $comment
      * @param string|null $crc32
      */

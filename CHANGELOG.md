@@ -1,5 +1,20 @@
 # Change Log
 
+### 1.2.0 - Jul XX, 2022
+**BC-breaking changes**:
+- Deleted methods in UnifiedArchive: `canOpenArchive`, `canOpenType`, `canCreateType`, `getArchiveType`, `detectArchiveType`, `getFileResource`, `getArchiveFormat`, `isFileExists`, `getArchiveSize`, `countCompressedFilesSize`, `countUncompressedFilesSize`.
+- Changed signature: `UnifiedArchive::open($filename, string|null $password = null)` => `UnifiedArchive::open($filename, array $abilities = [], string|null $password = null)`
+
+**New features**:
+- Added passing needed abilities to **UnifiedArchive::open()** to select a better driver:
+```php
+use \wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+
+# opens an array with driver, that supports content streaming and appending
+$archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.7z', [BasicDriver::STREAM_CONTENT, BasicDriver::APPEND]);
+# if not specified, uses OPEN or OPEN_ENCRYPTED check, if password passed
+```
+
 ### 1.1.5 - Jun 28, 2022
 
 **New features**:

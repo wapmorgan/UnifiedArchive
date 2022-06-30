@@ -38,10 +38,10 @@ class Rar extends BasicDriver
         switch ($format) {
             case Formats::RAR:
                 return [
-                    Formats::OPEN,
-                    Formats::OPEN_ENCRYPTED,
-                    Formats::EXTRACT_CONTENT,
-                    Formats::STREAM_CONTENT,
+                    BasicDriver::OPEN,
+                    BasicDriver::OPEN_ENCRYPTED,
+                    BasicDriver::EXTRACT_CONTENT,
+                    BasicDriver::STREAM_CONTENT,
                 ];
         }
     }

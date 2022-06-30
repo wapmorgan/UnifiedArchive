@@ -67,12 +67,12 @@ class TarByPhar extends BasicDriver
         }
 
         $abilities = [
-            Formats::OPEN,
-            Formats::EXTRACT_CONTENT,
-            Formats::STREAM_CONTENT,
-            Formats::APPEND,
-            Formats::DELETE,
-            Formats::CREATE,
+            BasicDriver::OPEN,
+            BasicDriver::EXTRACT_CONTENT,
+            BasicDriver::STREAM_CONTENT,
+            BasicDriver::APPEND,
+            BasicDriver::DELETE,
+            BasicDriver::CREATE,
         ];
 
         switch ($format) {

@@ -3,35 +3,36 @@
 namespace wapmorgan\UnifiedArchive\Commands;
 
 use Symfony\Component\Console\Output\OutputInterface;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class BaseCommand extends \Symfony\Component\Console\Command\Command
 {
     protected static $abilitiesLabels = [
-        'open' => Formats::OPEN,
-        'open (+password)' => Formats::OPEN_ENCRYPTED,
-        'get comment' => Formats::GET_COMMENT,
-        'extract' => Formats::EXTRACT_CONTENT,
-        'stream' => Formats::STREAM_CONTENT,
-        'append' => Formats::APPEND,
-        'delete' => Formats::DELETE,
-        'set comment' => Formats::SET_COMMENT,
-        'create' => Formats::CREATE,
-        'create (+password)' => Formats::CREATE_ENCRYPTED,
+        'open' => BasicDriver::OPEN,
+        'open (+password)' => BasicDriver::OPEN_ENCRYPTED,
+        'get comment' => BasicDriver::GET_COMMENT,
+        'extract' => BasicDriver::EXTRACT_CONTENT,
+        'stream' => BasicDriver::STREAM_CONTENT,
+        'append' => BasicDriver::APPEND,
+        'delete' => BasicDriver::DELETE,
+        'set comment' => BasicDriver::SET_COMMENT,
+        'create' => BasicDriver::CREATE,
+        'create (+password)' => BasicDriver::CREATE_ENCRYPTED,
     ];
 
     protected static $abilitiesShortCuts = [
-        Formats::OPEN => 'o',
-        Formats::OPEN_ENCRYPTED => 'O',
-        Formats::GET_COMMENT => 't',
-        Formats::EXTRACT_CONTENT => 'x',
-        Formats::STREAM_CONTENT => 's',
-        Formats::APPEND => 'a',
-        Formats::DELETE => 'd',
-        Formats::SET_COMMENT => 'T',
-        Formats::CREATE => 'c',
-        Formats::CREATE_ENCRYPTED => 'C',
+        BasicDriver::OPEN => 'o',
+        BasicDriver::OPEN_ENCRYPTED => 'O',
+        BasicDriver::GET_COMMENT => 't',
+        BasicDriver::EXTRACT_CONTENT => 'x',
+        BasicDriver::STREAM_CONTENT => 's',
+        BasicDriver::APPEND => 'a',
+        BasicDriver::DELETE => 'd',
+        BasicDriver::SET_COMMENT => 'T',
+        BasicDriver::CREATE => 'c',
+        BasicDriver::CREATE_ENCRYPTED => 'C',
     ];
 
     /**

@@ -71,17 +71,17 @@ class SevenZip extends BasicDriver
         }
 
         $abilities = [
-            Formats::OPEN,
-            Formats::EXTRACT_CONTENT,
+            BasicDriver::OPEN,
+            BasicDriver::EXTRACT_CONTENT,
         ];
 
         if (static::canRenameFiles()) {
             if (in_array($format, [Formats::SEVEN_ZIP, Formats::RAR, Formats::ZIP], true)) {
-                $abilities[] = Formats::OPEN_ENCRYPTED;
+                $abilities[] = BasicDriver::OPEN_ENCRYPTED;
             }
 
             if (in_array($format, [Formats::ZIP, Formats::SEVEN_ZIP], true)) {
-                $abilities[] = Formats::CREATE_ENCRYPTED;
+                $abilities[] = BasicDriver::CREATE_ENCRYPTED;
             }
 
             if (in_array($format, [Formats::SEVEN_ZIP,
@@ -90,14 +90,14 @@ class SevenZip extends BasicDriver
                 Formats::TAR,
                 Formats::LZMA,
                 Formats::ZIP], true)) {
-                $abilities[] = Formats::CREATE;
-                $abilities[] = Formats::APPEND;
-                $abilities[] = Formats::DELETE;
+                $abilities[] = BasicDriver::CREATE;
+                $abilities[] = BasicDriver::APPEND;
+                $abilities[] = BasicDriver::DELETE;
             }
 
             if ($format === Formats::SEVEN_ZIP) {
-                $abilities[] = Formats::GET_COMMENT;
-                $abilities[] = Formats::SET_COMMENT;
+                $abilities[] = BasicDriver::GET_COMMENT;
+                $abilities[] = BasicDriver::SET_COMMENT;
             }
 
         }

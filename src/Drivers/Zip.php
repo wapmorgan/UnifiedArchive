@@ -44,19 +44,19 @@ class Zip extends BasicDriver
             return [];
         }
         $abilities = [
-            Formats::OPEN,
-            Formats::OPEN_ENCRYPTED,
-            Formats::GET_COMMENT,
-            Formats::EXTRACT_CONTENT,
-            Formats::STREAM_CONTENT,
-            Formats::APPEND,
-            Formats::DELETE,
-            Formats::SET_COMMENT,
-            Formats::CREATE,
+            BasicDriver::OPEN,
+            BasicDriver::OPEN_ENCRYPTED,
+            BasicDriver::GET_COMMENT,
+            BasicDriver::EXTRACT_CONTENT,
+            BasicDriver::STREAM_CONTENT,
+            BasicDriver::APPEND,
+            BasicDriver::DELETE,
+            BasicDriver::SET_COMMENT,
+            BasicDriver::CREATE,
         ];
 
         if (static::canEncrypt($format)) {
-            $abilities[] = Formats::CREATE_ENCRYPTED;
+            $abilities[] = BasicDriver::CREATE_ENCRYPTED;
         }
 
         return $abilities;

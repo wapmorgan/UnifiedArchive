@@ -2,6 +2,7 @@
 namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 
@@ -30,7 +31,7 @@ class Gzip extends OneFileDriver
         }
         switch ($format) {
             case Formats::GZIP:
-                return [Formats::OPEN, Formats::EXTRACT_CONTENT, Formats::STREAM_CONTENT, Formats::CREATE];
+                return [BasicDriver::OPEN, BasicDriver::EXTRACT_CONTENT, BasicDriver::STREAM_CONTENT, BasicDriver::CREATE];
         }
     }
 

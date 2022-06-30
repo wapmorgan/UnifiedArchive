@@ -88,11 +88,11 @@ class AlchemyZippy extends BasicDriver
                 }
 
                 return [
-                    Formats::OPEN,
-                    Formats::EXTRACT_CONTENT,
-                    Formats::APPEND,
-                    Formats::DELETE,
-                    Formats::CREATE,
+                    BasicDriver::OPEN,
+                    BasicDriver::EXTRACT_CONTENT,
+                    BasicDriver::APPEND,
+                    BasicDriver::DELETE,
+                    BasicDriver::CREATE,
                 ];
         }
     }

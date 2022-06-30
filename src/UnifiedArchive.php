@@ -47,30 +47,39 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /** @var int Total size of archive file */
     protected $archiveSize;
 
-    /**
-     * @var null
-     */
-    protected $password;
+    /** @var BasicDriver */
+    protected $driver;
+
+    /** @var string|null */
+    private $password;
 
     /**
      * Creates a UnifiedArchive instance for passed archive
      *
      * @param string $fileName Archive filename
-     * @param null $password
+     * @param string|null $password
      * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
      */
-    public static function open($fileName, $password = null)
+    public static function open($fileName, $password = null, $abilities = [])
     {
         if (!file_exists($fileName) || !is_readable($fileName)) {
             throw new InvalidArgumentException('Could not open file: ' . $fileName.' is not readable');
         }
 
         $format = Formats::detectArchiveFormat($fileName);
-        if (!Formats::canOpen($format)) {
-            return null;
+
+        if (empty($abilities)) {
+            $abilities = [BasicDriver::OPEN];
+            if (!empty($password)) {
+                $abilities[] = [BasicDriver::OPEN_ENCRYPTED];
+            }
+        }
+        $driver = Formats::getFormatDriver($format, $abilities);
+        if ($driver === null) {
+            throw new \RuntimeException('Driver for '.$format.' ('.$fileName.') is not found');
         }
 
-        return new static($fileName, $format, $password);
+        return new static($fileName, $format, $driver, $password);
     }
 
     /**
@@ -90,20 +99,17 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      *
      * @param string $fileName Archive filename
      * @param string $format Archive type
+     * @param string|BasicDriver $driver
      * @param string|null $password
      */
-    public function __construct($fileName, $format, $password = null)
+    public function __construct($fileName, $format, $driver, $password = null)
     {
-        $driver = Formats::getFormatDriver($format);
-        if ($driver === false) {
-            throw new \RuntimeException('Driver for '.$format.' ('.$fileName.') is not found');
-        }
-
         $this->format = $format;
-        $this->archiveSize = filesize($fileName);
+        $this->driver = $driver;
         $this->password = $password;
+        $this->archiveSize = filesize($fileName);
 
-        /** @var BasicDriver archive */
+        /** @var BasicDriver */
         $this->archive = new $driver($fileName, $format, $password);
         $this->scanArchive();
     }
@@ -553,14 +559,22 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
 
         $info = static::prepareForArchiving($fileOrFiles, $archiveName);
 
+        $abilities = [BasicDriver::CREATE];
+
         if (!Formats::canCreate($info['type']))
             throw new UnsupportedArchiveException('Unsupported archive type: '.$info['type'].' of archive '.$archiveName);
 
         if ($password !== null && !Formats::canEncrypt($info['type']))
             throw new UnsupportedOperationException('Archive type '.$info['type'].' can not be encrypted');
+        if ($password !== null) {
+            $abilities[] = BasicDriver::CREATE_ENCRYPTED;
+        }
 
         /** @var BasicDriver $driver */
-        $driver = Formats::getFormatDriver($info['type'], true);
+        $driver = Formats::getFormatDriver($info['type'], $abilities);
+        if ($driver === null) {
+            throw new UnsupportedArchiveException('Unsupported archive type: ' . $info['type'] . ' of archive ');
+        }
 
         return $driver::createArchive(
             $info['files'],
@@ -578,7 +592,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string $file
      * @param string $archiveName
      * @param int $compressionLevel Level of compression
-     * @param null $password
+     * @param string|null $password
      * @return bool
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
@@ -598,7 +612,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string $directory
      * @param string $archiveName
      * @param int $compressionLevel Level of compression
-     * @param null $password
+     * @param string|null $password
      * @return bool
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
@@ -710,135 +724,6 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
                 $map[$destination.basename($node)] = $node;
             }
         }
-    }
-
-    /**
-     * Checks whether archive can be opened with current system configuration
-     *
-     * @param string $fileName Archive filename
-     * @deprecated See {UnifiedArchive::canOpen()}
-     * @return bool
-     */
-    public static function canOpenArchive($fileName)
-    {
-        return static::canOpen($fileName);
-    }
-
-    /**
-     * Checks whether specific archive type can be opened with current system configuration
-     *
-     * @deprecated See {{Formats::canOpen()}}
-     * @param string $type One of predefined archive types (class constants)
-     * @return bool
-     */
-    public static function canOpenType($type)
-    {
-        return Formats::canOpen($type);
-    }
-
-    /**
-     * Checks whether specified archive can be created
-     *
-     * @deprecated See {{Formats::canCreate()}}
-     * @param string $type One of predefined archive types (class constants)
-     * @return bool
-     */
-    public static function canCreateType($type)
-    {
-        return Formats::canCreate($type);
-    }
-
-    /**
-     * Returns type of archive
-     *
-     * @deprecated See {{UnifiedArchive::getArchiveFormat()}}
-     * @return string One of class constants
-     */
-    public function getArchiveType()
-    {
-        return $this->getFormat();
-    }
-
-    /**
-     * Detect archive type by its filename or content
-     *
-     * @deprecated See {{Formats::detectArchiveFormat()}}
-     * @param string $fileName Archive filename
-     * @param bool $contentCheck Whether archive type can be detected by content
-     * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
-     */
-    public static function detectArchiveType($fileName, $contentCheck = true)
-    {
-        return Formats::detectArchiveFormat($fileName, $contentCheck);
-    }
-
-    /**
-     * Returns a resource for reading file from archive
-     *
-     * @deprecated See {{UnifiedArchive::getFileStream}}
-     * @param string $fileName File name in archive
-     * @return resource
-     * @throws NonExistentArchiveFileException
-     */
-    public function getFileResource($fileName)
-    {
-        return $this->getFileStream($fileName);
-    }
-
-    /**
-     * Returns type of archive
-     *
-     * @deprecated See {{UnifiedArchive::getFormat}}
-     * @return string One of class constants
-     */
-    public function getArchiveFormat()
-    {
-        return $this->getFormat();
-    }
-
-    /**
-     * Checks that file exists in archive
-     *
-     * @deprecated See {{UnifiedArchive::hasFile}}
-     * @param string $fileName File name in archive
-     * @return bool
-     */
-    public function isFileExists($fileName)
-    {
-        return $this->hasFile($fileName);
-    }
-
-    /**
-     * Returns size of archive file in bytes
-     *
-     * @deprecated See {{UnifiedArchive::getSize}}
-     * @return int
-     */
-    public function getArchiveSize()
-    {
-        return $this->getSize();
-    }
-
-    /**
-     * Counts cumulative size of all compressed data (in bytes)
-     *
-     * @deprecated See {{UnifiedArchive::getCompressedSize}}
-     * @return int
-     */
-    public function countCompressedFilesSize()
-    {
-        return $this->getCompressedSize();
-    }
-
-    /**
-     * Counts cumulative size of all uncompressed data (bytes)
-     *
-     * @deprecated See {{UnifiedArchive::getOriginalSize}}
-     * @return int
-     */
-    public function countUncompressedFilesSize()
-    {
-        return $this->getOriginalSize();
     }
 
     /**

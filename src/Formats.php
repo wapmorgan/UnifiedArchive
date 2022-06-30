@@ -46,22 +46,6 @@ class Formats
     const RPM = 'rpm';
     const DEB = 'deb';
 
-    const OPEN = 1,
-        OPEN_ENCRYPTED = 2,
-        OPEN_VOLUMED = 4,
-
-        GET_COMMENT = 64,
-
-        EXTRACT_CONTENT = 128,
-        STREAM_CONTENT = 256,
-
-        APPEND = 4096,
-        DELETE = 8192,
-        SET_COMMENT = 16384,
-
-        CREATE = 1048576,
-        CREATE_ENCRYPTED = 2097152;
-
     /**
      * @var string[] List of archive format drivers
      */
@@ -189,7 +173,7 @@ class Formats
      */
     public static function canOpen($format)
     {
-        return static::checkFormatSupportAbility($format, Formats::OPEN);
+        return static::checkFormatSupportAbility($format, BasicDriver::OPEN);
     }
 
     /**
@@ -200,7 +184,7 @@ class Formats
      */
     public static function canStream($format)
     {
-        return static::checkFormatSupportAbility($format, Formats::STREAM_CONTENT);
+        return static::checkFormatSupportAbility($format, BasicDriver::STREAM_CONTENT);
     }
 
     /**
@@ -211,7 +195,7 @@ class Formats
      */
     public static function canCreate($format)
     {
-        return static::checkFormatSupportAbility($format, Formats::CREATE);
+        return static::checkFormatSupportAbility($format, BasicDriver::CREATE);
     }
 
     /**
@@ -222,7 +206,7 @@ class Formats
      */
     public static function canAppend($format)
     {
-        return static::checkFormatSupportAbility($format, Formats::APPEND);
+        return static::checkFormatSupportAbility($format, BasicDriver::APPEND);
     }
 
     /**
@@ -233,7 +217,7 @@ class Formats
      */
     public static function canUpdate($format)
     {
-        return static::checkFormatSupportAbility($format, Formats::DELETE);
+        return static::checkFormatSupportAbility($format, BasicDriver::DELETE);
     }
 
     /**
@@ -244,9 +228,13 @@ class Formats
      */
     public static function canEncrypt($format)
     {
-        return static::checkFormatSupportAbility($format, Formats::CREATE_ENCRYPTED);
+        return static::checkFormatSupportAbility($format, BasicDriver::CREATE_ENCRYPTED);
     }
 
+    /**
+     * @param $format
+     * @return void
+     */
     protected static function getFormatSupportStatus($format)
     {
         static::getAllPossibleFormatsAndDrivers();
@@ -265,7 +253,7 @@ class Formats
      * @param string $ability
      * @return bool
      */
-    protected static function checkFormatSupportAbility($format, $ability)
+    public static function checkFormatSupportAbility($format, $ability)
     {
         self::getFormatSupportStatus($format);
         foreach (static::$supportedDriversFormats[$format] as $driver => $driver_abilities) {
@@ -275,6 +263,23 @@ class Formats
         }
 
         return false;
+    }
+
+    /**
+     * @param string $format
+     * @param int[] $abilities
+     * @return int|string|null
+     */
+    public static function getFormatDriver($format, array $abilities = [])
+    {
+        self::getFormatSupportStatus($format);
+        foreach (static::$supportedDriversFormats[$format] as $driver => $driver_abilities) {
+            if (count(array_intersect($driver_abilities, $abilities)) === count($abilities)) {
+                return $driver;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -288,29 +293,6 @@ class Formats
             $result |= $int;
         }
         return $result;
-    }
-
-    /**
-     * @param string $format
-     * @param bool $createAbility
-     * @return mixed
-     */
-    public static function getFormatDriver($format, $createAbility = false)
-    {
-        static::getAllPossibleFormatsAndDrivers();
-
-        if (!static::canOpen($format))
-            throw new UnsupportedArchiveException('Unsupported archive type: '.$format.' of archive ');
-
-        if (!$createAbility)
-            return static::$supportedDriversFormats[$format][0];
-
-        foreach (static::$supportedDriversFormats[$format] as $driver) {
-            if ($driver::canCreateArchive($format))
-                return $driver;
-        }
-
-        return false;
     }
 
     /**

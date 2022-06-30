@@ -47,8 +47,8 @@ class Iso extends BasicDriver
         switch ($format) {
             case Formats::ISO:
                 return [
-                    Formats::OPEN,
-                    Formats::EXTRACT_CONTENT,
+                    BasicDriver::OPEN,
+                    BasicDriver::EXTRACT_CONTENT,
                 ];
         }
     }

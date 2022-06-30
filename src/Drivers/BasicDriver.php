@@ -16,6 +16,21 @@ abstract class BasicDriver
     const COMPRESSION_STRONG = 3;
     const COMPRESSION_MAXIMUM = 4;
 
+    const OPEN = 1;
+    const OPEN_ENCRYPTED = 2;
+    const OPEN_VOLUMED = 4;
+
+    const GET_COMMENT = 64;
+    const EXTRACT_CONTENT = 128;
+    const STREAM_CONTENT = 256;
+
+    const APPEND = 4096;
+    const DELETE = 8192;
+    const SET_COMMENT = 16384;
+
+    const CREATE = 1048576;
+    const CREATE_ENCRYPTED = 2097152;
+
     /**
      * @return array
      */

@@ -65,10 +65,10 @@ class TarByPear extends BasicDriver
         }
 
         $abilities = [
-            Formats::OPEN,
-            Formats::EXTRACT_CONTENT,
-            Formats::APPEND,
-            Formats::CREATE,
+            BasicDriver::OPEN,
+            BasicDriver::EXTRACT_CONTENT,
+            BasicDriver::APPEND,
+            BasicDriver::CREATE,
         ];
 
         switch ($format) {
