@@ -214,7 +214,7 @@ class SevenZip extends BasicDriver
             strtotime($entry->getModified()),
             $entry->getSize() !== $entry->getPackedSize(),
             $entry->getComment(),
-            $entry->getCrc()
+            $this->format === Formats::ZIP ? $entry->getCrc() : null
         );
     }
 
