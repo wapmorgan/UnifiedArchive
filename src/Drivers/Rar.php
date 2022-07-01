@@ -12,9 +12,31 @@ use wapmorgan\UnifiedArchive\Formats;
 class Rar extends BasicDriver
 {
     const NONE_RAR_COMPRESSION = 48;
+    const TYPE = self::TYPE_EXTENSION;
 
     /** @var \RarArchive */
     protected $rar;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'adapter for ext-rar' . (self::isInstalled() ? ' (' . phpversion('rar') . ')' : null);
+    }
+
+    public static function isInstalled()
+    {
+        return extension_loaded('rar');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install [rar] extension.' . "\n" . 'Can be installed with pecl: `pecl install rar`';
+    }
 
     /**
      * @return array
@@ -44,24 +66,6 @@ class Rar extends BasicDriver
                     BasicDriver::STREAM_CONTENT,
                 ];
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getDescription()
-    {
-        return 'adapter for ext-rar' . (extension_loaded('rar') ? ' (' . phpversion('rar') . ')' : null);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return !extension_loaded('rar')
-            ? 'install [rar] extension.' . "\n" . 'Can be installed with pecl: `pecl install rar`'
-            : null;
     }
 
     /**

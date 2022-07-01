@@ -8,6 +8,8 @@ use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 class Bzip extends OneFileDriver
 {
     const FORMAT_SUFFIX =  'bz2';
+    const PHP_EXTENSION = 'bz2';
+    const FORMAT = Formats::BZIP;
 
     /**
      * @return array
@@ -25,7 +27,7 @@ class Bzip extends OneFileDriver
      */
     public static function checkFormatSupport($format)
     {
-        if (!extension_loaded('bz2')) {
+        if (!static::isInstalled()) {
             return [];
         }
 
@@ -41,16 +43,6 @@ class Bzip extends OneFileDriver
     public static function getDescription()
     {
         return 'adapter for ext-bzip2';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return !extension_loaded('bz2')
-            ? 'install `bz2` extension'
-            : null;
     }
 
     /**

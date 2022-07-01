@@ -9,31 +9,8 @@ use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 class Gzip extends OneFileDriver
 {
     const FORMAT_SUFFIX = 'gz';
-
-    /**
-     * @return array
-     */
-    public static function getSupportedFormats()
-    {
-        return [
-            Formats::GZIP,
-        ];
-    }
-
-    /**
-     * @param $format
-     * @return array
-     */
-    public static function checkFormatSupport($format)
-    {
-        if (!extension_loaded('zlib')) {
-            return [];
-        }
-        switch ($format) {
-            case Formats::GZIP:
-                return [BasicDriver::OPEN, BasicDriver::EXTRACT_CONTENT, BasicDriver::STREAM_CONTENT, BasicDriver::CREATE];
-        }
-    }
+    const PHP_EXTENSION = 'zlib';
+    const FORMAT = Formats::GZIP;
 
     /**
      * @inheritDoc
@@ -41,16 +18,6 @@ class Gzip extends OneFileDriver
     public static function getDescription()
     {
         return 'adapter for ext-zlib'.(defined('ZLIB_VERSION') ? ' ('.ZLIB_VERSION.')' : null);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return !extension_loaded('zlib')
-            ? 'install `zlib` extension'
-            : null;
     }
 
     /**

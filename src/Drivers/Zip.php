@@ -19,10 +19,27 @@ use ZipArchive;
  */
 class Zip extends BasicDriver
 {
+    const TYPE = self::TYPE_EXTENSION;
+
     /** @var ZipArchive */
     protected $zip;
 
     protected $pureFilesNumber;
+
+    public static function getDescription()
+    {
+        return 'adapter for ext-zip'.(extension_loaded('zip') && defined('\ZipArchive::LIBZIP_VERSION') ? ' ('. ZipArchive::LIBZIP_VERSION.')' : null);
+    }
+
+    public static function isInstalled()
+    {
+        return extension_loaded('zip');
+    }
+
+    public static function getInstallationInstruction()
+    {
+        return 'install [zip] php extension';
+    }
 
     /**
      * @return array
@@ -40,7 +57,7 @@ class Zip extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
-        if (!extension_loaded('zip')) {
+        if (!static::isInstalled()) {
             return [];
         }
         $abilities = [
@@ -60,18 +77,6 @@ class Zip extends BasicDriver
         }
 
         return $abilities;
-    }
-
-    public static function getDescription()
-    {
-        return 'adapter for ext-zip'.(extension_loaded('zip') && defined('\ZipArchive::LIBZIP_VERSION') ? ' ('. ZipArchive::LIBZIP_VERSION.')' : null);
-    }
-
-    public static function getInstallationInstruction()
-    {
-        return !extension_loaded('zip')
-            ? 'install `zip` extension'
-            : null;
     }
 
     /**
@@ -367,14 +372,6 @@ class Zip extends BasicDriver
         $zip->close();
 
         return count($files);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function canCreateArchive($format)
-    {
-        return true;
     }
 
     /**

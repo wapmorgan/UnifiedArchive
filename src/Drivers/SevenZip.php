@@ -15,6 +15,8 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class SevenZip extends BasicDriver
 {
+    const TYPE = self::TYPE_UTILITIES;
+
     /** @var Archive7z */
     protected $sevenZip;
 
@@ -24,6 +26,37 @@ class SevenZip extends BasicDriver
     protected $format;
 
     const COMMENT_FILE = 'descript.ion';
+
+    public static function isInstalled()
+    {
+        return class_exists('\Archive7z\Archive7z') && Archive7z::getBinaryVersion() !== false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        if (!class_exists('\Archive7z\Archive7z'))
+            return 'install library [gemorroj/archive7z]: `composer require gemorroj/archive7z`' . "\n"
+                . ' and console program p7zip [7za]: `apt install p7zip-full` - depends on OS';
+
+        if (Archive7z::getBinaryVersion() === false)
+            return 'install console program p7zip [7za]: `apt install p7zip-full` - depends on OS';
+
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'php-library and console program'
+            .(class_exists('\Archive7z\Archive7z') && ($version = Archive7z::getBinaryVersion()) !== false
+                ? ' ('.$version.')'
+                : null);
+    }
 
     /**
      * @return array
@@ -60,8 +93,7 @@ class SevenZip extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
-        $available = class_exists('\Archive7z\Archive7z') && Archive7z::getBinaryVersion() !== false;
-        if (!$available) {
+        if (!static::isInstalled()) {
             return [];
         }
 
@@ -102,32 +134,6 @@ class SevenZip extends BasicDriver
 
         }
         return $abilities;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getDescription()
-    {
-        return 'php-library and console program'
-            .(class_exists('\Archive7z\Archive7z') && ($version = Archive7z::getBinaryVersion()) !== false
-                ? ' ('.$version.')'
-                : null);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        if (!class_exists('\Archive7z\Archive7z'))
-            return 'install library [gemorroj/archive7z]: `composer require gemorroj/archive7z`' . "\n"
-                . ' and console program p7zip [7za]: `apt install p7zip-full` - depends on OS';
-
-        if (Archive7z::getBinaryVersion() === false)
-            return 'install console program p7zip [7za]: `apt install p7zip-full` - depends on OS';
-
-        return null;
     }
 
     /**

@@ -53,18 +53,7 @@ class BaseArchiveCommand extends BaseCommand
      */
     protected function getDriverFormatAbilities($driver, $format)
     {
-        $abilities = [];
-        foreach ([
-            'stream' => 'canStream',
-            'create' => 'canCreateArchive',
-            'add' => 'canAddFiles',
-            'delete' => 'canDeleteFiles',
-            'encrypt' => 'canEncrypt',
-        ] as $ability => $checkMethod) {
-            if (call_user_func([$driver, $checkMethod], $format)) {
-                $abilities[] = $ability;
-            }
-        }
-        return $abilities;
+        $abilities = $driver::checkFormatSupport($format);
+        return array_keys(array_intersect(self::$abilitiesLabels, $abilities));
     }
 }

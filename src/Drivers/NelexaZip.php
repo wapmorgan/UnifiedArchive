@@ -10,6 +10,8 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class NelexaZip extends BasicDriver
 {
+    const TYPE = self::TYPE_PURE_PHP;
+
     /**
      * @var ZipFile
      */
@@ -153,5 +155,20 @@ class NelexaZip extends BasicDriver
             BasicDriver::APPEND,
             BasicDriver::DELETE,
         ];
+    }
+
+    public static function getDescription()
+    {
+        return 'nelexa/zip driver';
+    }
+
+    public static function isInstalled()
+    {
+        return class_exists('\\PhpZip\\ZipFile');
+    }
+
+    public static function getInstallationInstruction()
+    {
+        return 'install library [nelexa/zip]: `composer require nelexa/zip`';
     }
 }

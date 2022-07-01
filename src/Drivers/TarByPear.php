@@ -16,6 +16,8 @@ use wapmorgan\UnifiedArchive\LzwStreamWrapper;
 
 class TarByPear extends BasicDriver
 {
+    const TYPE = self::TYPE_PURE_PHP;
+
     /**
      * @var string Full path to archive
      */
@@ -39,6 +41,27 @@ class TarByPear extends BasicDriver
     protected $pureFilesNumber;
 
     /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'php-library for tar';
+    }
+
+    public static function isInstalled()
+    {
+        return class_exists('\Archive_Tar');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library [pear/archive_tar]: `composer require pear/archive_tar`' . "\n"  . ' and optionally php-extensions (zlib, bz2)';
+    }
+
+    /**
      * @return array
      */
     public static function getSupportedFormats()
@@ -59,8 +82,7 @@ class TarByPear extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
-        $availability = class_exists('\Archive_Tar');
-        if (!$availability) {
+        if (!static::isInstalled()) {
             return [];
         }
 
@@ -99,24 +121,6 @@ class TarByPear extends BasicDriver
                 }
                 return $abilities;
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getDescription()
-    {
-        return 'php-library for tar';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return !class_exists('\Archive_Tar')
-            ? 'install library [pear/archive_tar]: `composer require pear/archive_tar`' . "\n"  . ' and optionally php-extensions (zlib, bzip2)'
-            : null;
     }
 
     /**

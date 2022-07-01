@@ -13,8 +13,31 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class Cab extends BasicDriver
 {
+    const TYPE = self::TYPE_PURE_PHP;
+
     /** @var CabArchive */
     protected $cab;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'php-library';
+    }
+
+    public static function isInstalled()
+    {
+        return class_exists('\CabArchive');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library [wapmorgan/cab-archive]: `composer require wapmorgan/cab-archive`';
+    }
 
     /**
      * @return array
@@ -51,24 +74,6 @@ class Cab extends BasicDriver
 
                 return $abilities;
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getDescription()
-    {
-        return 'php-library';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return !class_exists('\CabArchive')
-            ? 'install library [wapmorgan/cab-archive]: `composer require wapmorgan/cab-archive`'
-            : null;
     }
 
     /**

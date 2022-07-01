@@ -161,7 +161,7 @@ class ReadingTest extends PhpUnitTestCase
             $this->assertEquals(
                 $file_data->compressedSize !== $file_data->uncompressedSize,
                 $file_data->isCompressed,
-                'Is compressed of '.$filename.' should be '.($file_data->compressedSize !== $file_data->uncompressedSize));
+                'Is compressed of '.$filename.' should be '.($file_data->compressedSize < $file_data->uncompressedSize) . ' for original size ' . $file_data->uncompressedSize . ' and compressed size ' . $file_data->compressedSize);
 
             // test content
             $this->assertEquals($content, $archive->getFileContent($filename), 'getFileContent() should return content of file that should be equal to real file content');

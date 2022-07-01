@@ -8,16 +8,51 @@ use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats;
 
 abstract class OneFileDriver extends BasicDriver
 {
     /** @var null|string Should be filled for real format like 'gz' or other */
     const FORMAT_SUFFIX = null;
+    const FORMAT = null;
+    const PHP_EXTENSION = null;
+
+    const TYPE = self::TYPE_EXTENSION;
 
     protected $fileName;
     protected $inArchiveFileName;
     protected $uncompressedSize;
     protected $modificationTime;
+
+    public static function isInstalled()
+    {
+        return extension_loaded(static::PHP_EXTENSION);
+    }
+
+    public static function getInstallationInstruction()
+    {
+        return 'install `' . static::PHP_EXTENSION . '` extension';
+    }
+
+    public static function getSupportedFormats()
+    {
+        return [static::FORMAT];
+    }
+
+    /**
+     * @param $format
+     * @return array
+     */
+    public static function checkFormatSupport($format)
+    {
+        if (!static::isInstalled()) {
+            return [];
+        }
+        switch ($format) {
+            case static::FORMAT:
+                return [BasicDriver::OPEN, BasicDriver::EXTRACT_CONTENT, BasicDriver::STREAM_CONTENT, BasicDriver::CREATE];
+        }
+    }
 
     /**
      * @inheritDoc
@@ -179,24 +214,5 @@ abstract class OneFileDriver extends BasicDriver
      * @return mixed
      * @throws UnsupportedOperationException
      */
-    protected static function compressData($data, $compressionLevel)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function canCreateArchive($format)
-    {
-        return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function canStream($format)
-    {
-        return true;
-    }
+    abstract protected static function compressData($data, $compressionLevel);
 }

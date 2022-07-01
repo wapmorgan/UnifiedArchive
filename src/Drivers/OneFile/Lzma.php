@@ -14,31 +14,8 @@ use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 class Lzma extends OneFileDriver
 {
     const FORMAT_SUFFIX =  'xz';
-
-    /**
-     * @return array
-     */
-    public static function getSupportedFormats()
-    {
-        return [
-            Formats::LZMA,
-        ];
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     */
-    public static function checkFormatSupport($format)
-    {
-        if (!extension_loaded('xz')) {
-            return [];
-        }
-        switch ($format) {
-            case Formats::LZMA:
-                return [BasicDriver::OPEN, BasicDriver::EXTRACT_CONTENT, BasicDriver::STREAM_CONTENT, BasicDriver::CREATE];
-        }
-    }
+    const PHP_EXTENSION = 'xz';
+    const FORMAT = Formats::LZMA;
 
     /**
      * @inheritDoc
@@ -53,9 +30,7 @@ class Lzma extends OneFileDriver
      */
     public static function getInstallationInstruction()
     {
-        return !extension_loaded('xz')
-            ? 'install [xz] extension' . "\n" . 'For 5.x: https://github.com/payden/php-xz' . "\n" . 'For 7.x: https://github.com/codemasher/php-ext-xz'
-            : null;
+        return 'install [xz] extension' . "\n" . 'For 5.x: https://github.com/payden/php-xz' . "\n" . 'For 7.x: https://github.com/codemasher/php-ext-xz';
     }
 
     /**

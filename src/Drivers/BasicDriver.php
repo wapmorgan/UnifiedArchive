@@ -10,6 +10,10 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 
 abstract class BasicDriver
 {
+    const TYPE_EXTENSION = 1;
+    const TYPE_UTILITIES = 2;
+    const TYPE_PURE_PHP = 3;
+
     const COMPRESSION_NONE = 0;
     const COMPRESSION_WEAK = 1;
     const COMPRESSION_AVERAGE = 2;
@@ -31,74 +35,39 @@ abstract class BasicDriver
     const CREATE = 1048576;
     const CREATE_ENCRYPTED = 2097152;
 
+    const TYPE = null;
+
     /**
-     * @return array
+     * @return string
+     */
+    abstract public static function getDescription();
+
+    /**
+     * @return bool
+     */
+    abstract public static function isInstalled();
+
+    /**
+     * @return string
+     */
+    abstract public static function getInstallationInstruction();
+
+    /**
+     * @return string[]
      */
     abstract public static function getSupportedFormats();
 
     /**
-     * @param $format
-     * @return array
+     * @param string $format
+     * @return int[]
      */
     abstract public static function checkFormatSupport($format);
-
-    /**
-     * @return string
-     */
-    public static function getDescription()
-    {
-        return null;
-    }
-
-    /**
-     * @return string
-     */
-    public static function getInstallationInstruction()
-    {
-        return null;
-    }
 
     /**
      * @param $format
      * @return bool
      */
     public static function canCreateArchive($format)
-    {
-        return false;
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     */
-    public static function canAddFiles($format)
-    {
-        return false;
-    }
-
-    /**
-     * @param $format
-     * @return bool
-     */
-    public static function canDeleteFiles($format)
-    {
-        return false;
-    }
-
-    /**
-     * @param $format
-     * @return false
-     */
-    public static function canEncrypt($format)
-    {
-        return false;
-    }
-
-    /**
-     * @param $format
-     * @return false
-     */
-    public static function canStream($format)
     {
         return false;
     }

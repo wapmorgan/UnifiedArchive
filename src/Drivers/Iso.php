@@ -9,6 +9,8 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class Iso extends BasicDriver
 {
+    const TYPE = self::TYPE_PURE_PHP;
+
     /** @var \CISOFile */
     protected $iso;
 
@@ -23,6 +25,27 @@ class Iso extends BasicDriver
 
     /** @var null|int Size of block in ISO. Used to find real position of file in ISO */
     protected $blockSize;
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'iso archives reader';
+    }
+
+    public static function isInstalled()
+    {
+        return class_exists('\CISOFile');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install library [phpclasses/php-iso-file]: `composer require phpclasses/php-iso-file`';
+    }
 
     /**
      * @return array
@@ -40,7 +63,7 @@ class Iso extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
-        if (!class_exists('\CISOFile')) {
+        if (!static::isInstalled()) {
             return [];
         }
 
@@ -51,24 +74,6 @@ class Iso extends BasicDriver
                     BasicDriver::EXTRACT_CONTENT,
                 ];
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getDescription()
-    {
-        return 'php-library';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return !class_exists('\CISOFile')
-            ? 'install library [phpclasses/php-iso-file]: `composer require phpclasses/php-iso-file`'
-            : null;
     }
 
     /**

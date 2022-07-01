@@ -63,7 +63,7 @@ class FormatsCommand extends BaseCommand
         }
 
         $headers = array_map(function ($v) { return substr($v, strrpos($v, '\\') + 1);}, Formats::$drivers);
-        array_unshift($headers, 'format');
+        array_unshift($headers, 'format / driver');
 
         $table->setHeaders($headers);
         $i = 0;

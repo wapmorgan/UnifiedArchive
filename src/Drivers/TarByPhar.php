@@ -19,6 +19,7 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class TarByPhar extends BasicDriver
 {
+    const TYPE = self::TYPE_EXTENSION;
     public static $disabled = false;
 
     /**
@@ -43,6 +44,27 @@ class TarByPhar extends BasicDriver
      */
     const PHAR_FLAGS = FilesystemIterator::UNIX_PATHS;
 
+    public static function isInstalled()
+    {
+        return extension_loaded('phar');
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getInstallationInstruction()
+    {
+        return 'install `phar` extension and optionally php-extensions (zlib, bz2)';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getDescription()
+    {
+        return 'adapter for ext-phar';
+    }
+
     /**
      * @return array
      */
@@ -62,7 +84,7 @@ class TarByPhar extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
-        if (static::$disabled || !class_exists('\PharData')) {
+        if (static::$disabled || !static::isInstalled()) {
             return [];
         }
 
@@ -89,24 +111,6 @@ class TarByPhar extends BasicDriver
                     ? $abilities
                     : [];
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getDescription()
-    {
-        return 'adapter for ext-phar';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return !extension_loaded('phar')
-            ? 'install `phar` extension and optionally php-extensions (zlib, bzip2)'
-            : null;
     }
 
     /**
@@ -186,7 +190,16 @@ class TarByPhar extends BasicDriver
         $entry_info = $this->tar->offsetGet($fileName);
         return new ArchiveEntry(
             $fileName,
-            ($this->compressRatio > 0 ? floor($entry_info->getSize() / $this->compressRatio) : 0), //$entry_info->getCompressedSize(),
+            (
+//                $entry_info->getCompressedSize() > $entry_info->getSize()
+                $this->compressRatio > 1
+                    ? floor($entry_info->getSize() / $this->compressRatio)
+                    : (
+                            $entry_info->getCompressedSize() > 0
+                                ? $entry_info->getCompressedSize()
+                                : 0
+                    )
+            ), //$entry_info->getCompressedSize(),
             $entry_info->getSize(),
             $entry_info->getMTime(),
             $entry_info->isCompressed());
