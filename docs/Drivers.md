@@ -1,26 +1,18 @@
 
-Here is a list of available drivers types with their differences:
-1. PHP Extensions
-   1. PHP extensions for compression only
-2. Utilities + bridge
-3. Pure PHP
-
 | Type | Pros | Cons                                                                                               | Useful for                                                              |
 |------|------|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
 | PHP Exteniosn | Fast, supports a lot of functions | Sometimes can not support specific functions (e.g. password-protection in zip on old php versions) | Use it when possible (when extensions installed)                        |
 | Utilities + bridge | Uses system utilities, so should be fast (and even faster PHP Extensions) | Do not support streaming                                                                           | Packing a lot of files / Unpacking the whole archives without streaming |
 | Pure PHP | Works without PHP Extensions or system utilities, can be installed via composer only | Uses a lot of memory, lack of speed                                                                | Fallback method                                                         |
 
-By default, UA goes top-down to select first available driver for passed archive. So, PHP Extension driver will be used (if available), then Utilities + bridge driver (if available), and then Pure PHP driver.
-
 # Proposals for installation drivers
-- **In docker/on VDS:**
-  - install extensions (`zip, rar, phar, zlib, bzip2`)
-  - install utility (`7za` - `p7zip-full` on ubuntu) and `SevenZip` driver
-- **In common hosting case:**
+- **In common case:**
   - install `TarByPear`, `NelexaZip`
   - If installed `7za` utility - configure `SevenZip` driver
   - Else if installed `tar` or `unzip` utilities - configure `AlchemyZippy` driver
+- **In docker/on VDS:**
+  - install all php extensions (`zip, rar, phar, zlib, bz2`)
+  - install utility (`7za` - `p7zip-full` on ubuntu) and `SevenZip` driver
 
 # Drivers
 ## PHP extensions

@@ -2,7 +2,9 @@
 Supports all basic (listing, reading, extracting and creation) and specific features (compression level, password-protection). 
 Bundled with console program for working with archives.
 
-Supported formats (depends on installed drivers): zip, 7z, rar, one-file(gz, bz2, xz), tar (tar.gz, tar.bz2, tar.x, tar.Z), and a lot of others. 
+UnifiedArchive is aimed to provide all operations on popular archive formats (zip, tar, rar, 7z) by all means and at
+better performance (depends on your OS/PHP configuration). Also, it allows to work with less popular archive types
+(with lack of functions).
 
 [![Latest Stable Version](https://poser.pugx.org/wapmorgan/unified-archive/v/stable)](https://packagist.org/packages/wapmorgan/unified-archive)
 [![Total Downloads](https://poser.pugx.org/wapmorgan/unified-archive/downloads)](https://packagist.org/packages/wapmorgan/unified-archive)
@@ -23,15 +25,29 @@ Tests & Quality: [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmo
 8. [Changelog](CHANGELOG.md)
 
 ## Goal
-Main purpose of this library is to create unified frontend interface for different archive formats, that works in
-various system configurations via drivers.
+Main purpose of this library is to create unified interface for popular archive formats, that works in
+various system configurations via different drivers, when there is no ability to update system configuration, when code
+delivered to another system configurations, or when you just want to install libraries and work.
 
-UnifiedArchive tries to utilize different installed drivers to handle as many formats as possible:
-* ZipArchive, RarArchive, PharData
-* ext-zlib, ext-bz2, ext-xz
-* `7za` cli program via Gemorroj/Archive7z
-* `zip`/`tar` cli programs via Alchemy/Zippy
-* another libraries (cab, iso, ...)
+UnifiedArchive introduces term "driver", which can be one of types:
+1. PHP Extensions
+2. Utilities + bridge
+3. Pure PHP
+
+By default, UA goes top-down to select first available driver for passed archive. So, PHP Extension driver will be used (if available), then Utilities + bridge driver (if available), and then Pure PHP driver.
+
+There is at least one driver in all three types, which handles **zip** format, so this format can be fully supported in any OS/PHP configuration:
+1. zip / phar PHP extensions
+2. Utility + bridge SevenZip / AlchemyZippy
+3. Pure NelexaZip
+
+**tar** format (with compressed variants) supported by:
+1. phar PHP extension
+2. Utility + bridge SevenZip / AlchemyZippy
+3. Pure TarByPear
+
+**So, there is always one driver that supports popular formats, and you should not remember how to work with this concrete
+driver (zip/phar/SevenZip/AlchemyZippy/NelexaZip), interface for them is uniform.**
 
 ## Functions & Features
 Main functions:
