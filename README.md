@@ -1,6 +1,6 @@
-*UnifiedArchive* - an archive manager with unified interface for different formats.
-Supports all basic (listing, reading, extracting and creation) and specific features (compression level, password-protection). 
-Bundled with console program for working with archives.
+*UnifiedArchive* - an archive manager with unified interface for different formats (bundled with cli utility). 
+Supports all formats with basic operations (reading, extracting and creation) and popular formats specific features
+(compression level, password-protection, comment).
 
 UnifiedArchive is aimed to provide all operations on popular archive formats (zip, tar, rar, 7z) by all means and at
 better performance (depends on your OS/PHP configuration). Also, it allows to work with less popular archive types
