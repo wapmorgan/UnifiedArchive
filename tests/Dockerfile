@@ -1,5 +1,5 @@
 FROM php:8.1.7-cli
-RUN apt-get update && apt-get install --yes --no-install-recommends libzip-dev libbz2-dev liblzma-dev p7zip-full git
+RUN apt-get update && apt-get install --yes --no-install-recommends php8-dev libzip-dev libbz2-dev liblzma-dev p7zip-full git
 RUN pecl install xdebug-3.1.5
 RUN docker-php-source extract \
     && git clone https://github.com/cataphract/php-rar.git \

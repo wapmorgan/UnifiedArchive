@@ -146,6 +146,7 @@ PhpUnitTestCase::$archives = [
 PhpUnitTestCase::$oneFileArchives = [
     Formats::GZIP => ['4ab7e4e61bc74dfd151487e94e58ccf8', 'onefile.gz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/onefile.gz'],
     Formats::BZIP => ['f3295b2a5afded3e4b42c583aa0bde6a', 'onefile.bz2', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/onefile.bz2'],
+    Formats::LZMA => ['9637c331bc694bf977ad34828c83c911', 'onefile.xz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/onefile.xz'],
 ];
 
 PhpUnitTestCase::$fixtureContents = [

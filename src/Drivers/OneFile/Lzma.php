@@ -10,6 +10,8 @@ use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
  *
  * @package wapmorgan\UnifiedArchive\Formats
  * @requires ext-lzma2
+ * @link https://github.com/payden/php-xz
+ * @link https://github.com/codemasher/php-ext-xz
  */
 class Lzma extends OneFileDriver
 {
@@ -69,10 +71,6 @@ class Lzma extends OneFileDriver
      */
     protected static function compressData($data, $compressionLevel)
     {
-        $fp = xzopen('php://temp', 'w');
-        xzwrite($fp, $data);
-        $data = stream_get_contents($fp);
-        xzclose($fp);
-        return $data;
+        return xzencode($data);
     }
 }
