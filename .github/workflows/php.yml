@@ -42,7 +42,7 @@ jobs:
         XDEBUG_MODE: coverage
       with:
         bootstrap: vendor/autoload.php
-        configuration: phpunit.xml
+        configuration: phpunit.xml.dist
         php_extensions: xdebug
         args: tests --coverage-clover ./coverage.xml
     - name: Upload to Codecov
