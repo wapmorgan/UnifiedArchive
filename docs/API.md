@@ -12,8 +12,8 @@ UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArch
 `$format` should be one of `Formats` constants (such as `Formats::ZIP` and so on).
 Full list of constants provided in the [appendix of this document](#formats-list).
 _If you want to enabled specific format support, you need to install an additional program or php extension. List of
-extensions that should be installed can be obtained by executing built-in `cam` with `--formats` flag:
-`./vendor/bin/cam --formats`_
+extensions that should be installed can be obtained by executing built-in `cam`:
+`./vendor/bin/cam system:drivers`_
 
 All methods are static.
 
@@ -26,6 +26,7 @@ All methods are static.
 | `Formats::canAppend`           | `string $format`                                     | `boolean`        | Tests if an archive format can be appended (addFiles).                                                                                                                                       |
 | `Formats::canUpdate`           | `string $format`                                     | `boolean`        | Tests if an archive format can be updated (deleteFiles).                                                                                                                                     |
 | `Formats::canEncrypt`          | `string $format`                                     | `boolean`        | Tests if an archive format can be encrypted or opened with encryption by any driver with new files.                                                                                          |
+| `Formats::checkFormatSupportAbility` | string `$format, int $ability` | boolean | Check if any driver supports passed ability for passed format |
 | `Formats::getFormatMimeType`   | `string $format`                                     | `string/false` | Returns mime type for passed format. Returns `false` if not found.                                                                                                                           |
 
 # UnifiedArchive
@@ -35,12 +36,12 @@ All methods are static.
   - [`UnifiedArchive::open`](#UnifiedArchive--open)
   - [`UnifiedArchive->getPclZipInterface`](#UnifiedArchive--getPclZipInterface)
 - Archive information:
-  - UnifiedArchive->getFormat
-  - UnifiedArchive->getSize
-  - UnifiedArchive->getCompressedSize
-  - UnifiedArchive->getOriginalSize
-  - UnifiedArchive->countFiles
-  - UnifiedArchive->getComment
+  - `UnifiedArchive->getFormat`
+  - `UnifiedArchive->getSize`
+  - `UnifiedArchive->getCompressedSize`
+  - `UnifiedArchive->getOriginalSize`
+  - `UnifiedArchive->countFiles`
+  - `UnifiedArchive->getComment`
 - Extracting an archive:
   - [`UnifiedArchive->getFileNames`](#UnifiedArchive--getFileNames)
   - [`UnifiedArchive->hasFile`](#UnifiedArchive--hasFile)
@@ -68,21 +69,23 @@ All methods are static.
 
     Tests if an archive (format is resolved by extension) can be opened with current system and php configuration.
     _If you want to enabled specific format support, you need to install an additional program or php extension. List of
-     extensions that should be installed can be obtained by executing built-in `cam` with `--formats` flag: `
-     ./vendor/bin/cam --formats`_
+     extensions that should be installed can be obtained by executing built-in `cam`: `
+     ./vendor/bin/cam system:formats`_
     Returns `true` if given archive can be opened and `false` otherwise.
 
 - <span id="UnifiedArchive--open"></span>
     ```php
     UnifiedArchive::open(
         string $fileName,
-        ?string $password = null
+        ?string $password = null,
+        int[] $abilities = []
     ): UnifiedArchive|null
     ```
 
     Opens an archive and returns instance of `UnifiedArchive`.
     In case of failure (format is not supported), `null` is returned.
     If you provide `$password`, it will be used to open encrypted archive.
+    If you provide `$abilities`, it will be used to determine driver for format, that supports ALL of passed abilities.
     In case you provide password for an archive that don't support it, an `UnsupportedOperationException` will be thrown.
 
 - <span id="UnifiedArchive--getPclZipInterface"></span>

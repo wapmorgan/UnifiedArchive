@@ -22,22 +22,6 @@ class Bzip extends OneFileDriver
     }
 
     /**
-     * @param $format
-     * @return array
-     */
-    public static function checkFormatSupport($format)
-    {
-        if (!static::isInstalled()) {
-            return [];
-        }
-
-        switch ($format) {
-            case Formats::BZIP:
-                return [BasicDriver::OPEN, BasicDriver::EXTRACT_CONTENT, BasicDriver::STREAM_CONTENT, BasicDriver::CREATE];
-        }
-    }
-
-    /**
      * @inheritDoc
      */
     public static function getDescription()

@@ -51,13 +51,12 @@ class Cab extends BasicDriver
 
     /**
      * @param $format
-     * @return bool
+     * @return array
      */
     public static function checkFormatSupport($format)
     {
         if (!class_exists('\CabArchive')) {
             return [];
-
         }
 
         switch ($format) {

@@ -54,7 +54,7 @@ class Rar extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
-        if (!extension_loaded('rar')) {
+        if (!static::isInstalled()) {
             return [];
         }
         switch ($format) {

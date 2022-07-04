@@ -62,14 +62,15 @@ class FormatsCommand extends BaseCommand
             return 0;
         }
 
-        $headers = array_map(function ($v) { return substr($v, strrpos($v, '\\') + 1);}, Formats::$drivers);
-        array_unshift($headers, 'format / driver');
-
+        $formats = Formats::getSupportedDriverFormats();
+        $headers = array_keys($formats);
+        array_unshift($headers, 'driver / format');
         $table->setHeaders($headers);
-        $i = 0;
-        foreach (Formats::getSupportedDriverFormats() as $format => $formatSupportStatus) {
-            $row = [$format];
-            foreach (Formats::$drivers as $driverClass) {
+        $rows = [];
+
+        foreach (Formats::$drivers as $driverClass) {
+            $row = [substr($driverClass, strrpos($driverClass, '\\') + 1)];
+            foreach ($formats as $format => $formatSupportStatus) {
                 if (isset($formatSupportStatus[$driverClass])) {
                     $shortcuts = null;
                     foreach (self::$abilitiesShortCuts as $ability => $abilitiesShortCut) {
@@ -82,9 +83,11 @@ class FormatsCommand extends BaseCommand
                     $row[] = '';
                 }
             }
-
-            $table->setRow($i++, $row);
+            $rows[] = $row;
         }
+
+        $table->setRows($rows);
+        //$table->setRow($i++, $row);
         $table->render();
 
         foreach (array_combine(array_values(self::$abilitiesShortCuts), array_keys(self::$abilitiesLabels)) as $shortCut => $label) {

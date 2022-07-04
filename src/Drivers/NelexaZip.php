@@ -148,6 +148,9 @@ class NelexaZip extends BasicDriver
 
     public static function checkFormatSupport($format)
     {
+        if (!static::isInstalled()) {
+            return [];
+        }
         return [
             BasicDriver::OPEN,
             BasicDriver::OPEN_ENCRYPTED,

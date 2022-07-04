@@ -1,3 +1,9 @@
+- [Proposals for installation drivers](#proposals-for-installation-drivers)
+- [Drivers](#drivers)
+  - [PHP Extensions](#php-extensions)
+  - [Utilities + bridge](#utilities--bridge)
+  - [Pure PHP](#pure-php-implementation)
+- [Full support matrix](#full-support-matrix)
 
 | Type | Pros | Cons                                                                                               | Useful for                                                              |
 |------|------|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
@@ -54,3 +60,36 @@ Works with binary data in php-land (= eats a lot of memory for big archives).
 | TarByPear | tar, tar.gz, tar.bz2, tar.xz, tar.Z | [`pear/archive_tar`](https://packagist.org/packages/pear/archive_tar) and optionally php-extensions (`zlib`, `bzip2`, `xz` - [5.x](https://github.com/payden/php-xz) / [7.x](https://github.com/codemasher/php-ext-xz)      | dont support updating archive (deleteFiles)                                                                             |
 | Cab    | cab                                 | [`wapmorgan/cab-archive`](https://packagist.org/packages/wapmorgan/cab-archive)                                                                                                                                             | Getting files content and extraction is supported only on PHP 7.0.22+, 7.1.8+, 7.2.0. Support only opening & extraction |
 | Iso    | iso                                 | [`phpclasses/php-iso-file`](https://packagist.org/packages/phpclasses/php-iso-file)                                                                                                                                         | Support only opening & extraction                                                                                       |
+
+# Full support matrix
+
+Result of `./vendor/bin/cam system:formats` when all drivers installed and configured (except of AlchemyZippy):
+```
++-----------------+------------+------+------+------+-------+--------+--------+--------+-----------+-----+-----+-----+------+-----+-----+-----+-----+-----+-----+-----+------+-------+
+| driver / format | zip        | rar  | gz   | bz2  | xz    | tar    | tgz    | tbz2   | 7z        | cab | iso | arj | uefi | gpt | mbr | msi | dmg | rpm | deb | udf | txz  | tar.z |
++-----------------+------------+------+------+------+-------+--------+--------+--------+-----------+-----+-----+-----+------+-----+-----+-----+-----+-----+-----+-----+------+-------+
+| Zip             | oOtxsadTcC |      |      |      |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| Rar             |            | oOxs |      |      |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| Gzip            |            |      | oxsc |      |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| Bzip            |            |      |      | oxsc |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| Lzma            |            |      |      |      | oxsc  |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| TarByPhar       | oxsadc     |      |      |      |       | oxsadc | oxsadc | oxsadc |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| SevenZip        | oOxadcC    |      |      |      | oxadc | oxadc  |        |        | oOtxadTcC | ox  | ox  | ox  | ox   | ox  | ox  | ox  | ox  | ox  | ox  | ox  |      |       |
+| AlchemyZippy    |            |      |      |      |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| NelexaZip       | oOxad      |      |      |      |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
+| TarByPear       |            |      |      |      |       | oxac   | oxac   | oxac   |           |     |     |     |      |     |     |     |     |     |     |     | oxac |       |
+| Iso             |            |      |      |      |       |        |        |        |           |     | ox  |     |      |     |     |     |     |     |     |     |      |       |
+| Cab             |            |      |      |      |       |        |        |        |           | ox  |     |     |      |     |     |     |     |     |     |     |      |       |
++-----------------+------------+------+------+------+-------+--------+--------+--------+-----------+-----+-----+-----+------+-----+-----+-----+-----+-----+-----+-----+------+-------+
+```
+
+- o - open
+- O - open (+password)
+- t - get comment
+- x - extract
+- s - stream
+- a - append
+- d - delete
+- T - set comment
+- c - create
+- C - create (+password)
