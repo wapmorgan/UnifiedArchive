@@ -67,23 +67,23 @@ Specific functions:
 ## Quick start
 1. Installation and configuration
 ```shell
-# 1. Install library
+// 1. Install library
 composer require wapmorgan/unified-archive
-# Check supported formats with installed drivers
+// Check supported formats with installed drivers
 ./vendor/bin/cam system:formats
-# Check supported functions for zip format
+// Check supported functions for zip format
 ./vendor/bin/cam system:format zip
 
-# 2. Install new driver
-# Read installation instructions from
+// 2. Install new driver
+// Read installation instructions from
 ./vendor/bin/cam system:drivers
-# install missing drivers, for example pear/archive_tar
+// install missing drivers, for example pear/archive_tar
 composer require pear/archive_tar
-# check out driver functions
+// check out driver functions
 ./vendor/bin/cam system:formats TarByPear
 
-# if needed, install extensions, cli tools and php libraries
-# to enable support of other formats
+// if needed, install extensions, cli tools and php libraries
+// to enable support of other formats
 ```
 
 2. Usage
