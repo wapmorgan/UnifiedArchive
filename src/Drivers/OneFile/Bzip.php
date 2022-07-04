@@ -26,7 +26,7 @@ class Bzip extends OneFileDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-bzip2';
+        return 'adapter for ext-bzip2'.(static::isInstalled() ? ' ('.phpversion(static::PHP_EXTENSION).')' : null);
     }
 
     /**

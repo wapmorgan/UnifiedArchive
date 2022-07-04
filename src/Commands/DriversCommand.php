@@ -3,10 +3,7 @@
 namespace wapmorgan\UnifiedArchive\Commands;
 
 use Symfony\Component\Console\Helper\FormatterHelper;
-use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
@@ -49,26 +46,39 @@ class DriversCommand extends BaseCommand
 
         /** @var FormatterHelper $formatter */
         $formatter = $this->getHelper('formatter');
-        $type_match_rules = [
-            BasicDriver::TYPE_EXTENSION => 'php extension',
-            BasicDriver::TYPE_UTILITIES => 'utilities + php bridge',
-            BasicDriver::TYPE_PURE_PHP => 'pure php',
-        ];
 
+        $table = new Table($output);
+        $table->setStyle('compact');
+        $table->setHeaders(['driver', 'type', 'description / installation']);
+
+        $i = 0;
         foreach ($drivers as $type => $typeDrivers) {
+            /**
+             * @var BasicDriver $typeDriverClass
+             * @var array $typeDriverConfig
+             */
             foreach ($typeDrivers as $typeDriverClass => $typeDriverConfig) {
+
                 $type_messages = [];
                 if ($typeDriverConfig[1]) {
-                    $type_messages[] = '<info>' . $typeDriverClass . '</info>: ' . $typeDriverConfig[0];
+//                    $type_messages[] = '<info>' . $typeDriverClass . '</info>: ' . $typeDriverConfig[0];
+                    $table->setRow($i++, [
+                        '<info>' . $this->getDriverBaseName($typeDriverClass) . '</info>',
+                        BasicDriver::$typeLabels[$typeDriverClass::TYPE],
+                        $typeDriverConfig[0],
+                    ]);
                 } else {
-                    $type_messages[] = '<error>' . $typeDriverClass . '</error>: ' . $typeDriverConfig[0];
-                    $type_messages[] = $this->formatInstallation($typeDriverConfig[2], 4);
+//                    $type_messages[] = '<error>' . $typeDriverClass . '</error>: ' . $typeDriverConfig[0];
+//                    $type_messages[] = $this->formatInstallation($typeDriverConfig[2], 4);
+                    $table->setRow($i++, [
+                        '<comment>' . $this->getDriverBaseName($typeDriverClass) . '</comment>',
+                        BasicDriver::$typeLabels[$typeDriverClass::TYPE],
+                        $this->formatInstallation($typeDriverConfig[2], 0),
+                    ]);
                 }
-                $output->writeln($formatter->formatSection(
-                    $type_match_rules[$type],
-                    implode("\n", $type_messages), $typeDriverConfig[1] ? 'info' : 'error'));
             }
         }
+        $table->render();
 
 //        if (!empty($notInstalled)) {
 //            foreach ($notInstalled as $data) {

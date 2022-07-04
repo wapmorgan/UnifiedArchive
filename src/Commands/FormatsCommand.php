@@ -3,7 +3,6 @@
 namespace wapmorgan\UnifiedArchive\Commands;
 
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -32,16 +31,7 @@ class FormatsCommand extends BaseCommand
         $driver = $input->getArgument('driver');
 
         if ($driver !== null) {
-            if (strpos($driver, '\\') === false) {
-                if (class_exists('\\wapmorgan\\UnifiedArchive\\Drivers\\' . $driver)) {
-                    $driver = '\\wapmorgan\\UnifiedArchive\\Drivers\\' . $driver;
-                } else if (class_exists('\\wapmorgan\\UnifiedArchive\\Drivers\\OneFile\\' . $driver)) {
-                    $driver = '\\wapmorgan\\UnifiedArchive\\Drivers\\OneFile\\' . $driver;
-                }
-            }
-            if ($driver[0] !== '\\') {
-                $driver = '\\'.$driver;
-            }
+            $driver = $this->resolveDriverName($driver);
             if (!class_exists($driver) || !is_a($driver, BasicDriver::class, true)) {
                 throw new \InvalidArgumentException('Class "' . $driver . '" not found or not in BasicDriver children');
             }
@@ -65,11 +55,16 @@ class FormatsCommand extends BaseCommand
         $formats = Formats::getSupportedDriverFormats();
         $headers = array_keys($formats);
         array_unshift($headers, 'driver / format');
+        array_unshift($headers, 'driver type');
         $table->setHeaders($headers);
         $rows = [];
 
+        /** @var BasicDriver $driverClass */
         foreach (Formats::$drivers as $driverClass) {
-            $row = [substr($driverClass, strrpos($driverClass, '\\') + 1)];
+            $row = [
+                substr($driverClass, strrpos($driverClass, '\\') + 1),
+                BasicDriver::$typeLabels[$driverClass::TYPE],
+            ];
             foreach ($formats as $format => $formatSupportStatus) {
                 if (isset($formatSupportStatus[$driverClass])) {
                     $shortcuts = null;

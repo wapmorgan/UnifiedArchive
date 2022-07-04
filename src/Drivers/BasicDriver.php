@@ -14,6 +14,12 @@ abstract class BasicDriver
     const TYPE_UTILITIES = 2;
     const TYPE_PURE_PHP = 3;
 
+    static $typeLabels = [
+        BasicDriver::TYPE_EXTENSION => 'php extension',
+        BasicDriver::TYPE_UTILITIES => 'utilities + php bridge',
+        BasicDriver::TYPE_PURE_PHP => 'pure php',
+    ];
+
     const COMPRESSION_NONE = 0;
     const COMPRESSION_WEAK = 1;
     const COMPRESSION_AVERAGE = 2;

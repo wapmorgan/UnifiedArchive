@@ -105,4 +105,24 @@ class BaseCommand extends \Symfony\Component\Console\Command\Command
     {
         return @mime_content_type($stream);
     }
+
+    protected function getDriverBaseName($driverClass)
+    {
+        return substr($driverClass, strrpos($driverClass, '\\') + 1);
+    }
+
+    protected function resolveDriverName($driver)
+    {
+        if (strpos($driver, '\\') === false) {
+            if (class_exists('\\wapmorgan\\UnifiedArchive\\Drivers\\' . $driver)) {
+                $driver = '\\wapmorgan\\UnifiedArchive\\Drivers\\' . $driver;
+            } else if (class_exists('\\wapmorgan\\UnifiedArchive\\Drivers\\OneFile\\' . $driver)) {
+                $driver = '\\wapmorgan\\UnifiedArchive\\Drivers\\OneFile\\' . $driver;
+            }
+        }
+        if ($driver[0] !== '\\') {
+            $driver = '\\'.$driver;
+        }
+        return $driver;
+    }
 }

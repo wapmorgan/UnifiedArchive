@@ -22,6 +22,44 @@ class NelexaZip extends BasicDriver
      */
     protected $files;
 
+    public static function getDescription()
+    {
+        return 'nelexa/zip driver';
+    }
+
+    public static function isInstalled()
+    {
+        return class_exists('\\PhpZip\\ZipFile');
+    }
+
+    public static function getInstallationInstruction()
+    {
+        return 'install library [nelexa/zip]: `composer require nelexa/zip`';
+    }
+
+    public static function getSupportedFormats()
+    {
+        return [
+            Formats::ZIP,
+        ];
+    }
+
+    public static function checkFormatSupport($format)
+    {
+        if (!static::isInstalled()) {
+            return [];
+        }
+        return [
+            BasicDriver::OPEN,
+            BasicDriver::OPEN_ENCRYPTED,
+            BasicDriver::GET_COMMENT,
+            BasicDriver::SET_COMMENT,
+            BasicDriver::EXTRACT_CONTENT,
+            BasicDriver::APPEND,
+            BasicDriver::DELETE,
+        ];
+    }
+
     /**
      * @inheritDoc
      * @throws \PhpZip\Exception\ZipException
@@ -137,43 +175,5 @@ class NelexaZip extends BasicDriver
     public function setComment($comment)
     {
         return $this->zip->setArchiveComment($comment);
-    }
-
-    public static function getSupportedFormats()
-    {
-        return [
-            Formats::ZIP,
-        ];
-    }
-
-    public static function checkFormatSupport($format)
-    {
-        if (!static::isInstalled()) {
-            return [];
-        }
-        return [
-            BasicDriver::OPEN,
-            BasicDriver::OPEN_ENCRYPTED,
-            BasicDriver::GET_COMMENT,
-            BasicDriver::SET_COMMENT,
-            BasicDriver::EXTRACT_CONTENT,
-            BasicDriver::APPEND,
-            BasicDriver::DELETE,
-        ];
-    }
-
-    public static function getDescription()
-    {
-        return 'nelexa/zip driver';
-    }
-
-    public static function isInstalled()
-    {
-        return class_exists('\\PhpZip\\ZipFile');
-    }
-
-    public static function getInstallationInstruction()
-    {
-        return 'install library [nelexa/zip]: `composer require nelexa/zip`';
     }
 }

@@ -22,7 +22,7 @@ class Lzma extends OneFileDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-xz';
+        return 'adapter for ext-xz'.(static::isInstalled() ? ' ('.phpversion(static::PHP_EXTENSION).')' : null);
     }
 
     /**

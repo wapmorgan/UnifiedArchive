@@ -50,7 +50,7 @@ class FormatCommand extends BaseCommand
          * @var BasicDriver $driver
          */
         foreach ($formats[$format] as $i => $driver) {
-            if ($driver::getInstallationInstruction() === null) {
+            if ($driver::isInstalled()) {
                 $abilities = $driver::checkFormatSupport($format);
                 $row = [$driver];
 
