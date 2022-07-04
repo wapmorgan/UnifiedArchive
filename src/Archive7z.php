@@ -44,11 +44,6 @@ class Archive7z extends \Archive7z\Archive7z
         return !(method_exists(__CLASS__, 'setChangeSystemLocale'));
     }
 
-//    public static function getSupportedFormats()
-//    {
-//
-//    }
-
     /**
      * @param int $level 0-9 level
      * @return $this

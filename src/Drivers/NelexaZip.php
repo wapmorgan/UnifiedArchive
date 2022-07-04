@@ -82,13 +82,17 @@ class NelexaZip extends BasicDriver
         $this->files = [];
         $information = new ArchiveInformation();
 
-        foreach ($this->zip->getAllInfo() as $info) {
-            if ($info->isFolder())
+        $files = method_exists($this->zip, 'getAllInfo')
+            ? $this->zip->getAllInfo()
+            : $this->zip->getEntries();
+
+        foreach ($files as $info) {
+            if (method_exists($info, 'isFolder') ? $info->isFolder() : $info->isDirectory())
                 continue;
 
             $this->files[] = $information->files[] = str_replace('\\', '/', $info->getName());
             $information->compressedFilesSize += $info->getCompressedSize();
-            $information->uncompressedFilesSize += $info->getSize();
+            $information->uncompressedFilesSize += method_exists($info, 'getSize') ? $info->getSize() : $info->getUncompressedSize();
         }
         return $information;
     }
@@ -114,11 +118,14 @@ class NelexaZip extends BasicDriver
      */
     public function getFileData($fileName)
     {
-        $info = $this->zip->getEntryInfo($fileName);
+        $info = method_exists($this->zip, 'getEntryInfo')
+            ? $this->zip->getEntryInfo($fileName)
+            : $this->zip->getEntry($fileName);
+
         return new ArchiveEntry(
             $fileName,
             $info->getCompressedSize(),
-            $info->getSize(),
+            method_exists($info, 'getSize') ? $info->getSize() : $info->getUncompressedSize(),
             $info->getMtime(),
             null,
             $info->getComment(),

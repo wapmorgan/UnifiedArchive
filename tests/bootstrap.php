@@ -53,6 +53,37 @@ class PhpUnitTestCase extends TestCase
     }
 
     /**
+     * @return array
+     */
+    public function archiveTypes()
+    {
+        return [
+            ['archive.tar', Formats::TAR],
+            ['archive.tgz', Formats::TAR_GZIP],
+            ['archive.tar.gz', Formats::TAR_GZIP],
+            ['archive.tbz2', Formats::TAR_BZIP],
+            ['archive.tar.bz2', Formats::TAR_BZIP],
+            ['archive.txz', Formats::TAR_LZMA],
+            ['archive.tar.xz', Formats::TAR_LZMA],
+            ['archive.zip', Formats::ZIP],
+            ['archive.rar', Formats::RAR],
+            ['archive.iso', Formats::ISO],
+            ['archive.7z', Formats::SEVEN_ZIP],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function oneFileArchiveTypes()
+    {
+        return [
+            ['onefile.gz', Formats::GZIP],
+            ['onefile.bz2', Formats::BZIP],
+        ];
+    }
+
+    /**
      *
      */
     public function cleanWorkDir()
@@ -113,8 +144,8 @@ PhpUnitTestCase::$archives = [
     Formats::ZIP => ['69dcdf13d2a8b7630e2f54fa5ab97d5a', 'fixtures.zip', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.zip'],
 ];
 PhpUnitTestCase::$oneFileArchives = [
-    Formats::GZIP => ['4ab7e4e61bc74dfd151487e94e58ccf8', 'onefile.gz', ''],
-    Formats::BZIP => ['f3295b2a5afded3e4b42c583aa0bde6a', 'onefile.bz2', ''],
+    Formats::GZIP => ['4ab7e4e61bc74dfd151487e94e58ccf8', 'onefile.gz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/onefile.gz'],
+    Formats::BZIP => ['f3295b2a5afded3e4b42c583aa0bde6a', 'onefile.bz2', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/onefile.bz2'],
 ];
 
 PhpUnitTestCase::$fixtureContents = [

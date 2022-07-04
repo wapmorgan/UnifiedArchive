@@ -243,6 +243,10 @@ class Formats
 
         if (!isset(static::$supportedDriversFormats[$format])) {
             static::$supportedDriversFormats[$format] = [];
+
+            if (!isset(static::$declaredDriversFormats[$format])) {
+                return;
+            }
             /** @var BasicDriver $format_driver */
             foreach (static::$declaredDriversFormats[$format] as $format_driver) {
                 static::$supportedDriversFormats[$format][$format_driver] = $format_driver::checkFormatSupport($format);
@@ -304,29 +308,6 @@ class Formats
     public static function getFormatMimeType($format)
     {
         return array_search($format, static::$mimeTypes, true);
-    }
-
-    /**
-     * @return array
-     */
-    public static function getFormatsSupportSummary()
-    {
-        static::getAllPossibleFormatsAndDrivers();
-        $result = [];
-
-        foreach (static::$declaredDriversFormats as $format => $formatDrivers) {
-            $result[$format] = [
-                'open' => static::canOpen($format),
-                'stream' => static::canStream($format),
-                'create' => static::canCreate($format),
-                'append' => static::canAppend($format),
-                'update' => static::canUpdate($format),
-                'encrypt' => static::canEncrypt($format),
-                'drivers' => static::$declaredDriversFormats[$format],
-            ];
-        }
-
-        return $result;
     }
 
     public static function getDeclaredDriverFormats()

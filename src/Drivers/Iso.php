@@ -116,7 +116,8 @@ class Iso extends BasicDriver
         /** @var \CPathTableRecord $Directory */
         foreach ($directories as $Directory) {
             $directory = $Directory->GetFullPath($directories);
-            $directory = trim($directory, '/');
+            // ? here is for some unexpected problem with ? appearing
+            $directory = trim($directory, '/?');
             if ($directory != '') {
                 $directory .= '/';
 //                $this->files[$Directory->Location] = $directory;
@@ -186,8 +187,13 @@ class Iso extends BasicDriver
         if (!isset($this->filesData[$fileName]))
             return false;
 
-        return new ArchiveEntry($fileName, $this->filesData[$fileName]['size'],
-            $this->filesData[$fileName]['size'], $this->filesData[$fileName]['mtime'],false);
+        return new ArchiveEntry(
+            $fileName,
+            $this->filesData[$fileName]['size'],
+            $this->filesData[$fileName]['size'],
+            $this->filesData[$fileName]['mtime'],
+            false
+        );
     }
 
     /**
@@ -230,23 +236,38 @@ class Iso extends BasicDriver
     /**
      * @param string $outputFolder
      * @param array $files
-     * @return void
+     * @return int
      * @throws UnsupportedOperationException
-     * @todo Implement extracting with reading & writing to FS
      */
     public function extractFiles($outputFolder, array $files)
     {
-        throw new UnsupportedOperationException();
+        foreach ($files as $file) {
+            $destination_file = rtrim($outputFolder, '/'). '/' . ltrim($file, '/');
+            $destination_dir = dirname($destination_file);
+
+            if (!empty($destination_dir)) {
+                if (!is_dir($destination_dir)) {
+                    mkdir($destination_dir, 0777, true);
+                } else {
+                    if (!is_writable($destination_dir)) {
+                        chmod($destination_dir, 0777);
+                    }
+                }
+            }
+
+            file_put_contents($destination_file, $this->getFileContent($file));
+        }
+        return count($files);
     }
 
     /**
      * @param string $outputFolder
-     * @return void
+     * @return int
      * @throws UnsupportedOperationException
      * @todo Implement extracting with reading & writing to FS
      */
     public function extractArchive($outputFolder)
     {
-        throw new UnsupportedOperationException();
+        return $this->extractFiles($outputFolder, $this->files);
     }
 }
