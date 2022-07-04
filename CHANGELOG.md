@@ -2,8 +2,10 @@
 
 ### 1.2.0 - Jul XX, 2022
 **BC-breaking changes**:
-- Deleted methods in UnifiedArchive: `canOpenArchive`, `canOpenType`, `canCreateType`, `getArchiveType`, `detectArchiveType`, `getFileResource`, `getArchiveFormat`, `isFileExists`, `getArchiveSize`, `countCompressedFilesSize`, `countUncompressedFilesSize`.
 - Changed signature: `UnifiedArchive::open($filename, string|null $password = null)` => `UnifiedArchive::open($filename, array $abilities = [], string|null $password = null)`
+- `addFiles`/`deleteFiles`/`getComment`/`setComment` throws an Exception when driver does not support this ability.
+
+- Deleted methods in UnifiedArchive: `canOpenArchive`, `canOpenType`, `canCreateType`, `getArchiveType`, `detectArchiveType`, `getFileResource`, `getArchiveFormat`, `isFileExists`, `getArchiveSize`, `countCompressedFilesSize`, `countUncompressedFilesSize`.
 
 **New features**:
 - Added passing needed abilities to **UnifiedArchive::open()** to select a better driver:
@@ -14,6 +16,10 @@ use \wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 $archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.7z', [BasicDriver::STREAM_CONTENT, BasicDriver::APPEND]);
 # if not specified, uses OPEN or OPEN_ENCRYPTED check, if password passed
 ```
+- Added `UnifiedArchive::test($files = [])` (and `cam files:test` command) to test archive contents (compare actual control sum with stored crc32).
+
+**Driver changes:**
+- Added `NelexaZip` driver.
 
 ### 1.1.5 - Jun 28, 2022
 
