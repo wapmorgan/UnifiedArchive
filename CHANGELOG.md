@@ -9,13 +9,13 @@
 
 **New features**:
 - Added passing needed abilities to **UnifiedArchive::open()** to select a better driver:
-```php
-use \wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+    ```php
+    use \wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 
-# opens an array with driver, that supports content streaming and appending
-$archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.7z', [BasicDriver::STREAM_CONTENT, BasicDriver::APPEND]);
-# if not specified, uses OPEN or OPEN_ENCRYPTED check, if password passed
-```
+    # opens an array with driver, that supports content streaming and appending
+    $archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.7z', [BasicDriver::STREAM_CONTENT, BasicDriver::APPEND]);
+    # if not specified, uses OPEN or OPEN_ENCRYPTED check, if password passed
+    ```
 - Added `UnifiedArchive::test($files = [])` (and `cam files:test` command) to test archive contents (compare actual control sum with stored crc32).
 
 **Driver changes:**
