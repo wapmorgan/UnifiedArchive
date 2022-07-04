@@ -37,7 +37,7 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: PHPUnit Tests
-      uses: php-actions/phpunit@v3
+      uses: php-actions/phpunit@v9
       env:
         XDEBUG_MODE: coverage
       with:
