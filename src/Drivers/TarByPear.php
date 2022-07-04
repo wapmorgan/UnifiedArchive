@@ -19,11 +19,6 @@ class TarByPear extends BasicDriver
     const TYPE = self::TYPE_PURE_PHP;
 
     /**
-     * @var string Full path to archive
-     */
-    protected $archiveFileName;
-
-    /**
      * @var Archive_Tar
      */
     protected $tar;
@@ -201,7 +196,7 @@ class TarByPear extends BasicDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
-        $this->archiveFileName = realpath($archiveFileName);
+        parent::__construct($archiveFileName, $format);
         $this->open($format);
     }
 
@@ -209,24 +204,24 @@ class TarByPear extends BasicDriver
     {
         switch ($archiveType) {
             case Formats::TAR_GZIP:
-                $this->tar = new Archive_Tar($this->archiveFileName, 'gz');
+                $this->tar = new Archive_Tar($this->fileName, 'gz');
                 break;
 
             case Formats::TAR_BZIP:
-                $this->tar = new Archive_Tar($this->archiveFileName, 'bz2');
+                $this->tar = new Archive_Tar($this->fileName, 'bz2');
                 break;
 
             case Formats::TAR_LZMA:
-                $this->tar = new Archive_Tar($this->archiveFileName, 'lzma2');
+                $this->tar = new Archive_Tar($this->fileName, 'lzma2');
                 break;
 
             case Formats::TAR_LZW:
                 LzwStreamWrapper::registerWrapper();
-                $this->tar = new Archive_Tar('compress.lzw://' . $this->archiveFileName);
+                $this->tar = new Archive_Tar('compress.lzw://' . $this->fileName);
                 break;
 
             default:
-                $this->tar = new Archive_Tar($this->archiveFileName);
+                $this->tar = new Archive_Tar($this->fileName);
                 break;
         }
     }
@@ -254,7 +249,7 @@ class TarByPear extends BasicDriver
             $this->pureFilesNumber++;
         }
 
-        $information->compressedFilesSize = filesize($this->archiveFileName);
+        $information->compressedFilesSize = filesize($this->fileName);
         $this->pearCompressionRatio = $information->uncompressedFilesSize != 0
             ? ceil($information->compressedFilesSize / $information->uncompressedFilesSize)
             : 1;
@@ -306,7 +301,7 @@ class TarByPear extends BasicDriver
         unset($files_list);
 
         return new ArchiveEntry($fileName, $data['size'] / $this->pearCompressionRatio,
-            $data['size'], $data['mtime'], in_array(strtolower(pathinfo($this->archiveFileName,
+            $data['size'], $data['mtime'], in_array(strtolower(pathinfo($this->fileName,
                 PATHINFO_EXTENSION)), ['gz', 'bz2', 'xz', 'z']));
     }
 
@@ -339,7 +334,10 @@ class TarByPear extends BasicDriver
     {
         $result = $this->tar->extractList($files, $outputFolder);
         if ($result === false) {
-            throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
+            if (isset($this->tar->error_object)) {
+                throw new ArchiveExtractionException('Error when extracting from ' . $this->fileName . ': ' . $this->tar->error_object->getMessage(0));
+            }
+            throw new ArchiveExtractionException('Error when extracting from '.$this->fileName);
         }
 
         return count($files);
@@ -352,7 +350,12 @@ class TarByPear extends BasicDriver
     {
         $result = $this->tar->extract($outputFolder);
         if ($result === false) {
-            throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
+            if (isset($this->tar->error_object)) {
+                throw new ArchiveExtractionException('Error when extracting ' . $this->fileName . ': '
+                                                     . $this->tar->error_object->toString()
+                );
+            }
+            throw new ArchiveExtractionException('Error when extracting '.$this->fileName);
         }
 
         return $this->pureFilesNumber;

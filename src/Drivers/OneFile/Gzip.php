@@ -45,7 +45,7 @@ class Gzip extends OneFileDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
-        parent::__construct($archiveFileName, $password);
+        parent::__construct($archiveFileName, $format, $password);
         $stat = static::gzipStat($archiveFileName);
         if ($stat === false) {
             throw new Exception('Could not open Gzip file');

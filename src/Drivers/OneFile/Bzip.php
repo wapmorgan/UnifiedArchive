@@ -34,7 +34,7 @@ class Bzip extends OneFileDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
-        parent::__construct($archiveFileName, $password);
+        parent::__construct($archiveFileName, $format, $password);
         $this->modificationTime = filemtime($this->fileName);
     }
 

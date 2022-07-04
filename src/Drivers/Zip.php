@@ -84,6 +84,7 @@ class Zip extends BasicDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
+        parent::__construct($archiveFileName, $format);
         $this->open($archiveFileName);
         if ($password !== null)
             $this->zip->setPassword($password);

@@ -81,6 +81,7 @@ class Rar extends BasicDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
+        parent::__construct($archiveFileName, $format);
         \RarException::setUsingExceptions(true);
         $this->open($archiveFileName, $password);
     }
@@ -213,16 +214,5 @@ class Rar extends BasicDriver
     public function extractArchive($outputFolder)
     {
         return $this->extractFiles($outputFolder, $this->getFileNames());
-    }
-
-    /**
-     * @param string $inArchiveName
-     * @param string $content
-     * @return bool|void
-     * @throws UnsupportedOperationException
-     */
-    public function addFileFromString($inArchiveName, $content)
-    {
-        throw new UnsupportedOperationException();
     }
 }

@@ -64,7 +64,8 @@ abstract class OneFileDriver extends BasicDriver
         if ($password !== null)
             throw new UnsupportedOperationException(self::FORMAT_SUFFIX.' archive does not support password!');
 
-        $this->fileName = $archiveFileName;
+        parent::__construct($archiveFileName, $format);
+
         $this->inArchiveFileName = basename($archiveFileName, '.'.static::FORMAT_SUFFIX);
     }
 
@@ -142,27 +143,6 @@ abstract class OneFileDriver extends BasicDriver
             throw new ArchiveExtractionException('Could not archive file "'.$this->inArchiveFileName.'": written '.$written.' of '.$size);
         }
         return 1;
-    }
-
-    /**
-     * @param array $files
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function deleteFiles(array $files)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param string $inArchiveName
-     * @param string $content
-     * @return bool|void
-     * @throws UnsupportedOperationException@
-     */
-    public function addFileFromString($inArchiveName, $content)
-    {
-        throw new UnsupportedOperationException();
     }
 
     /**

@@ -66,6 +66,7 @@ class NelexaZip extends BasicDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
+        parent::__construct($archiveFileName, $format);
         $this->zip = new ZipFile();
         $this->zip->openFile($archiveFileName);
         if ($password !== null) {
@@ -147,7 +148,8 @@ class NelexaZip extends BasicDriver
      */
     public function extractFiles($outputFolder, array $files)
     {
-        // TODO: Implement extractFiles() method.
+        $this->zip->extractTo($outputFolder, $files);
+        return count($files);
     }
 
     /**
@@ -155,7 +157,8 @@ class NelexaZip extends BasicDriver
      */
     public function extractArchive($outputFolder)
     {
-        // TODO: Implement extractArchive() method.
+        $this->zip->extractTo($outputFolder);
+        return count($this->files);
     }
 
     /**
@@ -175,5 +178,23 @@ class NelexaZip extends BasicDriver
     public function setComment($comment)
     {
         return $this->zip->setArchiveComment($comment);
+    }
+
+    public function deleteFiles(array $files)
+    {
+        $deleted = 0;
+        foreach ($files as $file) {
+            $this->zip->deleteFromName($file);
+            $deleted++;
+        }
+        return $deleted;
+    }
+
+    public function addFiles(array $files)
+    {
+        foreach ($files as $inArchiveName => $fsFileName)
+        {
+            $this->zip->addFile($fsFileName, $inArchiveName);
+        }
     }
 }

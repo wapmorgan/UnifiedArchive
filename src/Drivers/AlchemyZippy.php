@@ -39,11 +39,6 @@ class AlchemyZippy extends BasicDriver
     protected $files;
 
     /**
-     * @var string
-     */
-    protected $format;
-
-    /**
      * @var Member[]
      */
     protected $members;
@@ -177,8 +172,7 @@ class AlchemyZippy extends BasicDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
-        $this->fileName = $archiveFileName;
-        $this->format = $format;
+        parent::__construct($archiveFileName, $format);
         $this->archive = static::$zippy->open($archiveFileName);
     }
 

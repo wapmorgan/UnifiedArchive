@@ -141,6 +141,7 @@ class SevenZip extends BasicDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
+        parent::__construct($archiveFileName, $format);
         try {
             $this->format = $format;
             $this->sevenZip = new Archive7z($archiveFileName, null, null);
@@ -431,7 +432,7 @@ class SevenZip extends BasicDriver
     public function getComment()
     {
         if ($this->format !== Formats::SEVEN_ZIP) {
-            return parent::getComment();
+            return null;
         }
         try {
             return $this->getFileContent(static::COMMENT_FILE);

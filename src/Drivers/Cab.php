@@ -77,9 +77,11 @@ class Cab extends BasicDriver
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
+        parent::__construct($archiveFileName, $format);
         if ($password !== null)
             throw new UnsupportedOperationException('Cab archive does not support password!');
         $this->open($archiveFileName);
@@ -206,16 +208,5 @@ class Cab extends BasicDriver
                 $e->getPrevious()
             );
         }
-    }
-
-    /**
-     * @param string $inArchiveName
-     * @param string $content
-     * @return bool|void
-     * @throws UnsupportedOperationException
-     */
-    public function addFileFromString($inArchiveName, $content)
-    {
-        throw new UnsupportedOperationException();
     }
 }

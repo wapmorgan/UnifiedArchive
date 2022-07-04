@@ -23,11 +23,6 @@ class TarByPhar extends BasicDriver
     public static $disabled = false;
 
     /**
-     * @var false|string
-     */
-    protected $archiveFileName;
-
-    /**
      * @var PharData
      */
     protected $tar;
@@ -118,7 +113,7 @@ class TarByPhar extends BasicDriver
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
-        $this->archiveFileName = realpath($archiveFileName);
+        parent::__construct($archiveFileName, $format);
         $this->open();
     }
 
@@ -127,7 +122,7 @@ class TarByPhar extends BasicDriver
      */
     protected function open()
     {
-        $this->tar = new PharData($this->archiveFileName, self::PHAR_FLAGS);
+        $this->tar = new PharData($this->fileName, self::PHAR_FLAGS);
     }
 
     /**
@@ -136,8 +131,8 @@ class TarByPhar extends BasicDriver
     public function getArchiveInformation()
     {
         $information = new ArchiveInformation();
-        $stream_path_length = strlen('phar://'.$this->archiveFileName.'/');
-        $information->compressedFilesSize = filesize($this->archiveFileName);
+        $stream_path_length = strlen('phar://'.$this->fileName.'/');
+        $information->compressedFilesSize = filesize($this->fileName);
         /**
          * @var string $i
          * @var PharFileInfo $file
@@ -160,7 +155,7 @@ class TarByPhar extends BasicDriver
     {
         $files = [];
 
-        $stream_path_length = strlen('phar://'.$this->archiveFileName.'/');
+        $stream_path_length = strlen('phar://'.$this->fileName.'/');
         foreach (new RecursiveIteratorIterator($this->tar) as $i => $file) {
             $files[] = substr($file->getPathname(), $stream_path_length);
         }
@@ -218,7 +213,7 @@ class TarByPhar extends BasicDriver
      */
     public function getFileStream($fileName)
     {
-        return fopen('phar://'.$this->archiveFileName . '/' . $fileName, 'rb');
+        return fopen('phar://'.$this->fileName . '/' . $fileName, 'rb');
     }
 
     /**
@@ -228,7 +223,7 @@ class TarByPhar extends BasicDriver
     {
         $result = $this->tar->extractTo($outputFolder, $files, true);
         if ($result === false) {
-            throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
+            throw new ArchiveExtractionException('Error when extracting from '.$this->fileName);
         }
         return count($files);
     }
@@ -240,7 +235,7 @@ class TarByPhar extends BasicDriver
     {
         $result = $this->tar->extractTo($outputFolder, null, true);
         if ($result === false) {
-            throw new ArchiveExtractionException('Error when extracting from '.$this->archiveFileName);
+            throw new ArchiveExtractionException('Error when extracting from '.$this->fileName);
         }
 
         return $this->pureFilesNumber;

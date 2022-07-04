@@ -78,9 +78,11 @@ class Iso extends BasicDriver
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
+        parent::__construct($archiveFileName, $format);
         $this->open($archiveFileName);
         if ($password !== null)
             throw new UnsupportedOperationException('Iso archive does not support password!');
@@ -244,17 +246,6 @@ class Iso extends BasicDriver
      * @todo Implement extracting with reading & writing to FS
      */
     public function extractArchive($outputFolder)
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @param $inArchiveName
-     * @param $content
-     * @return void
-     * @throws UnsupportedOperationException
-     */
-    public function addFileFromString($inArchiveName, $content)
     {
         throw new UnsupportedOperationException();
     }

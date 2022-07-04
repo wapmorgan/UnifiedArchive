@@ -44,6 +44,16 @@ abstract class BasicDriver
     const TYPE = null;
 
     /**
+     * @var string
+     */
+    protected $fileName;
+
+    /**
+     * @var string
+     */
+    protected $format;
+
+    /**
      * @return string
      */
     abstract public static function getDescription();
@@ -70,12 +80,12 @@ abstract class BasicDriver
     abstract public static function checkFormatSupport($format);
 
     /**
-     * @param $format
+     * @param $ability
      * @return bool
      */
-    public static function canCreateArchive($format)
+    public function checkAbility($ability)
     {
-        return false;
+        return in_array($ability, static::checkFormatSupport($this->format), true);
     }
 
     /**
@@ -101,11 +111,15 @@ abstract class BasicDriver
 
     /**
      * BasicDriver constructor.
-     * @param string $archiveFileName
      * @param string $format
+     * @param string $archiveFileName
      * @param string|null $password Archive password for opening
      */
-    abstract public function __construct($archiveFileName, $format, $password = null);
+    public function __construct($archiveFileName, $format, $password = null)
+    {
+        $this->fileName = $archiveFileName;
+        $this->format = $format;
+    }
 
     /**
      * Returns summary about an archive.
@@ -203,22 +217,27 @@ abstract class BasicDriver
      * @throws UnsupportedOperationException
      * @throws ArchiveModificationException
      */
-    abstract public function addFileFromString($inArchiveName, $content);
+    public function addFileFromString($inArchiveName, $content)
+    {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @return string|null
+     * @throws UnsupportedOperationException
      */
     public function getComment()
     {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
      * @param string|null $comment
      * @return null
+     * @throws UnsupportedOperationException
      */
     public function setComment($comment)
     {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
