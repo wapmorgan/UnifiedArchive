@@ -23,15 +23,23 @@ class TestCommand extends BaseArchiveCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $archive = $this->getArchive($input, $output);
-        $test_result = $archive->test($input->getArgument('filter'));
-        if ($test_result === true) {
-            $output->writeln('<info>Archive is ok!</info>');
-        } else {
-            $output->writeln('<error>Failed:</error>:');
-            array_walk($test_result, static function ($file) use ($output) {
-                $output->writeln('- ' . $file);
-            });
+        $files = $archive->getFileNames($input->getArgument('filter'));
+
+        $errored = [];
+        foreach ($files as $file) {
+            $output->write($file . ' ... ');
+            if ($archive->test($file) === true) {
+                $output->writeln('<info>ok</info>');
+            } else {
+                $errored[] = $file;
+                $output->writeln('<error>error</error>');
+            }
         }
+
+        if (!empty($errored)) {
+            return 1;
+        }
+
         return 0;
     }
 }

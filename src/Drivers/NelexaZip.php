@@ -154,6 +154,8 @@ class NelexaZip extends BasicDriver
         return [
             BasicDriver::OPEN,
             BasicDriver::OPEN_ENCRYPTED,
+            BasicDriver::GET_COMMENT,
+            BasicDriver::SET_COMMENT,
             BasicDriver::EXTRACT_CONTENT,
             BasicDriver::APPEND,
             BasicDriver::DELETE,
