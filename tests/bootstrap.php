@@ -139,8 +139,8 @@ PhpUnitTestCase::$archives = [
     Formats::ISO => ['f3bb89062d2c62fb2339c913933db112', 'fixtures.iso', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.iso'],
     Formats::TAR => ['d64474b28bfd036abb885b4e80c847b3', 'fixtures.tar', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar'],
     Formats::TAR_BZIP => ['e2ca07d2f1007f312493a12b239544df', 'fixtures.tar.bz2', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.bz2'],
-    Formats::TAR_GZIP => ['fdc239490189e7bf6239a26067424d42', 'fixtures.tar.gz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.gz'],
-    Formats::TAR_LZMA => ['80caf9ba1488c55ca279958abd6fce18', 'fixtures.tar.xz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.xz'],
+    Formats::TAR_GZIP => ['510479bdead0ecafcaeac2d755a30112', 'fixtures.tar.gz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.gz'],
+    Formats::TAR_LZMA => ['f4be3134e45818b8c7d4e8f8ac76d2dc', 'fixtures.tar.xz', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.tar.xz'],
     Formats::ZIP => ['69dcdf13d2a8b7630e2f54fa5ab97d5a', 'fixtures.zip', 'https://github.com/wapmorgan/UnifiedArchive/releases/download/0.0.1/fixtures.zip'],
 ];
 PhpUnitTestCase::$oneFileArchives = [

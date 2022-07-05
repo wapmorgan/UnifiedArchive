@@ -74,7 +74,7 @@ class SevenZip extends BasicDriver
             Formats::CAB,
             Formats::ISO,
             Formats::ARJ,
-            Formats::LZMA,
+//            Formats::LZMA,
             Formats::UEFI,
             Formats::GPT,
             Formats::MBR,

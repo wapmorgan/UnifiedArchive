@@ -176,8 +176,8 @@ class TarByPear extends BasicDriver
             $add_dir = dirname($localName);
 
             if (is_null($filename)) {
-                if ($tar->addString($localName, '') === false)
-                    throw new ArchiveCreationException('Error when adding directory '.$localName.' to archive');
+//                if ($tar->addString($localName, '') === false)
+//                    throw new ArchiveCreationException('Error when adding directory '.$localName.' to archive');
             } else {
                 if ($tar->addModify($filename, $add_dir, $remove_dir) === false)
                     throw new ArchiveCreationException('Error when adding file '.$filename.' to archive');
@@ -371,9 +371,9 @@ class TarByPear extends BasicDriver
             $remove_dir = dirname($filename);
             $add_dir = dirname($localName);
             if (is_null($filename)) {
-                if ($this->tar->addString($localName, "") === false) {
-                    throw new ArchiveModificationException('Could not add directory "'.$filename.'": '.$this->tar->error_object->message, $this->tar->error_object->code);
-                }
+//                if ($this->tar->addString($localName, "") === false) {
+//                    throw new ArchiveModificationException('Could not add directory "'.$filename.'": '.$this->tar->error_object->message, $this->tar->error_object->code);
+//                }
             } else {
                 if ($this->tar->addModify($filename, $add_dir, $remove_dir) === false) {
                     throw new ArchiveModificationException('Could not add file "'.$filename.'": '.$this->tar->error_object->message, $this->tar->error_object->code);
