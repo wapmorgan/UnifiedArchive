@@ -101,8 +101,12 @@ class DriversTest extends PhpUnitTestCase
             return true;
         }
 
-        $flatten_list = [];
-        $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
+        if ($multiFileArchive) {
+            $flatten_list = [];
+            $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
+        } else {
+            $flatten_list = ['onefile' => file_get_contents(FIXTURES_DIR . '/doc')];
+        }
 
         /** @var BasicDriver $driver */
         $driver = new $driverClass(PhpUnitTestCase::getArchivePath($archiveConfig[1]), $format);
@@ -116,7 +120,12 @@ class DriversTest extends PhpUnitTestCase
                 $information->uncompressedFilesSize,
                 'Uncompressed size of archive should be equal to real files size'
             );
+        } else {
+//            $this->assertEquals(filesize(FIXTURES_DIR . '/doc'), $information->, 'Files set is not identical');
+
         }
+
+        $expected_files = array_keys($flatten_list);
 
         // test files list
         if ($multiFileArchive) {
@@ -128,58 +137,63 @@ class DriversTest extends PhpUnitTestCase
                 throw new Exception(json_encode([$expected_files, $actual_files]));
             }
             $this->assertEquals($expected_files, $actual_files, 'Files set is not identical');
+        } else {
+            $this->assertCount(1, $information->files, 'Files set is not identical');
         }
 
         // test files separately
-        if ($multiFileArchive) {
-            foreach ($flatten_list as $filename => $content) {
-                // test file existence
-                $this->assertTrue($driver->isFileExists($filename), 'File ' . $filename . ' should be in archive');
-                // test ArchiveEntry
-                $file_data = $driver->getFileData($filename);
-                $this->assertInstanceOf(
-                    'wapmorgan\\UnifiedArchive\\ArchiveEntry',
-                    $file_data,
-                    'Could not find '
-                    . $filename
-                );
+        foreach ($flatten_list as $filename => $content) {
+            // test file existence
+            $this->assertTrue($driver->isFileExists($filename), 'File ' . $filename . ' should be in archive');
+            // test ArchiveEntry
+            $file_data = $driver->getFileData($filename);
+            $this->assertInstanceOf(
+                'wapmorgan\\UnifiedArchive\\ArchiveEntry',
+                $file_data,
+                'Could not find '
+                . $filename
+            );
 
-                foreach ([
-                             'path' => $filename,
-                             'uncompressedSize' => strlen($content),
+            foreach ([
+                         'path' => $filename,
+                         'uncompressedSize' => strlen($content),
 //                             'isCompressed' => $file_data->compressedSize !== $file_data->uncompressedSize,
-                         ] as $expectedName => $expectedValue) {
-                    $this->assertObjectHasAttribute($expectedName, $file_data);
-                    $this->assertEquals($expectedValue, $file_data->{$expectedName}, $expectedName . ' should be ' . $expectedValue);
+                     ] as $expectedName => $expectedValue) {
+                if (!$multiFileArchive && $expectedName === 'uncompressedSize') {
+                    continue;
                 }
-                $this->assertTrue(
-                    is_numeric($file_data->compressedSize),
-                    'Compressed size of '
-                    . $filename . ' should be int'
-                );
-
-                // test content
-                $this->assertEquals(
-                    $content,
-                    $driver->getFileContent($filename),
-                    'getFileContent() should return content of file that should be equal to real file content'
-                );
-                $this->assertEquals(
-                    $content,
-                    stream_get_contents($driver->getFileStream($filename)),
-                    'getFileStream() should return stream with content of file that should be equal to real file content'
-                );
+                $this->assertObjectHasAttribute($expectedName, $file_data);
+                $this->assertEquals($expectedValue, $file_data->{$expectedName}, $expectedName . ' should be ' . $expectedValue);
             }
+            $this->assertTrue(
+                is_numeric($file_data->compressedSize),
+                'Compressed size of '
+                . $filename . ' should be int'
+            );
+
+            // test content
+            $this->assertEquals(
+                $content,
+                $driver->getFileContent($filename),
+                'getFileContent() should return content of file that should be equal to real file content'
+            );
+            $this->assertEquals(
+                $content,
+                stream_get_contents($driver->getFileStream($filename)),
+                'getFileStream() should return stream with content of file that should be equal to real file content'
+            );
         }
 
-        if ($multiFileArchive) {
-            $temp_file = $this->prepareTempFolder('uatest');
+        $temp_file = $this->prepareTempFolder('uatest');
 
-            $this->assertEquals(count($expected_files), $driver->extractArchive($temp_file), 'For archive ' . $archiveConfig[1]);
-            foreach ($flatten_list as $filename => $content) {
+        $this->assertEquals(count($expected_files), $driver->extractArchive($temp_file), 'For archive ' . $archiveConfig[1]);
+        foreach ($flatten_list as $filename => $content) {
+            if ($multiFileArchive) {
                 $this->assertFileEquals(FIXTURES_DIR . '/' . $filename, $temp_file . '/' . $filename);
+            } else {
+                $this->assertEquals($content, file_get_contents($temp_file . '/' . $filename));
             }
-            $this->removeTempFolder($temp_file);
         }
+        $this->removeTempFolder($temp_file);
     }
 }
