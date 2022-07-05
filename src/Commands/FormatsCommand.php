@@ -54,8 +54,8 @@ class FormatsCommand extends BaseCommand
 
         $formats = Formats::getSupportedDriverFormats();
         $headers = array_keys($formats);
-        array_unshift($headers, 'driver / format');
         array_unshift($headers, 'driver type');
+        array_unshift($headers, 'driver / format');
         $table->setHeaders($headers);
         $rows = [];
 

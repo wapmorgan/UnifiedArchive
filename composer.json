@@ -32,9 +32,9 @@
 		"gemorroj/archive7z": "[utility + bridge] 7ZIP (and a lot of other formats) support via console program",
 		"alchemy/zippy": "[utility + bridge] ZIP, TAR, GZIP, BZIP2 support (with combinations) via console programs",
 		"bin-ncompress": "[utility] TAR.Z support via console program",
-		"pear/archive_tar": "[pure php] another TAR support (plain php)",
-		"wapmorgan/cab-archive": "[pure php] CAB support (plain php)",
-		"phpclasses/php-iso-file": "[pure php] ISO support (plain php)",
+		"pear/archive_tar": "[pure php] another TAR support",
+		"wapmorgan/cab-archive": "[pure php] CAB support",
+		"phpclasses/php-iso-file": "[pure php] ISO support",
 		"symfony/console": "Requirement for cam (Console Archive Manager)"
 	},
 	"autoload": {
