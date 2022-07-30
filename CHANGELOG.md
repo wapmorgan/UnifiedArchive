@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.1.6 - Jul 31, 2022
+## 1.1.6 - Jul 31, 2022
 **BC-breaking changes**:
 - Changed signature: `UnifiedArchive::open($filename, string|null $password = null)` => `UnifiedArchive::open($filename, array $abilities = [], string|null $password = null)`. Right now if second argument is string, it will be treated as password (for BC-compatability).
 - `open` throws an Exception when format is not recognized or there's no driver that support requested abilities.
@@ -26,7 +26,7 @@
 - Added `Iso` driver extraction ability.
 - Added commenting-ability for `SevenZip` driver (via `descript.ion` file in archive).
 
-### 1.1.5 - Jun 28, 2022
+## 1.1.5 - Jun 28, 2022
 
 **New features**:
 - Reimplemented `cam` (console utility) - now it's on symfony/console and supports all features and more functions (folders, types) of UA.
@@ -48,10 +48,10 @@
 - Fixed counting of extracted files when extracting the whole archive in `TarByPear, TarByPhar, Zip`.
 - Fixed calculation archive entry compressed size (approximately) and modification time, implemented entry content streaming in `TarByPhar`.
 
-### 1.1.4 - Dec 21, 2021
+## 1.1.4 - Dec 21, 2021
 Disabled `rar` for SevenZip driver.
 
-### 1.1.3 - May 2, 2021
+## 1.1.3 - May 2, 2021
 
 **Changed format of `$files` in `archiveFiles()` and `addFiles()`**
 ```php
@@ -102,14 +102,14 @@ $file_data = $a['filename'];
 - `UnifiedArchive->getFileResource` -> `UnifiedArchive->getFileStream`.
 - `UnifiedArchive->isFileExists` -> `UnifiedArchive->hasFile`.
 
-### 1.1.2 - Mar 1, 2021
+## 1.1.2 - Mar 1, 2021
 Fixed calculation of tar's uncompressed size opened via `TarByPear` driver.
 Fixed working with *tar.xz* archives.
 
-### 1.1.1 - Feb 13, 2021
+## 1.1.1 - Feb 13, 2021
 Cleaned package.
 
-### 1.1.0 - Feb 13, 2021
+## 1.1.0 - Feb 13, 2021
 **New features**:
 - Added ability to open archives encrypted with password - added `$password` argument to `UnifiedArchive::open($fileName, $password = null)`. Works only with: zip, rar, 7z.   
 - Added ability to adjust compression level for new archives - added `$compressionLevel` argument (with default `BasicDriver::COMPRESSION_AVERAGE` level) to:
@@ -138,14 +138,14 @@ Cleaned package.
 
 Old methods exist, but marked as deprecated.
 
-### 1.0.1 - Nov 28, 2020
+## 1.0.1 - Nov 28, 2020
 
 - Improved extendable for all classes - used late-static binding everywhere.
 
 Format specific:
 - **gzip**: improved detection of archive by content.
 
-### 1.0.0 - Jun 13, 2020
+## 1.0.0 - Jun 13, 2020
 
 Format specific:
 - **tar**:
@@ -153,7 +153,7 @@ Format specific:
 - **rar**:
    - Exclude directories from files list.
 
-### 0.2.0 - Feb 2, 2020
+## 0.2.0 - Feb 2, 2020
 
 **BC-breaking changes**:
 - **Deleted deprecated UnifiedArchive methods**: `extractNode`, `archiveNodes`.
@@ -173,7 +173,7 @@ Format specific:
         - `UnsupportedOperationException`
         - `ArchiveCreationException`
 
-### 0.1.3 - Jan 13, 2020
+## 0.1.3 - Jan 13, 2020
 
 **BC-breaking changes**:
 - **Minimal version is 5.5.0**.
@@ -188,7 +188,7 @@ New features:
 - Added `canAddFiles(): bool`
 - Added `canDeleteFiles(): bool`
 
-### 0.1.2 - Jan 03, 2019
+## 0.1.2 - Jan 03, 2019
 
 **BC-breaking changes**:
 - PclZip-interface getter renamed to `getPclZipInterface()`.
@@ -221,7 +221,7 @@ Format-specific changes:
 - **cab**:
     - Fixed `extractFiles()` functionality.
 
-### 0.1.1 - Sep 21, 2018
+## 0.1.1 - Sep 21, 2018
 API changes:
 * **Changed algorithm of files list generation in `archiveFiles()` and `addFiles()`**:
     ```php
@@ -264,7 +264,7 @@ Miscellaneous:
 * Added simple tests.
 * Added `phar` distribution.
 
-### 0.1.0 - Apr 11, 2018
+## 0.1.0 - Apr 11, 2018
 API changes:
 * Renamed methods `extractNode()` → `extractFiles()`, `archiveNodes()` → `archiveFiles()`. Original method are still available with `@deprecated` status.
 * `getFileData()` now returns `ArchiveEntry` instance instead of `stdClass`. Original object fields are still available with `@deprecated` status.
@@ -279,41 +279,41 @@ Miscellaneous:
 * Removed example scripts (`examples/`).
 * Code changes: added comments.
 
-### 0.0.11 - Mar 21, 2018
+## 0.0.11 - Mar 21, 2018
 * Cleaned up some old code.
 * Added `ext-phar` adapter for tar archives (if `pear/archive_tar` is not installed).
 
-### 0.0.10 - Aug 7, 2017
+## 0.0.10 - Aug 7, 2017
 * Remove `docopt` from requirements. Now it's a suggestion.
 
-### 0.0.9 - Jul 20, 2017
+## 0.0.9 - Jul 20, 2017
 * Added `cam` (Console Archive Manager) script.
 
-### 0.0.8 - Jan 24, 2017
+## 0.0.8 - Jan 24, 2017
 * Added initial support for `CAB` archives without extracting.
 * Added handling of short names of tar archives (.tgz/.tbz2/...).
 * Removed external repository declaration.
 * Removed `die()` in source code.
 
-### 0.0.7 - Jan 14, 2017
+## 0.0.7 - Jan 14, 2017
 * Fixed usage of `ereg` function for PHP >7.
 
-### 0.0.6 - Jan 9, 2017
+## 0.0.6 - Jan 9, 2017
 * Added functionality for adding files in archive.
 * Added functionality for deleting files from archive.
 * Fixed discovering `7z` archive number of files and creating new archive.
 
-### 0.0.5 - Jan 8, 2017
+## 0.0.5 - Jan 8, 2017
 * Added support for `7z` (by 7zip-cli) archives.
 
-### 0.0.4 - Jan 7, 2017
+## 0.0.4 - Jan 7, 2017
 * Added support for single-file `bz2` (bzip2) and `xz` (lzma2) archives.
 
-### 0.0.3 - Aug 18, 2015
+## 0.0.3 - Aug 18, 2015
 * Removed `archive_tar` from required packages.
 
-### 0.0.2 - May 27, 2014
+## 0.0.2 - May 27, 2014
 * Released under the MIT license
 
-### 0.0.1 - May 26, 2014
+## 0.0.1 - May 26, 2014
 First version.
