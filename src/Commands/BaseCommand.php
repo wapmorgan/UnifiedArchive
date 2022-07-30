@@ -46,7 +46,7 @@ class BaseCommand extends \Symfony\Component\Console\Command\Command
         if (!UnifiedArchive::canOpen($file))
             throw new \Exception('Could not open archive '.$file.'. Try installing suggested packages or run `cam -f` to see formats support.');
 
-        $archive = UnifiedArchive::open($file, $password);
+        $archive = UnifiedArchive::open($file, [], $password);
         if ($archive === null)
             throw new \Exception('Could not open archive '.$file);
 

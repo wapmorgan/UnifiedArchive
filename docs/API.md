@@ -77,15 +77,15 @@ All methods are static.
     ```php
     UnifiedArchive::open(
         string $fileName,
-        ?string $password = null,
-        int[] $abilities = []
+        int[] $abilities = [],
+        ?string $password = null
     ): UnifiedArchive|null
     ```
 
     Opens an archive and returns instance of `UnifiedArchive`.
-    In case of failure (format is not supported), `null` is returned.
     If you provide `$password`, it will be used to open encrypted archive.
     If you provide `$abilities`, it will be used to determine driver for format, that supports ALL of passed abilities.
+    In case of failure (format is not supported or recognized), an `UnsupportedArchiveException` will be thrown.
     In case you provide password for an archive that don't support it, an `UnsupportedOperationException` will be thrown.
 
 - <span id="UnifiedArchive--getPclZipInterface"></span>

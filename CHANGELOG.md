@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.2.0 - Jul XX, 2022
+### 1.1.6 - Jul XX, 2022
 **BC-breaking changes**:
 - Changed signature: `UnifiedArchive::open($filename, string|null $password = null)` => `UnifiedArchive::open($filename, array $abilities = [], string|null $password = null)`
 - `addFiles`/`deleteFiles`/`getComment`/`setComment` throws an Exception when driver does not support this ability.

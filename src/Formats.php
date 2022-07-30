@@ -14,7 +14,6 @@ use wapmorgan\UnifiedArchive\Drivers\SevenZip;
 use wapmorgan\UnifiedArchive\Drivers\TarByPear;
 use wapmorgan\UnifiedArchive\Drivers\TarByPhar;
 use wapmorgan\UnifiedArchive\Drivers\Zip;
-use wapmorgan\UnifiedArchive\Exceptions\UnsupportedArchiveException;
 use wapmorgan\UnifiedArchive\Formats\Tar;
 
 class Formats

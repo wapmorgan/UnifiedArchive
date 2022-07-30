@@ -19,7 +19,7 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
  */
 class UnifiedArchive implements ArrayAccess, Iterator, Countable
 {
-    const VERSION = '1.1.5';
+    const VERSION = '1.1.6';
 
     /** @var string Type of current archive */
     protected $format;
@@ -57,16 +57,27 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Creates a UnifiedArchive instance for passed archive
      *
      * @param string $fileName Archive filename
-     * @param string|null $password
-     * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
+     * @param array|null|string $abilities List of supported abilities by driver. If passed string, used as password.
+     * @param string|null $password Password to open archive
+     * @return UnifiedArchive Returns UnifiedArchive in case of successful reading of the file
+     * @throws UnsupportedArchiveException
+     * @throws UnsupportedOperationException
      */
-    public static function open($fileName, $password = null, $abilities = [])
+    public static function open($fileName, $abilities = [], $password = null)
     {
         if (!file_exists($fileName) || !is_readable($fileName)) {
             throw new InvalidArgumentException('Could not open file: ' . $fileName.' is not readable');
         }
 
         $format = Formats::detectArchiveFormat($fileName);
+        if ($format === false) {
+            throw new UnsupportedArchiveException('Can not recognize archive format for ' . $fileName);
+        }
+
+        if (!empty($abilities) && is_string($abilities)) {
+            $password = $abilities;
+            $abilities = [];
+        }
 
         if (empty($abilities)) {
             $abilities = [BasicDriver::OPEN];
@@ -76,7 +87,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         }
         $driver = Formats::getFormatDriver($format, $abilities);
         if ($driver === null) {
-            throw new \RuntimeException('Driver for '.$format.' ('.$fileName.') is not found');
+            throw new UnsupportedOperationException('Driver for ' . $format . ' (' . $fileName . ') is not found');
         }
 
         return new static($fileName, $format, $driver, $password);

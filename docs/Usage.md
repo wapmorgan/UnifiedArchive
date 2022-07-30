@@ -7,6 +7,7 @@
 ## Reading and extraction
 1. Open the file with automatic detection of a format by name or content. In case of successful, an `UnifiedArchive`
    object will be returned. In case of failure - _null_ will be returned.
+
     ```php
     require 'vendor/autoload.php';
     use \wapmorgan\UnifiedArchive\UnifiedArchive;
@@ -24,7 +25,7 @@
     $archive = UnifiedArchive::open('filename.7z', null, 'password');
     ```
 
-2. Read the list of files of archive or check that file is in archive.
+3. Read the list of files of archive or check that file is in archive.
 
    ```php
    foreach($archive->getFileNames() as $filename) { // ['file', 'file2', 'file3', ...]
@@ -44,7 +45,7 @@
    }
    ```
 
-3. To get common information about concrete file use `getFileData()` method.
+4. To get common information about concrete file use `getFileData()` method.
 This method returns [an `ArchiveEntry` instance](API.md#ArchiveEntry). 
 To get raw file contents use `getFileContent()` method, to get stream for file use `getFileStream()` method.
 
@@ -61,7 +62,7 @@ To get raw file contents use `getFileContent()` method, to get stream for file u
    fpassthru($archive->getFileStream('README.md'));
    ```
 
-4. Unpack all archive or specific files on a disk - `extractFiles()`.
+5. Unpack all archive or specific files on a disk - `extractFiles()`.
 
     ```php
     // to unpack all contents of archive to "output" folder
