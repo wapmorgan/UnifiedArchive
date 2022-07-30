@@ -2,7 +2,8 @@
 
 ### 1.1.6 - Jul 31, 2022
 **BC-breaking changes**:
-- Changed signature: `UnifiedArchive::open($filename, string|null $password = null)` => `UnifiedArchive::open($filename, array $abilities = [], string|null $password = null)`
+- Changed signature: `UnifiedArchive::open($filename, string|null $password = null)` => `UnifiedArchive::open($filename, array $abilities = [], string|null $password = null)`. Right now if second argument is string, it will be treated as password (for BC-compatability).
+- `open` throws an Exception when format is not recognized or there's no driver that support requested abilities.
 - `addFiles`/`deleteFiles`/`getComment`/`setComment` throws an Exception when driver does not support this ability.
 
 - Deleted methods in UnifiedArchive: `canOpenArchive`, `canOpenType`, `canCreateType`, `getArchiveType`, `detectArchiveType`, `getFileResource`, `getArchiveFormat`, `isFileExists`, `getArchiveSize`, `countCompressedFilesSize`, `countUncompressedFilesSize`.
