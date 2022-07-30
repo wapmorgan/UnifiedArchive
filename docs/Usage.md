@@ -13,9 +13,15 @@
 
     $archive = UnifiedArchive::open('filename.rar');
     // or
-    $archive = UnifiedArchive::open('filename.zip', 'password');
+    $archive = UnifiedArchive::open('filename.zip', null, 'password');
     // or
-    $archive = UnifiedArchive::open('filename.7z', 'password');
+    $archive = UnifiedArchive::open('filename.tar', [
+        \wapmorgan\UnifiedArchive\Drivers\BasicDriver::EXTRACT_CONTENT,
+        \wapmorgan\UnifiedArchive\Drivers\BasicDriver::STREAM_CONTENT,
+        \wapmorgan\UnifiedArchive\Drivers\BasicDriver::APPEND,
+    ]);
+    // or
+    $archive = UnifiedArchive::open('filename.7z', null, 'password');
     ```
 
 2. Read the list of files of archive or check that file is in archive.
