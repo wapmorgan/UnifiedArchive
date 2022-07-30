@@ -8,7 +8,6 @@ use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
-use wapmorgan\UnifiedArchive\Formats;
 
 abstract class OneFileDriver extends BasicDriver
 {

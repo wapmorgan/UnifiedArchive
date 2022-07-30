@@ -12,7 +12,6 @@ use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 
 class AlchemyZippy extends BasicDriver
 {

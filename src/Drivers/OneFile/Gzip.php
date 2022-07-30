@@ -2,9 +2,7 @@
 namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
 use Exception;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
-use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 
 class Gzip extends OneFileDriver
 {

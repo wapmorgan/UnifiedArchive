@@ -18,9 +18,13 @@
     # if not specified, uses OPEN or OPEN_ENCRYPTED check, if password passed
     ```
 - Added `UnifiedArchive::test($files = [])` (and `cam files:test` command) to test archive contents (compare actual control sum with stored crc32).
+- More informative output in commands: `system:drivers`, `system:formats`, `system:format`, added command `files:test`.
+- Added driver abilities to select better driver.
 
 **Driver changes:**
-- Added `NelexaZip` driver.
+- Added `NelexaZip` pure-PHP driver.
+- Added `Iso` driver extraction ability.
+- Added commenting-ability for `SevenZip` driver (via `descript.ion` file in archive).
 
 ### 1.1.5 - Jun 28, 2022
 

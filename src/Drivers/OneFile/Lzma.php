@@ -1,9 +1,7 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
-use wapmorgan\UnifiedArchive\Drivers\OneFile\OneFileDriver;
 
 /**
  * Class Lzma
