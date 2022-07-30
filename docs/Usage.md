@@ -13,16 +13,26 @@
 
     $archive = UnifiedArchive::open('filename.rar');
     // or
-    $archive = UnifiedArchive::open('filename.zip');
+    $archive = UnifiedArchive::open('filename.zip', 'password');
     // or
-    $archive = UnifiedArchive::open('filename.7z');
+    $archive = UnifiedArchive::open('filename.7z', 'password');
     ```
 
 2. Read the list of files of archive or check that file is in archive.
 
    ```php
-   $files_list = $archive->getFileNames(); // ['file', 'file2', 'file3', ...]
-
+   foreach($archive->getFileNames() as $filename) { // ['file', 'file2', 'file3', ...]
+        // ...
+   }
+   
+   foreach($archive->getFileNames('*.txt') as $filename) { // ['README.txt', 'doc.txt', ...]
+        // ...
+   }
+   
+   foreach ($archive as $filename) {
+        // ...
+   }
+   
    if ($archive->hasFile('README.md')) {
        // some operations
    }
@@ -30,11 +40,13 @@
 
 3. To get common information about concrete file use `getFileData()` method.
 This method returns [an `ArchiveEntry` instance](API.md#ArchiveEntry). 
-To get raw file contents use `getFileContent()` method, to get reading stream for file use `getFileStream()` method.
+To get raw file contents use `getFileContent()` method, to get stream for file use `getFileStream()` method.
 
    ```php
    // file meta
    $file_data = $archive->getFileData('README.md')); // ArchiveEntry with file information
+   echo 'Original size is ' . $file_data->uncompressedSize.PHP_EOL;
+   echo 'Modification datetime is ' . date('r', $file_data->modificationTime).PHP_EOL;
 
    // raw file content
    $file_content = $archive->getFileContent('README.md')); // string
