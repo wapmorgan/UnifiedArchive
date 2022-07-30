@@ -60,6 +60,17 @@ class NelexaZip extends BasicDriver
         ];
     }
 
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null)
+    {
+
+    }
+
     /**
      * @inheritDoc
      * @throws \PhpZip\Exception\ZipException

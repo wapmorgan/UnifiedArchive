@@ -486,21 +486,23 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Prepare files list for archiving
      *
      * @param string|array $fileOrFiles File of list of files. See [[archiveFiles]] for details.
-     * @param string $archiveName File name of archive. See [[archiveFiles]] for details.
+     * @param string|null $archiveName File name of archive. See [[archiveFiles]] for details.
      * @return array An array containing entries:
      * - totalSize (int) - size in bytes for all files
      * - numberOfFiles (int) - quantity of files
      * - files (array) - list of files prepared for archiving
-     * - type (string) - prepared format for archive. One of class constants
+     * - type (string|null) - prepared format for archive. One of class constants
      * @throws EmptyFileListException
      * @throws UnsupportedArchiveException
      */
-    public static function prepareForArchiving($fileOrFiles, $archiveName)
+    public static function prepareForArchiving($fileOrFiles, $archiveName = null)
     {
-        $archiveType = Formats::detectArchiveFormat($archiveName, false);
-
-        if ($archiveType === false)
-            throw new UnsupportedArchiveException('Could not detect archive type for name "' . $archiveName . '"');
+        if ($archiveName !== null) {
+            $archiveType = Formats::detectArchiveFormat($archiveName, false);
+            if ($archiveType === false) {
+                throw new UnsupportedArchiveException('Could not detect archive type for name "' . $archiveName . '"');
+            }
+        }
 
         $files_list = static::createFilesList($fileOrFiles);
 
@@ -518,7 +520,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
             'totalSize' => $totalSize,
             'numberOfFiles' => count($files_list),
             'files' => $files_list,
-            'type' => $archiveType,
+            'type' => $archiveName !== null ? $archiveType : null,
         ];
     }
 
@@ -584,7 +586,71 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         return $driver::createArchive(
             $info['files'],
             $archiveName,
+            $info['type'],
             $compressionLevel,
+            $password,
+            $fileProgressCallable
+        );
+    }
+
+    /**
+     * Creates an archive with passed files list
+     *
+     * @param string|string[]|array<string,string> $fileOrFiles List of files. Can be one of three formats:
+     *                             1. A string containing path to file or directory.
+     *                                  File will have it's basename.
+     *                                  `UnifiedArchive::archiveFiles('/etc/php.ini', 'archive.zip)` will store
+     * file with 'php.ini' name.
+     *                                  Directory contents will be stored in archive root.
+     *                                  `UnifiedArchive::archiveFiles('/var/log/', 'archive.zip')` will store all
+     * directory contents in archive root.
+     *                             2. An array with strings containing pats to files or directories.
+     *                                  Files and directories will be stored with full paths.
+     *                                  `UnifiedArchive::archiveFiles(['/etc/php.ini', '/var/log/'], 'archive.zip)`
+     * will preserve full paths.
+     *                             3. An array with strings where keys are strings.
+     *                                  Files will have name from key.
+     *                                  Directories contents will have prefix from key.
+     *                                  `UnifiedArchive::archiveFiles(['doc.txt' => 'very_long_name_of_document.txt',
+     *  'static' => '/var/www/html/static/'], 'archive.zip')`
+     *
+     * @param string $archiveName File name of archive. Type of archive will be determined by it's name.
+     * @param int $compressionLevel Level of compression
+     * @param string|null $password
+     * @param callable|null $fileProgressCallable
+     * @return int Count of stored files is returned.
+     * @throws FileAlreadyExistsException
+     * @throws UnsupportedOperationException
+     */
+    public static function archiveInString(
+        $fileOrFiles,
+        $compressionLevel = BasicDriver::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    )
+    {
+        $info = static::prepareForArchiving($fileOrFiles);
+        $abilities = [BasicDriver::CREATE, BasicDriver::CREATE_IN_STRING];
+        if (!Formats::canCreate($info['type'])) {
+            throw new UnsupportedArchiveException('Unsupported archive type: ' . $info['type'] . ' of archive ' . $archiveName);
+        }
+
+        if ($password !== null && !Formats::canEncrypt($info['type'])) {
+            throw new UnsupportedOperationException('Archive type ' . $info['type'] . ' can not be encrypted');
+        }
+        if ($password !== null) {
+            $abilities[] = BasicDriver::CREATE_ENCRYPTED;
+        }
+
+        /** @var BasicDriver $driver */
+        $driver = Formats::getFormatDriver($info['type'], $abilities);
+        if ($driver === null) {
+            throw new UnsupportedArchiveException('Unsupported archive type: ' . $info['type'] . ' of archive ');
+        }
+
+        return $driver::createArchiveInString(
+            $info['files'],
+            $info['format'],
             $compressionLevel,
             $password,
             $fileProgressCallable

@@ -40,6 +40,7 @@ abstract class BasicDriver
 
     const CREATE = 1048576;
     const CREATE_ENCRYPTED = 2097152;
+    const CREATE_IN_STRING = 4194304;
 
     const TYPE = null;
 
@@ -101,6 +102,25 @@ abstract class BasicDriver
     public static function createArchive(
         array $files,
         $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    ) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param array $files
+     * @param string $archiveFormat
+     * @param int $compressionLevel
+     * @param null $password
+     * @param $fileProgressCallable
+     * @return int Number of archived files
+     * @throws UnsupportedOperationException
+     */
+    public static function createArchiveInString(
+        array $files,
         $archiveFormat,
         $compressionLevel = self::COMPRESSION_AVERAGE,
         $password = null,
