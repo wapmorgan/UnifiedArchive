@@ -59,9 +59,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string $fileName Archive filename
      * @param array|null|string $abilities List of supported abilities by driver. If passed string, used as password.
      * @param string|null $password Password to open archive
-     * @return UnifiedArchive Returns UnifiedArchive in case of successful reading of the file
-     * @throws UnsupportedArchiveException
-     * @throws UnsupportedOperationException
+     * @return UnifiedArchive|null Returns UnifiedArchive in case of successful reading of the file
      */
     public static function open($fileName, $abilities = [], $password = null)
     {
@@ -71,7 +69,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
 
         $format = Formats::detectArchiveFormat($fileName);
         if ($format === false) {
-            throw new UnsupportedArchiveException('Can not recognize archive format for ' . $fileName);
+            return null;
         }
 
         if (!empty($abilities) && is_string($abilities)) {
@@ -87,7 +85,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         }
         $driver = Formats::getFormatDriver($format, $abilities);
         if ($driver === null) {
-            throw new UnsupportedOperationException('Driver for ' . $format . ' (' . $fileName . ') is not found');
+            return null;
         }
 
         return new static($fileName, $format, $driver, $password);
@@ -820,5 +818,135 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     public function count()
     {
         return $this->filesQuantity;
+    }
+
+    // deprecated methods
+    /**
+     * Checks whether archive can be opened with current system configuration
+     *
+     * @param string $fileName Archive filename
+     * @deprecated See {UnifiedArchive::canOpen()}
+     * @return bool
+     */
+    public static function canOpenArchive($fileName)
+    {
+        return static::canOpen($fileName);
+    }
+
+    /**
+     * Checks whether specific archive type can be opened with current system configuration
+     *
+     * @deprecated See {{Formats::canOpen()}}
+     * @param string $type One of predefined archive types (class constants)
+     * @return bool
+     */
+    public static function canOpenType($type)
+    {
+        return Formats::canOpen($type);
+    }
+
+    /**
+     * Checks whether specified archive can be created
+     *
+     * @deprecated See {{Formats::canCreate()}}
+     * @param string $type One of predefined archive types (class constants)
+     * @return bool
+     */
+    public static function canCreateType($type)
+    {
+        return Formats::canCreate($type);
+    }
+
+    /**
+     * Returns type of archive
+     *
+     * @deprecated See {{UnifiedArchive::getArchiveFormat()}}
+     * @return string One of class constants
+     */
+    public function getArchiveType()
+    {
+        return $this->getFormat();
+    }
+
+    /**
+     * Detect archive type by its filename or content
+     *
+     * @deprecated See {{Formats::detectArchiveFormat()}}
+     * @param string $fileName Archive filename
+     * @param bool $contentCheck Whether archive type can be detected by content
+     * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
+     */
+    public static function detectArchiveType($fileName, $contentCheck = true)
+    {
+        return Formats::detectArchiveFormat($fileName, $contentCheck);
+    }
+
+    /**
+     * Returns a resource for reading file from archive
+     *
+     * @deprecated See {{UnifiedArchive::getFileStream}}
+     * @param string $fileName File name in archive
+     * @return resource
+     * @throws NonExistentArchiveFileException
+     */
+    public function getFileResource($fileName)
+    {
+        return $this->getFileStream($fileName);
+    }
+
+    /**
+     * Returns type of archive
+     *
+     * @deprecated See {{UnifiedArchive::getFormat}}
+     * @return string One of class constants
+     */
+    public function getArchiveFormat()
+    {
+        return $this->getFormat();
+    }
+
+    /**
+     * Checks that file exists in archive
+     *
+     * @deprecated See {{UnifiedArchive::hasFile}}
+     * @param string $fileName File name in archive
+     * @return bool
+     */
+    public function isFileExists($fileName)
+    {
+        return $this->hasFile($fileName);
+    }
+
+    /**
+     * Returns size of archive file in bytes
+     *
+     * @deprecated See {{UnifiedArchive::getSize}}
+     * @return int
+     */
+    public function getArchiveSize()
+    {
+        return $this->getSize();
+    }
+
+    /**
+     * Counts cumulative size of all compressed data (in bytes)
+     *
+     * @deprecated See {{UnifiedArchive::getCompressedSize}}
+     * @return int
+     */
+    public function countCompressedFilesSize()
+    {
+        return $this->getCompressedSize();
+    }
+
+    /**
+     * Counts cumulative size of all uncompressed data (bytes)
+     *
+     * @deprecated See {{UnifiedArchive::getOriginalSize}}
+     * @return int
+     */
+    public function countUncompressedFilesSize()
+    {
+        return $this->getOriginalSize();
     }
 }
