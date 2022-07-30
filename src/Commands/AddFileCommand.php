@@ -71,7 +71,7 @@ class AddFileCommand extends BaseArchiveCommand
         if ($source === '-') {
             $added_files = $archive->addFileFromString($destination, $data) ? 1 : 0;
         } else {
-            $added_files = $archive->addFiles([$destination => $source]);
+            $added_files = $archive->add([$destination => $source]);
         }
         if ($added_files === 1) {
             $details = $archive->getFileData($destination);

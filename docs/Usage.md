@@ -28,11 +28,11 @@
 3. Read the list of files of archive or check that file is in archive.
 
    ```php
-   foreach($archive->getFileNames() as $filename) { // ['file', 'file2', 'file3', ...]
+   foreach($archive->getFiles() as $filename) { // ['file', 'file2', 'file3', ...]
         // ...
    }
    
-   foreach($archive->getFileNames('*.txt') as $filename) { // ['README.txt', 'doc.txt', ...]
+   foreach($archive->getFiles('*.txt') as $filename) { // ['README.txt', 'doc.txt', ...]
         // ...
    }
    
@@ -62,48 +62,48 @@ To get raw file contents use `getFileContent()` method, to get stream for file u
    fpassthru($archive->getFileStream('README.md'));
    ```
 
-5. Unpack all archive or specific files on a disk - `extractFiles()`.
+5. Unpack all archive or specific files on a disk - `extract()`.
 
     ```php
     // to unpack all contents of archive to "output" folder
-    $archive->extractFiles(__DIR__.'/output');
+    $archive->extract(__DIR__.'/output');
 
     // to unpack specific files (README.md and composer.json) from archive to "output" folder
-    $archive->extractFiles(__DIR__.'/output', ['README.md', 'composer.json']);
+    $archive->extract(__DIR__.'/output', ['README.md', 'composer.json']);
 
     // to unpack the "src" catalog with all content from archive into the "sources" catalog on a disk
-    $archive->extractFiles(__DIR__.'/output', 'src/', true);
+    $archive->extract(__DIR__.'/output', 'src/', true);
     ```
 
 ## Archive modification
 Only few archive formats support modification: (zip, 7z, tar) - it depends on low-level driver - see **Formats** page for details.
 
-1. [Delete files](API.md#UnifiedArchive--deleteFiles) from archive
+1. [Delete files](API.md#UnifiedArchive--delete) from archive
 
     ```php
     // Delete a single file
-    $archive->deleteFiles('README.md');
+    $archive->delete('README.md');
 
     // Delete multiple files
-    $archive->deleteFiles(['README.md', 'MANIFEST.MF']);
+    $archive->delete(['README.md', 'MANIFEST.MF']);
 
     // Delete directory with full content
-    $archive->deleteFiles('src/', true);
+    $archive->delete('src/', true);
     ```
 
     In case of success the number of successfully deleted files will be returned.
 
-2. [Add files](API.md#UnifiedArchive--addFiles) to archive
+2. [Add files](API.md#UnifiedArchive--add) to archive
 
     ```php
     // Add a catalog with all contents with full paths
-    $archive->addFiles('/var/log/');
+    $archive->add('/var/log/');
 
     // To add one file (will be stored as one file "syslog")
-    $archive->addFiles('/var/log/syslog');
+    $archive->add('/var/log/syslog');
 
     // To add some files or catalogs (all catalogs structure in paths will be kept)
-    $archive->addFiles([$directory, $file, $file2, ...]);
+    $archive->add([$directory, $file, $file2, ...]);
     ```
 
 ## Archiving
@@ -113,19 +113,19 @@ To pack completely the catalog with all attached files and subdirectories in new
 
 ```php
 # archive all folder content
-UnifiedArchive::archiveFiles('/var/log', 'Archive.zip');
+UnifiedArchive::archive('/var/log', 'Archive.zip');
 
 # archive one file
-UnifiedArchive::archiveFiles('/var/log/syslog', 'Archive.zip');
+UnifiedArchive::archive('/var/log/syslog', 'Archive.zip');
 
 # archive few files / folders
-UnifiedArchive::archiveFiles([$directory, $file, $file2, ...], 'Archive.zip');
+UnifiedArchive::archive([$directory, $file, $file2, ...], 'Archive.zip');
 ```
 
-Also, there is [extended syntax](API.md#UnifiedArchive--archiveFiles) for `addFiles()` and `archiveFiles()`:
+Also, there is [extended syntax](API.md#UnifiedArchive--archive) for `add()` and `archive()`:
 
 ```php
-UnifiedArchive::archiveFiles([
+UnifiedArchive::archive([
           'abc.log' => '/var/www/site/abc.log',   // stored as 'abc.log'
           '/var/www/site/abc.log',                // stored as '/var/www/site/abc.log'
           'logs' => '/var/www/site/runtime/logs', // directory content stored in 'logs' dir

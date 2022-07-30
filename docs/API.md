@@ -23,8 +23,8 @@ All methods are static.
 | `Formats::canOpen`             | `string $format`                                     | `boolean`        | Tests if an archive format can be opened by any driver with current system and php configuration.                                                                                            |
 | `Formats::canStream`           | `string $format`                                     | `boolean`        | Tests if a specified archive can be streamed (getFileStream).                                                                                                                                |
 | `Formats::canCreate`           | `string $format`                                     | `boolean`        | Tests if an archive format can be created by any driver with current system and php configuration.                                                                                           |
-| `Formats::canAppend`           | `string $format`                                     | `boolean`        | Tests if an archive format can be appended (addFiles).                                                                                                                                       |
-| `Formats::canUpdate`           | `string $format`                                     | `boolean`        | Tests if an archive format can be updated (deleteFiles).                                                                                                                                     |
+| `Formats::canAppend`           | `string $format`                                     | `boolean`        | Tests if an archive format can be appended (add).                                                                                                                                       |
+| `Formats::canUpdate`           | `string $format`                                     | `boolean`        | Tests if an archive format can be updated (delete).                                                                                                                                     |
 | `Formats::canEncrypt`          | `string $format`                                     | `boolean`        | Tests if an archive format can be encrypted or opened with encryption by any driver with new files.                                                                                          |
 | `Formats::checkFormatSupportAbility` | string `$format, int $ability` | boolean | Check if any driver supports passed ability for passed format |
 | `Formats::getFormatMimeType`   | `string $format`                                     | `string/false` | Returns mime type for passed format. Returns `false` if not found.                                                                                                                           |
@@ -43,22 +43,22 @@ All methods are static.
   - `UnifiedArchive->countFiles`
   - `UnifiedArchive->getComment`
 - Extracting an archive:
-  - [`UnifiedArchive->getFileNames`](#UnifiedArchive--getFileNames)
+  - [`UnifiedArchive->getFiles`](#UnifiedArchive--getFiles)
   - [`UnifiedArchive->hasFile`](#UnifiedArchive--hasFile)
   - [`UnifiedArchive->getFileData`](#UnifiedArchive--getFileData)
   - [`UnifiedArchive->getFileStream`](#UnifiedArchive--getFileStream)
   - [`UnifiedArchive->getFileContent`](#UnifiedArchive--getFileContent)
-  - [`UnifiedArchive->extractFiles`](#UnifiedArchive--extractFiles)
+  - [`UnifiedArchive->extract`](#UnifiedArchive--extract)
 - Updating an archive:
   - [`UnifiedArchive->addDirectory`](#UnifiedArchive--addDirectory)
   - [`UnifiedArchive->addFile`](#UnifiedArchive--addFile)
   - [`UnifiedArchive->addFileFromString`](#UnifiedArchive--addFileFromString)
-  - [`UnifiedArchive->addFiles`](#UnifiedArchive--addFiles)
-  - [`UnifiedArchive->deleteFiles`](#UnifiedArchive--deleteFiles)
+  - [`UnifiedArchive->add`](#UnifiedArchive--add)
+  - [`UnifiedArchive->delete`](#UnifiedArchive--delete)
 - Making an archive:
   - [`UnifiedArchive::archiveDirectory`](#UnifiedArchive--archiveDirectory)
   - [`UnifiedArchive::archiveFile`](#UnifiedArchive--archiveFile)
-  - [`UnifiedArchive::archiveFiles`](#UnifiedArchive--archiveFiles)
+  - [`UnifiedArchive::archive`](#UnifiedArchive--archive)
 
 ## Archive opening
 
@@ -85,8 +85,7 @@ All methods are static.
     Opens an archive and returns instance of `UnifiedArchive`.
     If you provide `$password`, it will be used to open encrypted archive.
     If you provide `$abilities`, it will be used to determine driver for format, that supports ALL of passed abilities.
-    In case of failure (format is not supported or recognized), an `UnsupportedArchiveException` will be thrown.
-    In case you provide password for an archive that don't support it, an `UnsupportedOperationException` will be thrown.
+    In case of failure (format is not supported or recognized), null will be returned.
 
 - <span id="UnifiedArchive--getPclZipInterface"></span>
     ```php
@@ -111,9 +110,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
 
 ## Archive content
 
-- <span id="UnifiedArchive--getFileNames"></span>
+- <span id="UnifiedArchive--getFiles"></span>
     ```php
-    UnifiedArchive::getFileNames(?string $filter = null): string[]
+    UnifiedArchive::getFiles(?string $filter = null): string[]
     ```
     Returns full list of files stored in an archive. If `$filter` is passed, will return only matched by `fnmatch()` files. 
 
@@ -149,9 +148,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     Returns content of in-archive file as raw string.
     If file is not in archive, `NonExistentArchiveFileException` is thrown.
 
-- <span id="UnifiedArchive--extractFiles"></span>
+- <span id="UnifiedArchive--extract"></span>
     ```php
-    UnifiedArchive::extractFiles(string $outputFolder): int
+    UnifiedArchive::extract(string $outputFolder): int
     ```
 
     Extracts all archive content with full paths to output folder and rewriting existing files.
@@ -160,9 +159,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     Throws:
     - `ArchiveExtractionException`
 
-- <span id="UnifiedArchive--extractFiles"></span>
+- <span id="UnifiedArchive--extract"></span>
     ```php
-    UnifiedArchive::extractFiles(
+    UnifiedArchive::extract(
         string $outputFolder,
         array $files,
         boolean $expandFilesList = false
@@ -227,9 +226,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     Throws:
     - `ArchiveModificationException`
 
-- <span id="UnifiedArchive--addFiles"></span>
+- <span id="UnifiedArchive--add"></span>
     ```php
-    UnifiedArchive::addFiles(array $files): int|false
+    UnifiedArchive::add(array $files): int|false
     ```
 
     Packs given `$files` into archive. `$files` is an array of files or directories.
@@ -244,9 +243,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
     - `UnsupportedOperationException`
     - `ArchiveModificationException`
 
-- <span id="UnifiedArchive--deleteFiles"></span>
+- <span id="UnifiedArchive--delete"></span>
     ```php
-    UnifiedArchive::deleteFiles(
+    UnifiedArchive::delete(
         string|array $fileOrFiles,
         $expandFilesList = false
     ): int|false
@@ -310,9 +309,9 @@ All following methods is intended to be called to `UnifiedArchive` instance.
   - `EmptyFileListException`
   - `ArchiveCreationException`
 
-- <span id="UnifiedArchive--archiveFiles"></span>
+- <span id="UnifiedArchive--archive"></span>
     ```php
-    UnifiedArchive::archiveFiles(
+    UnifiedArchive::archive(
         array $files,
         string $archiveName,
         int $compressionLevel = BasicFormat::COMPRESSION_AVERAGE,

@@ -49,7 +49,7 @@ class ReadingTest extends PhpUnitTestCase
 
         $archive = UnifiedArchive::open($full_filename);
         if ($files_number != $archive->countFiles()) {
-            throw new Exception(json_encode([$archive->getFileNames(), $archive->getDriverType()]));
+            throw new Exception(json_encode([$archive->getFiles(), $archive->getDriverType()]));
         }
         $this->assertEquals($files_number, $archive->countFiles(), 'Invalid files count for '.$filename);
     }
@@ -68,17 +68,17 @@ class ReadingTest extends PhpUnitTestCase
 
         $archive = UnifiedArchive::open($full_filename);
         if (1 != $archive->countFiles()) {
-            throw new Exception(json_encode([$archive->getFileNames(), $archive->getDriverType()]));
+            throw new Exception(json_encode([$archive->getFiles(), $archive->getDriverType()]));
         }
 
         $temp_file = $this->prepareTempFolder('uatest');
 
         $this->assertEquals('Doc', $archive->getFileContent('onefile'), 'Invalid files count for '.$filename);
         $this->assertEquals('Doc', stream_get_contents($archive->getFileStream('onefile')), 'Invalid files count for '.$filename);
-        $this->assertEquals(1, $archive->extractFiles($temp_file.'/'));
+        $this->assertEquals(1, $archive->extract($temp_file.'/'));
         $this->assertFileExists($temp_file);
-        $this->assertFileEquals(FIXTURES_DIR . '/doc', $temp_file.$archive->getFileNames()[0]);
-        unlink($temp_file.'/'.$archive->getFileNames()[0]);
+        $this->assertFileEquals(FIXTURES_DIR . '/doc', $temp_file.$archive->getFiles()[0]);
+        unlink($temp_file.'/'.$archive->getFiles()[0]);
         rmdir($temp_file);
     }
 
@@ -104,7 +104,7 @@ class ReadingTest extends PhpUnitTestCase
 
         $expected_files = array_keys($flatten_list);
         sort($expected_files);
-        $actual_files = $archive->getFileNames();
+        $actual_files = $archive->getFiles();
         sort($actual_files);
         if ($expected_files != $actual_files) {
             throw new Exception(json_encode([$expected_files, $actual_files, $archive->getDriverType()]));
@@ -138,7 +138,7 @@ class ReadingTest extends PhpUnitTestCase
 
         $temp_file = $this->prepareTempFolder('uatest');
 
-        $this->assertEquals(count($expected_files), $archive->extractFiles($temp_file), 'For archive ' . $archiveFilename);
+        $this->assertEquals(count($expected_files), $archive->extract($temp_file), 'For archive ' . $archiveFilename);
         foreach ($flatten_list as $filename => $content) {
             $this->assertFileEquals(FIXTURES_DIR . '/' . $filename, $temp_file . '/' . $filename);
         }

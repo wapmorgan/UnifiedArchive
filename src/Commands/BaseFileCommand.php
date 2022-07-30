@@ -28,7 +28,7 @@ class BaseFileCommand extends BaseArchiveCommand
     {
         $archive = $this->getArchive($input, $output);
         $file = $input->getArgument('file');
-        $files = $archive->getFileNames();
+        $files = $archive->getFiles();
 
         if (empty($file)) {
             /** @var QuestionHelper $helper */

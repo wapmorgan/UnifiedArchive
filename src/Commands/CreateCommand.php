@@ -124,7 +124,7 @@ class CreateCommand extends BaseCommand
         $progressBar = new ProgressBar($output, $information['numberOfFiles']);
         $progressBar->setFormat('archiving');
         $progressBar->start();
-        $archived_files = UnifiedArchive::archiveFiles($files_list, $archive_file, $compression, $password, function ($currentFile, $totalFiles, $fsFilename, $archiveFilename)
+        $archived_files = UnifiedArchive::archive($files_list, $archive_file, $compression, $password, function ($currentFile, $totalFiles, $fsFilename, $archiveFilename)
             use ($progressBar) {
             if ($fsFilename === null) {
                 $progressBar->setMessage('Creating ' . $archiveFilename);

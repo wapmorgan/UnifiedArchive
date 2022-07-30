@@ -26,7 +26,7 @@ class TypesCommand extends BaseArchiveCommand
 
         $extensions = [];
 
-        foreach ($archive->getFileNames() as $file) {
+        foreach ($archive->getFiles() as $file) {
             $details = $archive->getFileData($file);
 
             $extension = pathinfo($file, PATHINFO_EXTENSION);

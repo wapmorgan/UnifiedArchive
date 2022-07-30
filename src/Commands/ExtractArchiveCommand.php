@@ -34,7 +34,7 @@ class ExtractArchiveCommand extends BaseArchiveCommand
             throw new \LogicException('Archive size ' . implode($this->formatSize($archive->getOriginalSize())) . ' is more that available on disk '
                                       . implode($this->formatSize(disk_free_space($output_dir))));
         }
-        $archive->extractFiles($output_dir, $entry_selector, true);
+        $archive->extract($output_dir, $entry_selector, true);
         $output->writeln('<info>Extracted all archive contents (' . implode($this->formatSize($archive->getOriginalSize())) . ')</info>');
 
         return 0;

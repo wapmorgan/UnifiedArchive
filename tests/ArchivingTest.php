@@ -27,7 +27,7 @@ class ArchivingTest extends PhpUnitTestCase
 
         $test_archive_filename = WORK_DIR.'/'.$archiveFileName;
 
-        $result = UnifiedArchive::archiveFiles(FIXTURES_DIR, $test_archive_filename);
+        $result = UnifiedArchive::archive(FIXTURES_DIR, $test_archive_filename);
         $this->assertValueIsInteger($result);
         $this->assertEquals(5, $result);
 
@@ -54,7 +54,7 @@ class ArchivingTest extends PhpUnitTestCase
 
         $test_archive_filename = WORK_DIR.'/'.$archiveFileName;
 
-        $result = UnifiedArchive::archiveFiles(FIXTURES_DIR . '/doc', $test_archive_filename);
+        $result = UnifiedArchive::archive(FIXTURES_DIR . '/doc', $test_archive_filename);
         $this->assertValueIsInteger($result);
         $this->assertEquals(1, $result);
 
@@ -94,7 +94,7 @@ class ArchivingTest extends PhpUnitTestCase
 
         // removing file
         if (Formats::canUpdate($archiveType)) {
-            $this->assertEquals(1, $archive->deleteFiles(basename(__FILE__)));
+            $this->assertEquals(1, $archive->delete(basename(__FILE__)));
             $this->assertFalse($archive->hasFile(basename(__FILE__)));
         } else {
             $this->markTestSkipped($archiveType.' does not support deleting files from archive');
@@ -121,7 +121,7 @@ class ArchivingTest extends PhpUnitTestCase
         $archive = UnifiedArchive::open($full_filename);
 
         $this->expectException(UnsupportedOperationException::class);
-        $archive->deleteFiles('onefile');
+        $archive->delete('onefile');
     }
 
     /**

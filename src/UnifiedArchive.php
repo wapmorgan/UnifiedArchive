@@ -64,7 +64,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     public static function open($fileName, $abilities = [], $password = null)
     {
         if (!file_exists($fileName) || !is_readable($fileName)) {
-            throw new InvalidArgumentException('Could not open file: ' . $fileName.' is not readable');
+            throw new InvalidArgumentException('Could not open file: ' . $fileName . ' is not readable');
         }
 
         $format = Formats::detectArchiveFormat($fileName);
@@ -264,7 +264,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string|null $filter
      * @return array List of files
      */
-    public function getFileNames($filter = null)
+    public function getFiles($filter = null)
     {
         if ($filter === null)
             return $this->files;
@@ -335,24 +335,20 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws EmptyFileListException
      * @throws ArchiveExtractionException
      */
-    public function extractFiles($outputFolder, &$files = null, $expandFilesList = false)
+    public function extract($outputFolder, &$files = null, $expandFilesList = false)
     {
         if ($files !== null) {
             if (is_string($files)) {
                 $files = [$files];
             }
-
             if ($expandFilesList) {
                 $files = static::expandFileList($this->files, $files);
             }
-
             if (empty($files)) {
                 throw new EmptyFileListException('Files list is empty!');
             }
-
             return $this->archive->extractFiles($outputFolder, $files);
         }
-
         return $this->archive->extractArchive($outputFolder);
     }
 
@@ -368,7 +364,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws UnsupportedOperationException
      * @throws ArchiveModificationException
      */
-    public function deleteFiles($fileOrFiles, $expandFilesList = false)
+    public function delete($fileOrFiles, $expandFilesList = false)
     {
         $fileOrFiles = is_string($fileOrFiles) ? [$fileOrFiles] : $fileOrFiles;
 
@@ -395,7 +391,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws EmptyFileListException
      * @throws UnsupportedOperationException
      */
-    public function addFiles($fileOrFiles)
+    public function add($fileOrFiles)
     {
         $files_list = static::createFilesList($fileOrFiles);
 
@@ -420,11 +416,11 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     public function addFile($file, $inArchiveName = null)
     {
         if (!is_file($file))
-            throw new InvalidArgumentException($file.' is not a valid file to add in archive');
+            throw new InvalidArgumentException($file . ' is not a valid file to add in archive');
 
         return ($inArchiveName !== null
-                ? $this->addFiles([$inArchiveName => $file])
-                : $this->addFiles([$file])) === 1;
+                ? $this->add([$inArchiveName => $file])
+                : $this->add([$file])) === 1;
     }
 
     /**
@@ -454,11 +450,11 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     public function addDirectory($directory, $inArchivePath = null)
     {
         if (!is_dir($directory) || !is_readable($directory))
-            throw new InvalidArgumentException($directory.' is not a valid directory to add in archive');
+            throw new InvalidArgumentException($directory . ' is not a valid directory to add in archive');
 
         return ($inArchivePath !== null
-                ? $this->addFiles([$inArchivePath => $directory])
-                : $this->addFiles([$inArchivePath])) > 0;
+                ? $this->add([$inArchivePath => $directory])
+                : $this->add([$inArchivePath])) > 0;
     }
 
     /**
@@ -470,7 +466,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     {
         $hash_exists = function_exists('hash_update_stream') && in_array('crc32b', hash_algos(), true);
         $failed = [];
-        foreach ($this->getFileNames($filter) as $fileName) {
+        foreach ($this->getFiles($filter) as $fileName) {
             if ($hash_exists) {
                 $ctx = hash_init('crc32b');
                 hash_update_stream($ctx, $this->getFileStream($fileName));
@@ -504,7 +500,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         $archiveType = Formats::detectArchiveFormat($archiveName, false);
 
         if ($archiveType === false)
-            throw new UnsupportedArchiveException('Could not detect archive type for name "'.$archiveName.'"');
+            throw new UnsupportedArchiveException('Could not detect archive type for name "' . $archiveName . '"');
 
         $files_list = static::createFilesList($fileOrFiles);
 
@@ -555,26 +551,26 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
      */
-    public static function archiveFiles(
+    public static function archive(
         $fileOrFiles,
         $archiveName,
         $compressionLevel = BasicDriver::COMPRESSION_AVERAGE,
         $password = null,
         $fileProgressCallable = null
- )
+    )
     {
         if (file_exists($archiveName))
-            throw new FileAlreadyExistsException('Archive '.$archiveName.' already exists!');
+            throw new FileAlreadyExistsException('Archive ' . $archiveName . ' already exists!');
 
         $info = static::prepareForArchiving($fileOrFiles, $archiveName);
 
         $abilities = [BasicDriver::CREATE];
 
         if (!Formats::canCreate($info['type']))
-            throw new UnsupportedArchiveException('Unsupported archive type: '.$info['type'].' of archive '.$archiveName);
+            throw new UnsupportedArchiveException('Unsupported archive type: ' . $info['type'] . ' of archive ' . $archiveName);
 
         if ($password !== null && !Formats::canEncrypt($info['type']))
-            throw new UnsupportedOperationException('Archive type '.$info['type'].' can not be encrypted');
+            throw new UnsupportedOperationException('Archive type ' . $info['type'] . ' can not be encrypted');
         if ($password !== null) {
             $abilities[] = BasicDriver::CREATE_ENCRYPTED;
         }
@@ -612,7 +608,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
             throw new InvalidArgumentException($file . ' is not a valid file to archive');
         }
 
-        return static::archiveFiles($file, $archiveName, $compressionLevel, $password) === 1;
+        return static::archive($file, $archiveName, $compressionLevel, $password) === 1;
     }
 
     /**
@@ -629,9 +625,9 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     public static function archiveDirectory($directory, $archiveName, $compressionLevel = BasicDriver::COMPRESSION_AVERAGE, $password = null)
     {
         if (!is_dir($directory) || !is_readable($directory))
-            throw new InvalidArgumentException($directory.' is not a valid directory to archive');
+            throw new InvalidArgumentException($directory . ' is not a valid directory to archive');
 
-        return static::archiveFiles($directory, $archiveName, $compressionLevel, $password) > 0;
+        return static::archive($directory, $archiveName, $compressionLevel, $password) > 0;
     }
 
     /**
@@ -645,7 +641,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         $newFiles = [];
         foreach ($files as $file) {
             foreach ($archiveFiles as $archiveFile) {
-                if (fnmatch($file.'*', $archiveFile)) {
+                if (fnmatch($file . '*', $archiveFile)) {
                     $newFiles[] = $archiveFile;
                 }
             }
@@ -702,7 +698,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         } else if (is_string($nodes)) { // passed one file or directory
             // if is directory
             if (is_dir($nodes))
-                static::importFilesFromDir(rtrim($nodes, '/\\*').'/*', null, true,
+                static::importFilesFromDir(rtrim($nodes, '/\\*') . '/*', null, true,
                     $files);
             else if (is_file($nodes))
                 $files[basename($nodes)] = $nodes;
@@ -727,10 +723,10 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
 
         foreach (glob($source, GLOB_MARK) as $node) {
             if (in_array(substr($node, -1), ['/', '\\'], true) && $recursive) {
-                static::importFilesFromDir(str_replace('\\', '/', $node).'*',
-                    $destination.basename($node).'/', $recursive, $map);
+                static::importFilesFromDir(str_replace('\\', '/', $node) . '*',
+                    $destination . basename($node) . '/', $recursive, $map);
             } elseif (is_file($node) && is_readable($node)) {
-                $map[$destination.basename($node)] = $node;
+                $map[$destination . basename($node)] = $node;
             }
         }
     }
@@ -778,7 +774,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
-        return $this->deleteFiles($offset);
+        return $this->delete($offset);
     }
 
     #[\ReturnTypeWillChange]
@@ -821,12 +817,13 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     }
 
     // deprecated methods
+
     /**
      * Checks whether archive can be opened with current system configuration
      *
      * @param string $fileName Archive filename
-     * @deprecated See {UnifiedArchive::canOpen()}
      * @return bool
+     * @deprecated See {UnifiedArchive::canOpen()}
      */
     public static function canOpenArchive($fileName)
     {
@@ -836,9 +833,9 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Checks whether specific archive type can be opened with current system configuration
      *
-     * @deprecated See {{Formats::canOpen()}}
      * @param string $type One of predefined archive types (class constants)
      * @return bool
+     * @deprecated See {{Formats::canOpen()}}
      */
     public static function canOpenType($type)
     {
@@ -848,9 +845,9 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Checks whether specified archive can be created
      *
-     * @deprecated See {{Formats::canCreate()}}
      * @param string $type One of predefined archive types (class constants)
      * @return bool
+     * @deprecated See {{Formats::canCreate()}}
      */
     public static function canCreateType($type)
     {
@@ -860,8 +857,8 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Returns type of archive
      *
-     * @deprecated See {{UnifiedArchive::getArchiveFormat()}}
      * @return string One of class constants
+     * @deprecated See {{UnifiedArchive::getArchiveFormat()}}
      */
     public function getArchiveType()
     {
@@ -871,10 +868,10 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Detect archive type by its filename or content
      *
-     * @deprecated See {{Formats::detectArchiveFormat()}}
      * @param string $fileName Archive filename
      * @param bool $contentCheck Whether archive type can be detected by content
      * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
+     * @deprecated See {{Formats::detectArchiveFormat()}}
      */
     public static function detectArchiveType($fileName, $contentCheck = true)
     {
@@ -884,10 +881,10 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Returns a resource for reading file from archive
      *
-     * @deprecated See {{UnifiedArchive::getFileStream}}
      * @param string $fileName File name in archive
      * @return resource
      * @throws NonExistentArchiveFileException
+     * @deprecated See {{UnifiedArchive::getFileStream}}
      */
     public function getFileResource($fileName)
     {
@@ -897,8 +894,8 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Returns type of archive
      *
-     * @deprecated See {{UnifiedArchive::getFormat}}
      * @return string One of class constants
+     * @deprecated See {{UnifiedArchive::getFormat}}
      */
     public function getArchiveFormat()
     {
@@ -908,9 +905,9 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Checks that file exists in archive
      *
-     * @deprecated See {{UnifiedArchive::hasFile}}
      * @param string $fileName File name in archive
      * @return bool
+     * @deprecated See {{UnifiedArchive::hasFile}}
      */
     public function isFileExists($fileName)
     {
@@ -920,8 +917,8 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Returns size of archive file in bytes
      *
-     * @deprecated See {{UnifiedArchive::getSize}}
      * @return int
+     * @deprecated See {{UnifiedArchive::getSize}}
      */
     public function getArchiveSize()
     {
@@ -931,8 +928,8 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Counts cumulative size of all compressed data (in bytes)
      *
-     * @deprecated See {{UnifiedArchive::getCompressedSize}}
      * @return int
+     * @deprecated See {{UnifiedArchive::getCompressedSize}}
      */
     public function countCompressedFilesSize()
     {
@@ -942,11 +939,115 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
     /**
      * Counts cumulative size of all uncompressed data (bytes)
      *
-     * @deprecated See {{UnifiedArchive::getOriginalSize}}
      * @return int
+     * @deprecated See {{UnifiedArchive::getOriginalSize}}
      */
     public function countUncompressedFilesSize()
     {
         return $this->getOriginalSize();
+    }
+
+    /**
+     * Returns list of files, excluding folders.
+     *
+     * Paths is present in unix-style (with forward slash - /).
+     *
+     * @param string|null $filter
+     * @return array List of files
+     * @deprecated See {{UnifiedArchive::getFiles}}
+     */
+    public function getFileNames($filter = null)
+    {
+        return $this->getFiles($filter);
+    }
+
+    /**
+     * Unpacks files to disk
+     *
+     * @param string $outputFolder Extraction output dir
+     * @param string|array|null $files One file or files list or null to extract all content.
+     * @param bool $expandFilesList Whether paths like 'src/' should be expanded to all files inside 'src/' dir or not.
+     * @return int Number of extracted files
+     * @throws EmptyFileListException
+     * @throws ArchiveExtractionException
+     * @deprecated See {{UnifiedArchive::extract}}
+     */
+    public function extractFiles($outputFolder, &$files = null, $expandFilesList = false)
+    {
+        return $this->extract($outputFolder, $files, $expandFilesList);
+    }
+
+    /**
+     * Updates existing archive by removing files from it
+     *
+     * Only 7zip and zip types support deletion.
+     * @param string|string[] $fileOrFiles
+     * @param bool $expandFilesList
+     *
+     * @return bool|int
+     * @throws EmptyFileListException
+     * @throws UnsupportedOperationException
+     * @throws ArchiveModificationException
+     * @deprecated See {{UnifiedArchive::delete}}
+     */
+    public function deleteFiles($fileOrFiles, $expandFilesList = false)
+    {
+        return $this->delete($fileOrFiles, $expandFilesList);
+    }
+
+    /**
+     * Updates existing archive by adding new files
+     *
+     * @param string[] $fileOrFiles See [[archiveFiles]] method for file list format.
+     * @return int|bool Number of added files
+     * @throws ArchiveModificationException
+     * @throws EmptyFileListException
+     * @throws UnsupportedOperationException
+     * @deprecated See {{UnifiedArchive::add}}
+     */
+    public function addFiles($fileOrFiles)
+    {
+        return $this->add($fileOrFiles);
+    }
+
+    /**
+     * Creates an archive with passed files list
+     *
+     * @param string|string[]|array<string,string> $fileOrFiles List of files. Can be one of three formats:
+     *                             1. A string containing path to file or directory.
+     *                                  File will have it's basename.
+     *                                  `UnifiedArchive::archiveFiles('/etc/php.ini', 'archive.zip)` will store
+     * file with 'php.ini' name.
+     *                                  Directory contents will be stored in archive root.
+     *                                  `UnifiedArchive::archiveFiles('/var/log/', 'archive.zip')` will store all
+     * directory contents in archive root.
+     *                             2. An array with strings containing pats to files or directories.
+     *                                  Files and directories will be stored with full paths.
+     *                                  `UnifiedArchive::archiveFiles(['/etc/php.ini', '/var/log/'], 'archive.zip)`
+     * will preserve full paths.
+     *                             3. An array with strings where keys are strings.
+     *                                  Files will have name from key.
+     *                                  Directories contents will have prefix from key.
+     *                                  `UnifiedArchive::archiveFiles(['doc.txt' => 'very_long_name_of_document.txt',
+     *  'static' => '/var/www/html/static/'], 'archive.zip')`
+     *
+     * @param string $archiveName File name of archive. Type of archive will be determined by it's name.
+     * @param int $compressionLevel Level of compression
+     * @param string|null $password
+     * @param callable|null $fileProgressCallable
+     * @return int Count of stored files is returned.
+     * @throws FileAlreadyExistsException
+     * @throws UnsupportedOperationException
+     * @deprecated See {{UnifiedArchive::archive}}
+     */
+    public static function archiveFiles(
+        $fileOrFiles,
+        $archiveName,
+        $compressionLevel = BasicDriver::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    )
+    {
+        return static::archive($fileOrFiles, $archiveName, $compressionLevel, $password, $fileProgressCallable);
     }
 }

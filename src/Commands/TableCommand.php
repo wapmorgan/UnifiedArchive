@@ -62,7 +62,7 @@ class TableCommand extends BaseArchiveCommand
 
         $rows = [];
 
-        foreach ($archive->getFileNames($filter) as $i => $file) {
+        foreach ($archive->getFiles($filter) as $i => $file) {
             $details = $archive->getFileData($file);
 
             if ($human_readable_size) {

@@ -92,6 +92,7 @@ composer require pear/archive_tar
 ```
 
 ## Usage
+
 ```php
 use \wapmorgan\UnifiedArchive\UnifiedArchive;
 
@@ -104,11 +105,11 @@ if (disk_free_space($output_dir) < $archive->getOriginalSize()) {
     throw new \RuntimeException('No needed space available. Need ' . ($archive->getOriginalSize() - disk_free_space($output_dir)) . ' byte(s) more');
 }
 
-$extracted = $archive->extractFiles($output_dir);
+$extracted = $archive->extract($output_dir);
 echo 'Number of extracted files' . $extracted.PHP_EOL;
 
 # Archiving
-UnifiedArchive::archiveFiles([
+UnifiedArchive::archive([
     'README.md' => '/default/path/to/README.md',
     '' => '/folder/with/content/',
 ], 'archive.zip');

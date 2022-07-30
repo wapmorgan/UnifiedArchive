@@ -23,7 +23,7 @@ class TestCommand extends BaseArchiveCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $archive = $this->getArchive($input, $output);
-        $files = $archive->getFileNames($input->getArgument('filter'));
+        $files = $archive->getFiles($input->getArgument('filter'));
 
         $errored = [];
         foreach ($files as $file) {

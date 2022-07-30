@@ -32,7 +32,7 @@ class ExtractFilesCommand extends BaseArchiveCommand
         $archive = $this->getArchive($input, $output);
         $entry_selector = $input->getArgument('entrySelector');
 
-        $archive->extractFiles($output_dir, $entry_selector, true);
+        $archive->extract($output_dir, $entry_selector, true);
         $output->writeln('<info>Extracted:</info> ' . implode(', ', $entry_selector) . ' (' . count($entry_selector) . ') file(s)');
 
         return 0;

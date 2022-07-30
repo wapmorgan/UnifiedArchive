@@ -32,7 +32,7 @@ class DeleteFileCommand extends BaseFileCommand
          */
         list($archive, $file) = $this->getArchiveAndFile($input, $output);
 
-        $archive->deleteFiles($file);
+        $archive->delete($file);
         $output->writeln('<comment>- file "' . $file . '"</comment>');
 
         return 0;

@@ -24,7 +24,7 @@ class FoldersCommand extends BaseArchiveCommand
         $archive = $this->getArchive($input, $output);
 
         $folders = [];
-        foreach ($archive->getFileNames() as $file) {
+        foreach ($archive->getFiles() as $file) {
             $file_folder = dirname($file);
             if (empty($file_folder)) {
                 $file_folder = '/';

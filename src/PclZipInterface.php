@@ -183,7 +183,7 @@ class PclZipInterface
                 if (strlen(basename($file_header->stored_filename)) > 255)
                     $file_header->status = 'filename_too_long';
                 if (is_file($filename)) {
-                    $this->archive->addFiles([
+                    $this->archive->add([
                         $file_header->stored_filename => $file_header->filename,
                     ]);
                 } else if (is_dir($filename)) {
@@ -211,7 +211,7 @@ class PclZipInterface
     {
         $filesList = [];
 
-        foreach ($this->archive->getFileNames() as $i => $fileName) {
+        foreach ($this->archive->getFiles() as $i => $fileName) {
             $fileData = $this->archive->getFileData($fileName);
 
             $filesList[] = [
@@ -468,7 +468,7 @@ class PclZipInterface
                     $file_header->filename, $file_header->index)
                 === self::SELECT_FILTER_REFUSE) {
                 // delete file from archive
-                if ($this->archive->deleteFiles($file_header->stored_filename)) {
+                if ($this->archive->delete($file_header->stored_filename)) {
                     // ok
                     continue;
                 }
@@ -520,7 +520,7 @@ class PclZipInterface
         if (!mkdir($tempDir)) return 0;
 
         // go through archive content list and copy all files
-        foreach ($a->getFileNames() as $filename) {
+        foreach ($a->getFiles() as $filename) {
             // dir merging process
             if (in_array(substr($filename, -1), array('/', '\\'))) {
                 $this->archive->addEmptyDir(rtrim($filename, '/\\'));

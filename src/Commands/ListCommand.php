@@ -36,7 +36,7 @@ class ListCommand extends BaseArchiveCommand
 
         if ($long_format) {
             $uncomp_size_length = $comp_size_length = 0;
-            foreach ($archive->getFileNames($filter) as $file) {
+            foreach ($archive->getFiles($filter) as $file) {
                 $details = $archive->getFileData($file);
 
                 if ($human_readable_size) {
@@ -57,7 +57,7 @@ class ListCommand extends BaseArchiveCommand
                 }
             }
 
-            foreach ($archive->getFileNames($filter) as $file) {
+            foreach ($archive->getFiles($filter) as $file) {
                 $details = $archive->getFileData($file);
                 $output->writeln(($details->isCompressed && $details->uncompressedSize > 0 ? 'x' : '-')
                                  . ' ' . str_pad(
@@ -73,7 +73,7 @@ class ListCommand extends BaseArchiveCommand
                                  . ' ' . $this->formatDateShort($details->modificationTime) . ' ' . $details->path);
             }
         } else {
-            foreach ($archive->getFileNames($filter) as $file) {
+            foreach ($archive->getFiles($filter) as $file) {
                 $output->writeln($file);
             }
         }
