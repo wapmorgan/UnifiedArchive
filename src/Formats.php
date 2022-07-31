@@ -70,6 +70,38 @@ class Formats
     /** @var array List of all drivers with formats and support-state */
     protected static $supportedDriversFormats;
 
+    protected static $oneLevelExtensions = [
+        'zip' => Formats::ZIP,
+        'jar' => Formats::ZIP,
+        '7z' => Formats::SEVEN_ZIP,
+        'rar' => Formats::RAR,
+        'gz' => Formats::GZIP,
+        'bz2' => Formats::BZIP,
+        'xz' => Formats::LZMA,
+        'iso' => Formats::ISO,
+        'cab' => Formats::CAB,
+        'tar' => Formats::TAR,
+        'tgz' => Formats::TAR_GZIP,
+        'tbz2' => Formats::TAR_BZIP,
+        'txz' => Formats::TAR_LZMA,
+        'arj' => Formats::ARJ,
+        'efi' => Formats::UEFI,
+        'gpt' => Formats::GPT,
+        'mbr' => Formats::MBR,
+        'msi' => Formats::MSI,
+        'dmg' => Formats::DMG,
+        'rpm' => Formats::RPM,
+        'deb' => Formats::DEB,
+        'udf' => Formats::UDF,
+    ];
+
+    protected static $twoLevelExtensions = [
+        'tar.gz' => Formats::TAR_GZIP,
+        'tar.bz2' => Formats::TAR_BZIP,
+        'tar.xz' => Formats::TAR_LZMA,
+        'tar.z' => Formats::TAR_LZW,
+    ];
+
     protected static $mimeTypes = [
         'application/zip' => Formats::ZIP,
         'application/x-7z-compressed' => Formats::SEVEN_ZIP,
@@ -94,73 +126,30 @@ class Formats
      */
     public static function detectArchiveFormat($fileName, $contentCheck = true)
     {
-        // by file name
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $fileName = strtolower($fileName);
 
-        if (stripos($fileName, '.tar.') !== false && preg_match('~\.(?<ext>tar\.(gz|bz2|xz|z))$~', strtolower($fileName), $match)) {
-            switch ($match['ext']) {
-                case 'tar.gz':
-                    return Formats::TAR_GZIP;
-                case 'tar.bz2':
-                    return Formats::TAR_BZIP;
-                case 'tar.xz':
-                    return Formats::TAR_LZMA;
-                case 'tar.z':
-                    return Formats::TAR_LZW;
+        // by file name
+        $ld_offset = strrpos($fileName, '.');
+        if ($ld_offset !== false) {
+            $ext = substr($fileName, $ld_offset + 1);
+            $sld_offset = strrpos($fileName, '.', - (strlen($ext) + 1));
+            if ($sld_offset !== false) {
+                $complex_ext = substr($fileName, $sld_offset + 1);
+                if (isset(static::$twoLevelExtensions[$complex_ext])) {
+                    return static::$twoLevelExtensions[$complex_ext];
+                }
+            }
+            if (isset(static::$oneLevelExtensions[$ext])) {
+                return static::$oneLevelExtensions[$ext];
             }
         }
 
-        switch ($ext) {
-            case 'zip':
-            case 'jar':
-                return Formats::ZIP;
-            case '7z':
-                return Formats::SEVEN_ZIP;
-            case 'rar':
-                return Formats::RAR;
-            case 'gz':
-                return Formats::GZIP;
-            case 'bz2':
-                return Formats::BZIP;
-            case 'xz':
-                return Formats::LZMA;
-            case 'iso':
-                return Formats::ISO;
-            case 'cab':
-                return Formats::CAB;
-            case 'tar':
-                return Formats::TAR;
-            case 'tgz':
-                return Formats::TAR_GZIP;
-            case 'tbz2':
-                return Formats::TAR_BZIP;
-            case 'txz':
-                return Formats::TAR_LZMA;
-            case 'arj':
-                return Formats::ARJ;
-            case 'efi':
-                return Formats::UEFI;
-            case 'gpt':
-                return Formats::GPT;
-            case 'mbr':
-                return Formats::MBR;
-            case 'msi':
-                return Formats::MSI;
-            case 'dmg':
-                return Formats::DMG;
-            case 'rpm':
-                return Formats::RPM;
-            case 'deb':
-                return Formats::DEB;
-            case 'udf':
-                return Formats::UDF;
-        }
-
         // by file content
-        if ($contentCheck) {
+        if ($contentCheck && function_exists('mime_content_type')) {
             $mime_type = mime_content_type($fileName);
-            if (isset(static::$mimeTypes[$mime_type]))
+            if (isset(static::$mimeTypes[$mime_type])) {
                 return static::$mimeTypes[$mime_type];
+            }
         }
 
         return false;
@@ -288,16 +277,20 @@ class Formats
     }
 
     /**
-     * @param array $ints
-     * @return int|mixed
+     * @param string $archiveFormat
+     * @return int|string|null
      */
-    protected static function flatArrayToInt(array $ints)
+    public static function getFormatExtension($archiveFormat)
     {
-        $result = 0;
-        foreach ($ints as $int) {
-            $result |= $int;
+        $complex_ext = array_search($archiveFormat, static::$twoLevelExtensions);
+        if ($complex_ext !== false) {
+            return $complex_ext;
         }
-        return $result;
+        $ext = array_search($archiveFormat, static::$oneLevelExtensions);
+        if ($ext !== false) {
+            return $ext;
+        }
+        return null;
     }
 
     /**

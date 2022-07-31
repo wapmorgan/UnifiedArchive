@@ -7,6 +7,7 @@ use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats;
 
 abstract class BasicDriver
 {
@@ -126,7 +127,15 @@ abstract class BasicDriver
         $password = null,
         $fileProgressCallable = null
     ) {
-        throw new UnsupportedOperationException();
+        $format_extension = Formats::getFormatExtension($archiveFormat);
+        do {
+            $temp_file = tempnam(sys_get_temp_dir(), 'temp_archive') . '.' . $format_extension;
+        } while (file_exists($temp_file));
+
+        $created = static::createArchive($files, $temp_file, $archiveFormat, $compressionLevel, $password, $fileProgressCallable);
+        $string = file_get_contents($temp_file);
+        unlink($temp_file);
+        return $string;
     }
 
     /**
