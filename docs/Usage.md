@@ -17,9 +17,9 @@
     $archive = UnifiedArchive::open('filename.zip', null, 'password');
     // or
     $archive = UnifiedArchive::open('filename.tar', [
-        \wapmorgan\UnifiedArchive\Drivers\BasicDriver::EXTRACT_CONTENT,
-        \wapmorgan\UnifiedArchive\Drivers\BasicDriver::STREAM_CONTENT,
-        \wapmorgan\UnifiedArchive\Drivers\BasicDriver::APPEND,
+        \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver::EXTRACT_CONTENT,
+        \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver::STREAM_CONTENT,
+        \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver::APPEND,
     ]);
     // or
     $archive = UnifiedArchive::open('filename.7z', null, 'password');

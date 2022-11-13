@@ -109,7 +109,7 @@ $extracted = $archive->extract($output_dir);
 echo 'Number of extracted files' . $extracted.PHP_EOL;
 
 # Archiving
-UnifiedArchive::archive([
+UnifiedArchive::create([
     'README.md' => '/default/path/to/README.md',
     '' => '/folder/with/content/',
 ], 'archive.zip');

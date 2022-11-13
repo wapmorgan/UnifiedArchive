@@ -4,6 +4,7 @@ namespace wapmorgan\UnifiedArchive\Drivers;
 use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 
 class Rar extends BasicDriver
@@ -59,18 +60,11 @@ class Rar extends BasicDriver
                 return [
                     BasicDriver::OPEN,
                     BasicDriver::OPEN_ENCRYPTED,
+                    BasicDriver::OPEN_VOLUMED,
                     BasicDriver::EXTRACT_CONTENT,
                     BasicDriver::STREAM_CONTENT,
                 ];
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function canStream($format)
-    {
-        return true;
     }
 
     /**
@@ -90,7 +84,11 @@ class Rar extends BasicDriver
      */
     protected function open($archiveFileName, $password)
     {
-        $this->rar = \RarArchive::open($archiveFileName, $password);
+        $this->rar = \RarArchive::open($archiveFileName, $password, function ($vol) {
+            var_dump($vol);
+            return null;
+        });
+        $this->rar->setAllowBroken(true);
         if ($this->rar === false) {
             throw new Exception('Could not open Rar archive');
         }

@@ -6,7 +6,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 
 class FormatsCommand extends BaseCommand
@@ -59,7 +59,7 @@ class FormatsCommand extends BaseCommand
         $table->setHeaders($headers);
         $rows = [];
 
-        /** @var BasicDriver $driverClass */
+        /** @var \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver $driverClass */
         foreach (Formats::$drivers as $driverClass) {
             $row = [
                 substr($driverClass, strrpos($driverClass, '\\') + 1),

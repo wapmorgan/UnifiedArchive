@@ -6,7 +6,7 @@ use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 
 class DriversCommand extends BaseCommand
@@ -28,7 +28,7 @@ class DriversCommand extends BaseCommand
         /** @var FormatterHelper $formatter */
         $formatter = $this->getHelper('formatter');
 
-        /** @var BasicDriver $driverClass */
+        /** @var \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver $driverClass */
         foreach (Formats::$drivers as $driverClass) {
             $description = $driverClass::getDescription();
             if (!$driverClass::isInstalled()) {
@@ -54,7 +54,7 @@ class DriversCommand extends BaseCommand
         $i = 0;
         foreach ($drivers as $type => $typeDrivers) {
             /**
-             * @var BasicDriver $typeDriverClass
+             * @var \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver $typeDriverClass
              * @var array $typeDriverConfig
              */
             foreach ($typeDrivers as $typeDriverClass => $typeDriverConfig) {

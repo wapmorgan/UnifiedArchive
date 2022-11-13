@@ -4,7 +4,7 @@ namespace wapmorgan\UnifiedArchive\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 
 class InfoCommand extends BaseArchiveCommand
 {

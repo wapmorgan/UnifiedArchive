@@ -1,5 +1,5 @@
 <?php
-namespace wapmorgan\UnifiedArchive\Drivers;
+namespace wapmorgan\UnifiedArchive\Drivers\Basic;
 
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
@@ -117,7 +117,7 @@ abstract class BasicDriver
      * @param int $compressionLevel
      * @param null $password
      * @param $fileProgressCallable
-     * @return int Number of archived files
+     * @return string Content of archive
      * @throws UnsupportedOperationException
      */
     public static function createArchiveInString(
@@ -129,12 +129,13 @@ abstract class BasicDriver
     ) {
         $format_extension = Formats::getFormatExtension($archiveFormat);
         do {
-            $temp_file = tempnam(sys_get_temp_dir(), 'temp_archive') . '.' . $format_extension;
-        } while (file_exists($temp_file));
-
-        $created = static::createArchive($files, $temp_file, $archiveFormat, $compressionLevel, $password, $fileProgressCallable);
-        $string = file_get_contents($temp_file);
-        unlink($temp_file);
+            $temp_file = tempnam(sys_get_temp_dir(), 'temp_archive');
+            unlink($temp_file);
+            $archive_file =  $temp_file . '.' . $format_extension;
+        } while (file_exists($archive_file));
+        $created = static::createArchive($files, $archive_file, $archiveFormat, $compressionLevel, $password, $fileProgressCallable);
+        $string = file_get_contents($archive_file);
+        unlink($archive_file);
         return $string;
     }
 
@@ -253,11 +254,10 @@ abstract class BasicDriver
 
     /**
      * @return string|null
-     * @throws UnsupportedOperationException
      */
     public function getComment()
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     /**

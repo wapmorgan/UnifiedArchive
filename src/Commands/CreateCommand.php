@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class CreateCommand extends BaseCommand
@@ -27,6 +27,8 @@ class CreateCommand extends BaseCommand
             ->addOption('compression', NULL, InputOption::VALUE_OPTIONAL, 'Compression level for new archive. Variants: none, weak, average, strong, maximum.', 'average')
             ->addOption('comment', NULL, InputOption::VALUE_OPTIONAL, 'Comment for new archive')
             ->addOption('path', NULL, InputOption::VALUE_OPTIONAL, 'Path resolving if destination is not passed. Variants: full, root, relative, basename', 'root')
+            ->addOption('stdout', NULL, InputOption::VALUE_NONE, 'Print archive to stdout')
+            ->addOption('format', NULL, InputOption::VALUE_REQUIRED, 'Format')
             ->addOption('dry-run', NULL, InputOption::VALUE_NONE, 'Do not perform real archiving. Just print prepared data')
         ;
     }
@@ -39,6 +41,10 @@ class CreateCommand extends BaseCommand
         'maximum' => BasicDriver::COMPRESSION_MAXIMUM,
     ];
 
+    /**
+     * @throws \wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException
+     * @throws \wapmorgan\UnifiedArchive\Exceptions\FileAlreadyExistsException
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $archive_file = $input->getArgument('archive');
@@ -56,6 +62,7 @@ class CreateCommand extends BaseCommand
         }
         $dry_run = $input->getOption('dry-run');
         $comment = $input->getOption('comment');
+        $stdout = $input->getOption('stdout');
 
         if (file_exists($archive_file)) {
             if (is_dir($archive_file))
@@ -73,11 +80,21 @@ class CreateCommand extends BaseCommand
                 case 'full':
                     $destination = ltrim($file_to_pack, '/');
                     $files_list[$destination] = $file_to_pack;
-                    $output->writeln('<comment>' . $file_to_pack . ' => ' . $destination . '</comment>', OutputInterface::VERBOSITY_VERBOSE);
+                    if (!$stdout) {
+                        $output->writeln(
+                            '<comment>' . $file_to_pack . ' => ' . $destination . '</comment>',
+                            OutputInterface::VERBOSITY_VERBOSE
+                        );
+                    }
                     break;
                 case 'root':
                     if (is_dir($file_to_pack)) {
-                        $output->writeln('<comment>' . $file_to_pack . ' => root</comment>', OutputInterface::VERBOSITY_VERBOSE);
+                        if (!$stdout) {
+                            $output->writeln(
+                                '<comment>' . $file_to_pack . ' => root</comment>',
+                                OutputInterface::VERBOSITY_VERBOSE
+                            );
+                        }
                         if (!isset($files_list[''])) {
                             $files_list[''] = $file_to_pack;
                         } elseif (is_string($files_list[''])) {
@@ -86,19 +103,34 @@ class CreateCommand extends BaseCommand
                             $files_list[''][] = $file_to_pack;
                         }
                     } else {
-                        $output->writeln('<comment>' . $file_to_pack . ' => ' . basename($file_to_pack) . '</comment>', OutputInterface::VERBOSITY_VERBOSE);
+                        if (!$stdout) {
+                            $output->writeln(
+                                '<comment>' . $file_to_pack . ' => ' . basename($file_to_pack) . '</comment>',
+                                OutputInterface::VERBOSITY_VERBOSE
+                            );
+                        }
                         $files_list[basename($file_to_pack)] = $file_to_pack;
                     }
                     break;
                 case 'relative':
                     $destination = ltrim($file_to_pack, '/.');
                     $files_list[$destination] = $file_to_pack;
-                    $output->writeln('<comment>' . $file_to_pack . ' => ' . $destination . '</comment>', OutputInterface::VERBOSITY_VERBOSE);
+                    if (!$stdout) {
+                        $output->writeln(
+                            '<comment>' . $file_to_pack . ' => ' . $destination . '</comment>',
+                            OutputInterface::VERBOSITY_VERBOSE
+                        );
+                    }
                     break;
                 case 'basename':
                     $destination = basename($file_to_pack);
                     $files_list[$destination] = $file_to_pack;
-                    $output->writeln('<comment>' . $file_to_pack . ' => ' . $destination . '</comment>', OutputInterface::VERBOSITY_VERBOSE);
+                    if (!$stdout) {
+                        $output->writeln(
+                            '<comment>' . $file_to_pack . ' => ' . $destination . '</comment>',
+                            OutputInterface::VERBOSITY_VERBOSE
+                        );
+                    }
                     break;
             }
         }
@@ -121,11 +153,14 @@ class CreateCommand extends BaseCommand
 
         ProgressBar::setFormatDefinition('archiving', '  %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%: %message%');
 
+        if ($stdout) {
+            $archived_files = UnifiedArchive::createInString($files_list, $archive_file, $compression, $password);
+        }
         $progressBar = new ProgressBar($output, $information['numberOfFiles']);
         $progressBar->setFormat('archiving');
         $progressBar->start();
-        $archived_files = UnifiedArchive::archive($files_list, $archive_file, $compression, $password, function ($currentFile, $totalFiles, $fsFilename, $archiveFilename)
-            use ($progressBar) {
+        $archived_files = UnifiedArchive::create($files_list, $archive_file, $compression, $password, function ($currentFile, $totalFiles, $fsFilename, $archiveFilename)
+        use ($progressBar) {
             if ($fsFilename === null) {
                 $progressBar->setMessage('Creating ' . $archiveFilename);
             } else {
@@ -146,9 +181,11 @@ class CreateCommand extends BaseCommand
             $archive->setComment($comment);
         }
 
-        $output->writeln('Created <info>' . $archive_file . '</info> with <comment>' . $archived_files . '</comment> file(s) ('
-                         . implode($this->formatSize($archive->getOriginalSize())) . ') of total size '
-                         . implode($this->formatSize(filesize($archive_file))));
+        $output->writeln(
+            'Created <info>' . $archive_file . '</info> with <comment>' . $archived_files . '</comment> file(s) ('
+            . implode($this->formatSize($archive->getOriginalSize())) . ') of total size '
+            . implode($this->formatSize(filesize($archive_file)))
+        );
 
         return 0;
     }

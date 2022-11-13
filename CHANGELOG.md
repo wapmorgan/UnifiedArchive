@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.1.8 - Sep XX, 2022
+- Renamed methods of `UnifiedArchive`: `oldName => newName`
+  - `getFileNames` => `getFiles`
+  - `extractFiles` => `extract`
+  - `addFiles` => `add`
+  - `deleteFiles` => `delete`
+  - `archiveFiles` => `archive`
+  - Old methods are still exist, but marked as deprecated and will be deleted in next minor release (1.2.x).
+- Marked as deprecated:
+  - `UnifiedArchive::detectArchiveType`
+- Added method: `Formtas::getFormatExtension($archiveFormat)`
+
 ## 1.1.7 - Jul 31, 2022
 - `open` does not throw an Exception, it returns null
 - returned deleted methods in UnifiedArchive: `canOpenArchive`, `canOpenType`, `canCreateType`, `getArchiveType`, `detectArchiveType`, `getFileResource`, `getArchiveFormat`, `isFileExists`, `getArchiveSize`, `countCompressedFilesSize`, `countUncompressedFilesSize`.
@@ -14,7 +26,7 @@
 **New features**:
 - Added passing needed abilities to **UnifiedArchive::open()** to select a better driver:
     ```php
-    use \wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+    use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 
     # opens an array with driver, that supports content streaming and appending
     $archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.7z', [BasicDriver::STREAM_CONTENT, BasicDriver::APPEND]);
@@ -138,8 +150,7 @@ Cleaned package.
 - `UnifiedArchive::canOpenArchive` -> `UnifiedArchive::canOpen`
 - `UnifiedArchive::canCreateType` -> `Formats::canCreate`
 - `UnifiedArchive->getArchiveType` -> `UnifiedArchive->getArchiveFormat`
-
-Old methods exist, but marked as deprecated.
+- Old methods exist, but marked as deprecated.
 
 ## 1.0.1 - Nov 28, 2020
 

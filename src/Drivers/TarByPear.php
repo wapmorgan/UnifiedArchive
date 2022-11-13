@@ -5,7 +5,7 @@ use Archive_Tar;
 use Vtiful\Kernel\Format;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -14,7 +14,7 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\LzwStreamWrapper;
 
-class TarByPear extends BasicDriver
+class TarByPear extends Basic\BasicDriver
 {
     const TYPE = self::TYPE_PURE_PHP;
 
@@ -84,8 +84,8 @@ class TarByPear extends BasicDriver
         $abilities = [
             BasicDriver::OPEN,
             BasicDriver::EXTRACT_CONTENT,
-            BasicDriver::APPEND,
-            BasicDriver::CREATE,
+            Basic\BasicDriver::APPEND,
+            Basic\BasicDriver::CREATE,
         ];
 
         switch ($format) {

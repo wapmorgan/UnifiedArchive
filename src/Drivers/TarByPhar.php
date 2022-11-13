@@ -9,13 +9,15 @@ use PharFileInfo;
 use RecursiveIteratorIterator;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicExtensionDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
-class TarByPhar extends BasicDriver
+class TarByPhar extends BasicExtensionDriver
 {
     const TYPE = self::TYPE_EXTENSION;
     public static $disabled = false;

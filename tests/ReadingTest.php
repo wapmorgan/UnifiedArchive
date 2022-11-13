@@ -98,9 +98,11 @@ class ReadingTest extends PhpUnitTestCase
         $flatten_list = [];
         $this->flattenFilesList(null, self::$fixtureContents, $flatten_list);
 
+        $this->assertNull($archive->getComment());
+
         // test uncompressed archive size calculation
         $this->assertEquals(array_sum(array_map('strlen', $flatten_list)), $archive->getOriginalSize(),
-        'Uncompressed size of archive should be equal to real files size');
+            'Uncompressed size of archive should be equal to real files size');
 
         $expected_files = array_keys($flatten_list);
         sort($expected_files);

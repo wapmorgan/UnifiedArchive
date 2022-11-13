@@ -5,7 +5,11 @@ namespace wapmorgan\UnifiedArchive\Drivers;
 use PhpZip\ZipFile;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Commands\BaseArchiveCommand;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class NelexaZip extends BasicDriver
@@ -57,9 +61,23 @@ class NelexaZip extends BasicDriver
             BasicDriver::EXTRACT_CONTENT,
             BasicDriver::APPEND,
             BasicDriver::DELETE,
+            BasicDriver::CREATE,
+            BasicDriver::CREATE_ENCRYPTED,
+            BasicDriver::CREATE_IN_STRING,
         ];
     }
 
+    /**
+     * @param array $files
+     * @param $archiveFileName
+     * @param $archiveFormat
+     * @param $compressionLevel
+     * @param $password
+     * @param $fileProgressCallable
+     * @return int
+     * @throws ArchiveCreationException
+     * @throws UnsupportedOperationException
+     */
     public static function createArchive(
         array $files,
         $archiveFileName,
@@ -68,7 +86,59 @@ class NelexaZip extends BasicDriver
         $password = null,
         $fileProgressCallable = null)
     {
+        if ($fileProgressCallable !== null && !is_callable($fileProgressCallable)) {
+            throw new ArchiveCreationException('File progress callable is not callable');
+        }
 
+        try {
+            $current_file = 0;
+            $total_files = count($files);
+
+            $zipFile = new \PhpZip\ZipFile();
+            foreach ($files as $archiveName => $localName) {
+                $zipFile->addFile($archiveName, $archiveFormat);
+                if ($fileProgressCallable !== null) {
+                    call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $localName, $archiveName]);
+                }
+            }
+            if ($password !== null) {
+                $zipFile->setPassword($password);
+            }
+            $zipFile->saveAsFile($archiveFileName)->close();
+        } catch (\Exception $e) {
+            throw new ArchiveCreationException('Could not create archive: '.$e->getMessage(), $e->getCode(), $e);
+        }
+        return count($files);
+    }
+
+    /**
+     * @param array $files
+     * @param string $archiveFormat
+     * @param int $compressionLevel
+     * @param string $password
+     * @param callable|null $fileProgressCallable
+     * @return string Content of archive
+     * @throws ArchiveCreationException
+     */
+    public static function createArchiveInString(
+        array $files,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    ) {
+        try {
+            $zipFile = new \PhpZip\ZipFile();
+            foreach ($files as $localName => $archiveName) {
+                $zipFile->addFile($localName, $archiveFormat);
+            }
+            if ($password !== null) {
+                $zipFile->setPassword($password);
+            }
+            return $zipFile->outputAsString();
+        } catch (\Exception $e) {
+            throw new ArchiveCreationException('Could not create archive: '.$e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**

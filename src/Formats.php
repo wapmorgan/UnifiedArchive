@@ -2,7 +2,7 @@
 namespace wapmorgan\UnifiedArchive;
 
 use wapmorgan\UnifiedArchive\Drivers\AlchemyZippy;
-use wapmorgan\UnifiedArchive\Drivers\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Cab;
 use wapmorgan\UnifiedArchive\Drivers\Iso;
 use wapmorgan\UnifiedArchive\Drivers\NelexaZip;
@@ -132,12 +132,13 @@ class Formats
         $ld_offset = strrpos($fileName, '.');
         if ($ld_offset !== false) {
             $ext = substr($fileName, $ld_offset + 1);
-            $sld_offset = strrpos($fileName, '.', - (strlen($ext) + 1));
+            $sld_offset = strrpos($fileName, '.', - (strlen($ext) + 2)); // 1 byte for ., 1 for another char
             if ($sld_offset !== false) {
                 $complex_ext = substr($fileName, $sld_offset + 1);
                 if (isset(static::$twoLevelExtensions[$complex_ext])) {
                     return static::$twoLevelExtensions[$complex_ext];
-                }
+                } else
+                exit;
             }
             if (isset(static::$oneLevelExtensions[$ext])) {
                 return static::$oneLevelExtensions[$ext];

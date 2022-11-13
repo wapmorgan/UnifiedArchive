@@ -5,6 +5,7 @@ use Exception;
 use wapmorgan\UnifiedArchive\Archive7z;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -389,13 +390,13 @@ class SevenZip extends BasicDriver
             if ($password !== null)
                 $seven_zip->setPassword($password);
             $seven_zip->setCompressionLevel($compressionLevelMap[$compressionLevel]);
-            foreach ($files as $localName => $filename) {
-                if ($filename !== null) {
-                    $seven_zip->addEntry($filename, true);
-                    $seven_zip->renameEntry($filename, $localName);
+            foreach ($files as $archiveName => $localName) {
+                if ($localName !== null) {
+                    $seven_zip->addEntry($localName, true);
+                    $seven_zip->renameEntry($localName, $archiveName);
                 }
                 if ($fileProgressCallable !== null) {
-                    call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $filename, $localName]);
+                    call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $localName, $archiveName]);
                 }
             }
             unset($seven_zip);
