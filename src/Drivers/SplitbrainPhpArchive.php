@@ -3,32 +3,20 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
+use wapmorgan\UnifiedArchive\Formats;
 
-class SplitbrainPhpArchive extends BasicDriver
+class SplitbrainPhpArchive extends BasicPureDriver
 {
+    const PACKAGE_NAME = 'splitbrain/php-archive';
+    const MAIN_CLASS = '\\splitbrain\\PHPArchive\\Tar';
 
     /**
      * @inheritDoc
      */
     public static function getDescription()
     {
-        // TODO: Implement getDescription() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function isInstalled()
-    {
-        // TODO: Implement isInstalled() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        // TODO: Implement getInstallationInstruction() method.
+        return 'php-library for zip/tar (with gzip/bzip-compression)';
     }
 
     /**
@@ -36,7 +24,12 @@ class SplitbrainPhpArchive extends BasicDriver
      */
     public static function getSupportedFormats()
     {
-        // TODO: Implement getSupportedFormats() method.
+        return [
+            Formats::ZIP,
+            Formats::TAR,
+            Formats::TAR_GZIP,
+            Formats::TAR_BZIP,
+        ];
     }
 
     /**
@@ -44,7 +37,31 @@ class SplitbrainPhpArchive extends BasicDriver
      */
     public static function checkFormatSupport($format)
     {
-        // TODO: Implement checkFormatSupport() method.
+        if (!static::isInstalled()) {
+            return [];
+        }
+
+        if (
+            ($format === Formats::TAR_BZIP && !extension_loaded('bzip2'))
+            || ($format === Formats::TAR_GZIP && !extension_loaded('zlib'))
+        ) {
+            return [];
+        }
+
+        switch ($format) {
+            case Formats::ZIP:
+            case Formats::TAR:
+            case Formats::TAR_GZIP;
+            case Formats::TAR_BZIP;
+                return [
+                    BasicDriver::OPEN,
+//                    BasicDriver::EXTRACT_CONTENT,
+                    BasicDriver::APPEND,
+                    BasicDriver::CREATE,
+                    BasicDriver::CREATE_ENCRYPTED,
+                    BasicDriver::CREATE_IN_STRING,
+                ];
+        }
     }
 
     /**

@@ -7,14 +7,16 @@ use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Commands\BaseArchiveCommand;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
-class NelexaZip extends BasicDriver
+class NelexaZip extends BasicPureDriver
 {
-    const TYPE = self::TYPE_PURE_PHP;
+    const PACKAGE_NAME = 'nelexa/zip';
+    const MAIN_CLASS = '\\PhpZip\\ZipFile';
 
     /**
      * @var ZipFile
@@ -29,16 +31,6 @@ class NelexaZip extends BasicDriver
     public static function getDescription()
     {
         return 'nelexa/zip driver';
-    }
-
-    public static function isInstalled()
-    {
-        return class_exists('\\PhpZip\\ZipFile');
-    }
-
-    public static function getInstallationInstruction()
-    {
-        return 'install library [nelexa/zip]: `composer require nelexa/zip`';
     }
 
     public static function getSupportedFormats()

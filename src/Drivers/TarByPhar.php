@@ -19,7 +19,8 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class TarByPhar extends BasicExtensionDriver
 {
-    const TYPE = self::TYPE_EXTENSION;
+    const EXTENSION_NAME = 'phar';
+
     public static $disabled = false;
 
     /**
@@ -38,11 +39,6 @@ class TarByPhar extends BasicExtensionDriver
      * @var int Flags for iterator
      */
     const PHAR_FLAGS = FilesystemIterator::UNIX_PATHS;
-
-    public static function isInstalled()
-    {
-        return extension_loaded('phar');
-    }
 
     /**
      * @inheritDoc

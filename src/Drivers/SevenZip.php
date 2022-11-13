@@ -6,6 +6,7 @@ use wapmorgan\UnifiedArchive\Archive7z;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicUtilityDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -13,10 +14,8 @@ use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
-class SevenZip extends BasicDriver
+class SevenZip extends BasicUtilityDriver
 {
-    const TYPE = self::TYPE_UTILITIES;
-
     /** @var Archive7z */
     protected $sevenZip;
 
@@ -138,6 +137,7 @@ class SevenZip extends BasicDriver
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
     public function __construct($archiveFileName, $format, $password = null)
     {

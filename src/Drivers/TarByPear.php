@@ -6,6 +6,7 @@ use Vtiful\Kernel\Format;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -14,10 +15,8 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\LzwStreamWrapper;
 
-class TarByPear extends Basic\BasicDriver
+class TarByPear extends BasicPureDriver
 {
-    const TYPE = self::TYPE_PURE_PHP;
-
     /**
      * @var Archive_Tar
      */
@@ -41,11 +40,6 @@ class TarByPear extends Basic\BasicDriver
     public static function getDescription()
     {
         return 'php-library for tar';
-    }
-
-    public static function isInstalled()
-    {
-        return class_exists('\Archive_Tar');
     }
 
     /**

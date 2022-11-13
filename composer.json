@@ -12,12 +12,7 @@
 	],
 	"require": {
 		"php": ">=5.5.0",
-		"ext-fileinfo": "*",
-		"gemorroj/archive7z": "^5.4",
-		"nelexa/zip": "^4.0",
-		"pear/archive_tar": "^1.4",
-		"phpclasses/php-iso-file": "^0.5.1",
-		"wapmorgan/cab-archive": "^0.0.7"
+		"ext-fileinfo": "*"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "~4.8|9.5.16",

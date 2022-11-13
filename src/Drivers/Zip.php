@@ -5,6 +5,7 @@ use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicExtensionDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveModificationException;
@@ -18,10 +19,8 @@ use ZipArchive;
  * @package wapmorgan\UnifiedArchive\Formats
  * @requires ext-zip
  */
-class Zip extends BasicDriver
+class Zip extends BasicExtensionDriver
 {
-    const TYPE = self::TYPE_EXTENSION;
-
     /** @var ZipArchive */
     protected $zip;
 
@@ -30,16 +29,6 @@ class Zip extends BasicDriver
     public static function getDescription()
     {
         return 'adapter for ext-zip'.(extension_loaded('zip') && defined('\ZipArchive::LIBZIP_VERSION') ? ' ('. ZipArchive::LIBZIP_VERSION.')' : null);
-    }
-
-    public static function isInstalled()
-    {
-        return extension_loaded('zip');
-    }
-
-    public static function getInstallationInstruction()
-    {
-        return 'install [zip] php extension';
     }
 
     /**

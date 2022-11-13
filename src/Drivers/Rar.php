@@ -5,12 +5,13 @@ use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicExtensionDriver;
 use wapmorgan\UnifiedArchive\Formats;
 
-class Rar extends BasicDriver
+class Rar extends BasicExtensionDriver
 {
     const NONE_RAR_COMPRESSION = 48;
-    const TYPE = self::TYPE_EXTENSION;
+    const EXTENSION_NAME = 'rar';
 
     /** @var \RarArchive */
     protected $rar;
@@ -21,11 +22,6 @@ class Rar extends BasicDriver
     public static function getDescription()
     {
         return 'adapter for ext-rar' . (self::isInstalled() ? ' (' . phpversion('rar') . ')' : null);
-    }
-
-    public static function isInstalled()
-    {
-        return extension_loaded('rar');
     }
 
     /**

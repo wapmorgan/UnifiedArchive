@@ -6,8 +6,7 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class Gzip extends OneFileDriver
 {
-    const FORMAT_SUFFIX = 'gz';
-    const PHP_EXTENSION = 'zlib';
+    const EXTENSION_NAME = 'zlib';
     const FORMAT = Formats::GZIP;
 
     /**

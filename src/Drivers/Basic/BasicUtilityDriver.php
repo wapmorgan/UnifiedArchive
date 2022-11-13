@@ -2,6 +2,7 @@
 
 namespace wapmorgan\UnifiedArchive\Drivers\Basic;
 
-class BasicUtilityDriver extends BasicDriver
+abstract class BasicUtilityDriver extends BasicDriver
 {
+    const TYPE = self::TYPE_UTILITIES;
 }

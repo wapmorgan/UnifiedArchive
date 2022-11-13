@@ -6,13 +6,15 @@ use Exception;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
-class Cab extends BasicDriver
+class Cab extends BasicPureDriver
 {
-    const TYPE = self::TYPE_PURE_PHP;
+    const PACKAGE_NAME = 'wapmorgan/cab-archive';
+    const MAIN_CLASS = '\CabArchive';
 
     /** @var CabArchive */
     protected $cab;
@@ -23,19 +25,6 @@ class Cab extends BasicDriver
     public static function getDescription()
     {
         return 'php-library';
-    }
-
-    public static function isInstalled()
-    {
-        return class_exists('\CabArchive');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return 'install library [wapmorgan/cab-archive]: `composer require wapmorgan/cab-archive`';
     }
 
     /**

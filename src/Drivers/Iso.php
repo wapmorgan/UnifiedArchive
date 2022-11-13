@@ -4,12 +4,14 @@ namespace wapmorgan\UnifiedArchive\Drivers;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
-class Iso extends BasicDriver
+class Iso extends BasicPureDriver
 {
-    const TYPE = self::TYPE_PURE_PHP;
+    const PACKAGE_NAME = 'phpclasses/php-iso-file';
+    const MAIN_CLASS = '\CISOFile';
 
     /** @var \CISOFile */
     protected $iso;
@@ -32,19 +34,6 @@ class Iso extends BasicDriver
     public static function getDescription()
     {
         return 'iso archives reader';
-    }
-
-    public static function isInstalled()
-    {
-        return class_exists('\CISOFile');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function getInstallationInstruction()
-    {
-        return 'install library [phpclasses/php-iso-file]: `composer require phpclasses/php-iso-file`';
     }
 
     /**

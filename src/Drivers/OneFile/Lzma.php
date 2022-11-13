@@ -13,8 +13,7 @@ use wapmorgan\UnifiedArchive\Formats;
  */
 class Lzma extends OneFileDriver
 {
-    const FORMAT_SUFFIX =  'xz';
-    const PHP_EXTENSION = 'xz';
+    const EXTENSION_NAME = 'xz';
     const FORMAT = Formats::LZMA;
 
     /**
@@ -22,7 +21,7 @@ class Lzma extends OneFileDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-xz'.(static::isInstalled() ? ' ('.phpversion(static::PHP_EXTENSION).')' : null);
+        return 'adapter for ext-xz'.(static::isInstalled() ? ' ('.phpversion(static::EXTENSION_NAME).')' : null);
     }
 
     /**
@@ -30,7 +29,7 @@ class Lzma extends OneFileDriver
      */
     public static function getInstallationInstruction()
     {
-        return 'install [xz] extension' . "\n" . 'For 5.x: https://github.com/payden/php-xz' . "\n" . 'For 7.x/8.x: https://github.com/codemasher/php-ext-xz';
+        return 'install [' . static::EXTENSION_NAME . '] extension' . "\n" . 'For 5.x: https://github.com/payden/php-xz' . "\n" . 'For 7.x/8.x: https://github.com/codemasher/php-ext-xz';
     }
 
     /**

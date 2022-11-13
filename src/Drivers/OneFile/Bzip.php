@@ -5,8 +5,7 @@ use wapmorgan\UnifiedArchive\Formats;
 
 class Bzip extends OneFileDriver
 {
-    const FORMAT_SUFFIX =  'bz2';
-    const PHP_EXTENSION = 'bz2';
+    const EXTENSION_NAME = 'bz2';
     const FORMAT = Formats::BZIP;
 
     /**
@@ -24,7 +23,7 @@ class Bzip extends OneFileDriver
      */
     public static function getDescription()
     {
-        return 'adapter for ext-bzip2'.(static::isInstalled() ? ' ('.phpversion(static::PHP_EXTENSION).')' : null);
+        return 'adapter for ext-bzip2'.(static::isInstalled() ? ' ('.phpversion(static::EXTENSION_NAME).')' : null);
     }
 
     /**

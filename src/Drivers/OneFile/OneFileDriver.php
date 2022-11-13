@@ -4,34 +4,22 @@ namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Drivers\Basic\BasicExtensionDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\EmptyFileListException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
+use wapmorgan\UnifiedArchive\Formats;
 
-abstract class OneFileDriver extends BasicDriver
+abstract class OneFileDriver extends BasicExtensionDriver
 {
     /** @var null|string Should be filled for real format like 'gz' or other */
-    const FORMAT_SUFFIX = null;
     const FORMAT = null;
-    const PHP_EXTENSION = null;
-
-    const TYPE = self::TYPE_EXTENSION;
 
     protected $fileName;
     protected $inArchiveFileName;
     protected $uncompressedSize;
     protected $modificationTime;
-
-    public static function isInstalled()
-    {
-        return extension_loaded(static::PHP_EXTENSION);
-    }
-
-    public static function getInstallationInstruction()
-    {
-        return 'install `' . static::PHP_EXTENSION . '` extension';
-    }
 
     public static function getSupportedFormats()
     {
@@ -55,16 +43,20 @@ abstract class OneFileDriver extends BasicDriver
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
+     * @throws \Exception
      */
     public function __construct($archiveFileName, $format, $password = null)
     {
-        if (static::FORMAT_SUFFIX === null)
-            throw new \Exception('Format should be initialized');
-        if ($password !== null)
-            throw new UnsupportedOperationException(self::FORMAT_SUFFIX.' archive does not support password!');
+        $suffix = Formats::getFormatExtension(static::FORMAT);
+        if ($suffix === null) {
+            throw new \Exception('Format suffix is empty for ' . static::FORMAT . ', it should be initialized!');
+        }
+        if ($password !== null) {
+            throw new UnsupportedOperationException($suffix . ' archive does not support password!');
+        }
 
         parent::__construct($archiveFileName, $format);
-
         $this->inArchiveFileName = basename($archiveFileName, '.'.static::FORMAT_SUFFIX);
     }
 
