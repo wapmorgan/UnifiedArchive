@@ -199,7 +199,7 @@ class NelexaZip extends BasicPureDriver
             $fileName,
             $info->getCompressedSize(),
             method_exists($info, 'getSize') ? $info->getSize() : $info->getUncompressedSize(),
-            $info->getMtime(),
+            $info->getMtime()->getTimestamp(),
             null,
             $info->getComment(),
             $info->getCrc()
