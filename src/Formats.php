@@ -139,8 +139,7 @@ class Formats
                 $complex_ext = substr($fileName, $sld_offset + 1);
                 if (isset(static::$twoLevelExtensions[$complex_ext])) {
                     return static::$twoLevelExtensions[$complex_ext];
-                } else
-                exit;
+                }
             }
             if (isset(static::$oneLevelExtensions[$ext])) {
                 return static::$oneLevelExtensions[$ext];

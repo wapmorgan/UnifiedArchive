@@ -141,9 +141,9 @@ abstract class OneFileDriver extends BasicExtensionDriver
      * @param string $archiveFileName
      * @param int $archiveFormat
      * @param int $compressionLevel
-     * @param null $password
-     * @param $fileProgressCallable
-     * @return int
+     * @param string|null $password
+     * @param callable|null $fileProgressCallable
+     * @return int Number of archived files
      * @throws ArchiveCreationException
      * @throws UnsupportedOperationException
      */

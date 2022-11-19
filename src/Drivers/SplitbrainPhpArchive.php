@@ -2,14 +2,19 @@
 
 namespace wapmorgan\UnifiedArchive\Drivers;
 
+use splitbrain\PHPArchive\Archive;
+use splitbrain\PHPArchive\ArchiveCorruptedException;
 use splitbrain\PHPArchive\ArchiveIllegalCompressionException;
 use splitbrain\PHPArchive\ArchiveIOException;
 use splitbrain\PHPArchive\FileInfo;
+use splitbrain\PHPArchive\FileInfoException;
 use splitbrain\PHPArchive\Tar;
+use splitbrain\PHPArchive\Zip;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
@@ -61,7 +66,7 @@ class SplitbrainPhpArchive extends BasicPureDriver
         }
 
         if (
-            ($format === Formats::TAR_BZIP && !extension_loaded('bzip2'))
+            ($format === Formats::TAR_BZIP && !extension_loaded('bz2'))
             || ($format === Formats::TAR_GZIP && !extension_loaded('zlib'))
         ) {
             return [];
@@ -77,7 +82,7 @@ class SplitbrainPhpArchive extends BasicPureDriver
 //                    BasicDriver::EXTRACT_CONTENT,
                     BasicDriver::APPEND,
                     BasicDriver::CREATE,
-                    BasicDriver::CREATE_ENCRYPTED,
+//                    BasicDriver::CREATE_ENCRYPTED,
                     BasicDriver::CREATE_IN_STRING,
                 ];
         }
@@ -185,5 +190,111 @@ class SplitbrainPhpArchive extends BasicPureDriver
     public function extractArchive($outputFolder)
     {
         $this->archive->extract($outputFolder);
+    }
+
+    /**
+     * @param array $files
+     * @param string $archiveFileName
+     * @param int $archiveFormat
+     * @param int $compressionLevel
+     * @param string|null $password
+     * @param callable|null $fileProgressCallable
+     * @return int Number of archived files
+     * @throws ArchiveCorruptedException
+     * @throws ArchiveIOException
+     * @throws ArchiveIllegalCompressionException
+     * @throws FileInfoException
+     * @throws UnsupportedOperationException
+     */
+    public static function createArchive(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    ) {
+        if ($password !== null) {
+            throw new UnsupportedOperationException(__CLASS__ . ' could not encrypt an archive');
+        }
+        $archive = static::createArchiveInternal($files, $archiveFileName, $archiveFormat, $compressionLevel, $fileProgressCallable);
+        $archive->save($archiveFileName);
+        return count($files);
+    }
+
+    /**
+     * @param array $files
+     * @param string $archiveFormat
+     * @param int $compressionLevel
+     * @param string $password
+     * @param callable|null $fileProgressCallable
+     * @return string Content of archive
+     * @throws ArchiveCorruptedException
+     * @throws ArchiveIOException
+     * @throws ArchiveIllegalCompressionException
+     * @throws FileInfoException
+     * @throws UnsupportedOperationException
+     */
+    public static function createArchiveInString(
+        array $files,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $password = null,
+        $fileProgressCallable = null
+    ) {
+        if ($password !== null) {
+            throw new UnsupportedOperationException(__CLASS__ . ' could not encrypt an archive');
+        }
+        $archive = static::createArchiveInternal($files, null, $archiveFormat, $compressionLevel, $fileProgressCallable);
+        return $archive->getArchive();
+    }
+
+    /**
+     * @param array $files
+     * @param $archiveFileName
+     * @param $archiveFormat
+     * @param int $compressionLevel
+     * @param null $fileProgressCallable
+     * @return Tar|Zip
+     * @throws ArchiveCorruptedException
+     * @throws ArchiveIOException
+     * @throws ArchiveIllegalCompressionException
+     * @throws FileInfoException
+     */
+    public static function createArchiveInternal(
+        array $files,
+        $archiveFileName,
+        $archiveFormat,
+        $compressionLevel = self::COMPRESSION_AVERAGE,
+        $fileProgressCallable = null
+    ) {
+        static $compressionLevelMap = [
+            self::COMPRESSION_NONE => 0,
+            self::COMPRESSION_WEAK => 2,
+            self::COMPRESSION_AVERAGE => 4,
+            self::COMPRESSION_STRONG => 7,
+            self::COMPRESSION_MAXIMUM => 9,
+        ];
+
+        if ($archiveFormat === Formats::ZIP) {
+            $archive = new \splitbrain\PHPArchive\Zip();
+            $archive->setCompression($compressionLevelMap[$compressionLevel], Archive::COMPRESS_AUTO);
+        } else {
+            $archive = new Tar();
+            $archive->setCompression($compressionLevelMap[$compressionLevel], ($archiveFormat === Formats::TAR_BZIP
+                ? Archive::COMPRESS_BZIP
+                : ($archiveFormat === Formats::TAR_GZIP ? Archive::COMPRESS_GZIP : Archive::COMPRESS_NONE)));
+        }
+        $archive->create($archiveFileName);
+
+        $current_file = 0;
+        $total_files = count($files);
+        foreach ($files as $inArchiveName => $localName) {
+            $archive->addFile($localName, $inArchiveName);
+            if ($fileProgressCallable !== null) {
+                call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $localName, $inArchiveName]);
+            }
+        }
+        return $archive;
     }
 }

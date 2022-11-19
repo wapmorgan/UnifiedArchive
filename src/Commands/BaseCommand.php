@@ -20,6 +20,7 @@ class BaseCommand extends \Symfony\Component\Console\Command\Command
         'set comment' => BasicDriver::SET_COMMENT,
         'create' => BasicDriver::CREATE,
         'create (+password)' => BasicDriver::CREATE_ENCRYPTED,
+        'create (as string)' => BasicDriver::CREATE_IN_STRING,
     ];
 
     protected static $abilitiesShortCuts = [
@@ -33,6 +34,7 @@ class BaseCommand extends \Symfony\Component\Console\Command\Command
         BasicDriver::SET_COMMENT => 'T',
         BasicDriver::CREATE => 'c',
         BasicDriver::CREATE_ENCRYPTED => 'C',
+        BasicDriver::CREATE_IN_STRING => 'S',
     ];
 
     /**

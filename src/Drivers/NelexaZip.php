@@ -83,19 +83,7 @@ class NelexaZip extends BasicPureDriver
         }
 
         try {
-            $current_file = 0;
-            $total_files = count($files);
-
-            $zipFile = new \PhpZip\ZipFile();
-            foreach ($files as $archiveName => $localName) {
-                $zipFile->addFile($archiveName, $archiveFormat);
-                if ($fileProgressCallable !== null) {
-                    call_user_func_array($fileProgressCallable, [$current_file++, $total_files, $localName, $archiveName]);
-                }
-            }
-            if ($password !== null) {
-                $zipFile->setPassword($password);
-            }
+            $zipFile = static::createArchiveInternal($files, $password, $fileProgressCallable);
             $zipFile->saveAsFile($archiveFileName)->close();
         } catch (\Exception $e) {
             throw new ArchiveCreationException('Could not create archive: '.$e->getMessage(), $e->getCode(), $e);
@@ -119,18 +107,37 @@ class NelexaZip extends BasicPureDriver
         $password = null,
         $fileProgressCallable = null
     ) {
+        if ($fileProgressCallable !== null && !is_callable($fileProgressCallable)) {
+            throw new ArchiveCreationException('File progress callable is not callable');
+        }
+
         try {
-            $zipFile = new \PhpZip\ZipFile();
-            foreach ($files as $localName => $archiveName) {
-                $zipFile->addFile($localName, $archiveFormat);
-            }
-            if ($password !== null) {
-                $zipFile->setPassword($password);
-            }
+            $zipFile = static::createArchiveInternal($files, $password, $fileProgressCallable);
             return $zipFile->outputAsString();
         } catch (\Exception $e) {
             throw new ArchiveCreationException('Could not create archive: '.$e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    protected static function createArchiveInternal(array $files, $password, $fileProgressCallable = null)
+    {
+        $current_file = 0;
+        $total_files = count($files);
+
+        $zipFile = new \PhpZip\ZipFile();
+        foreach ($files as $localName => $archiveName) {
+            $zipFile->addFile($localName, $archiveName);
+            if ($fileProgressCallable !== null) {
+                call_user_func_array(
+                    $fileProgressCallable,
+                    [$current_file++, $total_files, $localName, $archiveName]
+                );
+            }
+        }
+        if ($password !== null) {
+            $zipFile->setPassword($password);
+        }
+        return $zipFile;
     }
 
     /**

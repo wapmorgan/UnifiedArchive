@@ -95,8 +95,8 @@ abstract class BasicDriver
      * @param string $archiveFileName
      * @param string $archiveFormat
      * @param int $compressionLevel
-     * @param null $password
-     * @param $fileProgressCallable
+     * @param string|null $password
+     * @param callable|null $fileProgressCallable
      * @return int Number of archived files
      * @throws UnsupportedOperationException
      */

@@ -238,7 +238,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
         $fileProgressCallable = null
     )
     {
-        $info = static::prepareForArchiving($fileOrFiles);
+        $info = static::prepareForArchiving($fileOrFiles, '.' . Formats::getFormatExtension($archiveFormat));
         try {
             $driver = static::getCreationDriver($archiveFormat, true, $password !== null);
         } catch (UnsupportedArchiveException $e) {
@@ -248,7 +248,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
 
         return $driver::createArchiveInString(
             $info['files'],
-            $info['format'],
+            $info['type'],
             $compressionLevel,
             $password,
             $fileProgressCallable

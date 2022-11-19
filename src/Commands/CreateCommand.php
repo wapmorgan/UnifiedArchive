@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class CreateCommand extends BaseCommand
@@ -24,9 +25,9 @@ class CreateCommand extends BaseCommand
             ->addArgument('archive', InputArgument::REQUIRED, 'New archive filename. Type of archive will be recognized from extension')
             ->addArgument('file', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'Files to pack')
             ->addOption('password', NULL, InputOption::VALUE_REQUIRED, 'Password for new archive')
-            ->addOption('compression', NULL, InputOption::VALUE_OPTIONAL, 'Compression level for new archive. Variants: none, weak, average, strong, maximum.', 'average')
+            ->addOption('compression', NULL, InputOption::VALUE_OPTIONAL, 'Compression level for new archive. Variants: none/weak/average/strong/maximum.', 'average')
             ->addOption('comment', NULL, InputOption::VALUE_OPTIONAL, 'Comment for new archive')
-            ->addOption('path', NULL, InputOption::VALUE_OPTIONAL, 'Path resolving if destination is not passed. Variants: full, root, relative, basename', 'root')
+            ->addOption('path', NULL, InputOption::VALUE_OPTIONAL, 'Path resolving if destination is not passed. Variants: full/root/relative/basename', 'root')
             ->addOption('stdout', NULL, InputOption::VALUE_NONE, 'Print archive to stdout')
             ->addOption('format', NULL, InputOption::VALUE_REQUIRED, 'Format')
             ->addOption('dry-run', NULL, InputOption::VALUE_NONE, 'Do not perform real archiving. Just print prepared data')
@@ -154,7 +155,8 @@ class CreateCommand extends BaseCommand
         ProgressBar::setFormatDefinition('archiving', '  %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%: %message%');
 
         if ($stdout) {
-            $archived_files = UnifiedArchive::createInString($files_list, $archive_file, $compression, $password);
+            fwrite(STDOUT, UnifiedArchive::createInString($files_list, Formats::detectArchiveFormat($archive_file, false), $compression, $password));
+            return 0;
         }
         $progressBar = new ProgressBar($output, $information['numberOfFiles']);
         $progressBar->setFormat('archiving');
