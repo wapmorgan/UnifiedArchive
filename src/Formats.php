@@ -11,6 +11,7 @@ use wapmorgan\UnifiedArchive\Drivers\OneFile\Gzip;
 use wapmorgan\UnifiedArchive\Drivers\OneFile\Lzma;
 use wapmorgan\UnifiedArchive\Drivers\Rar;
 use wapmorgan\UnifiedArchive\Drivers\SevenZip;
+use wapmorgan\UnifiedArchive\Drivers\SplitbrainPhpArchive;
 use wapmorgan\UnifiedArchive\Drivers\TarByPear;
 use wapmorgan\UnifiedArchive\Drivers\TarByPhar;
 use wapmorgan\UnifiedArchive\Drivers\Zip;
@@ -58,6 +59,7 @@ class Formats
         TarByPhar::class,
         SevenZip::class,
         AlchemyZippy::class,
+        SplitbrainPhpArchive::class,
         NelexaZip::class,
         TarByPear::class,
         Iso::class,

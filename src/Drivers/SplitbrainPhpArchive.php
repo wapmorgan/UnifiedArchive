@@ -2,14 +2,33 @@
 
 namespace wapmorgan\UnifiedArchive\Drivers;
 
+use splitbrain\PHPArchive\ArchiveIllegalCompressionException;
+use splitbrain\PHPArchive\ArchiveIOException;
+use splitbrain\PHPArchive\FileInfo;
+use splitbrain\PHPArchive\Tar;
+use wapmorgan\UnifiedArchive\ArchiveEntry;
+use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
+use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class SplitbrainPhpArchive extends BasicPureDriver
 {
     const PACKAGE_NAME = 'splitbrain/php-archive';
-    const MAIN_CLASS = '\\splitbrain\\PHPArchive\\Tar';
+    const MAIN_CLASS = '\\splitbrain\\PHPArchive\\Archive';
+
+    /**
+     * @var \splitbrain\PHPArchive\Zip|Tar
+     */
+    protected $archive;
+    /**
+     * @var array
+     */
+    protected $files;
+
+    /** @var FileInfo[] */
+    protected $members;
 
     /**
      * @inheritDoc
@@ -65,11 +84,39 @@ class SplitbrainPhpArchive extends BasicPureDriver
     }
 
     /**
+     * @throws ArchiveIllegalCompressionException
+     * @throws ArchiveIOException
+     */
+    public function __construct($archiveFileName, $format, $password = null)
+    {
+        parent::__construct($archiveFileName, $format, $password);
+        if ($format === Formats::ZIP) {
+            $this->archive = new \splitbrain\PHPArchive\Zip();
+        } else {
+            $this->archive = new Tar();
+        }
+        $this->archive->open($archiveFileName);
+    }
+
+    /**
      * @inheritDoc
      */
     public function getArchiveInformation()
     {
-        // TODO: Implement getArchiveInformation() method.
+        $this->files = [];
+        $information = new ArchiveInformation();
+
+        foreach ($this->archive->contents() as $member) {
+            if ($member->getIsdir()) {
+                continue;
+            }
+
+            $this->files[] = $information->files[] = str_replace('\\', '/', $member->getPath());
+            $this->members[str_replace('\\', '/', $member->getPath())] = $member;
+            $information->compressedFilesSize += (int)$member->getCompressedSize();
+            $information->uncompressedFilesSize += (int)$member->getSize();
+        }
+        return $information;
     }
 
     /**
@@ -77,7 +124,7 @@ class SplitbrainPhpArchive extends BasicPureDriver
      */
     public function getFileNames()
     {
-        // TODO: Implement getFileNames() method.
+        return $this->files;
     }
 
     /**
@@ -85,7 +132,7 @@ class SplitbrainPhpArchive extends BasicPureDriver
      */
     public function isFileExists($fileName)
     {
-        // TODO: Implement isFileExists() method.
+        return array_key_exists($fileName, $this->members);
     }
 
     /**
@@ -93,31 +140,43 @@ class SplitbrainPhpArchive extends BasicPureDriver
      */
     public function getFileData($fileName)
     {
-        // TODO: Implement getFileData() method.
+        $entry = $this->members[$fileName];
+        return new ArchiveEntry(
+            $fileName,
+            $entry->getCompressedSize(),
+            $entry->getSize(),
+            strtotime($entry->getMtime()),
+            $entry->getSize() !== $entry->getCompressedSize(),
+            $entry->getComment(),
+            null
+        );
     }
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
      */
     public function getFileContent($fileName)
     {
-        // TODO: Implement getFileContent() method.
+        throw new UnsupportedOperationException('Getting file content is not supported by ' . __CLASS__);
     }
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
      */
     public function getFileStream($fileName)
     {
-        // TODO: Implement getFileStream() method.
+        throw new UnsupportedOperationException('Getting file stream is not supported by ' . __CLASS__);
     }
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
      */
     public function extractFiles($outputFolder, array $files)
     {
-        // TODO: Implement extractFiles() method.
+        throw new UnsupportedOperationException('Extract specific files is not supported by ' . __CLASS__);
     }
 
     /**
@@ -125,6 +184,6 @@ class SplitbrainPhpArchive extends BasicPureDriver
      */
     public function extractArchive($outputFolder)
     {
-        // TODO: Implement extractArchive() method.
+        $this->archive->extract($outputFolder);
     }
 }
