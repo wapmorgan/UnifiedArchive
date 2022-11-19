@@ -81,8 +81,7 @@ class Rar extends BasicExtensionDriver
     protected function open($archiveFileName, $password)
     {
         $this->rar = \RarArchive::open($archiveFileName, $password, function ($vol) {
-            var_dump($vol);
-            return null;
+            throw new Exception('Could not open volumed Rar archive');
         });
         $this->rar->setAllowBroken(true);
         if ($this->rar === false) {

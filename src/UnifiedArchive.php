@@ -872,7 +872,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      *
      * @param string $type One of predefined archive types (class constants)
      * @return bool
-     * @deprecated See {{Formats::canOpen()}}
+     * @deprecated Use {{Formats::canOpen()}}
      */
     public static function canOpenType($type)
     {
@@ -884,7 +884,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      *
      * @param string $type One of predefined archive types (class constants)
      * @return bool
-     * @deprecated See {{Formats::canCreate()}}
+     * @deprecated Use {{Formats::canCreate()}}
      */
     public static function canCreateType($type)
     {
@@ -897,7 +897,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string $fileName Archive filename
      * @param bool $contentCheck Whether archive type can be detected by content
      * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
-     * @deprecated See {{Formats::detectArchiveFormat()}}
+     * @deprecated Use {{Formats::detectArchiveFormat()}}
      */
     public static function detectArchiveType($fileName, $contentCheck = true)
     {
@@ -932,7 +932,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @return int Count of stored files is returned.
      * @throws FileAlreadyExistsException
      * @throws UnsupportedOperationException
-     * @deprecated See {{UnifiedArchive::create}}
+     * @deprecated Use {{UnifiedArchive::create}}
      */
     public static function archiveFiles(
         $fileOrFiles,
@@ -990,7 +990,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Returns type of archive
      *
      * @return string One of class constants
-     * @deprecated See {{UnifiedArchive::getArchiveFormat()}}
+     * @deprecated Use {{UnifiedArchive::getArchiveFormat()}}
      */
     public function getArchiveType()
     {
@@ -1003,7 +1003,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string $fileName File name in archive
      * @return resource
      * @throws NonExistentArchiveFileException
-     * @deprecated See {{UnifiedArchive::getFileStream}}
+     * @deprecated Use {{UnifiedArchive::getFileStream}}
      */
     public function getFileResource($fileName)
     {
@@ -1014,7 +1014,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Returns type of archive
      *
      * @return string One of class constants
-     * @deprecated See {{UnifiedArchive::getFormat}}
+     * @deprecated Use {{UnifiedArchive::getFormat}}
      */
     public function getArchiveFormat()
     {
@@ -1026,7 +1026,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      *
      * @param string $fileName File name in archive
      * @return bool
-     * @deprecated See {{UnifiedArchive::hasFile}}
+     * @deprecated Use {{UnifiedArchive::hasFile}}
      */
     public function isFileExists($fileName)
     {
@@ -1037,7 +1037,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Returns size of archive file in bytes
      *
      * @return int
-     * @deprecated See {{UnifiedArchive::getSize}}
+     * @deprecated Use {{UnifiedArchive::getSize}}
      */
     public function getArchiveSize()
     {
@@ -1048,7 +1048,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Counts cumulative size of all compressed data (in bytes)
      *
      * @return int
-     * @deprecated See {{UnifiedArchive::getCompressedSize}}
+     * @deprecated Use {{UnifiedArchive::getCompressedSize}}
      */
     public function countCompressedFilesSize()
     {
@@ -1059,7 +1059,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * Counts cumulative size of all uncompressed data (bytes)
      *
      * @return int
-     * @deprecated See {{UnifiedArchive::getOriginalSize}}
+     * @deprecated Use {{UnifiedArchive::getOriginalSize}}
      */
     public function countUncompressedFilesSize()
     {
@@ -1073,7 +1073,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      *
      * @param string|null $filter
      * @return array List of files
-     * @deprecated See {{UnifiedArchive::getFiles}}
+     * @deprecated Use {{UnifiedArchive::getFiles}}
      */
     public function getFileNames($filter = null)
     {
@@ -1089,7 +1089,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @return int Number of extracted files
      * @throws EmptyFileListException
      * @throws ArchiveExtractionException
-     * @deprecated See {{UnifiedArchive::extract}}
+     * @deprecated Use {{UnifiedArchive::extract}}
      */
     public function extractFiles($outputFolder, &$files = null, $expandFilesList = false)
     {
@@ -1107,7 +1107,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws EmptyFileListException
      * @throws UnsupportedOperationException
      * @throws ArchiveModificationException
-     * @deprecated See {{UnifiedArchive::delete}}
+     * @deprecated Use {{UnifiedArchive::delete}}
      */
     public function deleteFiles($fileOrFiles, $expandFilesList = false)
     {
@@ -1122,7 +1122,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @throws ArchiveModificationException
      * @throws EmptyFileListException
      * @throws UnsupportedOperationException
-     * @deprecated See {{UnifiedArchive::add}}
+     * @deprecated Use {{UnifiedArchive::add}}
      */
     public function addFiles($fileOrFiles)
     {

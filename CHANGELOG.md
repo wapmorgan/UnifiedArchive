@@ -1,16 +1,30 @@
 # Change Log
 
 ## 1.1.8 - Sep XX, 2022
-- Renamed methods of `UnifiedArchive`: `oldName => newName`
+Fixed:
+- Fixed opening an archive with password (#37)
+- Fixed `UnifiedArchive->getComment` now returns null when comment is not supported by driver (#39)
+- Fixed `UnifiedArchive->getFileData()->modificationTime` is not int timestamp in case of NelexaZip driver instead of DateTimeImmutable (#38)
+
+Deprecations:
+- Renamed methods of `UnifiedArchive`:
   - `getFileNames` => `getFiles`
   - `extractFiles` => `extract`
   - `addFiles` => `add`
   - `deleteFiles` => `delete`
   - `archiveFiles` => `archive`
-  - Old methods are still exist, but marked as deprecated and will be deleted in next minor release (1.2.x).
+  - `canOpenArchive` => `canOpen`
+  - Old methods are marked as deprecated and will be deleted in future releases.
 - Marked as deprecated:
-  - `UnifiedArchive::detectArchiveType`
-- Added method: `Formtas::getFormatExtension($archiveFormat)`
+  - `UnifiedArchive::detectArchiveType` - use `Formats::detectArchiveFormat` instead
+  - `UnifiedArchive::archiveDirectory`/`archiveFile` - use `UnifiedArchive::archive` instead
+  - `UnifiedArchive::canCreateType` - `Formats::canCreate`
+
+New functions:
+- Added method to get file extension for format: `Formats::getFormatExtension($archiveFormat)`
+- Added method to get info about ready to archive files: `UnifiedArchive->prepareForArchiving($fileOrFiles, $archiveName = null)`
+- Added method to create archive in memory: `UnifiedArchive::createInString()` and `BasicDriver::CREATE_IN_STRING` ability constant
+- Added new pure driver for Zip/Tar(gz/bz2) - SplitbrainPhpArchive.
 
 ## 1.1.7 - Jul 31, 2022
 - `open` does not throw an Exception, it returns null
