@@ -35,7 +35,7 @@ Main functions:
 - List archive content, calculate original size of archive
 - Get details (original size, date of modification) of every archived file. Extract or stream archived file content
 - Extract all archive content. Append an archive with new files or directories. Remove files from archive
-- Create new archives with files/directories
+- Create new archives with files/directories on disk and stream from memory
 - Fully implemented [PclZip-like interface for archives](docs/API.md#UnifiedArchive--getPclZipInterface) for all formats. Easy transition from old PclZip.
 - Bundled with cli utility
 
