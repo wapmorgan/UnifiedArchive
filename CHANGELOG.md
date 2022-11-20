@@ -1,10 +1,11 @@
 # Change Log
 
-## 1.1.8 - Sep XX, 2022
+## 1.1.8 - Nov 20, 2022
 Fixed:
 - Fixed opening an archive with password (#37)
-- Fixed `UnifiedArchive->getComment` now returns null when comment is not supported by driver (#39)
-- Fixed `UnifiedArchive->getFileData()->modificationTime` is not int timestamp in case of NelexaZip driver instead of DateTimeImmutable (#38)
+- Fixed `UnifiedArchive->getComment()` now returns null when comment is not supported by driver (#39)
+- Fixed `UnifiedArchive->getFileData()->modificationTime` is integer timestamp now in case of NelexaZip driver instead of DateTimeImmutable (#38)
+- Fixed `PharData::create` for zip-archives
 
 Deprecations:
 - Renamed methods of `UnifiedArchive`:
