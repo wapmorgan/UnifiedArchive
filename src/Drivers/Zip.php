@@ -21,6 +21,8 @@ use ZipArchive;
  */
 class Zip extends BasicExtensionDriver
 {
+    const EXTENSION_NAME = 'zip';
+
     /** @var ZipArchive */
     protected $zip;
 

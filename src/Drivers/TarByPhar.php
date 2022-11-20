@@ -300,7 +300,7 @@ class TarByPhar extends BasicExtensionDriver
     )
     {
         if ($password !== null) {
-            throw new UnsupportedOperationException('One-file format ('.__CLASS__.') could not encrypt an archive');
+            throw new UnsupportedOperationException('Driver (' . __CLASS__ . ') could not encrypt an archive');
         }
 
         if ($fileProgressCallable !== null && !is_callable($fileProgressCallable)) {
@@ -327,18 +327,18 @@ class TarByPhar extends BasicExtensionDriver
                 break;
         }
 
-        $destination_file = $basename.'.tar';
+        $destination_file = $basename . '.' . ($archiveFormat === Formats::ZIP ? 'zip' : 'tar');
         // if compression used and there is .tar archive with that's name,
         // use temp file
-        if ($compression !== null && file_exists($basename.'.tar')) {
+        if ($compression !== null && file_exists($basename . '.' . ($archiveFormat === Formats::ZIP ? 'zip' : 'tar'))) {
             $temp_basename = tempnam(sys_get_temp_dir(), 'tar-archive');
             unlink($temp_basename);
-            $destination_file = $temp_basename.'.tar';
+            $destination_file = $temp_basename. '.' . ($archiveFormat === Formats::ZIP ? 'zip' : 'tar');
         }
 
         $tar = new PharData(
             $destination_file,
-            0, null, Phar::TAR
+            0, null, $archiveFormat === Formats::ZIP ? Phar::ZIP : Phar::TAR
         );
 
         try {
@@ -382,7 +382,7 @@ class TarByPhar extends BasicExtensionDriver
 
         // it temp file was used, rename it to destination archive name
         if (isset($temp_basename)) {
-            rename($temp_basename.'.'.$ext, $archiveFileName);
+            rename($temp_basename . '.' . $ext, $archiveFileName);
         }
 
         return count($files);

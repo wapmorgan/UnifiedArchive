@@ -57,7 +57,7 @@ abstract class OneFileDriver extends BasicExtensionDriver
         }
 
         parent::__construct($archiveFileName, $format);
-        $this->inArchiveFileName = basename($archiveFileName, '.'.static::FORMAT_SUFFIX);
+        $this->inArchiveFileName = basename($archiveFileName, '.' . $suffix);
     }
 
     /**
