@@ -2,7 +2,6 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Archive_Tar;
-use Vtiful\Kernel\Format;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
@@ -17,6 +16,8 @@ use wapmorgan\UnifiedArchive\LzwStreamWrapper;
 
 class TarByPear extends BasicPureDriver
 {
+    const MAIN_CLASS = '\\Archive_Tar';
+
     /**
      * @var Archive_Tar
      */
