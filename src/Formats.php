@@ -15,7 +15,6 @@ use wapmorgan\UnifiedArchive\Drivers\SplitbrainPhpArchive;
 use wapmorgan\UnifiedArchive\Drivers\TarByPear;
 use wapmorgan\UnifiedArchive\Drivers\TarByPhar;
 use wapmorgan\UnifiedArchive\Drivers\Zip;
-use wapmorgan\UnifiedArchive\Formats\Tar;
 
 class Formats
 {
@@ -122,13 +121,13 @@ class Formats
     /**
      * Detect archive type by its filename or content
      *
-     * @param string $fileName Archive filename
+     * @param string $originalFileName Archive filename
      * @param bool $contentCheck Whether archive type can be detected by content
      * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
      */
-    public static function detectArchiveFormat($fileName, $contentCheck = true)
+    public static function detectArchiveFormat($originalFileName, $contentCheck = true)
     {
-        $fileName = strtolower($fileName);
+        $fileName = strtolower($originalFileName);
 
         // by file name
         $ld_offset = strrpos($fileName, '.');
@@ -148,7 +147,7 @@ class Formats
 
         // by file content
         if ($contentCheck && function_exists('mime_content_type')) {
-            $mime_type = mime_content_type($fileName);
+            $mime_type = mime_content_type($originalFileName);
             if (isset(static::$mimeTypes[$mime_type])) {
                 return static::$mimeTypes[$mime_type];
             }
