@@ -33,7 +33,7 @@ class BaseArchiveCommand extends BaseCommand
         if (!is_file($file)) {
             throw new \InvalidArgumentException('File ' . $input->getArgument('archive') . ' is not accessible');
         }
-        $output->writeln('<comment>Format ' . Formats::detectArchiveFormat($file).'</comment>', OutputInterface::VERBOSITY_VERY_VERBOSE);
+        $output->writeln('<comment>Format ' . Formats::detectArchiveFormat($file) . '</comment>', OutputInterface::VERBOSITY_VERY_VERBOSE);
         $password = $input->getOption('password');
         if (empty($password)) {
             $password = null;
@@ -53,7 +53,7 @@ class BaseArchiveCommand extends BaseCommand
      */
     protected function getDriverFormatAbilities($driver, $format)
     {
-        $abilities = $driver::checkFormatSupport($format);
+        $abilities = $driver::getFormatAbilities($format);
         return array_keys(array_intersect(self::$abilitiesLabels, $abilities));
     }
 }

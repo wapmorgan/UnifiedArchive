@@ -10,11 +10,10 @@ use splitbrain\PHPArchive\FileInfo;
 use splitbrain\PHPArchive\FileInfoException;
 use splitbrain\PHPArchive\Tar;
 use splitbrain\PHPArchive\Zip;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
-use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
 
@@ -46,7 +45,7 @@ class SplitbrainPhpArchive extends BasicPureDriver
     /**
      * @inheritDoc
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::ZIP,
@@ -59,7 +58,7 @@ class SplitbrainPhpArchive extends BasicPureDriver
     /**
      * @inheritDoc
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
@@ -78,12 +77,12 @@ class SplitbrainPhpArchive extends BasicPureDriver
             case Formats::TAR_GZIP;
             case Formats::TAR_BZIP;
                 return [
-                    BasicDriver::OPEN,
+                    Abilities::OPEN,
 //                    BasicDriver::EXTRACT_CONTENT,
-                    BasicDriver::APPEND,
-                    BasicDriver::CREATE,
+                    Abilities::APPEND,
+                    Abilities::CREATE,
 //                    BasicDriver::CREATE_ENCRYPTED,
-                    BasicDriver::CREATE_IN_STRING,
+                    Abilities::CREATE_IN_STRING,
                 ];
         }
     }

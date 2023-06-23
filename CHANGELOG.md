@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.2.0 - Jun XX, 2023
+- Deprecate few functions:
+  - _Formats::checkFormatSupportAbility()_ marked deprecated, use `can()` instead.
+  - _UnifiedArchive: addFile() and addDirectory()_ marked deprecated, use `add()` instead.
+- Changed behaviour:
+  - _UnifiedArchive: add() and create()_ changed `fileOrFiles` handling: if passed string, then file/directory will be archived with full its original name (as opposed to relative name before).
+  - _Formats: detectArchiveFormat() and getFormatMimeType()_ returns **null** instead of **false** in case of failed type detection.
+  - _UnifiedArchive::getMimeType()_ returns **null** instead of **false**.
+- New:
+  - Improved `test()` functionality - returns list of mismatched hashes.
+
+## 1.1.10 - Jan 17, 2023
+- Fixed invalid initialization of `TarByPear` driver (from 1.1.8)
+
+## 1.1.9 - Jan 17, 2023
+- Fixed archive type detection when filename is not lower-cased (#40)
+
 ## 1.1.8 - Nov 20, 2022
 Fixed:
 - Fixed opening an archive with password (#37)
@@ -41,10 +58,10 @@ New functions:
 **New features**:
 - Added passing needed abilities to **UnifiedArchive::open()** to select a better driver:
     ```php
-    use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+    use wapmorgan\UnifiedArchive\Abilities;use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 
     # opens an array with driver, that supports content streaming and appending
-    $archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.7z', [BasicDriver::STREAM_CONTENT, BasicDriver::APPEND]);
+    $archive = \wapmorgan\UnifiedArchive\UnifiedArchive::open('archive.7z', [Abilities::STREAM_CONTENT, Abilities::APPEND]);
     # if not specified, uses OPEN or OPEN_ENCRYPTED check, if password passed
     ```
 - Added `UnifiedArchive::test($files = [])` (and `cam files:test` command) to test archive contents (compare actual control sum with stored crc32).

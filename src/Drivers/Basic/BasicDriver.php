@@ -27,22 +27,6 @@ abstract class BasicDriver
     const COMPRESSION_STRONG = 3;
     const COMPRESSION_MAXIMUM = 4;
 
-    const OPEN = 1;
-    const OPEN_ENCRYPTED = 2;
-    const OPEN_VOLUMED = 4;
-
-    const GET_COMMENT = 64;
-    const EXTRACT_CONTENT = 128;
-    const STREAM_CONTENT = 256;
-
-    const APPEND = 4096;
-    const DELETE = 8192;
-    const SET_COMMENT = 16384;
-
-    const CREATE = 1048576;
-    const CREATE_ENCRYPTED = 2097152;
-    const CREATE_IN_STRING = 4194304;
-
     const TYPE = null;
 
     /**
@@ -73,13 +57,13 @@ abstract class BasicDriver
     /**
      * @return string[]
      */
-    abstract public static function getSupportedFormats();
+    abstract public static function getFormats();
 
     /**
      * @param string $format
      * @return int[]
      */
-    abstract public static function checkFormatSupport($format);
+    abstract public static function getFormatAbilities($format);
 
     /**
      * @param $ability
@@ -87,7 +71,7 @@ abstract class BasicDriver
      */
     public function checkAbility($ability)
     {
-        return in_array($ability, static::checkFormatSupport($this->format), true);
+        return in_array($ability, static::getFormatAbilities($this->format), true);
     }
 
     /**

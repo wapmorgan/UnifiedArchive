@@ -2,9 +2,9 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicExtensionDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
@@ -36,7 +36,7 @@ class Zip extends BasicExtensionDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::ZIP
@@ -47,25 +47,25 @@ class Zip extends BasicExtensionDriver
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
         }
         $abilities = [
-            BasicDriver::OPEN,
-            BasicDriver::OPEN_ENCRYPTED,
-            BasicDriver::GET_COMMENT,
-            BasicDriver::EXTRACT_CONTENT,
-            BasicDriver::STREAM_CONTENT,
-            BasicDriver::APPEND,
-            BasicDriver::DELETE,
-            BasicDriver::SET_COMMENT,
-            BasicDriver::CREATE,
+            Abilities::OPEN,
+            Abilities::OPEN_ENCRYPTED,
+            Abilities::GET_COMMENT,
+            Abilities::EXTRACT_CONTENT,
+            Abilities::STREAM_CONTENT,
+            Abilities::APPEND,
+            Abilities::DELETE,
+            Abilities::SET_COMMENT,
+            Abilities::CREATE,
         ];
 
         if (static::canEncrypt($format)) {
-            $abilities[] = BasicDriver::CREATE_ENCRYPTED;
+            $abilities[] = Abilities::CREATE_ENCRYPTED;
         }
 
         return $abilities;
@@ -182,7 +182,7 @@ class Zip extends BasicExtensionDriver
             $stat['mtime'],
             $stat['comp_method'] != 0,
             $this->zip->getCommentName($fileName),
-            strtoupper(dechex($stat['crc'] < 0 ? sprintf('%u', $stat['crc']) : $stat['crc']))
+            str_pad(strtoupper(dechex($stat['crc'] < 0 ? sprintf('%u', $stat['crc']) : $stat['crc'])), 8, '0', STR_PAD_LEFT)
         );
     }
 

@@ -47,7 +47,8 @@ class Formats
     const DEB = 'deb';
 
     /**
-     * @var string[] List of archive format drivers
+     * @var string[] List of archive format drivers.
+     * Selection priority depends on placement in the list
      */
     public static $drivers = [
         Zip::class,
@@ -123,7 +124,7 @@ class Formats
      *
      * @param string $originalFileName Archive filename
      * @param bool $contentCheck Whether archive type can be detected by content
-     * @return string|bool One of UnifiedArchive type constants OR false if type is not detected
+     * @return null|bool One of UnifiedArchive type constants OR null if type is not detected
      */
     public static function detectArchiveFormat($originalFileName, $contentCheck = true)
     {
@@ -164,7 +165,7 @@ class Formats
      */
     public static function canOpen($format)
     {
-        return static::checkFormatSupportAbility($format, BasicDriver::OPEN);
+        return static::can($format, Abilities::OPEN);
     }
 
     /**
@@ -175,7 +176,7 @@ class Formats
      */
     public static function canStream($format)
     {
-        return static::checkFormatSupportAbility($format, BasicDriver::STREAM_CONTENT);
+        return static::can($format, Abilities::STREAM_CONTENT);
     }
 
     /**
@@ -186,7 +187,7 @@ class Formats
      */
     public static function canCreate($format)
     {
-        return static::checkFormatSupportAbility($format, BasicDriver::CREATE);
+        return static::can($format, Abilities::CREATE);
     }
 
     /**
@@ -197,7 +198,7 @@ class Formats
      */
     public static function canAppend($format)
     {
-        return static::checkFormatSupportAbility($format, BasicDriver::APPEND);
+        return static::can($format, Abilities::APPEND);
     }
 
     /**
@@ -208,7 +209,7 @@ class Formats
      */
     public static function canUpdate($format)
     {
-        return static::checkFormatSupportAbility($format, BasicDriver::DELETE);
+        return static::can($format, Abilities::DELETE);
     }
 
     /**
@@ -219,7 +220,7 @@ class Formats
      */
     public static function canEncrypt($format)
     {
-        return static::checkFormatSupportAbility($format, BasicDriver::CREATE_ENCRYPTED);
+        return static::can($format, Abilities::CREATE_ENCRYPTED);
     }
 
     /**
@@ -229,16 +230,14 @@ class Formats
     protected static function getFormatSupportStatus($format)
     {
         static::getAllPossibleFormatsAndDrivers();
-
         if (!isset(static::$supportedDriversFormats[$format])) {
             static::$supportedDriversFormats[$format] = [];
-
             if (!isset(static::$declaredDriversFormats[$format])) {
                 return;
             }
             /** @var BasicDriver $format_driver */
             foreach (static::$declaredDriversFormats[$format] as $format_driver) {
-                static::$supportedDriversFormats[$format][$format_driver] = $format_driver::checkFormatSupport($format);
+                static::$supportedDriversFormats[$format][$format_driver] = $format_driver::getFormatAbilities($format);
             }
         }
     }
@@ -248,7 +247,7 @@ class Formats
      * @param string $ability
      * @return bool
      */
-    public static function checkFormatSupportAbility($format, $ability)
+    public static function can($format, $ability)
     {
         self::getFormatSupportStatus($format);
         foreach (static::$supportedDriversFormats[$format] as $driver => $driver_abilities) {
@@ -256,14 +255,13 @@ class Formats
                 return true;
             }
         }
-
         return false;
     }
 
     /**
      * @param string $format
      * @param int[] $abilities
-     * @return int|string|null
+     * @return string|null
      */
     public static function getFormatDriver($format, array $abilities = [])
     {
@@ -283,24 +281,20 @@ class Formats
      */
     public static function getFormatExtension($archiveFormat)
     {
-        $complex_ext = array_search($archiveFormat, static::$twoLevelExtensions);
-        if ($complex_ext !== false) {
-            return $complex_ext;
-        }
-        $ext = array_search($archiveFormat, static::$oneLevelExtensions);
-        if ($ext !== false) {
-            return $ext;
-        }
-        return null;
+        return
+            array_search($archiveFormat, static::$twoLevelExtensions)
+            ?: array_search($archiveFormat, static::$oneLevelExtensions)
+            ?: null;
     }
 
     /**
      * @param $format
-     * @return false|int|string
+     * @return null|string
      */
     public static function getFormatMimeType($format)
     {
-        return array_search($format, static::$mimeTypes, true);
+        return array_search($format, static::$mimeTypes, true)
+            ?: null;
     }
 
     public static function getDeclaredDriverFormats()
@@ -326,12 +320,23 @@ class Formats
             static::$declaredDriversFormats = [];
             foreach (static::$drivers as $handlerClass)
             {
-                $handler_formats = $handlerClass::getSupportedFormats();
+                $handler_formats = $handlerClass::getFormats();
                 foreach ($handler_formats as $handler_format)
                 {
                     static::$declaredDriversFormats[$handler_format][] = $handlerClass;
                 }
             }
         }
+    }
+
+    /**
+     * @param string $format
+     * @param string $ability
+     * @return bool
+     * @deprecated Use {{Formats::can}} instead
+     */
+    public static function checkFormatSupportAbility($format, $ability)
+    {
+        return static::can($format, $ability);
     }
 }

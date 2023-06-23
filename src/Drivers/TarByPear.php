@@ -2,9 +2,9 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Archive_Tar;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
@@ -54,7 +54,7 @@ class TarByPear extends BasicPureDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::TAR,
@@ -70,17 +70,17 @@ class TarByPear extends BasicPureDriver
      * @return array
      * @throws \Exception
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
         }
 
         $abilities = [
-            BasicDriver::OPEN,
-            BasicDriver::EXTRACT_CONTENT,
-            Basic\BasicDriver::APPEND,
-            Basic\BasicDriver::CREATE,
+            Abilities::OPEN,
+            Abilities::EXTRACT_CONTENT,
+            Abilities::APPEND,
+            Abilities::CREATE,
         ];
 
         switch ($format) {

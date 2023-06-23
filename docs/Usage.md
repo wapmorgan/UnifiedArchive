@@ -10,16 +10,17 @@
 
     ```php
     require 'vendor/autoload.php';
-    use \wapmorgan\UnifiedArchive\UnifiedArchive;
+    use wapmorgan\UnifiedArchive\Abilities;
+    use wapmorgan\UnifiedArchive\UnifiedArchive;
 
     $archive = UnifiedArchive::open('filename.rar');
     // or
     $archive = UnifiedArchive::open('filename.zip', null, 'password');
     // or
     $archive = UnifiedArchive::open('filename.tar', [
-        \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver::EXTRACT_CONTENT,
-        \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver::STREAM_CONTENT,
-        \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver::APPEND,
+        Abilities::EXTRACT_CONTENT,
+        Abilities::STREAM_CONTENT,
+        Abilities::APPEND,
     ]);
     // or
     $archive = UnifiedArchive::open('filename.7z', null, 'password');
@@ -52,8 +53,8 @@ To get raw file contents use `getFileContent()` method, to get stream for file u
    ```php
    // file meta
    $file_data = $archive->getFileData('README.md')); // ArchiveEntry with file information
-   echo 'Original size is ' . $file_data->uncompressedSize.PHP_EOL;
-   echo 'Modification datetime is ' . date('r', $file_data->modificationTime).PHP_EOL;
+   echo 'Original size is ' . $file_data->uncompressedSize . PHP_EOL;
+   echo 'Modification datetime is ' . date('r', $file_data->modificationTime) . PHP_EOL;
 
    // raw file content
    $file_content = $archive->getFileContent('README.md')); // string
@@ -66,13 +67,13 @@ To get raw file contents use `getFileContent()` method, to get stream for file u
 
     ```php
     // to unpack all contents of archive to "output" folder
-    $archive->extract(__DIR__.'/output');
+    $archive->extract(__DIR__ . '/output');
 
     // to unpack specific files (README.md and composer.json) from archive to "output" folder
-    $archive->extract(__DIR__.'/output', ['README.md', 'composer.json']);
+    $archive->extract(__DIR__ . '/output', ['README.md', 'composer.json']);
 
     // to unpack the "src" catalog with all content from archive into the "sources" catalog on a disk
-    $archive->extract(__DIR__.'/output', 'src/', true);
+    $archive->extract(__DIR__ . '/output', 'src/', true);
     ```
 
 ## Archive modification
@@ -99,7 +100,7 @@ Only few archive formats support modification: (zip, 7z, tar) - it depends on lo
     // Add a catalog with all contents with full paths
     $archive->add('/var/log/');
 
-    // To add one file (will be stored as one file "syslog")
+    // To add one file (will be stored as one file "/var/log/syslog")
     $archive->add('/var/log/syslog');
 
     // To add some files or catalogs (all catalogs structure in paths will be kept)
@@ -112,24 +113,24 @@ Only few archive formats support modification: zip, 7z, tar (with restrictions).
 To pack completely the catalog with all attached files and subdirectories in new archive:
 
 ```php
-# archive all folder content
-UnifiedArchive::archive('/var/log', 'Archive.zip');
+# archive all folder content (with original full name)
+UnifiedArchive::create('/var/log', 'Archive.zip');
 
-# archive one file
-UnifiedArchive::archive('/var/log/syslog', 'Archive.zip');
+# archive one file (with original full name)
+UnifiedArchive::create('/var/log/syslog', 'Archive.zip');
 
 # archive few files / folders
-UnifiedArchive::archive([$directory, $file, $file2, ...], 'Archive.zip');
+UnifiedArchive::create([$directory, $file, $file2, ...], 'Archive.zip');
 ```
 
-Also, there is [extended syntax](API.md#UnifiedArchive--archive) for `add()` and `archive()`:
+Also, there is [extended syntax](API.md#UnifiedArchive--create) for `add()` and `create()`:
 
 ```php
-UnifiedArchive::archive([
-          'abc.log' => '/var/www/site/abc.log',   // stored as 'abc.log'
-          '/var/www/site/abc.log',                // stored as '/var/www/site/abc.log'
-          'logs' => '/var/www/site/runtime/logs', // directory content stored in 'logs' dir
-          '/var/www/site/runtime/logs',           // stored as '/var/www/site/runtime/logs'
-          '' => ['/home/user1/docs', '/home/user2/docs'], // user1 and user2 docs stored in archive root
-    ], 'archive.zip');
+UnifiedArchive::create([
+   '/var/www/original/name.log',           // file **/var/www/original/name.log** will be store with its original name
+   '/var/www/site/runtime/logs',           // directory contents will be stored as '/var/www/site/runtime/logs', with its original name
+   'insideArchiveName.log' => '/var/www/original/name.log',   // file /var/www/original/name.log will be stored as insideArchiveName.log in archive root
+   'insideArchiveDir' => '/var/www/site/runtime/logs',        // directory contents will be stored in insideArchiveDir dir inside archive
+   '' => ['/home/user1/docs', '/home/user2/docs'],            // directories user1 and user2 docs contents will be merged and stored in archive root
+], 'archive.zip');
 ```

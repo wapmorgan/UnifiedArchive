@@ -4,7 +4,7 @@ namespace wapmorgan\UnifiedArchive\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Abilities;
 
 class InfoCommand extends BaseArchiveCommand
 {
@@ -34,7 +34,7 @@ class InfoCommand extends BaseArchiveCommand
         $output->writeln("\t". 'uncompressed: '.implode(' ', $this->formatSize($archive->getOriginalSize(), 2)));
         $output->writeln("\t" . 'compressed: ' . implode(' ', $this->formatSize($archive->getCompressedSize(), 2)));
         $output->writeln("\t" . 'ratio: <info>' . round($archive->getOriginalSize() / $archive->getCompressedSize(), 6) . '/1 (' . floor($archive->getCompressedSize() / $archive->getOriginalSize() * 100) . '%</info>)');
-        if ($archive->getDriver()->checkAbility(BasicDriver::GET_COMMENT) && !empty($comment = $archive->getComment()))
+        if ($archive->getDriver()->checkAbility(Abilities::GET_COMMENT) && !empty($comment = $archive->getComment()))
             $output->writeln('Comment: <comment>' . $comment . '</comment>');
 
         return 0;

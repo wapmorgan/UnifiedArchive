@@ -7,9 +7,9 @@ use Phar;
 use PharData;
 use PharFileInfo;
 use RecursiveIteratorIterator;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicExtensionDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
@@ -59,7 +59,7 @@ class TarByPhar extends BasicExtensionDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::TAR,
@@ -73,19 +73,19 @@ class TarByPhar extends BasicExtensionDriver
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (static::$disabled || !static::isInstalled()) {
             return [];
         }
 
         $abilities = [
-            BasicDriver::OPEN,
-            BasicDriver::EXTRACT_CONTENT,
-            BasicDriver::STREAM_CONTENT,
-            BasicDriver::APPEND,
-            BasicDriver::DELETE,
-            BasicDriver::CREATE,
+            Abilities::OPEN,
+            Abilities::EXTRACT_CONTENT,
+            Abilities::STREAM_CONTENT,
+            Abilities::APPEND,
+            Abilities::DELETE,
+            Abilities::CREATE,
         ];
 
         switch ($format) {

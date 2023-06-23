@@ -54,17 +54,17 @@ UnifiedArchive uses "drivers", which can be one of types:
 By default, UA goes top-down to select first available driver for passed archive. So, PHP Extension driver will be used (if available), then Utilities + bridge driver (if available), and then Pure PHP driver.
 
 There is at least one driver in all three types, which handles **zip** format, so this format can be fully supported in any OS/PHP configuration:
-1. zip / phar PHP extensions
-2. Utility + bridge SevenZip / AlchemyZippy
-3. Pure NelexaZip
+1. PHP extensions: zip / phar 
+2. Utility + bridge: SevenZip / AlchemyZippy
+3. Pure: NelexaZip / SplitbrainPhpArchive
 
 **tar** format (with compressed variants) supported by:
-1. phar PHP extension
-2. Utility + bridge SevenZip / AlchemyZippy
-3. Pure TarByPear
+1. PHP extension: phar
+2. Utility + bridge: SevenZip / AlchemyZippy
+3. Pure: TarByPear / SplitbrainPhpArchive
 
 **So, there is always one driver that supports popular formats, and you should not remember how to work with this concrete
-driver (zip/phar/SevenZip/AlchemyZippy/NelexaZip), interface for them is uniform.**
+driver (zip/phar/SevenZip/AlchemyZippy/NelexaZip/SplitbrainPhpArchive), interface for them is uniform.**
 
 # Quick start
 

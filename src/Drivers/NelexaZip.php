@@ -3,10 +3,9 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use PhpZip\ZipFile;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Commands\BaseArchiveCommand;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\NonExistentArchiveFileException;
@@ -33,29 +32,29 @@ class NelexaZip extends BasicPureDriver
         return 'nelexa/zip driver';
     }
 
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::ZIP,
         ];
     }
 
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
         }
         return [
-            BasicDriver::OPEN,
-            BasicDriver::OPEN_ENCRYPTED,
-            BasicDriver::GET_COMMENT,
-            BasicDriver::SET_COMMENT,
-            BasicDriver::EXTRACT_CONTENT,
-            BasicDriver::APPEND,
-            BasicDriver::DELETE,
-            BasicDriver::CREATE,
-            BasicDriver::CREATE_ENCRYPTED,
-            BasicDriver::CREATE_IN_STRING,
+            Abilities::OPEN,
+            Abilities::OPEN_ENCRYPTED,
+            Abilities::GET_COMMENT,
+            Abilities::SET_COMMENT,
+            Abilities::EXTRACT_CONTENT,
+            Abilities::APPEND,
+            Abilities::DELETE,
+            Abilities::CREATE,
+            Abilities::CREATE_ENCRYPTED,
+            Abilities::CREATE_IN_STRING,
         ];
     }
 

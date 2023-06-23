@@ -85,7 +85,7 @@ class ArchivingTest extends PhpUnitTestCase
 
         // adding file
         if (Formats::canAppend($archiveType)) {
-            $this->assertTrue($archive->addFile(__FILE__, basename(__FILE__)));
+            $this->assertTrue($archive->add([basename(__FILE__) => __FILE__]) === 1);
             $this->assertTrue($archive->hasFile(basename(__FILE__)));
             $this->assertEquals(file_get_contents(__FILE__), $archive->getFileContent(basename(__FILE__)));
         } else {

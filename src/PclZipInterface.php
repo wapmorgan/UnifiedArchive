@@ -523,7 +523,7 @@ class PclZipInterface
         foreach ($a->getFiles() as $filename) {
             // dir merging process
             if (in_array(substr($filename, -1), array('/', '\\'))) {
-                $this->archive->addEmptyDir(rtrim($filename, '/\\'));
+//                $this->archive->addEmptyDir(rtrim($filename, '/\\'));
             }
             // file merging process
             else {
@@ -535,8 +535,7 @@ class PclZipInterface
                     return 0;
                 }
                 // add file in archive
-                if ($this->archive->addFile($tempDir.'/'.$filename,
-                    $filename)) {
+                if ($this->archive->add([$tempDir.'/'.$filename => $filename])) {
                     // ok
                 } else {
                     return 0;
@@ -613,6 +612,7 @@ class PclZipInterface
      */
     private function makeKeyValueArrayFromList(array $options)
     {
+        // @todo create version for 5.5 of ARRAY_FILTER_USE_KEY function or drop 5.5 support
         $keys = array_filter($options, function ($v) {return ($v%2) == 0;}, ARRAY_FILTER_USE_KEY);
         $values = array_filter($options, function ($v) {return ($v%2) == 1;}, ARRAY_FILTER_USE_KEY);
         if (count($values) < count($keys)) $values[] = true;

@@ -3,9 +3,9 @@ namespace wapmorgan\UnifiedArchive\Drivers;
 
 use CabArchive;
 use Exception;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
@@ -30,7 +30,7 @@ class Cab extends BasicPureDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::CAB,
@@ -41,7 +41,7 @@ class Cab extends BasicPureDriver
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!class_exists('\CabArchive')) {
             return [];
@@ -50,13 +50,17 @@ class Cab extends BasicPureDriver
         switch ($format) {
             case Formats::CAB:
                 $abilities = [
-                    BasicDriver::OPEN,
+                    Abilities::OPEN,
                 ];
 
                 $parts = explode('.', PHP_VERSION);
                 // not supported on versions below 7.0.22, 7.1.8, 7.2.0
-                if ($parts[0] > 7 || $parts[1] >= 2 || (($parts[1] == 1 && $parts[2] >= 8) || ($parts[1] == 0 && $parts[2] >= 22))) {
-                    $abilities[] = BasicDriver::EXTRACT_CONTENT;
+                if (
+                    $parts[0] > 7
+                    || $parts[1] >= 2
+                    || (($parts[1] == 1 && $parts[2] >= 8) || ($parts[1] == 0 && $parts[2] >= 22))
+                ) {
+                    $abilities[] = Abilities::EXTRACT_CONTENT;
                 }
 
                 return $abilities;

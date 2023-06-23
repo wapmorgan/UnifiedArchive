@@ -1,9 +1,9 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Drivers;
 
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicPureDriver;
 use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
 use wapmorgan\UnifiedArchive\Formats;
@@ -39,7 +39,7 @@ class Iso extends BasicPureDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::ISO,
@@ -50,7 +50,7 @@ class Iso extends BasicPureDriver
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
@@ -59,8 +59,8 @@ class Iso extends BasicPureDriver
         switch ($format) {
             case Formats::ISO:
                 return [
-                    BasicDriver::OPEN,
-                    BasicDriver::EXTRACT_CONTENT,
+                    Abilities::OPEN,
+                    Abilities::EXTRACT_CONTENT,
                 ];
         }
     }

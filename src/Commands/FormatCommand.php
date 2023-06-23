@@ -44,14 +44,16 @@ class FormatCommand extends BaseCommand
         $output->writeln('Format <info>' . $format . '</info> drivers support');
 
         $table = new Table($output);
-        $table->setHeaders(['format', ...array_keys(self::$abilitiesLabels)]);
+        $headers = array_keys(self::$abilitiesLabels);
+        array_unshift($headers, 'format');
+        $table->setHeaders($headers);
         /**
          * @var int $i
          * @var \wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver $driver
          */
         foreach ($formats[$format] as $i => $driver) {
             if ($driver::isInstalled()) {
-                $abilities = $driver::checkFormatSupport($format);
+                $abilities = $driver::getFormatAbilities($format);
                 $row = [$driver];
 
                 foreach (self::$abilitiesLabels as $possibleAbility) {
@@ -60,7 +62,7 @@ class FormatCommand extends BaseCommand
 
                 $table->setRow($i, $row);
             } else {
-                $table->setRow($i, [$driver, new TableCell('<error>not installed</error>', ['colspan' => 6])]);
+                $table->setRow($i, [$driver, new TableCell('<error>not installed</error>', ['colspan' => count($headers) - 1])]);
             }
         }
         $table->render();

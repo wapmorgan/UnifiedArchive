@@ -11,7 +11,7 @@ class Bzip extends OneFileDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::BZIP,

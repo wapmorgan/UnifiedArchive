@@ -15,6 +15,6 @@ abstract class BasicPureDriver extends BasicDriver
 
     public static function getInstallationInstruction()
     {
-        return 'install library [ ' . static::PACKAGE_NAME . ']: `composer require ' . static::PACKAGE_NAME . '`';
+        return 'install library [' . static::PACKAGE_NAME . ']: `composer require ' . static::PACKAGE_NAME . '`';
     }
 }

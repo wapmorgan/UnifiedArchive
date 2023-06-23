@@ -1,5 +1,6 @@
 <?php
 
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 use wapmorgan\UnifiedArchive\UnifiedArchive;
@@ -57,8 +58,11 @@ class DriversTest extends PhpUnitTestCase
     {
         $full_filename = self::getArchivePath($filename);
 
-        if (!UnifiedArchive::canOpen($full_filename))
-            $this->markTestSkipped(Formats::detectArchiveFormat($full_filename) .' is not supported with current system configuration');
+        if (!UnifiedArchive::canOpen($full_filename)) {
+            $this->markTestSkipped(
+                Formats::detectArchiveFormat($full_filename) . ' is not supported with current system configuration'
+            );
+        }
 
         $this->assertInstanceOf('wapmorgan\UnifiedArchive\UnifiedArchive', UnifiedArchive::open($full_filename),
             'UnifiedArchive::open() on '.$full_filename.' should return an object');
@@ -69,7 +73,7 @@ class DriversTest extends PhpUnitTestCase
         $result = [];
         /** @var BasicDriver $driver */
         foreach (Formats::$drivers as $driver) {
-            $driver_formats = $driver::getSupportedFormats();
+            $driver_formats = $driver::getFormats();
 
             foreach (static::$archives as $format => $archiveConfig) {
                 if (!in_array($format, $driver_formats, true)) {
@@ -95,8 +99,8 @@ class DriversTest extends PhpUnitTestCase
      */
     public function testFormats($driverClass, $format, $multiFileArchive, $archiveConfig)
     {
-        $supported_abilities = $driverClass::checkFormatSupport($format);
-        if (!in_array(BasicDriver::OPEN, $supported_abilities, true)) {
+        $supported_abilities = $driverClass::getFormatAbilities($format);
+        if (!in_array(Abilities::OPEN, $supported_abilities, true)) {
             $this->markTestSkipped('Format ' . $format . ' is not openable via ' . $driverClass);
             return true;
         }

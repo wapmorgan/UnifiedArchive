@@ -28,11 +28,12 @@ class TestCommand extends BaseArchiveCommand
         $errored = [];
         foreach ($files as $file) {
             $output->write($file . ' ... ');
-            if ($archive->test($file) === true) {
+            if ($archive->test($file, $hash) === true) {
                 $output->writeln('<info>ok</info>');
             } else {
                 $errored[] = $file;
                 $output->writeln('<error>error</error>');
+                var_dump($hash[$file]);
             }
         }
 

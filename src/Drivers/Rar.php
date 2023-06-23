@@ -2,9 +2,9 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicExtensionDriver;
 use wapmorgan\UnifiedArchive\Formats;
 
@@ -35,7 +35,7 @@ class Rar extends BasicExtensionDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::RAR,
@@ -46,7 +46,7 @@ class Rar extends BasicExtensionDriver
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
@@ -54,11 +54,11 @@ class Rar extends BasicExtensionDriver
         switch ($format) {
             case Formats::RAR:
                 return [
-                    BasicDriver::OPEN,
-                    BasicDriver::OPEN_ENCRYPTED,
-                    BasicDriver::OPEN_VOLUMED,
-                    BasicDriver::EXTRACT_CONTENT,
-                    BasicDriver::STREAM_CONTENT,
+                    Abilities::OPEN,
+                    Abilities::OPEN_ENCRYPTED,
+                    Abilities::OPEN_VOLUMED,
+                    Abilities::EXTRACT_CONTENT,
+                    Abilities::STREAM_CONTENT,
                 ];
         }
     }

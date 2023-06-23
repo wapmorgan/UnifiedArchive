@@ -2,6 +2,7 @@
 namespace wapmorgan\UnifiedArchive\Drivers;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\Archive7z;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
@@ -60,7 +61,7 @@ class SevenZip extends BasicUtilityDriver
     /**
      * @return array
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::SEVEN_ZIP,
@@ -90,7 +91,7 @@ class SevenZip extends BasicUtilityDriver
      * @return array
      * @throws \Archive7z\Exception
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
@@ -102,17 +103,17 @@ class SevenZip extends BasicUtilityDriver
         }
 
         $abilities = [
-            BasicDriver::OPEN,
-            BasicDriver::EXTRACT_CONTENT,
+            Abilities::OPEN,
+            Abilities::EXTRACT_CONTENT,
         ];
 
         if (static::canRenameFiles()) {
             if (in_array($format, [Formats::SEVEN_ZIP, Formats::RAR, Formats::ZIP], true)) {
-                $abilities[] = BasicDriver::OPEN_ENCRYPTED;
+                $abilities[] = Abilities::OPEN_ENCRYPTED;
             }
 
             if (in_array($format, [Formats::ZIP, Formats::SEVEN_ZIP], true)) {
-                $abilities[] = BasicDriver::CREATE_ENCRYPTED;
+                $abilities[] = Abilities::CREATE_ENCRYPTED;
             }
 
             if (in_array($format, [Formats::SEVEN_ZIP,
@@ -121,14 +122,14 @@ class SevenZip extends BasicUtilityDriver
                 Formats::TAR,
                 Formats::LZMA,
                 Formats::ZIP], true)) {
-                $abilities[] = BasicDriver::CREATE;
-                $abilities[] = BasicDriver::APPEND;
-                $abilities[] = BasicDriver::DELETE;
+                $abilities[] = Abilities::CREATE;
+                $abilities[] = Abilities::APPEND;
+                $abilities[] = Abilities::DELETE;
             }
 
             if ($format === Formats::SEVEN_ZIP) {
-                $abilities[] = BasicDriver::GET_COMMENT;
-                $abilities[] = BasicDriver::SET_COMMENT;
+                $abilities[] = Abilities::GET_COMMENT;
+                $abilities[] = Abilities::SET_COMMENT;
             }
 
         }

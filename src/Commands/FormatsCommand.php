@@ -37,9 +37,11 @@ class FormatsCommand extends BaseCommand
             }
             $output->writeln('Supported formats by <info>' . $driver . '</info>');
 
-            $table->setHeaders(['format', ...array_keys(self::$abilitiesLabels)]);
-            foreach ($driver::getSupportedFormats() as $i => $format) {
-                $abilities = $driver::checkFormatSupport($format);
+            $headers = array_keys(self::$abilitiesLabels);
+            array_unshift($headers, 'format');
+            $table->setHeaders($headers);
+            foreach ($driver::getFormats() as $i => $format) {
+                $abilities = $driver::getFormatAbilities($format);
                 $row = [$format];
 
                 foreach (self::$abilitiesLabels as $possibleAbility) {

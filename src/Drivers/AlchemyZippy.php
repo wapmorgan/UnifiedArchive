@@ -5,9 +5,9 @@ use Alchemy\Zippy\Archive\Member;
 use Alchemy\Zippy\Exception\NoAdapterOnPlatformException;
 use Alchemy\Zippy\Zippy;
 use Exception;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicUtilityDriver;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveCreationException;
 use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
@@ -71,7 +71,7 @@ class AlchemyZippy extends BasicUtilityDriver
     /**
      * @return mixed|void
      */
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [
             Formats::ZIP,
@@ -93,7 +93,7 @@ class AlchemyZippy extends BasicUtilityDriver
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         static::init();
 
@@ -110,11 +110,11 @@ class AlchemyZippy extends BasicUtilityDriver
                 }
 
                 return [
-                    BasicDriver::OPEN,
-                    BasicDriver::EXTRACT_CONTENT,
-                    BasicDriver::APPEND,
-                    BasicDriver::DELETE,
-                    BasicDriver::CREATE,
+                    Abilities::OPEN,
+                    Abilities::EXTRACT_CONTENT,
+                    Abilities::APPEND,
+                    Abilities::DELETE,
+                    Abilities::CREATE,
                 ];
         }
     }

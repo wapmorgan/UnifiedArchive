@@ -1,6 +1,7 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
 use wapmorgan\UnifiedArchive\ArchiveInformation;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
@@ -21,7 +22,7 @@ abstract class OneFileDriver extends BasicExtensionDriver
     protected $uncompressedSize;
     protected $modificationTime;
 
-    public static function getSupportedFormats()
+    public static function getFormats()
     {
         return [static::FORMAT];
     }
@@ -30,14 +31,14 @@ abstract class OneFileDriver extends BasicExtensionDriver
      * @param $format
      * @return array
      */
-    public static function checkFormatSupport($format)
+    public static function getFormatAbilities($format)
     {
         if (!static::isInstalled()) {
             return [];
         }
         switch ($format) {
             case static::FORMAT:
-                return [BasicDriver::OPEN, BasicDriver::EXTRACT_CONTENT, BasicDriver::STREAM_CONTENT, BasicDriver::CREATE];
+                return [Abilities::OPEN, Abilities::EXTRACT_CONTENT, Abilities::STREAM_CONTENT, Abilities::CREATE];
         }
     }
 

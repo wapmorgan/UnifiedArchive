@@ -40,7 +40,7 @@ class DriversCommand extends BaseCommand
 
 //            if (!empty($install)) {
 //            } else {
-//                $output->writeln($formatter->formatSection($driverClass, $description) . ': ' . implode(', ', $driverClass::getSupportedFormats()));
+//                $output->writeln($formatter->formatSection($driverClass, $description) . ': ' . implode(', ', $driverClass::getFormats()));
 //            }
         }
 
@@ -82,7 +82,7 @@ class DriversCommand extends BaseCommand
 
 //        if (!empty($notInstalled)) {
 //            foreach ($notInstalled as $data) {
-//                $output->writeln($formatter->formatSection($data[0], $data[1] . ': ' . implode(', ', $data[0]::getSupportedFormats()), 'error'));
+//                $output->writeln($formatter->formatSection($data[0], $data[1] . ': ' . implode(', ', $data[0]::getFormats()), 'error'));
 //                $data[2] = preg_replace('~`(.+?)`~', '<options=bold,underscore>$1</>', $data[2]);
 //                $output->writeln($formatter->formatSection($data[0], $data[2], 'comment'));
 //            }
