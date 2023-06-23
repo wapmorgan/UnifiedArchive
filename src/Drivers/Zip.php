@@ -343,6 +343,7 @@ class Zip extends BasicExtensionDriver
 
         $current_file = 0;
         $total_files = count($files);
+        var_dump($files);
 
         foreach ($files as $localName => $fileName) {
             if ($fileName === null) {
