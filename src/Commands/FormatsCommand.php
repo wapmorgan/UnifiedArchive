@@ -6,6 +6,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 
@@ -37,14 +38,14 @@ class FormatsCommand extends BaseCommand
             }
             $output->writeln('Supported formats by <info>' . $driver . '</info>');
 
-            $headers = array_keys(self::$abilitiesLabels);
+            $headers = array_keys(Abilities::$abilitiesLabels);
             array_unshift($headers, 'format');
             $table->setHeaders($headers);
             foreach ($driver::getFormats() as $i => $format) {
                 $abilities = $driver::getFormatAbilities($format);
                 $row = [$format];
 
-                foreach (self::$abilitiesLabels as $possibleAbility) {
+                foreach (Abilities::$abilitiesLabels as $possibleAbility) {
                     $row[] = in_array($possibleAbility, $abilities, true) ? '+' : '';
                 }
 
@@ -70,7 +71,7 @@ class FormatsCommand extends BaseCommand
             foreach ($formats as $format => $formatSupportStatus) {
                 if (isset($formatSupportStatus[$driverClass])) {
                     $shortcuts = null;
-                    foreach (self::$abilitiesShortCuts as $ability => $abilitiesShortCut) {
+                    foreach (Abilities::$abilitiesShortCuts as $ability => $abilitiesShortCut) {
                         if (in_array($ability, $formatSupportStatus[$driverClass], true)) {
                             $shortcuts .= $abilitiesShortCut;
                         }
@@ -87,7 +88,9 @@ class FormatsCommand extends BaseCommand
         //$table->setRow($i++, $row);
         $table->render();
 
-        foreach (array_combine(array_values(self::$abilitiesShortCuts), array_keys(self::$abilitiesLabels)) as $shortCut => $label) {
+        foreach (array_combine(array_values(Abilities::$abilitiesShortCuts), array_keys(
+            Abilities::$abilitiesLabels
+        )) as $shortCut => $label) {
             $output->writeln('<info>' . $shortCut . '</info> - ' . $label);
         }
 

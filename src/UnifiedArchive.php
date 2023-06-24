@@ -77,18 +77,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
             $abilities = [];
         }
 
-        if (empty($abilities)) {
-            $abilities = [Abilities::OPEN];
-            if (!empty($password)) {
-                $abilities[] = Abilities::OPEN_ENCRYPTED;
-            }
-        }
-        $driver = Formats::getFormatDriver($format, $abilities);
-        if ($driver === null) {
-            return null;
-        }
-
-        return new static($fileName, $format, $driver, $password);
+        return new static($fileName, $format, $abilities, $password);
     }
 
     /**
@@ -97,10 +86,12 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string $fileName Archive filename
      * @return bool
      */
-    public static function canOpen($fileName)
+    public static function canOpen($fileName, $passwordProtected = false)
     {
         $format = Formats::detectArchiveFormat($fileName);
-        return $format !== null && Formats::canOpen($format);
+        return $format !== null
+            && Formats::canOpen($format)
+            && (!$passwordProtected || Formats::can($format, Abilities::OPEN_ENCRYPTED));
     }
 
     /**
@@ -290,17 +281,35 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      *
      * @param string $fileName Archive filename
      * @param string $format Archive type
-     * @param string|BasicDriver $driver
      * @param string|null $password
      */
-    public function __construct($fileName, $format, $driver, $password = null)
+    public function __construct($fileName, $format, $abilities = [], $password = null)
     {
+        if (empty($abilities)) {
+            $abilities = [Abilities::OPEN];
+            if (!empty($password)) {
+                $abilities[] = Abilities::OPEN_ENCRYPTED;
+            }
+        }
+        $driver = Formats::getFormatDriver($format, $abilities);
+        if ($driver === null) {
+            throw new UnsupportedArchiveException(
+                'Format ' . $format . ' driver with abilities ('
+                . implode(
+                    ', ',
+                    array_map(function ($ability) {
+                        return array_search($ability, Abilities::$abilitiesLabels);
+                    }, $abilities)
+                )
+                . ') is not found');
+        }
+
         $this->format = $format;
         $this->driver = $driver;
         $this->password = $password;
         $this->archiveSize = filesize($fileName);
 
-        /** @var BasicDriver */
+        /** @var $driver BasicDriver */
         $this->archive = new $driver($fileName, $format, $password);
         $this->scanArchive();
     }

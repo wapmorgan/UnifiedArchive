@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
 use wapmorgan\UnifiedArchive\Formats;
 
@@ -54,6 +55,6 @@ class BaseArchiveCommand extends BaseCommand
     protected function getDriverFormatAbilities($driver, $format)
     {
         $abilities = $driver::getFormatAbilities($format);
-        return array_keys(array_intersect(self::$abilitiesLabels, $abilities));
+        return array_keys(array_intersect(Abilities::$abilitiesLabels, $abilities));
     }
 }

@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-use wapmorgan\UnifiedArchive\Drivers\Basic\BasicDriver;
+use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\Formats;
 
 class FormatCommand extends BaseCommand
@@ -44,7 +44,7 @@ class FormatCommand extends BaseCommand
         $output->writeln('Format <info>' . $format . '</info> drivers support');
 
         $table = new Table($output);
-        $headers = array_keys(self::$abilitiesLabels);
+        $headers = array_keys(Abilities::$abilitiesLabels);
         array_unshift($headers, 'format');
         $table->setHeaders($headers);
         /**
@@ -56,7 +56,7 @@ class FormatCommand extends BaseCommand
                 $abilities = $driver::getFormatAbilities($format);
                 $row = [$driver];
 
-                foreach (self::$abilitiesLabels as $possibleAbility) {
+                foreach (Abilities::$abilitiesLabels as $possibleAbility) {
                     $row[] = in_array($possibleAbility, $abilities, true) ? '+' : '';
                 }
 

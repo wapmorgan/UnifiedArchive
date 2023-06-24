@@ -149,7 +149,7 @@ class Formats
         // by file content
         if ($contentCheck && function_exists('mime_content_type')) {
             $mime_type = mime_content_type($originalFileName);
-            if (isset(static::$mimeTypes[$mime_type])) {
+            if ($mime_type !== false && isset(static::$mimeTypes[$mime_type])) {
                 return static::$mimeTypes[$mime_type];
             }
         }

@@ -93,18 +93,19 @@ composer require pear/archive_tar
 
 ## Usage
 
+* [Full usage](docs/Usage.md)
+* [Drivers & formats](docs/Drivers.md)
+* [Full API description](docs/API.md)
+* [Changelog](CHANGELOG.md)
+
 ```php
 use \wapmorgan\UnifiedArchive\UnifiedArchive;
-
 $output_dir = '/var/www/extracted';
-
 # Extraction
 $archive = UnifiedArchive::open('archive.zip'); // archive.rar, archive.tar.bz2
-
 if (disk_free_space($output_dir) < $archive->getOriginalSize()) {
     throw new \RuntimeException('No needed space available. Need ' . ($archive->getOriginalSize() - disk_free_space($output_dir)) . ' byte(s) more');
 }
-
 $extracted = $archive->extract($output_dir);
 echo 'Number of extracted files' . $extracted.PHP_EOL;
 
@@ -126,8 +127,3 @@ archives without other system software. To show help, launch it:
 ./vendor/bin/cam archive:extract archive.tar.gz ./OUTPUT/ # extraction all archive
 ./vendor/bin/cam archive:create --compression=maximum archive2.tar.gz ./OUTPUT/partners # archive creation from files
 ```
-
-* [Usage](docs/Usage.md)
-* [Drivers & formats](docs/Drivers.md)
-* [Full API description](docs/API.md)
-* [Changelog](CHANGELOG.md)

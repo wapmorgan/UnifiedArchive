@@ -30,7 +30,7 @@ All methods are static.
   - [`UnifiedArchive::canOpen`](#UnifiedArchive--canOpen)
   - [`UnifiedArchive::open`](#UnifiedArchive--open)
   - [`UnifiedArchive->getPclZipInterface`](#UnifiedArchive--getPclZipInterface)
-  - [`UnifiedArchive::can()`](#UnifiedArchive--can)
+  - [`UnifiedArchive->can()`](#UnifiedArchive--can)
 - Archive information:
   - `UnifiedArchive->getFormat`
   - `UnifiedArchive->getSize`
@@ -57,7 +57,7 @@ All methods are static.
 
 - <span id="UnifiedArchive--canOpen"></span>
     ```php
-    UnifiedArchive::canOpen(string $fileName): boolean
+    UnifiedArchive::canOpen(string $fileName, bool $passwordProtected = false): boolean
     ```
 
     Tests if an archive (format is resolved by extension) can be opened with current system and php configuration.
@@ -75,10 +75,10 @@ All methods are static.
     ): UnifiedArchive|null
     ```
 
-    Opens an archive and returns instance of `UnifiedArchive`.
-    If you provide `$password`, it will be used to open encrypted archive.
-    If you provide `$abilities`, it will be used to determine driver for format, that supports ALL of passed abilities.
-    In case of failure (format is not supported or recognized), null will be returned.
+  Opens an archive and returns instance of `UnifiedArchive`.
+  If you provide `$password`, it will be used to open encrypted archive.
+  If you provide `$abilities`, it will be used to determine driver for format, that supports ALL of passed abilities.
+  In case of failure (file is not readable or format is not supported or recognized), an `InvalidArgumentException` or `UnsupportedArchiveException` will be thrown.
 
 - <span id="UnifiedArchive--getPclZipInterface"></span>
     ```php

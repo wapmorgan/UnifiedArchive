@@ -10,34 +10,6 @@ use wapmorgan\UnifiedArchive\UnifiedArchive;
 
 class BaseCommand extends \Symfony\Component\Console\Command\Command
 {
-    protected static $abilitiesLabels = [
-        'open' => Abilities::OPEN,
-        'open (+password)' => Abilities::OPEN_ENCRYPTED,
-        'get comment' => Abilities::GET_COMMENT,
-        'extract' => Abilities::EXTRACT_CONTENT,
-        'stream' => Abilities::STREAM_CONTENT,
-        'append' => Abilities::APPEND,
-        'delete' => Abilities::DELETE,
-        'set comment' => Abilities::SET_COMMENT,
-        'create' => Abilities::CREATE,
-        'create (+password)' => Abilities::CREATE_ENCRYPTED,
-        'create (as string)' => Abilities::CREATE_IN_STRING,
-    ];
-
-    protected static $abilitiesShortCuts = [
-        Abilities::OPEN => 'o',
-        Abilities::OPEN_ENCRYPTED => 'O',
-        Abilities::GET_COMMENT => 't',
-        Abilities::EXTRACT_CONTENT => 'x',
-        Abilities::STREAM_CONTENT => 's',
-        Abilities::APPEND => 'a',
-        Abilities::DELETE => 'd',
-        Abilities::SET_COMMENT => 'T',
-        Abilities::CREATE => 'c',
-        Abilities::CREATE_ENCRYPTED => 'C',
-        Abilities::CREATE_IN_STRING => 'S',
-    ];
-
     /**
      * @param $file
      * @param null $password
@@ -46,8 +18,11 @@ class BaseCommand extends \Symfony\Component\Console\Command\Command
      */
     protected function open($file, $password = null)
     {
-        if (!UnifiedArchive::canOpen($file))
-            throw new \Exception('Could not open archive '.$file.'. Try installing suggested packages or run `cam -f` to see formats support.');
+        if (!UnifiedArchive::canOpen($file, !empty($password))) {
+            throw new \Exception(
+                'Could not open archive ' . $file . '. Try installing suggested packages or run `cam -f` to see formats support.'
+            );
+        }
 
         $archive = UnifiedArchive::open($file, [], $password);
         if ($archive === null)
