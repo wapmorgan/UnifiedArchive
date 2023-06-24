@@ -283,7 +283,7 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
      * @param string $format Archive type
      * @param string|null $password
      */
-    public function __construct($fileName, $format, $abilities = [], $password = null)
+    public function __construct($fileName, $format, $abilities = [], $password = null, $driver = null)
     {
         if (empty($abilities)) {
             $abilities = [Abilities::OPEN];
@@ -291,17 +291,20 @@ class UnifiedArchive implements ArrayAccess, Iterator, Countable
                 $abilities[] = Abilities::OPEN_ENCRYPTED;
             }
         }
-        $driver = Formats::getFormatDriver($format, $abilities);
         if ($driver === null) {
-            throw new UnsupportedArchiveException(
-                'Format ' . $format . ' driver with abilities ('
-                . implode(
-                    ', ',
-                    array_map(function ($ability) {
-                        return array_search($ability, Abilities::$abilitiesLabels);
-                    }, $abilities)
-                )
-                . ') is not found');
+            $driver = Formats::getFormatDriver($format, $abilities);
+            if ($driver === null) {
+                throw new UnsupportedArchiveException(
+                    'Format ' . $format . ' driver with abilities ('
+                    . implode(
+                        ', ',
+                        array_map(function ($ability) {
+                            return array_search($ability, Abilities::$abilitiesLabels);
+                        }, $abilities)
+                    )
+                    . ') is not found'
+                );
+            }
         }
 
         $this->format = $format;
