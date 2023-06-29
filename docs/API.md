@@ -1,11 +1,14 @@
 This file describes all UnifiedArchive API.
 
+# TOC
+
 UnifiedArchive is represented by few basic classes under `\wapmorgan\UnifiedArchive` namespace:
 
 1. [`Formats`](#Formats) keeps information about formats support and specific format functions.
-2. [`UnifiedArchive`](#UnifiedArchive) - represents an archive and provides related functions.
-3. [`ArchiveEntry`](#ArchiveEntry) - represents information about a specific file from archive. This object can be obtained
-   by call to one of  `UnifiedArchive` methods.
+2. [`Abilities`](#Abilities) list.
+3. [`UnifiedArchive`](#UnifiedArchive) - represents an archive and provides related functions.
+4. [`ArchiveEntry`](#ArchiveEntry) - represents information about a specific file from archive. This object can be obtained
+   by call `UnifiedArchive->getFileData()` method.
 
 # Formats
 
@@ -23,6 +26,44 @@ All methods are static.
 | `Formats::getFormatMimeType`                                                                                                      | `string $format`                                     | `?string` | Returns mime type for passed format. Returns `null` if not found.                                                                                                |
 | `Formats::can`                                                                                                                    | `string $format, int $ability`                       | `boolean` | Check if any driver supports passed [ability](#abilities) for passed format                                                                                      |
 | `Formats::canOpen`, `Formats::canStream`, `Formats::canCreate`, `Formats::canAppend`, `Formats::canUpdate`, `Formats::canEncrypt` | `string $format`                                     | `boolean` | Tests if an archive format can be opened/created/appended (`add`)/updated (`delete`)/created encrypted by any driver with current system and php configuration.  |
+
+### Formats list
+- `Formats::ZIP`
+- `Formats::SEVEN_ZIP`
+- `Formats::RAR`
+- `Formats::CAB`
+- `Formats::TAR`
+- `Formats::TAR_GZIP`
+- `Formats::TAR_BZIP`
+- `Formats::TAR_LZMA`
+- `Formats::TAR_LZW`
+- `Formats::ARJ`
+- `Formats::GZIP`
+- `Formats::BZIP`
+- `Formats::LZMA`
+- `Formats::UEFI`
+- `Formats::GPT`
+- `Formats::MBR`
+- `Formats::MSI`
+- `Formats::ISO`
+- `Formats::DMG`
+- `Formats::UDF`
+- `Formats::RPM`
+- `Formats::DEB`
+
+### Abilities
+- `Abilities::OPEN`
+- `Abilities::OPEN_ENCRYPTED`
+- `Abilities::OPEN_VOLUMED`
+- `Abilities::GET_COMMENT`
+- `Abilities::EXTRACT_CONTENT`
+- `Abilities::STREAM_CONTENT`
+- `Abilities::SET_COMMENT`
+- `Abilities::APPEND`
+- `Abilities::DELETE`
+- `Abilities::CREATE`
+- `Abilities::CREATE_ENCRYPTED`
+- `Abilities::CREATE_IN_STRING`
 
 # UnifiedArchive
 
@@ -289,41 +330,3 @@ It contains fields with file information:
 - `integer $compressedSize` - size of the file with compression in bytes.
 - `integer $uncompressedSize` - size of the file without compression in bytes.
 since the beginning of an era of Unix).
-
-### Formats list
-- `Formats::ZIP`
-- `Formats::SEVEN_ZIP`
-- `Formats::RAR`
-- `Formats::CAB`
-- `Formats::TAR`
-- `Formats::TAR_GZIP`
-- `Formats::TAR_BZIP`
-- `Formats::TAR_LZMA`
-- `Formats::TAR_LZW`
-- `Formats::ARJ`
-- `Formats::GZIP`
-- `Formats::BZIP`
-- `Formats::LZMA`
-- `Formats::UEFI`
-- `Formats::GPT`
-- `Formats::MBR`
-- `Formats::MSI`
-- `Formats::ISO`
-- `Formats::DMG`
-- `Formats::UDF`
-- `Formats::RPM`
-- `Formats::DEB`
-
-### Abilities
-- `Abilities::OPEN`
-- `Abilities::OPEN_ENCRYPTED`
-- `Abilities::OPEN_VOLUMED`
-- `Abilities::GET_COMMENT`
-- `Abilities::EXTRACT_CONTENT`
-- `Abilities::STREAM_CONTENT`
-- `Abilities::SET_COMMENT`
-- `Abilities::APPEND`
-- `Abilities::DELETE`
-- `Abilities::CREATE`
-- `Abilities::CREATE_ENCRYPTED`
-- `Abilities::CREATE_IN_STRING`
