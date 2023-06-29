@@ -21,7 +21,7 @@ All methods are static.
 |-----------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Formats::detectArchiveFormat`                                                                                                    | `string $archiveFileName, bool $contentCheck = true` | `?string` | Detects a format of given archive by file name and content (when `$contentCheck = true`). Returns one of `Formats` constant or `null` if format is not detected. |
 | `Formats::getFormatMimeType`                                                                                                      | `string $format`                                     | `?string` | Returns mime type for passed format. Returns `null` if not found.                                                                                                |
-| `Formats::can`                                                                                                                    | `string $format, int $ability`                       | `boolean` | Check if any driver supports passed ability for passed format                                                                                                    |
+| `Formats::can`                                                                                                                    | `string $format, int $ability`                       | `boolean` | Check if any driver supports passed [ability](#abilities) for passed format                                                                                      |
 | `Formats::canOpen`, `Formats::canStream`, `Formats::canCreate`, `Formats::canAppend`, `Formats::canUpdate`, `Formats::canEncrypt` | `string $format`                                     | `boolean` | Tests if an archive format can be opened/created/appended (`add`)/updated (`delete`)/created encrypted by any driver with current system and php configuration.  |
 
 # UnifiedArchive
@@ -77,7 +77,7 @@ All methods are static.
 
   Opens an archive and returns instance of `UnifiedArchive`.
   If you provide `$password`, it will be used to open encrypted archive.
-  If you provide `$abilities`, it will be used to determine driver for format, that supports ALL of passed abilities.
+  If you provide `$abilities`, it will be used to determine driver for format, that supports ALL of passed [abilities](#abilities).
   In case of failure (file is not readable or format is not supported or recognized), an `InvalidArgumentException` or `UnsupportedArchiveException` will be thrown.
 
 - <span id="UnifiedArchive--getPclZipInterface"></span>
@@ -92,7 +92,7 @@ All methods are static.
     UnifiedArchive::can(int $ability): boolean
     ```
 
-  Checks if current driver supports ability for archive.
+  Checks if current driver supports [ability](#abilities) for archive.
 
 ## Archive information
 
@@ -313,3 +313,17 @@ since the beginning of an era of Unix).
 - `Formats::UDF`
 - `Formats::RPM`
 - `Formats::DEB`
+
+### Abilities
+- `Abilities::OPEN`
+- `Abilities::OPEN_ENCRYPTED`
+- `Abilities::OPEN_VOLUMED`
+- `Abilities::GET_COMMENT`
+- `Abilities::EXTRACT_CONTENT`
+- `Abilities::STREAM_CONTENT`
+- `Abilities::SET_COMMENT`
+- `Abilities::APPEND`
+- `Abilities::DELETE`
+- `Abilities::CREATE`
+- `Abilities::CREATE_ENCRYPTED`
+- `Abilities::CREATE_IN_STRING`
