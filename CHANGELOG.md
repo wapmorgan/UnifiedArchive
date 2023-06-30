@@ -1,6 +1,6 @@
 # Change Log
 
-## 1.2.0 - Jun XX, 2023
+## 1.2.0 - Jun 30, 2023
 - Deprecate few functions:
   - _Formats::checkFormatSupportAbility()_ marked deprecated, use `can()` instead.
   - _UnifiedArchive: addFile() and addDirectory()_ marked deprecated, use `add()` instead.
