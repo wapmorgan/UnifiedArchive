@@ -230,7 +230,7 @@ class AlchemyZippy extends BasicUtilityDriver
     public function getFileData($fileName)
     {
         $member = $this->getMember($fileName);
-        return new ArchiveEntry($member->getLocation(), $member->getSize(), $member->getSize(), strtotime($member->getLastModifiedDate()), true);
+        return new ArchiveEntry($member->getLocation(), $member->getSize(), $member->getSize(), $member->getLastModifiedDate()->getTimestamp(), true);
     }
 
     /**
