@@ -396,6 +396,7 @@ class LzwStreamWrapper
         } elseif ($new_size < $actual_data_size) {
             if ($this->tmp === null) {
                 $this->data = substr($this->data, 0, $new_size);
+                $this->writtenBytes = $new_size;
             } else {
                 $fp = fopen($this->tmp, 'w'.(strpos($this->mode, 'b') !== 0
                     ? 'b' : null));
@@ -403,7 +404,7 @@ class LzwStreamWrapper
                 fclose($fp);
             }
         }
-        
+
         return true;
     }
 
