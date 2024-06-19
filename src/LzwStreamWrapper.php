@@ -274,6 +274,7 @@ class LzwStreamWrapper
             if (file_exists($this->tmp2)) unlink($this->tmp2);
         } else {
             $this->data = null;
+            $this->dataSize = 0;
         }
     }
 
@@ -339,6 +340,7 @@ class LzwStreamWrapper
             $postfix = substr($this->data, ($this->pointer + $count));
             $this->data = $prefix.$data.$postfix;
             $this->pointer += $count;
+            $this->dataSize = strlen($this->data);
 
             return $count;
         }
@@ -396,6 +398,7 @@ class LzwStreamWrapper
         } elseif ($new_size < $actual_data_size) {
             if ($this->tmp === null) {
                 $this->data = substr($this->data, 0, $new_size);
+                $this->dataSize = strlen($this->data);
                 $this->writtenBytes = $new_size;
             } else {
                 $fp = fopen($this->tmp, 'w'.(strpos($this->mode, 'b') !== 0
