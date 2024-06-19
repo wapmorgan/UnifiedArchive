@@ -403,6 +403,8 @@ class LzwStreamWrapper
                 fclose($fp);
             }
         }
+        
+        return true;
     }
 
     /**
