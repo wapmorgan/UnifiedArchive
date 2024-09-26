@@ -37,10 +37,11 @@ jobs:
     # Docs: https://getcomposer.org/doc/articles/scripts.md
 
     - name: PHPUnit Tests
-      uses: php-actions/phpunit@v9
+      uses: php-actions/phpunit@v4
       env:
         XDEBUG_MODE: coverage
       with:
+        version: 9
         bootstrap: tests/bootstrap.php
         configuration: phpunit.xml.dist
         php_extensions: xdebug
