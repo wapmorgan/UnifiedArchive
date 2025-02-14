@@ -2,6 +2,7 @@
 namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
 use Exception;
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class Gzip extends OneFileDriver
@@ -86,5 +87,23 @@ class Gzip extends OneFileDriver
             self::COMPRESSION_MAXIMUM => 9,
         ];
         return gzencode($data, $compressionLevelMap[$compressionLevel]);
+    }
+
+    /**
+     * @param string $targetPath
+     */
+    public function streamToFile($targetPath)
+    {
+        $sfp = gzopen($this->fileName, 'rb');
+        $fp = fopen($targetPath, "w");
+        while (!gzeof($sfp)) {
+            $chunk = gzread($sfp, 8192);
+            if($chunk === 0 || $chunk === false)
+                throw new ArchiveExtractionException('Cannot read gzip chunk');
+            if(fwrite($fp, $chunk, strlen($chunk)) === false)
+                throw new ArchiveExtractionException('Cannot write gzip chunk');
+        }
+        gzclose($sfp);
+        fclose($fp);
     }
 }

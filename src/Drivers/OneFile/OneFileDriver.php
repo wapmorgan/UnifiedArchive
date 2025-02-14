@@ -122,17 +122,21 @@ abstract class OneFileDriver extends BasicExtensionDriver
      */
     public function extractArchive($outputFolder)
     {
-        $data = $this->getFileContent($this->inArchiveFileName);
-        if ($data === false)
-            throw new ArchiveExtractionException('Could not extract archive');
+        if(method_exists($this, 'streamToFile')){
+            $this->streamToFile($outputFolder.$this->inArchiveFileName);
+        }else{
+            $data = $this->getFileContent($this->inArchiveFileName);
+            if ($data === false)
+                throw new ArchiveExtractionException('Could not extract archive');
 
-        $size = strlen($data);
-        $written = file_put_contents($outputFolder.$this->inArchiveFileName, $data);
+            $size = strlen($data);
+            $written = file_put_contents($outputFolder.$this->inArchiveFileName, $data);
 
-        if ($written === true) {
-            throw new ArchiveExtractionException('Could not extract file "'.$this->inArchiveFileName.'": could not write data');
-        } else if ($written < $size) {
-            throw new ArchiveExtractionException('Could not archive file "'.$this->inArchiveFileName.'": written '.$written.' of '.$size);
+            if ($written === true) {
+                throw new ArchiveExtractionException('Could not extract file "'.$this->inArchiveFileName.'": could not write data');
+            } else if ($written < $size) {
+                throw new ArchiveExtractionException('Could not archive file "'.$this->inArchiveFileName.'": written '.$written.' of '.$size);
+            }
         }
         return 1;
     }
