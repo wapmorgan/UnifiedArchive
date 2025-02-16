@@ -110,7 +110,7 @@ abstract class OneFileDriver extends BasicExtensionDriver
      * @return int
      * @throws ArchiveExtractionException
      */
-    public function extractFiles($outputFolder, array $files = null)
+    public function extractFiles($outputFolder, ?array $files = null)
     {
         return $this->extractArchive($outputFolder);
     }
