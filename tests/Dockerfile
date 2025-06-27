@@ -1,4 +1,5 @@
-FROM php:7.4-cli
+ARG PHP_VERSION=7.4-cli
+FROM php:${PHP_VERSION}
 RUN apt-get update && apt-get install --yes --no-install-recommends libzip-dev libbz2-dev liblzma-dev p7zip-full git wget
 RUN pecl install xdebug-3.1.5
 RUN docker-php-source extract \
