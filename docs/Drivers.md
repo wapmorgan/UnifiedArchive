@@ -75,7 +75,7 @@ Result of `./vendor/bin/cam system:formats` when all drivers installed and confi
 | Bzip            |            |      |      | oxsc |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
 | Lzma            |            |      |      |      | oxsc  |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
 | TarByPhar       | oxsadc     |      |      |      |       | oxsadc | oxsadc | oxsadc |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
-| SevenZip        | oOxadcC    |      |      |      | oxadc | oxadc  |        |        | oOtxadTcC | ox  | ox  | ox  | ox   | ox  | ox  | ox  | ox  | ox  | ox  | ox  |      |       |
+| SevenZip        | oOxadcC    |      |      |      |       | oxadc  |        |        | oOtxadTcC | ox  | ox  | ox  | ox   | ox  | ox  | ox  | ox  | ox  | ox  | ox  |      |       |
 | AlchemyZippy    |            |      |      |      |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
 | NelexaZip       | oOxad      |      |      |      |       |        |        |        |           |     |     |     |      |     |     |     |     |     |     |     |      |       |
 | TarByPear       |            |      |      |      |       | oxac   | oxac   | oxac   |           |     |     |     |      |     |     |     |     |     |     |     | oxac |       |
