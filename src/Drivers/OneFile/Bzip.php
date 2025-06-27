@@ -1,6 +1,7 @@
 <?php
 namespace wapmorgan\UnifiedArchive\Drivers\OneFile;
 
+use wapmorgan\UnifiedArchive\Exceptions\ArchiveExtractionException;
 use wapmorgan\UnifiedArchive\Formats;
 
 class Bzip extends OneFileDriver
@@ -74,5 +75,23 @@ class Bzip extends OneFileDriver
         // it seems not working at all
         $work_factor = ($compressionLevelMap[$compressionLevel] * $work_factor_multiplier);
         return bzcompress($data, $compressionLevelMap[$compressionLevel], $work_factor);
+    }
+
+    /**
+     * @param string $targetPath
+     */
+    public function streamToFile($targetPath)
+    {
+        $sfp = bzopen($this->fileName, 'r');
+        $fp = fopen($targetPath, "w");
+        while (!feof($sfp)) {
+            $chunk = bzread($sfp, 8192);
+            if($chunk === 0 || $chunk === false)
+                throw new ArchiveExtractionException('Cannot read bzip chunk');
+            if(fwrite($fp, $chunk, strlen($chunk)) === false)
+                throw new ArchiveExtractionException('Cannot write bzip chunk');
+        }
+        bzclose($sfp);
+        fclose($fp);
     }
 }
