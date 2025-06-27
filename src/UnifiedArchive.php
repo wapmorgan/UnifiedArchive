@@ -19,7 +19,7 @@ use wapmorgan\UnifiedArchive\Exceptions\UnsupportedOperationException;
  */
 class UnifiedArchive implements ArrayAccess, Iterator, Countable
 {
-    const VERSION = '1.2.1';
+    const VERSION = '1.3.0';
 
     /** @var string Type of current archive */
     protected $format;
