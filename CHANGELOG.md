@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.2.1 - Jun 27, 2025
+- Fixed bugs in:
+  - AlchemyZippy::getLastModifiedDate (#44 by @rotdrop)
+  - LzwStreamWrapper (#46 by @cod3beat)
+- Enhancements:
+  - Improved performance in one-file drivers extraction (gzip - #49, bzip - #50 by @iasjennen)
+- Docs:
+  - Specified supported **php versions**: 5.5.0-8.3.x, deprecations in 8.4.x (#47 by @cedric-anne)
+  - Fixed support status for `xz` in matrix: SevenZip does not support it (#45 by @rotdrop)
+
 ## 1.2.0 - Jun 30, 2023
 - Deprecate few functions:
   - _Formats::checkFormatSupportAbility()_ marked deprecated, use `can()` instead.
