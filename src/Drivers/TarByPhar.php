@@ -6,6 +6,7 @@ use FilesystemIterator;
 use Phar;
 use PharData;
 use PharFileInfo;
+use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use wapmorgan\UnifiedArchive\Abilities;
 use wapmorgan\UnifiedArchive\ArchiveEntry;
@@ -127,14 +128,25 @@ class TarByPhar extends BasicExtensionDriver
     public function getArchiveInformation()
     {
         $information = new ArchiveInformation();
-        $stream_path_length = strlen('phar://'.$this->fileName.'/');
+
+        // Store the compressed archive size
         $information->compressedFilesSize = filesize($this->fileName);
-        /**
-         * @var string $i
-         * @var PharFileInfo $file
-         */
-        foreach (new RecursiveIteratorIterator($this->tar) as $i => $file) {
-            $information->files[] = substr($file->getPathname(), $stream_path_length);
+
+        // Create a temporary folder to extract the TAR archive
+        // Use a shorter prefix to avoid exceeding OS path limits
+        // And extract the TAR archive to the temporary folder
+        $extractPath = sys_get_temp_dir() . '/' . uniqid('tmp_tar_');
+        $this->tar->extractTo($extractPath);
+
+        // Iterate through all extracted files recursively
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($extractPath, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            /** @var SplFileInfo $file */
+            $relativePath = substr($file->getPathname(), strlen($extractPath) + 1);
+            $information->files[] = $relativePath;
             $information->uncompressedFilesSize += $file->getSize();
         }
         $this->compressRatio = $information->compressedFilesSize > 0
