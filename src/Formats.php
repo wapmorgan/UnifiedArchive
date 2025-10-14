@@ -124,7 +124,7 @@ class Formats
      *
      * @param string $originalFileName Archive filename
      * @param bool $contentCheck Whether archive type can be detected by content
-     * @return null|bool One of UnifiedArchive type constants OR null if type is not detected
+     * @return null|string One of UnifiedArchive type constants OR null if type is not detected
      */
     public static function detectArchiveFormat($originalFileName, $contentCheck = true)
     {
