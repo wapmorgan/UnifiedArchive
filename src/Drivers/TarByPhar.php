@@ -118,7 +118,7 @@ class TarByPhar extends BasicExtensionDriver
      */
     protected function open()
     {
-        $this->tar = new PharData($this->fileName, self::PHAR_FLAGS);
+        $this->tar = @new PharData($this->fileName, self::PHAR_FLAGS);
     }
 
     /**
